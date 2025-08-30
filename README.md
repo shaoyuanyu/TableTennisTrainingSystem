@@ -23,6 +23,7 @@ null
 
 ### 项目目录规范
 
+采用 Monorepo 策略进行管理：
 - 前端项目目录: `frontend`
 - 后端项目目录: `backend`
 - 项目文档目录: `documents`
