@@ -2,11 +2,14 @@ package plugins
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import persistence.user.CoachTable
-import persistence.user.UserTable
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+import persistence.user.CampusTable
+import persistence.user.UserTable
+import persistence.user.CoachTable
+import persistence.user.StudentTable
+import persistence.user.Student_CoachTable
 
 fun configureDatabase(
     url: String,
@@ -35,6 +38,9 @@ fun configureDatabase(
     transaction(database) {
         SchemaUtils.create(UserTable)
         SchemaUtils.create(CoachTable)
+        SchemaUtils.create(StudentTable)
+        SchemaUtils.create(Student_CoachTable)
+        SchemaUtils.create(CampusTable)
     }
 
     return database
