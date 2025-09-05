@@ -1,8 +1,10 @@
-package io.github.shaoyuanyu.ttts.persistence
+package plugins
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import io.github.shaoyuanyu.ttts.persistence.user.UserTable
 import org.jetbrains.exposed.v1.jdbc.Database
+import org.jetbrains.exposed.v1.jdbc.SchemaUtils
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 
 fun configureDatabase(
@@ -30,6 +32,7 @@ fun configureDatabase(
     // 第一次transaction与数据库建立连接
     // 检查table并创建缺失的，DSL "CREATE TABLE IF NOT EXISTS"
     transaction(database) {
+        SchemaUtils.create(UserTable)
     }
 
     return database

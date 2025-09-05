@@ -1,6 +1,6 @@
 package io.github.shaoyuanyu.ttts
 
-import io.github.shaoyuanyu.ttts.persistence.configureDatabase
+import plugins.configureDatabase
 import io.ktor.server.application.*
 
 fun main(args: Array<String>) {
