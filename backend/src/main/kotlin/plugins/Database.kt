@@ -2,6 +2,7 @@ package plugins
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import persistence.user.CoachTable
 import persistence.user.UserTable
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
@@ -33,6 +34,7 @@ fun configureDatabase(
     // 检查table并创建缺失的，DSL "CREATE TABLE IF NOT EXISTS"
     transaction(database) {
         SchemaUtils.create(UserTable)
+        SchemaUtils.create(CoachTable)
     }
 
     return database
