@@ -1,4 +1,4 @@
-package io.github.shaoyuanyu.ttts.persistence.user
+package persistence.user
 
 import org.jetbrains.exposed.v1.core.dao.id.EntityID
 import org.jetbrains.exposed.v1.dao.UUIDEntity
@@ -16,6 +16,7 @@ class UserEntity(uuid: EntityID<UUID>) : UUIDEntity(uuid) {
     var phone_number by UserTable.phone_number
     var email by UserTable.email
     var campus_id by UserTable.campus_id
+    var role by UserTable.role
     var status by UserTable.status
     var created_at by UserTable.created_at
     var last_login_at by UserTable.last_login_at

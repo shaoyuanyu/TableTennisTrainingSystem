@@ -1,5 +1,6 @@
-package io.github.shaoyuanyu.ttts.persistence.user
+package persistence.user
 
+import io.github.shaoyuanyu.ttts.dto.user.UserRole
 import kotlinx.datetime.LocalDateTime
 import org.jetbrains.exposed.v1.core.Column
 import org.jetbrains.exposed.v1.core.dao.id.UUIDTable
@@ -25,6 +26,13 @@ object UserTable : UUIDTable("user") {
 
     // TODO: 使用 foreign key
     val campus_id: Column<Int> = integer("campus_id")
+
+    val role: Column<UserRole> = customEnumeration(
+        name = "role",
+        sql = "ENUM('SUPER_ADMIN', 'CAMPUS_ADMIN', 'COACH', 'STUDENT')",
+        fromDb = { value -> UserRole.valueOf(value as String) },
+        toDb = { it.name }
+    )
 
     // TODO: 使用 enum
     val status: Column<String> = varchar("status", 32)

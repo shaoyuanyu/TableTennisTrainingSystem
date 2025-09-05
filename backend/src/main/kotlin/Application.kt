@@ -1,7 +1,10 @@
 package io.github.shaoyuanyu.ttts
 
+import io.github.shaoyuanyu.ttts.plugins.configureSerialization
 import plugins.configureDatabase
 import io.ktor.server.application.*
+import plugins.configureRouting
+import plugins.configureSecurity
 
 fun main(args: Array<String>) {
     io.ktor.server.netty.EngineMain.main(args)
@@ -15,6 +18,12 @@ fun Application.module() {
         user = environment.config.property("database.user").getString(),
         password = environment.config.property("database.password").getString()
     )
+
+    // serialization
+    configureSerialization()
+
+    // session & authority
+    configureSecurity()
 
     // routing
     configureRouting()
