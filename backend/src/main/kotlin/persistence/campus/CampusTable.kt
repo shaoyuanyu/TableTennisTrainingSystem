@@ -1,4 +1,4 @@
-package persistence.user
+package persistence.campus
 
 import kotlinx.datetime.LocalDateTime
 import org.jetbrains.exposed.v1.core.Column

@@ -1,11 +1,11 @@
-package persistence.user
+package persistence.student_coach
 
 import org.jetbrains.exposed.v1.core.dao.id.UUIDTable
 import kotlinx.datetime.LocalDateTime
 import org.jetbrains.exposed.v1.core.Column
 import org.jetbrains.exposed.v1.datetime.datetime
 
-object Student_CoachTable : UUIDTable("student_coach") {
+object StudentCoachRelationTable : UUIDTable("student_coach") {
     // TODO: 使用 foreign key
     val coach_username: Column<String> = varchar("cooach_username", 64).uniqueIndex()
     // TODO: 使用 foreign key
