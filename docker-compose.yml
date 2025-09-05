@@ -1,0 +1,24 @@
+name: "TableTennisTrainingSystem"
+
+volumes:
+  mysql:
+    driver: "local"
+
+services:
+  mysql:
+    image: "bitnami/mysql:9.0"
+    restart: "unless-stopped"
+    env_file:
+      - path: "./.env.default"
+        required: true
+      - path: "./.env"
+        required: false
+    volumes:
+      - "mysql:/bitnami/mysql/data"
+    ports:
+      - "127.0.0.1:${MYSQL_PORT:-3306}:3306"
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: "1m"
+      timeout: "10s"
+      start_period: "30s"
