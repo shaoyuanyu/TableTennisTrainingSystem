@@ -1,4 +1,4 @@
-rootProject.name = "backend"
+rootProject.name = "TableTennisTrainingSystemBackend"
 
 dependencyResolutionManagement {
     repositories {
