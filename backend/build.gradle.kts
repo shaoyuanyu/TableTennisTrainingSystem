@@ -47,6 +47,9 @@ dependencies {
     // logback
     implementation("ch.qos.logback:logback-classic:${logback_version}")
 
+    // jbcrypt
+    implementation("org.mindrot:jbcrypt:0.4")
+
     // junit
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
 }

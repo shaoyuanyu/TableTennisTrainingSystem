@@ -1,4 +1,4 @@
-package persistence.student
+package io.github.shaoyuanyu.ttts.persistence.student
 
 import kotlinx.datetime.LocalDateTime
 import org.jetbrains.exposed.v1.core.Column

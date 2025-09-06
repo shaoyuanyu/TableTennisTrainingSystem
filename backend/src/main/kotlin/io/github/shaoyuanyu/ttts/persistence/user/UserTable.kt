@@ -1,10 +1,13 @@
-package persistence.user
+@file:OptIn(ExperimentalTime::class)
+
+package io.github.shaoyuanyu.ttts.persistence.user
 
 import io.github.shaoyuanyu.ttts.dto.user.UserRole
-import kotlinx.datetime.LocalDateTime
 import org.jetbrains.exposed.v1.core.Column
 import org.jetbrains.exposed.v1.core.dao.id.UUIDTable
-import org.jetbrains.exposed.v1.datetime.datetime
+import org.jetbrains.exposed.v1.datetime.timestamp
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 object UserTable : UUIDTable("user") {
     val username: Column<String> = varchar("username", 64).uniqueIndex()
@@ -37,7 +40,7 @@ object UserTable : UUIDTable("user") {
     // TODO: 使用 enum
     val status: Column<String> = varchar("status", 32)
 
-    val created_at: Column<LocalDateTime> = datetime("created_at")
+    val created_at: Column<Instant> = timestamp("created_at")
 
-    val last_login_at: Column<LocalDateTime> = datetime("last_login_at")
+    val last_login_at: Column<Instant> = timestamp("last_login_at")
 }

@@ -1,13 +1,15 @@
 package io.github.shaoyuanyu.ttts
 
+import io.github.shaoyuanyu.ttts.persistence.UserService
 import io.github.shaoyuanyu.ttts.plugins.configureSerialization
-import plugins.configureDatabase
+import io.github.shaoyuanyu.ttts.plugins.configureDatabase
 import io.ktor.server.application.*
-import plugins.configureRouting
-import plugins.configureSecurity
+import io.ktor.server.netty.EngineMain
+import io.github.shaoyuanyu.ttts.plugins.configureRouting
+import io.github.shaoyuanyu.ttts.plugins.configureSecurity
 
 fun main(args: Array<String>) {
-    io.ktor.server.netty.EngineMain.main(args)
+    EngineMain.main(args)
 }
 
 fun Application.module() {
@@ -19,6 +21,9 @@ fun Application.module() {
         password = environment.config.property("database.password").getString()
     )
 
+    // 创建各类服务
+    val userService = UserService(database)
+
     // serialization
     configureSerialization()
 
@@ -26,5 +31,5 @@ fun Application.module() {
     configureSecurity()
 
     // routing
-    configureRouting()
+    configureRouting(userService)
 }

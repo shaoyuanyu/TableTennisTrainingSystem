@@ -1,15 +1,15 @@
-package plugins
+package io.github.shaoyuanyu.ttts.plugins
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import io.github.shaoyuanyu.ttts.persistence.campus.CampusTable
+import io.github.shaoyuanyu.ttts.persistence.coach.CoachTable
+import io.github.shaoyuanyu.ttts.persistence.student.StudentTable
+import io.github.shaoyuanyu.ttts.persistence.student_coach.StudentCoachRelationTable
+import io.github.shaoyuanyu.ttts.persistence.user.UserTable
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
-import persistence.campus.CampusTable
-import persistence.user.UserTable
-import persistence.coach.CoachTable
-import persistence.student.StudentTable
-import persistence.student_coach.StudentCoachRelationTable
 
 fun configureDatabase(
     url: String,

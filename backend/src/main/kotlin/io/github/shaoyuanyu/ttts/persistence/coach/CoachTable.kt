@@ -1,4 +1,4 @@
-package persistence.coach
+package io.github.shaoyuanyu.ttts.persistence.coach
 
 import kotlinx.datetime.LocalDateTime
 import org.jetbrains.exposed.v1.core.Column
