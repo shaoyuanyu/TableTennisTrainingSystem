@@ -2,25 +2,18 @@ package io.github.shaoyuanyu.ttts.plugins
 
 import io.github.shaoyuanyu.ttts.dto.user.UserRole
 import io.github.shaoyuanyu.ttts.dto.user.UserSession
-import io.ktor.server.application.*
-import io.ktor.server.auth.*
-import io.ktor.server.sessions.*
-import io.ktor.server.sessions.cookie
-import java.io.File
+import io.github.shaoyuanyu.ttts.persistence.UserService
+import io.ktor.server.application.Application
+import io.ktor.server.application.install
+import io.ktor.server.auth.Authentication
+import io.ktor.server.auth.UserIdPrincipal
+import io.ktor.server.auth.form
+import io.ktor.server.auth.session
+import org.slf4j.LoggerFactory
 
-fun Application.configureSecurity() {
-    val sessionStoragePath = environment.config.property("session.storage.path").getString()
+internal val LOGGER = LoggerFactory.getLogger("io.github.shaoyuanyu.ttts.plugins.Authentication")
 
-    install(Sessions) {
-        cookie<UserSession>(
-            "user_session",
-            directorySessionStorage(File(sessionStoragePath))
-        ) {
-            cookie.path = "/"
-            cookie.maxAgeInSeconds = 600 // TODO: 生产环境下 60 * 60 * 24 * 30 一个月
-        }
-    }
-
+fun Application.configureAuthentication(userService: UserService) {
     install(Authentication) {
         // web-form 验证（登录用）
         form("auth-form") {
@@ -28,7 +21,13 @@ fun Application.configureSecurity() {
             userParamName = "username"
             passwordParamName = "password"
 
-            // more
+            validate { credentials ->
+                val uuid: String = userService.validateUser(credentials.name, credentials.password)
+
+                LOGGER.info("用户id: $uuid 登录成功")
+
+                UserIdPrincipal(uuid)
+            }
         }
 
         // session 验证（student）

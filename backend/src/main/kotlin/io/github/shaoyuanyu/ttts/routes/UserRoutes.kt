@@ -58,7 +58,17 @@ fun Route.signup(userService: UserService) {
  */
 fun Route.login(userService: UserService) {
     post("/login") {
-        call.respondText("login")
+        val userId = call.principal<UserIdPrincipal>()?.name.toString()
+
+        println("user uuid: $userId\n\n\n")
+
+        val user = userService.queryUserByUUID(userId)
+
+        call.sessions.set(
+            UserSession(userId = userId, username = user.username, userRole = user.role)
+        )
+
+        call.respond(user)
     }
 }
 

@@ -6,8 +6,10 @@ import io.github.shaoyuanyu.ttts.dto.user.User
 import io.github.shaoyuanyu.ttts.dto.user.UserRole
 import io.github.shaoyuanyu.ttts.persistence.user.UserEntity
 import io.github.shaoyuanyu.ttts.persistence.user.UserTable
+import io.github.shaoyuanyu.ttts.persistence.user.expose
 import io.github.shaoyuanyu.ttts.persistence.user.exposeWithoutPassword
 import io.github.shaoyuanyu.ttts.utils.encryptPasswd
+import io.github.shaoyuanyu.ttts.utils.validatePasswd
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.slf4j.LoggerFactory
@@ -118,6 +120,35 @@ class UserService(
             }
         }
     }
+
+    /**
+     * 验证用户身份
+     *
+     * 该函数通过用户名查找用户，并验证提供的明文密码是否与存储的加密密码匹配。
+     * 如果验证成功，将记录登录信息并返回用户ID；否则返回null。
+     *
+     * @param username 用户名
+     * @param plainPassword 明文密码
+     * @return 用户UUID字符串，如果验证失败则返回null，如果用户不存在则抛出异常
+     * @throws Exception 当用户不存在时抛出异常
+     */
+    fun validateUser(username: String, plainPassword: String): String =
+        transaction(database) {
+            UserEntity.find {
+                UserTable.username eq username
+            }.also {
+                if (it.empty()) {
+                    throw Exception("用户不存在")
+                }
+            }.first().expose().let {
+                if (validatePasswd(plainPassword, it.encryptedPassword!!)) {
+                    LOGGER.info("验证用户成功，用户 ID：${it.uuid}, 用户名：${it.username}")
+                    it.uuid.toString()
+                } else {
+                    throw Exception("密码错误")
+                }
+            }
+        }
 
     /**
      * 删除用户
