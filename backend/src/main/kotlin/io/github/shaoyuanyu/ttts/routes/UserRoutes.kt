@@ -39,8 +39,6 @@ fun Route.signup(userService: UserService) {
     post("/signup") {
         val newUser = call.receive<User>()
 
-        println(newUser)
-
         if (newUser.role == UserRole.STUDENT || newUser.role == UserRole.COACH) {
             val userId = userService.createUser(newUser)
             call.sessions.set(
@@ -48,6 +46,7 @@ fun Route.signup(userService: UserService) {
             )
             call.respondText("signup success")
         } else {
+            // TODO: 使用 Status Page
             call.respondText("role error")
         }
     }
@@ -59,8 +58,6 @@ fun Route.signup(userService: UserService) {
 fun Route.login(userService: UserService) {
     post("/login") {
         val userId = call.principal<UserIdPrincipal>()?.name.toString()
-
-        println("user uuid: $userId\n\n\n")
 
         val user = userService.queryUserByUUID(userId)
 

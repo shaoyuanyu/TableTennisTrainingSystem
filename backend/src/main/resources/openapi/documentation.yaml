@@ -22,12 +22,9 @@ paths:
         "200":
           description: "OK"
           content:
-            text/plain:
+            '*/*':
               schema:
-                type: "string"
-              examples:
-                Example#1:
-                  value: "login"
+                $ref: "#/components/schemas/User"
   /:
     get:
       description: ""
