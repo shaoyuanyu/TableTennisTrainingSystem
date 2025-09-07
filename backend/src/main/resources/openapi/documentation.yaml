@@ -1,0 +1,100 @@
+openapi: "3.1.0"
+info:
+  title: "TableTennisTrainingSystem API"
+  description: "TableTennisTrainingSystem API"
+  version: "1.0.0"
+servers:
+  - url: "https://TableTennisTrainingSystem"
+paths:
+  /user/create:
+    post:
+      description: ""
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+        required: true
+  /user/login:
+    post:
+      description: ""
+      responses:
+        "200":
+          description: "OK"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: "login"
+  /:
+    get:
+      description: ""
+      responses:
+        "200":
+          description: "OK"
+          content:
+            text/plain:
+              schema:
+                type: "string"
+              examples:
+                Example#1:
+                  value: "Hello World!"
+components:
+  schemas:
+    User:
+      type: "object"
+      properties:
+        uuid:
+          type: "string"
+          nullable: true
+        username:
+          type: "string"
+        plainPassword:
+          type: "string"
+          nullable: true
+        encryptedPassword:
+          type: "string"
+          nullable: true
+        realName:
+          type: "string"
+        gender:
+          type: "string"
+        age:
+          type: "integer"
+          format: "int32"
+        phoneNumber:
+          type: "string"
+        email:
+          type: "string"
+        campusId:
+          type: "integer"
+          format: "int32"
+        role:
+          type: "string"
+          enum:
+            - "SUPER_ADMIN"
+            - "CAMPUS_ADMIN"
+            - "COACH"
+            - "STUDENT"
+        status:
+          type: "string"
+        createdAt:
+          type: "string"
+          format: "date-time"
+          nullable: true
+        lastLoginAt:
+          type: "string"
+          format: "date-time"
+          nullable: true
+      required:
+        - "username"
+        - "realName"
+        - "gender"
+        - "age"
+        - "phoneNumber"
+        - "email"
+        - "campusId"
+        - "role"
+        - "status"

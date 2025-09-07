@@ -30,6 +30,8 @@ dependencies {
     implementation("io.ktor:ktor-server-content-negotiation:${ktor_version}")
     implementation("io.ktor:ktor-serialization-kotlinx-json:${ktor_version}")
     implementation("io.ktor:ktor-server-sessions:${ktor_version}")
+    implementation("io.ktor:ktor-server-openapi:${ktor_version}")
+    implementation("io.ktor:ktor-server-swagger:${ktor_version}")
     testImplementation("io.ktor:ktor-server-test-host:${ktor_version}")
 
     // kotlinx
