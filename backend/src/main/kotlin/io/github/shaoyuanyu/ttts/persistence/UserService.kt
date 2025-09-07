@@ -5,6 +5,7 @@ package io.github.shaoyuanyu.ttts.persistence
 import io.github.shaoyuanyu.ttts.dto.user.User
 import io.github.shaoyuanyu.ttts.dto.user.UserRole
 import io.github.shaoyuanyu.ttts.persistence.user.UserEntity
+import io.github.shaoyuanyu.ttts.persistence.user.UserTable
 import io.github.shaoyuanyu.ttts.persistence.user.exposeWithoutPassword
 import io.github.shaoyuanyu.ttts.utils.encryptPasswd
 import org.jetbrains.exposed.v1.jdbc.Database
@@ -63,7 +64,7 @@ class UserService(
                 lastLoginAt = createdAt
             }.id.value.toString()
         }.also { uuid ->
-            LOGGER.info("创建用户成功，用户名：${newUser.username}，用户 ID：$uuid")
+            LOGGER.info("创建用户成功，用户 ID：$uuid，用户名：${newUser.username}")
         }
 
     /**
@@ -77,6 +78,61 @@ class UserService(
                 }
 
                 it.exposeWithoutPassword()
+            }.also {
+                LOGGER.info("查询用户成功，用户 ID：$uuid，用户名：${it.username}")
             }
         }
+
+    /**
+     * 根据用户名查询用户
+     */
+    fun queryUserByUsername(username: String): User =
+        transaction(database) {
+            UserEntity.find { UserTable.username eq username }.also {
+                if (it.empty()) {
+                    throw Exception("用户不存在")
+                }
+            }.first().exposeWithoutPassword().also {
+                LOGGER.info("查询用户成功，用户 ID：${it.uuid}, 用户名：${it.username}")
+            }
+        }
+
+    /**
+     * 更新用户信息
+     */
+    fun updateUser(user: User) {
+        transaction(database) {
+            UserEntity.findByIdAndUpdate(UUID.fromString(user.uuid)) {
+                it.username = user.username
+                it.encryptedPassword = encryptPasswd(user.plainPassword!!)
+                it.realName = user.realName
+                it.gender = user.gender
+                it.age = user.age
+                it.phoneNumber = user.phoneNumber
+                it.email = user.email
+                it.campusId = user.campusId
+                it.role = user.role
+                it.status = user.status
+            }.also {
+                LOGGER.info("更新用户成功，用户 ID：${user.uuid}, 用户名：${user.username}")
+            }
+        }
+    }
+
+    /**
+     * 删除用户
+     */
+    fun deleteUser(uuid: String) {
+        transaction(database) {
+            UserEntity.findById(UUID.fromString(uuid)).let {
+                if (it == null) {
+                    throw Exception("用户不存在")
+                }
+
+                it.delete()
+            }.also {
+                LOGGER.info("删除用户成功，用户 ID：$uuid")
+            }
+        }
+    }
 }
