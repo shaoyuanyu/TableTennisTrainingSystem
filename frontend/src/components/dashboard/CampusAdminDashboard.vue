@@ -1,734 +1,1258 @@
 <template>
   <div class="campus-admin-dashboard">
-    <!-- 背景装饰元素 -->
-    <div class="background-decorations">
-      <!-- 管理相关图标 -->
-      <div class="admin-icon manage-icon">📊</div>
-      <div class="admin-icon chart-icon">📈</div>
-      <div class="admin-icon folder-icon">📁</div>
-      <div class="admin-icon settings-icon">⚙️</div>
-
-      <!-- 校区管理装饰 -->
-      <div class="campus-decoration building-icon">🏢</div>
-      <div class="campus-decoration users-icon">👥</div>
-      <div class="campus-decoration calendar-icon">📅</div>
-
-      <!-- 艺术字装饰 -->
-      <div class="art-text">
-        <div class="art-text-main">ADMIN</div>
-        <div class="art-text-sub">校区管理</div>
+    <!-- 欢迎横幅 -->
+    <div class="welcome-banner">
+      <div class="banner-left">
+        <div class="welcome-content">
+          <h1 class="welcome-title">{{ getWelcomeMessage() }}，{{ userStore.userName }}！</h1>
+          <p class="welcome-subtitle">{{ getCampusName() }}校区运营概览</p>
+          <div class="banner-stats">
+            <div class="stat-item">
+              <span class="stat-value">{{ todayStats.revenue }}</span>
+              <span class="stat-label">今日营收</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-value">{{ todayStats.courses }}</span>
+              <span class="stat-label">今日课程</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-value">{{ todayStats.utilization }}%</span>
+              <span class="stat-label">场地利用率</span>
+            </div>
+          </div>
+        </div>
       </div>
-
-      <!-- 几何装饰 -->
-      <div class="geometric-decoration geo-1"></div>
-      <div class="geometric-decoration geo-2"></div>
-      <div class="geometric-decoration geo-3"></div>
+      <div class="banner-right">
+        <div class="avatar-container">
+          <el-avatar :size="80" :src="userStore.userInfo.avatar" class="user-avatar">
+            <el-icon size="40">
+              <User />
+            </el-icon>
+          </el-avatar>
+          <div class="avatar-badge">
+            <el-tag type="warning" size="small">校区管理员</el-tag>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <!-- 待审核事项 -->
-    <el-card class="dashboard-card pending-card" shadow="hover">
-      <template #header>
-        <div class="card-header">
-          <el-icon class="header-icon">
-            <Warning />
-          </el-icon>
-          <span>待审核事项</span>
-          <el-badge :value="totalPending" :hidden="totalPending === 0" />
-        </div>
-      </template>
-      <div class="pending-items">
-        <div class="pending-item" @click="$router.push('/campus/coaches')">
-          <div class="pending-icon">
-            <el-icon>
-              <UserFilled />
-            </el-icon>
+    <!-- 核心数据统计 -->
+    <el-row :gutter="24" class="stats-row">
+      <el-col :xs="12" :sm="6" v-for="stat in campusStats" :key="stat.key">
+        <el-card class="stat-card" shadow="hover">
+          <div class="stat-content">
+            <div class="stat-icon" :style="{ background: stat.gradient }">
+              <component :is="stat.icon" />
+            </div>
+            <div class="stat-info">
+              <div class="stat-value">{{ stat.value }}</div>
+              <div class="stat-label">{{ stat.label }}</div>
+              <div class="stat-trend" :class="stat.trend">
+                <el-icon v-if="stat.trend === 'up'">
+                  <TrendCharts />
+                </el-icon>
+                <span>{{ stat.trendText }}</span>
+              </div>
+            </div>
           </div>
-          <div class="pending-info">
-            <div class="pending-title">待审核教练</div>
-            <div class="pending-count">{{ pendingCoaches }}人</div>
-          </div>
-          <el-icon class="arrow-icon">
-            <ArrowRight />
-          </el-icon>
-        </div>
-        <div class="pending-item" @click="$router.push('/campus/appointments')">
-          <div class="pending-icon">
-            <el-icon>
-              <Calendar />
-            </el-icon>
-          </div>
-          <div class="pending-info">
-            <div class="pending-title">异常预约</div>
-            <div class="pending-count">{{ abnormalAppointments }}个</div>
-          </div>
-          <el-icon class="arrow-icon">
-            <ArrowRight />
-          </el-icon>
-        </div>
-      </div>
-    </el-card>
+        </el-card>
+      </el-col>
+    </el-row>
 
-    <!-- 本月数据统计 -->
-    <el-card class="dashboard-card stats-card" shadow="hover">
-      <template #header>
-        <div class="card-header">
-          <el-icon class="header-icon">
-            <TrendCharts />
-          </el-icon>
-          <span>本月统计</span>
-        </div>
-      </template>
-      <div class="stats-grid">
-        <div class="stat-item">
-          <div class="stat-value">{{ monthlyStats.newStudents }}</div>
-          <div class="stat-label">新增学员</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-value">{{ monthlyStats.totalCourses }}</div>
-          <div class="stat-label">课程总数</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-value">{{ monthlyStats.revenue }}</div>
-          <div class="stat-label">收入金额</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-value">{{ monthlyStats.tournaments }}</div>
-          <div class="stat-label">比赛报名</div>
-        </div>
-      </div>
-    </el-card>
+    <!-- 主要功能区域 -->
+    <el-row :gutter="24" class="main-content">
+      <!-- 左侧内容 -->
+      <el-col :xs="24" :lg="16">
+        <!-- 营收统计图表 -->
+        <el-card class="content-card revenue-chart-card" shadow="hover">
+          <template #header>
+            <div class="card-header">
+              <div class="header-left">
+                <el-icon class="header-icon">
+                  <TrendCharts />
+                </el-icon>
+                <span>营收趋势</span>
+              </div>
+              <div class="header-actions">
+                <el-radio-group v-model="revenueTimeRange" size="small">
+                  <el-radio-button label="week">7天</el-radio-button>
+                  <el-radio-button label="month">30天</el-radio-button>
+                  <el-radio-button label="quarter">90天</el-radio-button>
+                </el-radio-group>
+              </div>
+            </div>
+          </template>
+          <div class="revenue-overview">
+            <div class="revenue-summary">
+              <div class="summary-item">
+                <span class="summary-label">本月总营收</span>
+                <span class="summary-value">¥{{ monthlyRevenue.toLocaleString() }}</span>
+                <span class="summary-trend up">+15.2%</span>
+              </div>
+              <div class="summary-item">
+                <span class="summary-label">平均客单价</span>
+                <span class="summary-value">¥{{ averagePrice }}</span>
+                <span class="summary-trend up">+8.5%</span>
+              </div>
+              <div class="summary-item">
+                <span class="summary-label">会员续费率</span>
+                <span class="summary-value">{{ renewalRate }}%</span>
+                <span class="summary-trend stable">持平</span>
+              </div>
+            </div>
+            <div class="revenue-chart">
+              <div class="chart-placeholder">📊 营收趋势图表区域</div>
+            </div>
+          </div>
+        </el-card>
 
-    <!-- 最新活动 -->
-    <el-card class="dashboard-card activity-card" shadow="hover">
-      <template #header>
-        <div class="card-header">
-          <el-icon class="header-icon">
-            <Bell />
-          </el-icon>
-          <span>最新活动</span>
-        </div>
-      </template>
-      <div class="activity-list">
-        <div v-for="activity in recentActivities" :key="activity.id" class="activity-item">
-          <div class="activity-icon" :class="activity.type">
-            <component :is="activity.icon" />
+        <!-- 教练管理 -->
+        <el-card class="content-card coaches-card" shadow="hover">
+          <template #header>
+            <div class="card-header">
+              <div class="header-left">
+                <el-icon class="header-icon">
+                  <UserFilled />
+                </el-icon>
+                <span>教练团队</span>
+              </div>
+              <el-button type="primary" size="small" @click="manageCoaches">管理教练</el-button>
+            </div>
+          </template>
+          <div class="coaches-grid">
+            <div v-for="coach in coaches" :key="coach.id" class="coach-card">
+              <div class="coach-header">
+                <el-avatar :size="50" :src="coach.avatar">
+                  <el-icon>
+                    <User />
+                  </el-icon>
+                </el-avatar>
+                <div class="coach-info">
+                  <div class="coach-name">{{ coach.name }}</div>
+                  <div class="coach-level">{{ coach.level }}级教练</div>
+                  <div class="coach-rating">
+                    <el-rate :model-value="coach.rating" disabled size="small" />
+                    <span>({{ coach.rating }})</span>
+                  </div>
+                </div>
+                <div class="coach-status">
+                  <el-tag :type="getCoachStatusType(coach.status)" size="small">
+                    {{ coach.status }}
+                  </el-tag>
+                </div>
+              </div>
+              <div class="coach-stats">
+                <div class="stat">
+                  <span class="stat-label">学员</span>
+                  <span class="stat-value">{{ coach.students }}</span>
+                </div>
+                <div class="stat">
+                  <span class="stat-label">课程</span>
+                  <span class="stat-value">{{ coach.courses }}</span>
+                </div>
+                <div class="stat">
+                  <span class="stat-label">收入</span>
+                  <span class="stat-value">¥{{ coach.income }}</span>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="activity-content">
-            <div class="activity-title">{{ activity.title }}</div>
-            <div class="activity-time">{{ formatTime(activity.time) }}</div>
-          </div>
-        </div>
-      </div>
-    </el-card>
+        </el-card>
 
-    <!-- 系统通知 -->
-    <el-card class="dashboard-card" shadow="hover">
-      <template #header>
-        <div class="card-header">
-          <el-icon>
-            <Message />
-          </el-icon>
-          <span>系统通知</span>
-        </div>
-      </template>
-      <div v-if="systemNotices.length > 0" class="notice-list">
-        <div
-          v-for="notice in systemNotices"
-          :key="notice.id"
-          class="notice-item"
-          :class="{ unread: !notice.read }"
-        >
-          <div class="notice-content">
-            <div class="notice-title">{{ notice.title }}</div>
-            <div class="notice-summary">{{ notice.summary }}</div>
+        <!-- 学员管理 -->
+        <el-card class="content-card students-overview-card" shadow="hover">
+          <template #header>
+            <div class="card-header">
+              <div class="header-left">
+                <el-icon class="header-icon">
+                  <Avatar />
+                </el-icon>
+                <span>学员概览</span>
+              </div>
+              <el-link type="primary" @click="manageStudents">详细管理</el-link>
+            </div>
+          </template>
+          <div class="students-overview">
+            <div class="overview-chart">
+              <div class="chart-item">
+                <div class="chart-circle active">
+                  <span class="circle-value">{{ studentStats.active }}</span>
+                  <span class="circle-label">活跃学员</span>
+                </div>
+              </div>
+              <div class="chart-item">
+                <div class="chart-circle new">
+                  <span class="circle-value">{{ studentStats.new }}</span>
+                  <span class="circle-label">新增学员</span>
+                </div>
+              </div>
+              <div class="chart-item">
+                <div class="chart-circle retention">
+                  <span class="circle-value">{{ studentStats.retention }}%</span>
+                  <span class="circle-label">留存率</span>
+                </div>
+              </div>
+            </div>
+            <div class="recent-students">
+              <div class="recent-title">最新注册学员</div>
+              <div v-for="student in recentStudents" :key="student.id" class="recent-student">
+                <el-avatar :size="36" :src="student.avatar">
+                  <el-icon>
+                    <User />
+                  </el-icon>
+                </el-avatar>
+                <div class="student-info">
+                  <div class="student-name">{{ student.name }}</div>
+                  <div class="student-time">{{ formatTime(student.registeredAt) }}</div>
+                </div>
+                <el-tag size="small" type="success">新用户</el-tag>
+              </div>
+            </div>
           </div>
-          <div class="notice-time">{{ formatDate(notice.time) }}</div>
-        </div>
-      </div>
-      <el-empty v-else description="暂无系统通知" :image-size="60" />
-    </el-card>
+        </el-card>
+      </el-col>
+
+      <!-- 右侧边栏 -->
+      <el-col :xs="24" :lg="8">
+        <!-- 场地利用率 -->
+        <el-card class="sidebar-card venue-card" shadow="hover">
+          <template #header>
+            <div class="card-header">
+              <el-icon class="header-icon">
+                <OfficeBuilding />
+              </el-icon>
+              <span>场地使用情况</span>
+            </div>
+          </template>
+          <div class="venue-overview">
+            <div class="venue-stats">
+              <div class="venue-stat">
+                <span class="stat-label">总场地数</span>
+                <span class="stat-value">{{ venueStats.total }}</span>
+              </div>
+              <div class="venue-stat">
+                <span class="stat-label">使用中</span>
+                <span class="stat-value busy">{{ venueStats.busy }}</span>
+              </div>
+              <div class="venue-stat">
+                <span class="stat-label">空闲</span>
+                <span class="stat-value free">{{ venueStats.free }}</span>
+              </div>
+            </div>
+            <div class="venue-utilization">
+              <div class="utilization-title">今日利用率</div>
+              <el-progress :percentage="venueStats.utilization" :stroke-width="12" />
+              <div class="utilization-text">{{ venueStats.utilization }}% 运营中</div>
+            </div>
+          </div>
+          <div class="venue-list">
+            <div v-for="venue in venues" :key="venue.id" class="venue-item">
+              <div class="venue-info">
+                <div class="venue-name">{{ venue.name }}</div>
+                <div class="venue-status" :class="venue.status">
+                  {{ getVenueStatusText(venue.status) }}
+                </div>
+              </div>
+              <div class="venue-time">{{ venue.currentTime || '--' }}</div>
+            </div>
+          </div>
+        </el-card>
+
+        <!-- 系统通知 -->
+        <el-card class="sidebar-card notifications-card" shadow="hover">
+          <template #header>
+            <div class="card-header">
+              <el-icon class="header-icon">
+                <Bell />
+              </el-icon>
+              <span>系统通知</span>
+              <el-badge :value="notifications.length" class="badge" />
+            </div>
+          </template>
+          <div class="notifications-list">
+            <div
+              v-for="notification in notifications"
+              :key="notification.id"
+              class="notification-item"
+            >
+              <div class="notification-icon" :class="notification.type">
+                <el-icon>
+                  <component :is="getNotificationIcon(notification.type)" />
+                </el-icon>
+              </div>
+              <div class="notification-content">
+                <div class="notification-title">{{ notification.title }}</div>
+                <div class="notification-time">{{ formatTime(notification.time) }}</div>
+              </div>
+              <div class="notification-action">
+                <el-button size="small" type="primary" @click="handleNotification(notification)">
+                  处理
+                </el-button>
+              </div>
+            </div>
+          </div>
+        </el-card>
+
+        <!-- 财务概览 -->
+        <el-card class="sidebar-card finance-card" shadow="hover">
+          <template #header>
+            <div class="card-header">
+              <el-icon class="header-icon">
+                <Money />
+              </el-icon>
+              <span>财务概览</span>
+            </div>
+          </template>
+          <div class="finance-overview">
+            <div class="finance-item">
+              <div class="finance-label">本月收入</div>
+              <div class="finance-value income">¥{{ monthlyRevenue.toLocaleString() }}</div>
+            </div>
+            <div class="finance-item">
+              <div class="finance-label">本月支出</div>
+              <div class="finance-value expense">¥{{ monthlyExpense.toLocaleString() }}</div>
+            </div>
+            <div class="finance-item">
+              <div class="finance-label">净利润</div>
+              <div class="finance-value profit">
+                ¥{{ (monthlyRevenue - monthlyExpense).toLocaleString() }}
+              </div>
+            </div>
+          </div>
+          <div class="finance-chart">
+            <div class="chart-placeholder">💰 收支对比图</div>
+          </div>
+        </el-card>
+
+        <!-- 快捷操作 -->
+        <el-card class="sidebar-card actions-card" shadow="hover">
+          <template #header>
+            <div class="card-header">
+              <el-icon class="header-icon">
+                <Operation />
+              </el-icon>
+              <span>快捷操作</span>
+            </div>
+          </template>
+          <div class="quick-actions">
+            <el-button
+              v-for="action in quickActions"
+              :key="action.key"
+              :type="action.type"
+              @click="action.handler"
+              class="action-button"
+              size="large"
+            >
+              <template #icon>
+                <component :is="action.icon" />
+              </template>
+              {{ action.label }}
+            </el-button>
+          </div>
+        </el-card>
+      </el-col>
+    </el-row>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import {
-  Warning,
-  UserFilled,
-  Calendar,
-  ArrowRight,
-  TrendCharts,
-  Bell,
-  Message,
-  Plus,
-  Edit,
-  Delete,
-} from '@element-plus/icons-vue'
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/user'
 import dayjs from 'dayjs'
-import relativeTime from 'dayjs/plugin/relativeTime'
+import {
+  User,
+  UserFilled,
+  Avatar,
+  TrendCharts,
+  OfficeBuilding,
+  Bell,
+  Money,
+  Operation,
+  Calendar,
+  Warning,
+} from '@element-plus/icons-vue'
 
-dayjs.extend(relativeTime)
+const router = useRouter()
+const userStore = useUserStore()
 
-// 待审核数据
-const pendingCoaches = ref(3)
-const abnormalAppointments = ref(2)
+// 响应式数据
+const revenueTimeRange = ref('month')
+const monthlyRevenue = ref(245000)
+const monthlyExpense = ref(180000)
+const averagePrice = ref(320)
+const renewalRate = ref(87)
 
-// 总待审核数
-const totalPending = computed(() => pendingCoaches.value + abnormalAppointments.value)
-
-// 本月统计数据
-const monthlyStats = ref({
-  newStudents: 28,
-  totalCourses: 156,
-  revenue: '¥12,800',
-  tournaments: 23,
+const todayStats = ref({
+  revenue: '¥12,580',
+  courses: '32',
+  utilization: 78,
 })
 
-// 最新活动
-const recentActivities = ref([])
+// 校区统计数据
+const campusStats = ref([
+  {
+    key: 'revenue',
+    label: '月度营收',
+    value: '¥245K',
+    icon: Money,
+    gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    trend: 'up',
+    trendText: '+15.2%',
+  },
+  {
+    key: 'students',
+    label: '在读学员',
+    value: '168',
+    icon: Avatar,
+    gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+    trend: 'up',
+    trendText: '+12',
+  },
+  {
+    key: 'coaches',
+    label: '教练团队',
+    value: '8',
+    icon: UserFilled,
+    gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+    trend: 'stable',
+    trendText: '稳定',
+  },
+  {
+    key: 'utilization',
+    label: '场地利用率',
+    value: '78%',
+    icon: OfficeBuilding,
+    gradient: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+    trend: 'up',
+    trendText: '+5%',
+  },
+])
+
+// 教练团队
+const coaches = ref([
+  {
+    id: 1,
+    name: '李教练',
+    level: '高',
+    rating: 4.9,
+    status: '在线',
+    students: 25,
+    courses: 8,
+    income: 15000,
+    avatar: '',
+  },
+  {
+    id: 2,
+    name: '王教练',
+    level: '中',
+    rating: 4.7,
+    status: '授课中',
+    students: 18,
+    courses: 6,
+    income: 12000,
+    avatar: '',
+  },
+  {
+    id: 3,
+    name: '张教练',
+    level: '高',
+    rating: 4.8,
+    status: '休假',
+    students: 22,
+    courses: 7,
+    income: 14000,
+    avatar: '',
+  },
+  {
+    id: 4,
+    name: '赵教练',
+    level: '中',
+    rating: 4.6,
+    status: '在线',
+    students: 15,
+    courses: 5,
+    income: 10000,
+    avatar: '',
+  },
+])
+
+// 学员统计
+const studentStats = ref({
+  active: 168,
+  new: 12,
+  retention: 87,
+})
+
+// 最新注册学员
+const recentStudents = ref([
+  {
+    id: 1,
+    name: '小明',
+    registeredAt: dayjs().subtract(2, 'hour').toDate(),
+    avatar: '',
+  },
+  {
+    id: 2,
+    name: '小红',
+    registeredAt: dayjs().subtract(5, 'hour').toDate(),
+    avatar: '',
+  },
+  {
+    id: 3,
+    name: '小华',
+    registeredAt: dayjs().subtract(1, 'day').toDate(),
+    avatar: '',
+  },
+])
+
+// 场地统计
+const venueStats = ref({
+  total: 6,
+  busy: 4,
+  free: 2,
+  utilization: 78,
+})
+
+// 场地列表
+const venues = ref([
+  { id: 1, name: '训练室A', status: 'busy', currentTime: '09:00-11:00' },
+  { id: 2, name: '训练室B', status: 'busy', currentTime: '10:00-12:00' },
+  { id: 3, name: '训练室C', status: 'free', currentTime: null },
+  { id: 4, name: '比赛厅', status: 'busy', currentTime: '14:00-16:00' },
+  { id: 5, name: '多功能厅', status: 'busy', currentTime: '15:00-17:00' },
+  { id: 6, name: '体能训练室', status: 'free', currentTime: null },
+])
 
 // 系统通知
-const systemNotices = ref([])
+const notifications = ref([
+  {
+    id: 1,
+    type: 'warning',
+    title: '设备维护提醒',
+    time: dayjs().subtract(30, 'minute').toDate(),
+  },
+  {
+    id: 2,
+    type: 'info',
+    title: '新教练入职审核',
+    time: dayjs().subtract(2, 'hour').toDate(),
+  },
+  {
+    id: 3,
+    type: 'error',
+    title: '学员投诉处理',
+    time: dayjs().subtract(4, 'hour').toDate(),
+  },
+])
 
-// 格式化时间
-const formatTime = (time) => {
-  return dayjs(time).fromNow()
+// 快捷操作
+const quickActions = ref([
+  {
+    key: 'coaches',
+    label: '教练管理',
+    type: 'primary',
+    icon: UserFilled,
+    handler: () => router.push('/campus/coaches'),
+  },
+  {
+    key: 'students',
+    label: '学员管理',
+    type: 'success',
+    icon: Avatar,
+    handler: () => router.push('/campus/students'),
+  },
+  {
+    key: 'finance',
+    label: '财务报表',
+    type: 'warning',
+    icon: Money,
+    handler: () => router.push('/campus/finance'),
+  },
+  {
+    key: 'schedule',
+    label: '课程安排',
+    type: 'info',
+    icon: Calendar,
+    handler: () => router.push('/campus/schedule'),
+  },
+])
+
+// 计算属性和方法
+const getWelcomeMessage = () => {
+  const hour = dayjs().hour()
+  if (hour < 6) return '夜深了'
+  if (hour < 12) return '早上好'
+  if (hour < 18) return '下午好'
+  return '晚上好'
 }
 
-const formatDate = (time) => {
-  return dayjs(time).format('MM-DD HH:mm')
+const getCampusName = () => {
+  return userStore.userInfo.campus || '东校区'
 }
 
-// 获取数据
-const fetchData = async () => {
-  // 模拟数据
-  recentActivities.value = [
-    {
-      id: 1,
-      type: 'success',
-      icon: Plus,
-      title: '新学员"小王"注册成功',
-      time: new Date(Date.now() - 30 * 60 * 1000),
-    },
-    {
-      id: 2,
-      type: 'info',
-      icon: Edit,
-      title: '教练"张老师"更新了个人信息',
-      time: new Date(Date.now() - 2 * 60 * 60 * 1000),
-    },
-    {
-      id: 3,
-      type: 'warning',
-      icon: Calendar,
-      title: '学员"小李"取消了明天的课程',
-      time: new Date(Date.now() - 4 * 60 * 60 * 1000),
-    },
-    {
-      id: 4,
-      type: 'danger',
-      icon: Delete,
-      title: '教练申请被拒绝',
-      time: new Date(Date.now() - 6 * 60 * 60 * 1000),
-    },
-  ]
+const getCoachStatusType = (status) => {
+  const statusMap = {
+    在线: 'success',
+    授课中: 'warning',
+    休假: 'info',
+    离线: 'danger',
+  }
+  return statusMap[status] || 'info'
+}
 
-  systemNotices.value = [
-    {
-      id: 1,
-      title: '系统维护通知',
-      summary: '系统将于本周日凌晨2:00-4:00进行维护升级',
-      time: new Date(Date.now() - 24 * 60 * 60 * 1000),
-      read: false,
-    },
-    {
-      id: 2,
-      title: '新功能上线',
-      summary: '学员评价功能已上线，支持课后评价和反馈',
-      time: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-      read: true,
-    },
-    {
-      id: 3,
-      title: '比赛报名开始',
-      summary: '本月乒乓球比赛报名已开始，截止时间为月底',
-      time: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
-      read: true,
-    },
-  ]
+const getVenueStatusText = (status) => {
+  const textMap = {
+    busy: '使用中',
+    free: '空闲',
+    maintenance: '维护中',
+  }
+  return textMap[status] || status
+}
+
+const getNotificationIcon = (type) => {
+  const iconMap = {
+    warning: Warning,
+    info: Bell,
+    error: Warning,
+  }
+  return iconMap[type] || Bell
+}
+
+const formatTime = (date) => {
+  return dayjs(date).format('MM-DD HH:mm')
+}
+
+// 导航方法
+const manageCoaches = () => {
+  router.push('/campus/coaches')
+}
+
+const manageStudents = () => {
+  router.push('/campus/students')
+}
+
+const handleNotification = (notification) => {
+  console.log('处理通知:', notification)
 }
 
 onMounted(() => {
-  fetchData()
+  // 可以在这里加载数据
 })
 </script>
 
 <style scoped>
 .campus-admin-dashboard {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* 欢迎横幅 */
+.welcome-banner {
+  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+  border-radius: 20px;
+  padding: 40px;
+  color: white;
+  margin-bottom: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 10px 30px rgba(255, 152, 0, 0.3);
+}
+
+.banner-left {
+  flex: 1;
+}
+
+.welcome-title {
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0 0 12px 0;
+}
+
+.welcome-subtitle {
+  font-size: 18px;
+  opacity: 0.9;
+  margin: 0 0 20px 0;
+}
+
+.banner-stats {
+  display: flex;
+  gap: 30px;
+}
+
+.stat-item {
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  padding: 24px;
-  background: linear-gradient(
-    135deg,
-    #667eea 0%,
-    #764ba2 25%,
-    #f093fb 50%,
-    #f5576c 75%,
-    #4facfe 100%
-  );
-  min-height: 100vh;
-  position: relative;
-  overflow: hidden;
+  align-items: center;
 }
 
-/* 背景装饰元素 */
-.background-decorations {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 1;
-}
-
-/* 管理图标装饰 */
-.admin-icon {
-  position: absolute;
-  font-size: 60px;
-  opacity: 0.08;
-  animation: float 8s ease-in-out infinite;
-}
-
-.manage-icon {
-  top: 15%;
-  left: 10%;
-  animation-delay: 0s;
-}
-
-.chart-icon {
-  top: 60%;
-  right: 12%;
-  animation-delay: 2s;
-}
-
-.folder-icon {
-  bottom: 25%;
-  left: 8%;
-  animation-delay: 4s;
-}
-
-.settings-icon {
-  top: 40%;
-  left: 5%;
-  animation-delay: 6s;
-}
-
-/* 校区装饰 */
-.campus-decoration {
-  position: absolute;
-  font-size: 70px;
-  opacity: 0.06;
-  animation: rotate 20s linear infinite;
-}
-
-.building-icon {
-  top: 25%;
-  right: 8%;
-  animation-delay: 1s;
-}
-
-.users-icon {
-  bottom: 15%;
-  right: 15%;
-  animation-delay: 3s;
-}
-
-.calendar-icon {
-  top: 70%;
-  left: 15%;
-  animation-delay: 5s;
-}
-
-/* 艺术字装饰 */
-.art-text {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
-  opacity: 0.12;
-  z-index: 1;
-  pointer-events: none;
-  user-select: none;
-}
-
-.art-text-main {
-  font-size: 120px;
-  font-weight: 900;
-  color: rgba(255, 255, 255, 0.7);
-  letter-spacing: 10px;
-  text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
-  font-family: 'Arial Black', sans-serif;
-  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.2);
-}
-
-.art-text-sub {
-  font-size: 48px;
+.stat-value {
+  font-size: 24px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.6);
-  letter-spacing: 8px;
-  margin-top: -20px;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+  margin-bottom: 4px;
 }
 
-/* 几何装饰 */
-.geometric-decoration {
-  position: absolute;
-  background: rgba(255, 255, 255, 0.06);
-  border-radius: 50%;
+.stat-label {
+  font-size: 14px;
+  opacity: 0.8;
 }
 
-.geo-1 {
-  top: 30%;
-  left: 5%;
-  width: 100px;
-  height: 100px;
-  animation: rotate 25s linear infinite;
+.avatar-container {
+  text-align: center;
 }
 
-.geo-2 {
-  bottom: 35%;
-  right: 10%;
-  width: 80px;
-  height: 80px;
-  animation: rotate 30s linear infinite reverse;
+.user-avatar {
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-.geo-3 {
-  top: 50%;
-  right: 5%;
-  width: 60px;
-  height: 60px;
-  animation: pulse 4s ease-in-out infinite;
+.avatar-badge {
+  margin-top: 10px;
 }
 
-.dashboard-card {
+/* 统计卡片 */
+.stats-row {
+  margin-bottom: 30px;
+}
+
+.stat-card {
   border: none;
   border-radius: 16px;
-  backdrop-filter: blur(15px);
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.12),
-    0 0 0 1px rgba(255, 255, 255, 0.2) inset;
-  position: relative;
-  z-index: 10;
-  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
 }
 
-.dashboard-card:hover {
+.stat-card:hover {
   transform: translateY(-4px);
-  box-shadow:
-    0 12px 40px rgba(0, 0, 0, 0.18),
-    0 0 0 1px rgba(255, 255, 255, 0.3) inset;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
 }
 
-.pending-card {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 87, 108, 0.1));
+.stat-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
-.stats-card {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(102, 126, 234, 0.1));
+.stat-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 24px;
 }
 
-.activity-card {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(79, 172, 254, 0.1));
+.stat-info {
+  flex: 1;
+}
+
+.stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.stat-trend {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #67c23a;
+}
+
+.stat-trend.stable {
+  color: #909399;
+}
+
+/* 内容卡片 */
+.content-card,
+.sidebar-card {
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  margin-bottom: 24px;
 }
 
 .card-header {
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: space-between;
   font-weight: 600;
-  font-size: 16px;
   color: #333;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .header-icon {
-  font-size: 20px;
-  color: #667eea;
+  color: #ff9800;
 }
 
-.pending-items {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+/* 营收概览 */
+.revenue-overview {
+  margin-bottom: 20px;
 }
 
-.pending-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px;
-  background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(10px);
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.pending-item:hover {
-  background: rgba(255, 255, 255, 0.8);
-  transform: translateX(4px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-}
-
-.pending-icon {
-  width: 45px;
-  height: 45px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-}
-
-.pending-info {
-  flex: 1;
-}
-
-.pending-title {
-  font-weight: 600;
-  margin-bottom: 4px;
-  color: #333;
-}
-
-.pending-count {
-  color: #666;
-  font-size: 14px;
-}
-
-.arrow-icon {
-  color: #999;
-  transition: all 0.3s ease;
-}
-
-.pending-item:hover .arrow-icon {
-  color: #667eea;
-  transform: translateX(4px);
-}
-
-.stats-grid {
+.revenue-summary {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 20px;
+  margin-bottom: 30px;
 }
 
-.stat-item {
+.summary-item {
   text-align: center;
   padding: 20px;
-  background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(10px);
+  background: #f8f9fa;
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  transition: all 0.3s ease;
 }
 
-.stat-item:hover {
-  transform: translateY(-2px);
-  background: rgba(255, 255, 255, 0.8);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-}
-
-.stat-value {
-  font-size: 32px;
-  font-weight: 700;
-  color: #667eea;
+.summary-label {
+  display: block;
+  font-size: 14px;
+  color: #666;
   margin-bottom: 8px;
 }
 
-.stat-label {
-  color: #666;
-  font-size: 14px;
-  font-weight: 500;
+.summary-value {
+  display: block;
+  font-size: 24px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 4px;
 }
 
-.activity-list {
+.summary-trend {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.summary-trend.up {
+  color: #67c23a;
+}
+
+.summary-trend.stable {
+  color: #909399;
+}
+
+.chart-placeholder {
+  height: 200px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: #666;
+}
+
+/* 教练网格 */
+.coaches-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.coach-card {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.coach-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.coach-info {
+  flex: 1;
+}
+
+.coach-name {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.coach-level {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.coach-rating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+}
+
+.coach-stats {
+  display: flex;
+  justify-content: space-around;
+  border-top: 1px solid #e9ecef;
+  padding-top: 12px;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-label {
+  display: block;
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 2px;
+}
+
+.stat-value {
+  font-weight: 600;
+  color: #333;
+}
+
+/* 学员概览 */
+.students-overview {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.overview-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.chart-circle {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+}
+
+.chart-circle.active {
+  background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
+}
+
+.chart-circle.new {
+  background: linear-gradient(135deg, #2196f3 0%, #1565c0 100%);
+}
+
+.chart-circle.retention {
+  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+}
+
+.circle-value {
+  font-size: 24px;
+  margin-bottom: 4px;
+}
+
+.circle-label {
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.recent-students {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.activity-item {
+.recent-title {
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.recent-student {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 16px;
-  background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(10px);
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  transition: all 0.3s ease;
+  padding: 8px;
+  background: #f8f9fa;
+  border-radius: 8px;
 }
 
-.activity-item:hover {
-  background: rgba(255, 255, 255, 0.8);
-  transform: translateY(-2px);
+.student-info {
+  flex: 1;
 }
 
-.activity-icon {
-  width: 40px;
-  height: 40px;
+.student-name {
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.student-time {
+  font-size: 12px;
+  color: #666;
+}
+
+/* 场地使用情况 */
+.venue-overview {
+  margin-bottom: 20px;
+}
+
+.venue-stats {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 20px;
+}
+
+.venue-stat {
+  text-align: center;
+}
+
+.stat-label {
+  display: block;
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #333;
+}
+
+.stat-value.busy {
+  color: #f56c6c;
+}
+
+.stat-value.free {
+  color: #67c23a;
+}
+
+.venue-utilization {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.utilization-title {
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.utilization-text {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #666;
+}
+
+.venue-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.venue-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.venue-name {
+  font-weight: 600;
+}
+
+.venue-status {
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.venue-status.busy {
+  color: #f56c6c;
+}
+
+.venue-status.free {
+  color: #67c23a;
+}
+
+.venue-time {
+  font-size: 12px;
+  color: #666;
+}
+
+/* 通知列表 */
+.notifications-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.notification-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.notification-icon {
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  font-size: 18px;
 }
 
-.activity-icon.success {
-  background: linear-gradient(135deg, #52c41a, #73d13d);
+.notification-icon.warning {
+  background: #ff9800;
 }
 
-.activity-icon.warning {
-  background: linear-gradient(135deg, #faad14, #ffc53d);
+.notification-icon.info {
+  background: #2196f3;
 }
 
-.activity-icon.info {
-  background: linear-gradient(135deg, #1890ff, #40a9ff);
+.notification-icon.error {
+  background: #f44336;
 }
 
-.activity-icon.danger {
-  background: linear-gradient(135deg, #ff4d4f, #ff7875);
-}
-
-.activity-content {
+.notification-content {
   flex: 1;
 }
 
-.activity-title {
+.notification-title {
   font-weight: 600;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
+}
+
+.notification-time {
+  font-size: 12px;
+  color: #666;
+}
+
+/* 财务概览 */
+.finance-overview {
+  margin-bottom: 20px;
+}
+
+.finance-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.finance-item:last-child {
+  border-bottom: none;
+}
+
+.finance-label {
+  font-weight: 600;
   color: #333;
 }
 
-.activity-time {
-  color: #666;
-  font-size: 12px;
+.finance-value {
+  font-size: 18px;
+  font-weight: 700;
 }
 
-.notice-list {
+.finance-value.income {
+  color: #67c23a;
+}
+
+.finance-value.expense {
+  color: #f56c6c;
+}
+
+.finance-value.profit {
+  color: #409eff;
+}
+
+/* 快捷操作 */
+.quick-actions {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.notice-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px;
-  background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(10px);
+.action-button {
+  justify-content: flex-start;
+  height: 48px;
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
   transition: all 0.3s ease;
 }
 
-.notice-item.unread {
-  background: linear-gradient(135deg, rgba(24, 144, 255, 0.1), rgba(255, 255, 255, 0.6));
-  border-left: 4px solid #1890ff;
+.action-button:hover {
+  transform: translateX(4px);
 }
 
-.notice-item:hover {
-  background: rgba(255, 255, 255, 0.8);
-  transform: translateY(-2px);
+.badge {
+  margin-left: 8px;
 }
 
-.notice-content {
-  flex: 1;
-}
-
-.notice-title {
-  font-weight: 600;
-  margin-bottom: 4px;
-  color: #333;
-}
-
-.notice-summary {
-  font-size: 12px;
-  color: #666;
-  line-height: 1.4;
-}
-
-.notice-time {
-  font-size: 12px;
-  color: #999;
-  white-space: nowrap;
-}
-
-/* 动画定义 */
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0px) rotate(0deg);
-  }
-
-  50% {
-    transform: translateY(-15px) rotate(3deg);
-  }
-}
-
-@keyframes rotate {
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 0.06;
-    transform: scale(1);
-  }
-
-  50% {
-    opacity: 0.12;
-    transform: scale(1.1);
-  }
-}
-
-/* 响应式设计 */
+/* 响应式 */
 @media (max-width: 768px) {
-  .campus-admin-dashboard {
-    padding: 16px;
+  .welcome-banner {
+    flex-direction: column;
+    text-align: center;
+    gap: 20px;
+    padding: 30px 20px;
   }
 
-  .art-text-main {
-    font-size: 80px;
+  .banner-stats {
+    justify-content: center;
   }
 
-  .art-text-sub {
-    font-size: 32px;
+  .welcome-title {
+    font-size: 24px;
   }
 
-  .admin-icon,
-  .campus-decoration {
-    font-size: 40px;
+  .revenue-summary {
+    grid-template-columns: 1fr;
   }
 
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
+  .coaches-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .students-overview {
+    grid-template-columns: 1fr;
+  }
+
+  .overview-chart {
+    flex-direction: row;
+    justify-content: space-around;
+  }
+
+  .chart-circle {
+    width: 80px;
+    height: 80px;
+  }
+
+  .circle-value {
+    font-size: 18px;
+  }
+
+  .circle-label {
+    font-size: 10px;
   }
 }
 </style>

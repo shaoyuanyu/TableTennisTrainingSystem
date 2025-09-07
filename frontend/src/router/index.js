@@ -38,11 +38,11 @@ const router = createRouter({
       component: () => import('@/layouts/MainLayout.vue'),
       meta: { requiresAuth: false },
       children: [
-        // 仪表盘
+        // 仪表盘 - 根据角色显示对应仪表板
         {
           path: 'dashboard',
           name: 'Dashboard',
-          component: () => import('@/views/DashboardView.vue'),
+          component: () => import('@/views/HomeView.vue'),
         },
 
         // 超级管理员页面
