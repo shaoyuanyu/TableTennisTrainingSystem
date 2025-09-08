@@ -4,6 +4,7 @@ package io.github.shaoyuanyu.ttts.persistence
 
 import io.github.shaoyuanyu.ttts.dto.user.User
 import io.github.shaoyuanyu.ttts.dto.user.UserRole
+import io.github.shaoyuanyu.ttts.exceptions.UnauthorizedException
 import io.github.shaoyuanyu.ttts.persistence.user.UserEntity
 import io.github.shaoyuanyu.ttts.persistence.user.UserTable
 import io.github.shaoyuanyu.ttts.persistence.user.expose
@@ -138,14 +139,15 @@ class UserService(
                 UserTable.username eq username
             }.also {
                 if (it.empty()) {
-                    throw Exception("用户不存在")
+                    throw UnauthorizedException("用户名不存在")
                 }
             }.first().expose().let {
                 if (validatePasswd(plainPassword, it.encryptedPassword!!)) {
                     LOGGER.info("验证用户成功，用户 ID：${it.uuid}, 用户名：${it.username}")
+
                     it.uuid.toString()
                 } else {
-                    throw Exception("密码错误")
+                    throw UnauthorizedException("密码错误")
                 }
             }
         }

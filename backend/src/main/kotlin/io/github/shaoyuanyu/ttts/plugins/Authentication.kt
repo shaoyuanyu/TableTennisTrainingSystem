@@ -2,6 +2,7 @@ package io.github.shaoyuanyu.ttts.plugins
 
 import io.github.shaoyuanyu.ttts.dto.user.UserRole
 import io.github.shaoyuanyu.ttts.dto.user.UserSession
+import io.github.shaoyuanyu.ttts.exceptions.UnauthorizedException
 import io.github.shaoyuanyu.ttts.persistence.UserService
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
@@ -37,7 +38,7 @@ fun Application.configureAuthentication(userService: UserService) {
             }
 
             challenge {
-                Exception("未登录")
+                throw UnauthorizedException("未登录")
             }
         }
 

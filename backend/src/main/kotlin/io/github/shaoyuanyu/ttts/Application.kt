@@ -8,6 +8,7 @@ import io.ktor.server.application.*
 import io.ktor.server.netty.EngineMain
 import io.github.shaoyuanyu.ttts.plugins.configureRouting
 import io.github.shaoyuanyu.ttts.plugins.configureSessions
+import io.github.shaoyuanyu.ttts.plugins.configureStatusPages
 
 fun main(args: Array<String>) {
     EngineMain.main(args)
@@ -31,6 +32,9 @@ fun Application.module() {
     // session & authentication
     configureSessions()
     configureAuthentication(userService)
+
+    // status page
+    configureStatusPages()
 
     // routing
     configureRouting(userService)
