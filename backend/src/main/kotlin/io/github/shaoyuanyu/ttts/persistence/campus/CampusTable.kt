@@ -1,9 +1,11 @@
+@file:OptIn(ExperimentalTime::class)
 package io.github.shaoyuanyu.ttts.persistence.campus
 
-import kotlinx.datetime.LocalDateTime
 import org.jetbrains.exposed.v1.core.Column
 import org.jetbrains.exposed.v1.core.dao.id.UUIDTable
-import org.jetbrains.exposed.v1.datetime.datetime
+import org.jetbrains.exposed.v1.datetime.timestamp
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 object CampusTable : UUIDTable("campus") {
 
@@ -20,7 +22,7 @@ object CampusTable : UUIDTable("campus") {
 
     val is_central: Column<Boolean> = bool("is_central").default(false)
 
-    val created_at: Column<LocalDateTime> = datetime("created_at")
+    val created_at: Column<Instant> = timestamp("created_at")
 
-    val last_login_at: Column<LocalDateTime> = datetime("last_login_at")
+    val last_login_at: Column<Instant> = timestamp("last_login_at")
 }

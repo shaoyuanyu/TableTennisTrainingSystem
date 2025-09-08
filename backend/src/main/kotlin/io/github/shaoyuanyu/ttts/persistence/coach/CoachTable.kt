@@ -1,9 +1,11 @@
+@file:OptIn(ExperimentalTime::class)
 package io.github.shaoyuanyu.ttts.persistence.coach
 
-import kotlinx.datetime.LocalDateTime
 import org.jetbrains.exposed.v1.core.Column
 import org.jetbrains.exposed.v1.core.dao.id.UUIDTable
-import org.jetbrains.exposed.v1.datetime.datetime
+import org.jetbrains.exposed.v1.datetime.timestamp
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 object CoachTable : UUIDTable("coach") {
 
@@ -19,16 +21,18 @@ object CoachTable : UUIDTable("coach") {
 
     val hourly_rate: Column<Float> = float("hourly_rate")
 
+    val balance: Column<Float> = float("balance")
+
     val max_students: Column<Int> = integer("max_students").default(20)
 
-    val current_students: Column<Int> = integer("current_students").default(0)
+    val current_students: Column<Int> = integer("current_students")
 
     val is_approved: Column<Boolean> = bool("is_approved").default(false)
 
     // TODO: 使用 foreign key
     val approved_by: Column<Int> = integer("approved_by")
 
-    val created_at: Column<LocalDateTime> = datetime("created_at")
+    val created_at: Column<Instant> = timestamp("created_at")
 
-    val last_login_at: Column<LocalDateTime> = datetime("last_login_at")
+    val last_login_at: Column<Instant> = timestamp("last_login_at")
 }

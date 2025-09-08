@@ -8,10 +8,10 @@ import java.util.UUID
 class StudentCoachRelationEntity(uuid: EntityID<UUID>) : UUIDEntity(uuid) {
     companion object : UUIDEntityClass<StudentCoachRelationEntity>(StudentCoachRelationTable)
 
-    val coach_username by StudentCoachRelationTable.coach_username
-    val student_username by StudentCoachRelationTable.student_username
-    val status by StudentCoachRelationTable.status
-    val start_time by StudentCoachRelationTable.start_time
-    val end_time by StudentCoachRelationTable.end_time
-    val created_at by StudentCoachRelationTable.created_at
+    var coach_username by StudentCoachRelationTable.coach_username
+    var student_username by StudentCoachRelationTable.student_username
+    var status by StudentCoachRelationTable.status
+    var start_time by StudentCoachRelationTable.start_time
+    var end_time by StudentCoachRelationTable.end_time
+    var createdAt by StudentCoachRelationTable.created_at
 }

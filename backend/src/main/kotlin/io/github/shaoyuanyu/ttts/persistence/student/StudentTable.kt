@@ -1,9 +1,11 @@
+@file:OptIn(ExperimentalTime::class)
 package io.github.shaoyuanyu.ttts.persistence.student
 
-import kotlinx.datetime.LocalDateTime
 import org.jetbrains.exposed.v1.core.Column
 import org.jetbrains.exposed.v1.core.dao.id.UUIDTable
-import org.jetbrains.exposed.v1.datetime.datetime
+import org.jetbrains.exposed.v1.datetime.timestamp
+import kotlin.time.Instant
+import kotlin.time.ExperimentalTime
 
 
 object StudentTable: UUIDTable("student")  {
@@ -12,7 +14,11 @@ object StudentTable: UUIDTable("student")  {
 
     val balance: Column<Float> = float("balance")
 
-    val created_at: Column<LocalDateTime> = datetime("created_at")
+    val max_coach: Column<Int> = integer("max_coach").default(2)
 
-    val last_login_at: Column<LocalDateTime> = datetime("last_login_at")
+    val current_coach: Column<Int> = integer("current_coach")
+
+    val created_at: Column<Instant> = timestamp("created_at")
+
+    val last_login_at: Column<Instant> = timestamp("last_login_at")
 }

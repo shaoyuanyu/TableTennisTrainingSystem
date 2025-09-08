@@ -7,7 +7,7 @@ import org.jetbrains.exposed.v1.datetime.datetime
 
 object StudentCoachRelationTable : UUIDTable("student_coach") {
     // TODO: 使用 foreign key
-    val coach_username: Column<String> = varchar("cooach_username", 64).uniqueIndex()
+    val coach_username: Column<String> = varchar("coach_username", 64).uniqueIndex()
     // TODO: 使用 foreign key
     val student_username: Column<String> = varchar("student_username", 64).uniqueIndex()
     // TODO: 使用 enum
