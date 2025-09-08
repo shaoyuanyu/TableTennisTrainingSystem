@@ -4,6 +4,7 @@ import io.github.shaoyuanyu.ttts.dto.user.User
 import io.github.shaoyuanyu.ttts.dto.user.UserRole
 import io.github.shaoyuanyu.ttts.dto.user.UserSession
 import io.github.shaoyuanyu.ttts.persistence.UserService
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.request.*
@@ -22,6 +23,12 @@ fun Application.userRoutes(userService: UserService) {
             // 无身份登录
             authenticate("auth-form") {
                 login(userService)
+            }
+
+            // 所有用户
+            authenticate("auth-session-all") {
+                logout()
+                getSelfInfo(userService)
             }
 
             // super admin
@@ -70,10 +77,38 @@ fun Route.login(userService: UserService) {
 }
 
 /**
+ *  登出
+ */
+fun Route.logout() {
+    post("/logout") {
+        call.sessions.clear<UserSession>()
+        call.response.status(HttpStatusCode.OK)
+    }
+}
+
+/**
+ *  获取自己的信息
+ */
+fun Route.getSelfInfo(userService: UserService) {
+    get("/info") {
+        val userId = call.sessions.get<UserSession>().let {
+            if (it == null) {
+                Exception("未登录")
+            }
+            it!!.userId
+        }
+
+        call.respond(
+            userService.queryUserByUUID(userId)
+        )
+    }
+}
+
+/**
  * 管理员创建用户
  */
 fun Route.createUser(userService: UserService) {
     post("/create") {
-        val newUser = call.receive<User>()
+//        val newUser = call.receive<User>()
     }
 }

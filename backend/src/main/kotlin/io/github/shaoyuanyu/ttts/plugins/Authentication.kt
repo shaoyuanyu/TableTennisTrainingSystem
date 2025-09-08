@@ -30,6 +30,17 @@ fun Application.configureAuthentication(userService: UserService) {
             }
         }
 
+        // session 验证（all user）
+        session<UserSession>("auth-session-all") {
+            validate { session ->
+                session
+            }
+
+            challenge {
+                Exception("未登录")
+            }
+        }
+
         // session 验证（student）
         session<UserSession>("auth-session-student") {
             validate { session ->
