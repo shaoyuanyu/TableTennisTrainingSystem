@@ -103,17 +103,18 @@ class StudentService(
      */
     fun deduct(uuid: String, amount: Float) =
         transaction(database) {
-            StudentEntity.findById(UUID.fromString(uuid)).let {
-                if (it == null) {
+            StudentEntity.findById(UUID.fromString(uuid)).let { student ->
+                if (student == null) {
                     throw Exception("用户不存在")
                 }
-                if (it.balance < amount) {
+                if (student.balance < amount) {
                     throw Exception("余额不足")
                 }
-                it.balance -= amount
-                val newbalance=it.balance
-            }.also {newbalance->
-                LOGGER.info("扣费成功，用户 ID：$uuid，余额：${newbalance}")
+                student.balance -= amount
+
+                student
+            }.also { student ->
+                LOGGER.info("扣费成功，用户 ID：$uuid，余额：${student.balance}")
             }
         }
 
