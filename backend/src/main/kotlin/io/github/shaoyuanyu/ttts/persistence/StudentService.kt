@@ -69,7 +69,7 @@ class StudentService(
     /**
      * 更新余额
      */
-    fun updateBalance(uuid: String, newBalance: Float): Float =
+    fun updateBalance(uuid: String, newBalance: Float) =
         transaction(database) {
             StudentEntity.findById(UUID.fromString(uuid)).let {
                 if (it == null) {
@@ -77,7 +77,6 @@ class StudentService(
                 }
                 it.balance = newBalance
                 val newbalance=it.balance
-                it.balance
             }.also {newbalance->
                 LOGGER.info("更新用户余额成功，用户 ID：$uuid，余额：${newbalance}")
             }
@@ -86,7 +85,7 @@ class StudentService(
     /**
      * 充值
      */
-    fun recharge(uuid: String, amount: Float): Float =
+    fun recharge(uuid: String, amount: Float) =
         transaction(database) {
             StudentEntity.findById(UUID.fromString(uuid)).let {
                 if (it == null) {
@@ -94,7 +93,6 @@ class StudentService(
                 }
                 it.balance += amount
                 val newbalance=it.balance
-                it.balance
             }.also {newbalance->
                 LOGGER.info("充值成功，用户 ID：$uuid，余额：${newbalance}")
             }
@@ -103,7 +101,7 @@ class StudentService(
     /**
      * 扣费
      */
-    fun deduct(uuid: String, amount: Float): Float =
+    fun deduct(uuid: String, amount: Float) =
         transaction(database) {
             StudentEntity.findById(UUID.fromString(uuid)).let {
                 if (it == null) {
@@ -114,7 +112,6 @@ class StudentService(
                 }
                 it.balance -= amount
                 val newbalance=it.balance
-                it.balance
             }.also {newbalance->
                 LOGGER.info("扣费成功，用户 ID：$uuid，余额：${newbalance}")
             }
