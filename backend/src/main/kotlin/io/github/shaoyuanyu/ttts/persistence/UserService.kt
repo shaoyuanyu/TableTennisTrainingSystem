@@ -166,4 +166,22 @@ class UserService(
             }
         }
     }
+    /**
+     * 更新用户密码
+     */
+    fun updateUserPassword(uuid: String, plainPassword: String,newPlainPassword: String) {
+        transaction(database) {
+            UserEntity.findById(UUID.fromString(uuid)).let {
+                if (it == null) {
+                    throw Exception("用户不存在")
+                }
+                if(it.encryptedPassword!=encryptPasswd(plainPassword)){
+                    throw Exception("原密码错误")
+                }
+                it.encryptedPassword = encryptPasswd(newPlainPassword)
+            }.also {
+                LOGGER.info("更新用户密码成功，用户 ID：$uuid")
+            }
+        }
+    }
 }
