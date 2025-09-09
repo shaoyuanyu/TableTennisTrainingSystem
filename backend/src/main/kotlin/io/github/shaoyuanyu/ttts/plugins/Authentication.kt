@@ -48,7 +48,7 @@ fun Application.configureAuthentication(userService: UserService) {
                 if (session.userRole == UserRole.STUDENT) {
                     session
                 } else {
-//                    throw UserAuthorityException()
+                    throw UnauthorizedException("需要学生权限")
                 }
             }
         }
@@ -59,18 +59,7 @@ fun Application.configureAuthentication(userService: UserService) {
                 if (session.userRole == UserRole.COACH) {
                     session
                 } else {
-//                    throw UserAuthorityException()
-                }
-            }
-        }
-
-        // session 验证（super admin）
-        session<UserSession>("auth-session-super-admin") {
-            validate { session ->
-                if (session.userRole == UserRole.SUPER_ADMIN) {
-                    session
-                } else {
-//                    throw UserAuthorityException()
+                    throw UnauthorizedException("需要教练权限")
                 }
             }
         }
@@ -81,7 +70,18 @@ fun Application.configureAuthentication(userService: UserService) {
                 if (session.userRole == UserRole.CAMPUS_ADMIN) {
                     session
                 } else {
-//                    throw UserAuthorityException()
+                    throw UnauthorizedException("需要校区管理员权限")
+                }
+            }
+        }
+
+        // session 验证（super admin）
+        session<UserSession>("auth-session-super-admin") {
+            validate { session ->
+                if (session.userRole == UserRole.SUPER_ADMIN) {
+                    session
+                } else {
+                    throw UnauthorizedException("需要超级管理员权限")
                 }
             }
         }

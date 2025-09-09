@@ -6,6 +6,7 @@ import io.github.shaoyuanyu.ttts.dto.user.User
 import io.github.shaoyuanyu.ttts.dto.user.UserRole
 import io.github.shaoyuanyu.ttts.dto.user.injectCoachEntity
 import io.github.shaoyuanyu.ttts.dto.user.injectStudentEntity
+import io.github.shaoyuanyu.ttts.exceptions.BadRequestException
 import io.github.shaoyuanyu.ttts.exceptions.UnauthorizedException
 import io.github.shaoyuanyu.ttts.persistence.coach.CoachEntity
 import io.github.shaoyuanyu.ttts.persistence.student.StudentEntity
@@ -76,20 +77,20 @@ class UserService(
         transaction(database) {
             // 检查用户名是否已存在
             if (isUsernameExists(newUser.username)) {
-                throw IllegalArgumentException("用户名已存在")
+                throw BadRequestException("用户名已存在")
             }
             
             // 提前验证角色特定信息
             when (newUser.role) {
                 UserRole.STUDENT -> {
                     if (newUser.studentInfo == null) {
-                        throw IllegalArgumentException("学生用户必须提供学生信息")
+                        throw BadRequestException("学生用户必须提供学生信息")
                     }
                 }
                 
                 UserRole.COACH -> {
                     if (newUser.coachInfo == null) {
-                        throw IllegalArgumentException("教练用户必须提供教练信息")
+                        throw BadRequestException("教练用户必须提供教练信息")
                     }
                 }
                 
@@ -160,7 +161,7 @@ class UserService(
         transaction(database) {
             UserEntity.findById(UUID.fromString(uuid)).let { userEntity ->
                 if (userEntity == null) {
-                    throw Exception("用户不存在")
+                    throw BadRequestException("用户不存在")
                 }
 
                 // 根据用户角色附加角色特定信息
@@ -196,7 +197,7 @@ class UserService(
         transaction(database) {
             UserEntity.find { UserTable.username eq username }.also {
                 if (it.empty()) {
-                    throw Exception("用户不存在")
+                    throw BadRequestException("用户不存在")
                 }
             }.first().exposeWithoutPassword().also {
                 LOGGER.info("查询用户成功，用户 ID：${it.uuid}, 用户名：${it.username}")
@@ -273,13 +274,13 @@ class UserService(
      * 根据用户角色的不同，会同时更新相应的角色特定表中的数据。
      *
      * @param user 包含更新信息的User对象
-     * @throws IllegalArgumentException 当用户名已存在时抛出异常
+     * @throws BadRequestException 当用户名已存在时抛出异常
      */
     fun updateUser(user: User) {
         transaction(database) {
             // 检查用户名是否已存在（排除当前用户）
             if (isUsernameExists(user.username, user.uuid)) {
-                throw IllegalArgumentException("用户名已存在")
+                throw BadRequestException("用户名已存在")
             }
             
             // 更新用户基本信息
@@ -333,7 +334,7 @@ class UserService(
      * @param username 用户名
      * @param plainPassword 明文密码
      * @return 用户UUID字符串，如果验证失败则返回null，如果用户不存在则抛出异常
-     * @throws Exception 当用户不存在时抛出异常
+     * @throws BadRequestException 当用户不存在时抛出异常
      */
     fun validateUser(username: String, plainPassword: String): String =
         transaction(database) {
@@ -362,18 +363,18 @@ class UserService(
      * @param uuid 用户UUID
      * @param oldPassword 旧密码
      * @param newPassword 新密码
-     * @throws Exception 当用户不存在或旧密码错误时抛出异常
+     * @throws BadRequestException 当用户不存在或旧密码错误时抛出异常
      */
     fun changeUserPassword(uuid: String, oldPassword: String, newPassword: String) {
         transaction(database) {
             UserEntity.findById(UUID.fromString(uuid)).let { userEntity ->
                 if (userEntity == null) {
-                    throw Exception("用户不存在")
+                    throw BadRequestException("用户不存在")
                 }
                 
                 // 验证旧密码
                 if (!validatePasswd(oldPassword, userEntity.encryptedPassword)) {
-                    throw Exception("旧密码错误")
+                    throw BadRequestException("旧密码错误")
                 }
                 
                 // 更新为新密码
@@ -391,7 +392,7 @@ class UserService(
         transaction(database) {
             UserEntity.findById(UUID.fromString(uuid)).let {
                 if (it == null) {
-                    throw Exception("用户不存在")
+                    throw BadRequestException("用户不存在")
                 }
 
                 it.delete()
@@ -408,10 +409,10 @@ class UserService(
         transaction(database) {
             UserEntity.findById(UUID.fromString(uuid)).let {
                 if (it == null) {
-                    throw Exception("用户不存在")
+                    throw BadRequestException("用户不存在")
                 }
                 if(!validatePasswd(oldPassword, it.encryptedPassword)){
-                    throw Exception("原密码错误")
+                    throw BadRequestException("原密码错误")
                 }
 
                 it.encryptedPassword = encryptPasswd(newPassword)

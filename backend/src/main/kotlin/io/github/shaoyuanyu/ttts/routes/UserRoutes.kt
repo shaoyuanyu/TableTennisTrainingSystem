@@ -35,6 +35,11 @@ fun Application.userRoutes(userService: UserService) {
                 changeSelfPassword(userService)
             }
 
+            // campus admin
+            authenticate("auth-session-campus-admin") {
+
+            }
+
             // super admin
             authenticate("auth-session-super-admin") {
                 createUser(userService)
