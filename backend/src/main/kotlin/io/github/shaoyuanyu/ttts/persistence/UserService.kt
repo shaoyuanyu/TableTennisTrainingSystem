@@ -2,6 +2,8 @@
 
 package io.github.shaoyuanyu.ttts.persistence
 
+import io.github.shaoyuanyu.ttts.dto.coach.CoachInfo
+import io.github.shaoyuanyu.ttts.dto.student.StudentInfo
 import io.github.shaoyuanyu.ttts.dto.user.User
 import io.github.shaoyuanyu.ttts.dto.user.UserRole
 import io.github.shaoyuanyu.ttts.exceptions.UnauthorizedException
@@ -50,10 +52,33 @@ class UserService(
     }
 
     /**
+     * 检查用户名是否存在
+     *
+     * 该函数用于检查指定用户名是否已存在于数据库中。
+     *
+     * @param username 要检查的用户名
+     * @param excludeUuid 可选参数，排除指定UUID的用户（用于更新时检查）
+     * @return 如果用户名已存在返回true，否则返回false
+     */
+    fun isUsernameExists(username: String, excludeUuid: String? = null): Boolean =
+        transaction(database) {
+            val query = UserEntity.find { UserTable.username eq username }
+            val filteredQuery = excludeUuid?.let { 
+                query.filter { userEntity -> userEntity.id.value != UUID.fromString(it) }
+            } ?: query
+            filteredQuery.count() > 0
+        }
+
+    /**
      * 创建用户
      */
     fun createUser(newUser: User): String =
         transaction(database) {
+            // 检查用户名是否已存在
+            if (isUsernameExists(newUser.username)) {
+                throw IllegalArgumentException("用户名已存在")
+            }
+            
             // 提前验证角色特定信息
             when (newUser.role) {
                 UserRole.STUDENT -> {
@@ -133,12 +158,50 @@ class UserService(
      */
     fun queryUserByUUID(uuid: String): User =
         transaction(database) {
-            UserEntity.findById(UUID.fromString(uuid)).let {
-                if (it == null) {
+            UserEntity.findById(UUID.fromString(uuid)).let { userEntity ->
+                if (userEntity == null) {
                     throw Exception("用户不存在")
                 }
 
-                it.exposeWithoutPassword()
+                // 根据用户角色附加角色特定信息
+                val user = userEntity.exposeWithoutPassword()
+                when (user.role) {
+                    UserRole.STUDENT -> {
+                        val studentEntity = StudentEntity.findById(UUID.fromString(uuid))
+                        if (studentEntity != null) {
+                            user.copy(
+                                studentInfo = StudentInfo(
+                                    balance = studentEntity.balance,
+                                    maxCoach = studentEntity.maxCoach,
+                                    currentCoach = studentEntity.currentCoach
+                                )
+                            )
+                        } else {
+                            user
+                        }
+                    }
+                    UserRole.COACH -> {
+                        val coachEntity = CoachEntity.findById(UUID.fromString(uuid))
+                        if (coachEntity != null) {
+                            user.copy(
+                                coachInfo = CoachInfo(
+                                    photoUrl = coachEntity.photoUrl,
+                                    achievements = coachEntity.achievements,
+                                    level = coachEntity.level,
+                                    hourlyRate = coachEntity.hourlyRate,
+                                    balance = coachEntity.balance,
+                                    maxStudents = coachEntity.maxStudents,
+                                    currentStudents = coachEntity.currentStudents,
+                                    isApproved = coachEntity.isApproved,
+                                    approvedBy = coachEntity.approvedBy
+                                )
+                            )
+                        } else {
+                            user
+                        }
+                    }
+                    else -> user
+                }
             }.also {
                 LOGGER.info("查询用户成功，用户 ID：$uuid，用户名：${it.username}")
             }
@@ -159,24 +222,60 @@ class UserService(
         }
 
     /**
-     * 更新用户信息
+     * 更新用户信息和专有信息
+     *
+     * 该函数用于更新用户的基本信息以及学生或教练的专有信息。
+     * 根据用户角色的不同，会同时更新相应的角色特定表中的数据。
+     *
+     * @param user 包含更新信息的User对象
+     * @throws IllegalArgumentException 当用户名已存在时抛出异常
      */
     fun updateUser(user: User) {
         transaction(database) {
+            // 检查用户名是否已存在（排除当前用户）
+            if (isUsernameExists(user.username, user.uuid)) {
+                throw IllegalArgumentException("用户名已存在")
+            }
+            
+            // 更新用户基本信息
             UserEntity.findByIdAndUpdate(UUID.fromString(user.uuid)) {
                 it.username = user.username
-                it.encryptedPassword = encryptPasswd(user.plainPassword!!)
                 it.realName = user.realName
                 it.gender = user.gender
                 it.age = user.age
                 it.phoneNumber = user.phoneNumber
                 it.email = user.email
                 it.campusId = user.campusId
-                it.role = user.role
-                it.status = user.status
-            }.also {
-                LOGGER.info("更新用户成功，用户 ID：${user.uuid}, 用户名：${user.username}")
+                // 注意：不更新角色和状态字段，防止用户越权修改
             }
+            
+            // 根据用户角色更新专有信息
+            when (user.role) {
+                UserRole.STUDENT -> {
+                    user.studentInfo?.let { studentInfo ->
+                        StudentEntity.findByIdAndUpdate(UUID.fromString(user.uuid)) {
+                            it.balance = studentInfo.balance
+                            it.maxCoach = studentInfo.maxCoach
+                        }
+                    }
+                }
+                UserRole.COACH -> {
+                    user.coachInfo?.let { coachInfo ->
+                        CoachEntity.findByIdAndUpdate(UUID.fromString(user.uuid)) {
+                            it.photoUrl = coachInfo.photoUrl ?: ""
+                            it.achievements = coachInfo.achievements ?: ""
+                            it.level = coachInfo.level ?: ""
+                            it.hourlyRate = coachInfo.hourlyRate
+                            it.maxStudents = coachInfo.maxStudents
+                        }
+                    }
+                }
+                else -> {
+                    // 其他角色没有专有信息需要更新
+                }
+            }
+        }.also {
+            LOGGER.info("更新用户信息成功，用户 ID：${user.uuid}, 用户名：${user.username}")
         }
     }
 
@@ -199,11 +298,11 @@ class UserService(
                 if (it.empty()) {
                     throw UnauthorizedException("用户名不存在")
                 }
-            }.first().expose().let {
-                if (validatePasswd(plainPassword, it.encryptedPassword!!)) {
-                    LOGGER.info("验证用户成功，用户 ID：${it.uuid}, 用户名：${it.username}")
+            }.first().expose().let { user ->
+                if (validatePasswd(plainPassword, user.encryptedPassword!!)) {
+                    LOGGER.info("验证用户成功，用户 ID：${user.uuid}, 用户名：${user.username}")
 
-                    it.uuid.toString()
+                    user.uuid.toString()
                 } else {
                     throw UnauthorizedException("密码错误")
                 }
@@ -236,7 +335,7 @@ class UserService(
                 if (it == null) {
                     throw Exception("用户不存在")
                 }
-                if(validatePasswd(oldPassword, it.encryptedPassword)){
+                if(!validatePasswd(oldPassword, it.encryptedPassword)){
                     throw Exception("原密码错误")
                 }
 
