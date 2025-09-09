@@ -1,65 +1,92 @@
 openapi: "3.1.0"
 info:
   title: "TableTennisTrainingSystem API"
-  description: "TableTennisTrainingSystem API"
+  description: "API documentation for the Table Tennis Training System"
   version: "1.0.0"
 servers:
-  - url: "https://TableTennisTrainingSystem"
+  - url: "http://localhost:8080"
 paths:
-  /user/create:
+  /user/signup:
     post:
-      description: ""
+      summary: "用户注册"
+      description: "允许学生或教练注册账户"
       requestBody:
         content:
           application/json:
             schema:
               $ref: "#/components/schemas/User"
         required: true
-  /user/info:
-    get:
-      description: ""
       responses:
-        "200":
-          description: "OK"
+        "201":
+          description: "注册成功"
           content:
-            '*/*':
+            application/json:
               schema:
-                $ref: "#/components/schemas/User"
-  /user/login:
-    post:
-      description: ""
-      responses:
-        "200":
-          description: "OK"
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/User"
-  /user/logout:
-    post:
-      description: ""
-  /user/signup:
-    post:
-      description: ""
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/RegistrationRequest"
-        required: true
-      responses:
+                type: "object"
+                properties:
+                  message:
+                    type: "string"
+                  userId:
+                    type: "string"
         "400":
-          description: "Bad Request"
+          description: "请求参数错误"
           content:
             text/plain:
               schema:
                 type: "string"
-  /:
-    get:
-      description: ""
+  /user/login:
+    post:
+      summary: "用户登录"
+      description: "通过表单验证用户身份"
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: "object"
+              properties:
+                username:
+                  type: "string"
+                password:
+                  type: "string"
+              required:
+                - "username"
+                - "password"
       responses:
         "200":
-          description: "OK"
+          description: "登录成功"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: "认证失败"
+  /user/logout:
+    post:
+      summary: "用户登出"
+      description: "清除用户会话"
+      responses:
+        "200":
+          description: "登出成功"
+  /user/info:
+    get:
+      summary: "获取用户信息"
+      description: "获取当前登录用户的信息"
+      responses:
+        "200":
+          description: "返回用户信息"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: "未认证"
+  /:
+    get:
+      summary: "根路径"
+      description: "测试服务器是否运行"
+      responses:
+        "200":
+          description: "服务器正常运行"
           content:
             text/plain:
               schema:
@@ -114,6 +141,12 @@ components:
           type: "string"
           format: "date-time"
           nullable: true
+        studentInfo:
+          $ref: "#/components/schemas/StudentInfo"
+          nullable: true
+        coachInfo:
+          $ref: "#/components/schemas/CoachInfo"
+          nullable: true
       required:
         - "username"
         - "realName"
@@ -124,6 +157,58 @@ components:
         - "campusId"
         - "role"
         - "status"
+    StudentInfo:
+      type: "object"
+      properties:
+        balance:
+          type: "number"
+          format: "float"
+        maxCoach:
+          type: "integer"
+          format: "int32"
+        currentCoach:
+          type: "integer"
+          format: "int32"
+      required:
+        - "balance"
+        - "maxCoach"
+        - "currentCoach"
+    CoachInfo:
+      type: "object"
+      properties:
+        photoUrl:
+          type: "string"
+          nullable: true
+        achievements:
+          type: "string"
+          nullable: true
+        level:
+          type: "string"
+          nullable: true
+        hourlyRate:
+          type: "number"
+          format: "float"
+        balance:
+          type: "number"
+          format: "float"
+        maxStudents:
+          type: "integer"
+          format: "int32"
+        currentStudents:
+          type: "integer"
+          format: "int32"
+        isApproved:
+          type: "boolean"
+        approvedBy:
+          type: "integer"
+          format: "int32"
+      required:
+        - "hourlyRate"
+        - "balance"
+        - "maxStudents"
+        - "currentStudents"
+        - "isApproved"
+        - "approvedBy"
     StudentRegistration:
       type: "object"
       properties:
@@ -151,13 +236,10 @@ components:
         maxCoach:
           type: "integer"
           format: "int32"
-          default: "3"
+          default: 3
         role:
           type: "string"
           enum:
-            - "SUPER_ADMIN"
-            - "CAMPUS_ADMIN"
-            - "COACH"
             - "STUDENT"
         status:
           type: "string"
@@ -211,10 +293,7 @@ components:
         role:
           type: "string"
           enum:
-            - "SUPER_ADMIN"
-            - "CAMPUS_ADMIN"
             - "COACH"
-            - "STUDENT"
         status:
           type: "string"
           default: "pending_approval"

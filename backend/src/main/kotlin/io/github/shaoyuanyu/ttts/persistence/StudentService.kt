@@ -20,20 +20,6 @@ class StudentService(
         }
     }
 
-    /** Create student
-     */
-    fun createStudent(newStudent: Student): String =
-        transaction(database) {
-            StudentEntity.new {
-                username = newStudent.username
-                balance = 0.0f
-                createdAt = Clock.System.now()
-                lastLoginAt = this.createdAt
-            }.id.value.toString()
-        }.also { uuid ->
-            LOGGER.info("创建用户成功，用户 ID：$uuid，用户名：${newStudent.username}")
-        }
-
     /**
      * query student by uuid
      */
@@ -119,24 +105,6 @@ class StudentService(
         }
 
     /**
-     * 删除用户
-     */
-    fun deleteStudent(uuid: String) {
-        transaction(database) {
-            StudentEntity.findById(UUID.fromString(uuid)).let {
-                if (it == null) {
-                    throw Exception("用户不存在")
-                }
-                if(it.balance!=0.0f){
-                    throw Exception("用户余额不为0，无法删除")
-                }
-                it.delete()
-            }.also {
-                LOGGER.info("删除用户成功，用户 ID：$uuid")
-            }
-        }
-    }
-    /**
      * 选择教练前判断
      */
     fun judgeCoachNumber(uuid: String): Boolean =
@@ -155,4 +123,3 @@ class StudentService(
             }
         }
 }
-

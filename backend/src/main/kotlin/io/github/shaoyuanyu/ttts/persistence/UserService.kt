@@ -54,7 +54,27 @@ class UserService(
      */
     fun createUser(newUser: User): String =
         transaction(database) {
-            UserEntity.new {
+            // 提前验证角色特定信息
+            when (newUser.role) {
+                UserRole.STUDENT -> {
+                    if (newUser.studentInfo == null) {
+                        throw IllegalArgumentException("学生用户必须提供学生信息")
+                    }
+                }
+                
+                UserRole.COACH -> {
+                    if (newUser.coachInfo == null) {
+                        throw IllegalArgumentException("教练用户必须提供教练信息")
+                    }
+                }
+                
+                else -> {
+                    // 其他角色不需要额外验证
+                }
+            }
+            
+            // 创建用户账户
+            val userEntity = UserEntity.new {
                 username = newUser.username
                 encryptedPassword = encryptPasswd(newUser.plainPassword!!)
                 realName = newUser.realName
@@ -67,54 +87,45 @@ class UserService(
                 status = newUser.status
                 createdAt = Clock.System.now()
                 lastLoginAt = createdAt
-            }.id.value.toString()
+            }
+            val userId = userEntity.id.value.toString()
+            
+            // 根据用户角色创建相应的角色特定记录
+            when (newUser.role) {
+                UserRole.STUDENT -> {
+                    val studentInfo = newUser.studentInfo!!
+                    StudentEntity.new(UUID.fromString(userId)) {
+                        this.userId = userEntity
+                        this.balance = studentInfo.balance
+                        this.maxCoach = studentInfo.maxCoach
+                        this.currentCoach = 0
+                    }
+                }
+                
+                UserRole.COACH -> {
+                    val coachInfo = newUser.coachInfo!!
+                    CoachEntity.new(UUID.fromString(userId)) {
+                        this.userId = userEntity
+                        this.photoUrl = coachInfo.photoUrl ?: ""
+                        this.achievements = coachInfo.achievements ?: ""
+                        this.level = coachInfo.level ?: ""
+                        this.hourlyRate = coachInfo.hourlyRate
+                        this.balance = 0.0f
+                        this.maxStudents = 20
+                        this.currentStudents = 0
+                        this.isApproved = false
+                        this.approvedBy = -1
+                    }
+                }
+                
+                else -> {
+                    // 其他角色不需要创建额外记录
+                }
+            }
+            
+            userId
         }.also { uuid ->
             LOGGER.info("创建用户成功，用户 ID：$uuid，用户名：${newUser.username}")
-        }
-
-    /**
-     * 创建学生
-     */
-    fun createStudent(username: String, balance: Float = 0.0f, maxCoach: Int = 3) =
-        transaction(database) {
-            StudentEntity.new {
-                this.username = username
-                this.balance = balance
-                this.maxCoach = maxCoach
-                this.currentCoach = 0
-                this.createdAt = Clock.System.now()
-                this.lastLoginAt = createdAt
-            }.id.value.toString()
-        }.also { uuid ->
-            LOGGER.info("创建学生成功，用户 ID：$uuid，用户名：$username")
-        }
-
-    /**
-     * 创建教练
-     */
-    fun createCoach(
-        username: String,
-        photoUrl: String? = null,
-        achievements: String? = null,
-        level: String? = null,
-        hourlyRate: Float = 0.0f
-    ) =
-        transaction(database) {
-            CoachEntity.new {
-                this.username = username
-                this.photo_url = photoUrl ?: ""
-                this.achievements = achievements ?: ""
-                this.level_ = level ?: ""
-                this.hourly_rate = hourlyRate
-                this.max_students = 20 // 默认值
-                this.current_students = 0
-                this.is_approved = false // 默认需要审批
-                this.approved_by = 0 // 未审批
-                this.createdAt = Clock.System.now()
-                this.lastLoginAt = createdAt
-            }.id.value.toString()
-        }.also { uuid ->
-            LOGGER.info("创建教练成功，用户 ID：$uuid，用户名：$username")
         }
 
     /**

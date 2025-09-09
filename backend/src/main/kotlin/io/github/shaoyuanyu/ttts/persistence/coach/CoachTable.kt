@@ -1,23 +1,21 @@
-@file:OptIn(ExperimentalTime::class)
 package io.github.shaoyuanyu.ttts.persistence.coach
 
+import io.github.shaoyuanyu.ttts.persistence.user.UserTable
 import org.jetbrains.exposed.v1.core.Column
-import org.jetbrains.exposed.v1.core.dao.id.UUIDTable
-import org.jetbrains.exposed.v1.datetime.timestamp
-import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
+import org.jetbrains.exposed.v1.core.dao.id.IdTable
+import org.jetbrains.exposed.v1.core.ReferenceOption
+import java.util.UUID
 
-object CoachTable : UUIDTable("coach") {
+object CoachTable : IdTable<UUID>("coach") {
+    override val id = reference("user_id", UserTable, ReferenceOption.CASCADE)
+    
+    override val primaryKey = PrimaryKey(id)
 
-    val username: Column<String> = varchar("username", 64).uniqueIndex()
-    /**
-     * 使用 BCrypt 算法
-     */
     val photo_url: Column<String> = varchar("photo_url", 128)
 
     val achievements: Column<String> = varchar("achievements", 128)
 
-    val level_: Column<String> = varchar("level_",32)
+    val level: Column<String> = varchar("level",32)
 
     val hourly_rate: Column<Float> = float("hourly_rate")
 
@@ -29,10 +27,5 @@ object CoachTable : UUIDTable("coach") {
 
     val is_approved: Column<Boolean> = bool("is_approved").default(false)
 
-    // TODO: 使用 foreign key
     val approved_by: Column<Int> = integer("approved_by")
-
-    val created_at: Column<Instant> = timestamp("created_at")
-
-    val last_login_at: Column<Instant> = timestamp("last_login_at")
 }

@@ -1,5 +1,7 @@
 package io.github.shaoyuanyu.ttts.dto.user
 
+import io.github.shaoyuanyu.ttts.dto.student.StudentInfo
+import io.github.shaoyuanyu.ttts.dto.coach.CoachInfo
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
 
@@ -19,4 +21,8 @@ data class User(
     val status: String,
     val createdAt: LocalDateTime? = null,
     val lastLoginAt: LocalDateTime? = null,
+    
+    // 角色特定信息
+    val studentInfo: StudentInfo? = null,
+    val coachInfo: CoachInfo? = null,
 )
