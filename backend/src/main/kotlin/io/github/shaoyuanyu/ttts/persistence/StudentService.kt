@@ -1,23 +1,22 @@
 @file:OptIn(ExperimentalTime::class)
 package io.github.shaoyuanyu.ttts.persistence
 
-import io.github.shaoyuanyu.ttts.dto.student.Student
+import io.github.shaoyuanyu.ttts.persistence.campus.CampusEntity
 import io.github.shaoyuanyu.ttts.persistence.coach.CoachEntity
 import io.github.shaoyuanyu.ttts.persistence.student.StudentEntity
-import io.github.shaoyuanyu.ttts.persistence.student.expose
 import io.github.shaoyuanyu.ttts.persistence.student_coach.StudentCoachRelationEntity
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import java.util.UUID
 import kotlin.time.Clock
+import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 
 class StudentService(
-    private val database: Database
+    private val database: Database,
+    private val userService: UserService
 ) {
     init {
         transaction(database) {
@@ -130,7 +129,7 @@ class StudentService(
     /**
      * 选择教练课程
      */
-    fun selectCourse(studentuuid: String, coachuuid: String, startTime: LocalDateTime,endTime:LocalDateTime) =
+    fun selectCourse(studentuuid: String, coachuuid: String, startTime: Instant, endTime:Instant) =
         transaction(database) {
             val student = StudentEntity.findById(UUID.fromString(studentuuid))
                 ?: throw Exception("学生不存在")
@@ -141,9 +140,44 @@ class StudentService(
                 throw Exception("学生已达到最大教练选择数量")
             }
 
-            if (coach.currentStudents>= coach.maxStudents) {
+            if (coach.currentStudents >= coach.maxStudents) {
                 throw Exception("教练已达到最大学生接收数量")
             }
+            // 获取教练所属的校区
+            val campusID =userService.queryUserByUUID(coachuuid).campusId
+
+            //根据campusID获取校区实体
+            val campus = queryCampusById(campusID)
+
+            // 计算上课时间（小时）
+            val duration: Duration = endTime - startTime
+            val durationHours = duration.inWholeHours.toFloat()
+
+            if (durationHours <= 0) {
+                throw Exception("课程时间无效，结束时间必须晚于开始时间")
+            }
+
+            // 根据教练等级计算费用
+            val coachLevel = coach.level
+            val hourlyRate = when (coachLevel) {
+                "初级" -> 80.0f
+                "中级" -> 150.0f
+                "高级" -> 200.0f
+                else -> throw Exception("未知的教练等级: $coachLevel")
+            }
+
+            val totalCost = hourlyRate * durationHours
+
+            // 调用扣费函数
+            deduct(studentuuid, totalCost)
+
+            // 为教练增加余额（扣费金额的60%）
+            val coachEarnings = totalCost * 0.6f
+            coach.balance += coachEarnings
+
+            //校区增加金额（扣费金额的40%）
+            val campusEarnings = totalCost * 0.4f
+            campus.balance += campusEarnings
 
             // 创建关系
             StudentCoachRelationEntity.new {
@@ -152,20 +186,40 @@ class StudentService(
                 status = "active"
                 start_time = startTime
                 end_time = endTime
-                createdAt = Clock.System.now().toLocalDateTime(TimeZone.of("Asia/Shanghai"))
+                createdAt = Clock.System.now()
             }
 
             // 更新计数
             student.currentCoach += 1
             coach.currentStudents += 1
 
-            LOGGER.info("选择教练课程成功")
+            LOGGER.info("选择教练课程成功，课程时长: ${durationHours}小时，总费用: ${totalCost}元")
 
             // 返回成功信息
             mapOf(
                 "success" to true,
                 "message" to "学生-教练关系建立成功",
-                "studentCurrentCoaches" to student.currentCoach
+                "studentCurrentCoaches" to student.currentCoach,
+                "durationHours" to durationHours,
+                "totalCost" to totalCost,
+                "coachEarnings" to coachEarnings
             )
         }
+
+    /**
+     * 根据campusId查询校区获取校区实体
+     */
+    fun queryCampusById(campusId: Int): CampusEntity =
+        transaction(database) {
+            CampusEntity.findById(campusId).let {
+                if (it == null) {
+                    throw Exception("校区不存在")
+                }
+
+                it
+            }.also {
+                LOGGER.info("查询校区成功，校区 ID：$campusId，校区名称：${it.campus_name}")
+            }
+        }
+
 }

@@ -1,13 +1,17 @@
+@file:OptIn(ExperimentalTime::class)
 package io.github.shaoyuanyu.ttts.persistence.student_coach
 
 import io.github.shaoyuanyu.ttts.persistence.coach.CoachTable
 import io.github.shaoyuanyu.ttts.persistence.student.StudentTable
 import io.github.shaoyuanyu.ttts.persistence.user.UserTable
 import org.jetbrains.exposed.v1.core.dao.id.UUIDTable
-import kotlinx.datetime.LocalDateTime
+
 import org.jetbrains.exposed.v1.core.Column
 import org.jetbrains.exposed.v1.core.ReferenceOption
 import org.jetbrains.exposed.v1.datetime.datetime
+import org.jetbrains.exposed.v1.datetime.timestamp
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 object StudentCoachRelationTable : UUIDTable("student_coach") {
 
@@ -19,10 +23,9 @@ object StudentCoachRelationTable : UUIDTable("student_coach") {
     // TODO: 使用 enum
     val status: Column<String> = varchar("status", 32)
 
-    val start_time: Column<LocalDateTime> = datetime("start_time")
+    val start_time: Column<Instant> = timestamp("start_time")
 
-    val end_time: Column<LocalDateTime> = datetime("end_time")
+    val end_time: Column<Instant> = timestamp("end_time")
 
-    val created_at: Column<LocalDateTime> = datetime("created_at")
-
+    val created_at: Column<Instant> = timestamp("created_at")
 }
