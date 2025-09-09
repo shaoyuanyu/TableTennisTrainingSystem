@@ -32,6 +32,7 @@ fun Application.userRoutes(userService: UserService) {
                 logout()
                 getSelfInfo(userService)
                 updateSelfInfo(userService)
+                changeSelfPassword(userService)
             }
 
             // super admin
@@ -39,6 +40,7 @@ fun Application.userRoutes(userService: UserService) {
                 createUser(userService)
                 deleteUser(userService)
                 resetCampusAdminPassword(userService)
+                getAllUsers(userService)
             }
         }
     }
@@ -144,6 +146,71 @@ fun Route.updateSelfInfo(userService: UserService) {
         
         call.response.status(HttpStatusCode.OK)
         call.respond(mapOf("message" to "用户信息更新成功"))
+    }
+}
+
+/**
+ * 修改密码
+ *
+ * 该函数用于用户修改自己的密码，需要提供旧密码进行验证
+ *
+ * @param userService UserService实例，用于修改密码
+ */
+fun Route.changeSelfPassword(userService: UserService) {
+    put("/change-password") {
+        // 从表单数据中获取密码信息
+        val formData = call.receiveParameters()
+        val oldPassword = formData["oldPassword"] ?: throw BadRequestException("缺少旧密码参数")
+        val newPassword = formData["newPassword"] ?: throw BadRequestException("缺少新密码参数")
+        
+        // 从会话中获取用户ID，如果未登录则抛出异常
+        val userId = call.sessions.get<UserSession>().let {
+            if (it == null) {
+                throw UnauthorizedException("未登录")
+            }
+            it.userId
+        }
+        
+        userService.changeUserPassword(userId, oldPassword, newPassword)
+        
+        call.response.status(HttpStatusCode.OK)
+        call.respond(mapOf("message" to "密码修改成功"))
+    }
+}
+
+/**
+ * 获取所有用户（分页）
+ *
+ * 该函数用于查询用户列表，支持分页和过滤。仅限超级管理员
+ *
+ * @param userService UserService实例，用于查询用户列表
+ */
+fun Route.getAllUsers(userService: UserService) {
+    get("/users") {
+        // 获取查询参数
+        val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 1
+        val size = call.request.queryParameters["size"]?.toIntOrNull() ?: 10
+        val role = call.request.queryParameters["role"]?.let { UserRole.valueOf(it) }
+        val campusId = call.request.queryParameters["campusId"]?.toIntOrNull()
+        
+        // 参数验证
+        if (page <= 0) {
+            throw BadRequestException("页码必须大于0")
+        }
+        
+        if (size !in 1..100) {
+            throw BadRequestException("每页大小必须在1-100之间")
+        }
+        
+        val (users, totalCount) = userService.queryUsers(page, size, role, campusId)
+        
+        call.respond(mapOf(
+            "users" to users,
+            "totalCount" to totalCount,
+            "page" to page,
+            "size" to size,
+            "totalPages" to ((totalCount + size - 1) / size).toInt()
+        ))
     }
 }
 

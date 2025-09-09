@@ -2,23 +2,23 @@
 
 package io.github.shaoyuanyu.ttts.persistence
 
-import io.github.shaoyuanyu.ttts.dto.coach.CoachInfo
-import io.github.shaoyuanyu.ttts.dto.student.StudentInfo
 import io.github.shaoyuanyu.ttts.dto.user.User
 import io.github.shaoyuanyu.ttts.dto.user.UserRole
+import io.github.shaoyuanyu.ttts.dto.user.injectCoachEntity
+import io.github.shaoyuanyu.ttts.dto.user.injectStudentEntity
 import io.github.shaoyuanyu.ttts.exceptions.UnauthorizedException
+import io.github.shaoyuanyu.ttts.persistence.coach.CoachEntity
+import io.github.shaoyuanyu.ttts.persistence.student.StudentEntity
 import io.github.shaoyuanyu.ttts.persistence.user.UserEntity
 import io.github.shaoyuanyu.ttts.persistence.user.UserTable
 import io.github.shaoyuanyu.ttts.persistence.user.expose
 import io.github.shaoyuanyu.ttts.persistence.user.exposeWithoutPassword
-import io.github.shaoyuanyu.ttts.persistence.student.StudentEntity
-import io.github.shaoyuanyu.ttts.persistence.coach.CoachEntity
 import io.github.shaoyuanyu.ttts.utils.encryptPasswd
 import io.github.shaoyuanyu.ttts.utils.validatePasswd
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.slf4j.LoggerFactory
-import java.util.UUID
+import java.util.*
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
@@ -169,13 +169,7 @@ class UserService(
                     UserRole.STUDENT -> {
                         val studentEntity = StudentEntity.findById(UUID.fromString(uuid))
                         if (studentEntity != null) {
-                            user.copy(
-                                studentInfo = StudentInfo(
-                                    balance = studentEntity.balance,
-                                    maxCoach = studentEntity.maxCoach,
-                                    currentCoach = studentEntity.currentCoach
-                                )
-                            )
+                            user.injectStudentEntity(studentEntity)
                         } else {
                             user
                         }
@@ -183,19 +177,7 @@ class UserService(
                     UserRole.COACH -> {
                         val coachEntity = CoachEntity.findById(UUID.fromString(uuid))
                         if (coachEntity != null) {
-                            user.copy(
-                                coachInfo = CoachInfo(
-                                    photoUrl = coachEntity.photoUrl,
-                                    achievements = coachEntity.achievements,
-                                    level = coachEntity.level,
-                                    hourlyRate = coachEntity.hourlyRate,
-                                    balance = coachEntity.balance,
-                                    maxStudents = coachEntity.maxStudents,
-                                    currentStudents = coachEntity.currentStudents,
-                                    isApproved = coachEntity.isApproved,
-                                    approvedBy = coachEntity.approvedBy
-                                )
-                            )
+                            user.injectCoachEntity(coachEntity)
                         } else {
                             user
                         }
@@ -220,6 +202,69 @@ class UserService(
                 LOGGER.info("查询用户成功，用户 ID：${it.uuid}, 用户名：${it.username}")
             }
         }
+
+    /**
+     * 查询用户列表
+     *
+     * @param page 页码，从1开始
+     * @param size 每页大小
+     * @param role 用户角色过滤
+     * @param campusId 校区ID过滤
+     * @return 用户列表和总数
+     */
+    fun queryUsers(
+        page: Int = 1,
+        size: Int = 10,
+        role: UserRole? = null,
+        campusId: Int? = null
+    ): Pair<List<User>, Long> = transaction(database) {
+        var query = UserEntity.all().toList()
+        
+        // 根据角色筛选
+        role?.let {
+            query = query.filter { user -> user.role == it }
+        }
+        
+        // 根据校区ID筛选
+        campusId?.let {
+            query = query.filter { user -> user.campusId == it }
+        }
+        
+        // 获取总数
+        val totalCount = query.size.toLong()
+        
+        // 分页查询
+        val users = query
+            .drop((page - 1) * size)
+            .take(size)
+            .map { userEntity ->
+                // 根据用户角色附加角色特定信息
+                val user = userEntity.exposeWithoutPassword()
+                when (user.role) {
+                    UserRole.STUDENT -> {
+                        val studentEntity = StudentEntity.findById(UUID.fromString(user.uuid))
+                        if (studentEntity != null) {
+                            user.injectStudentEntity(studentEntity)
+                        } else {
+                            user
+                        }
+                    }
+                    UserRole.COACH -> {
+                        val coachEntity = CoachEntity.findById(UUID.fromString(user.uuid))
+                        if (coachEntity != null) {
+                            user.injectCoachEntity(coachEntity)
+                        } else {
+                            user
+                        }
+                    }
+                    else -> user
+                }
+            }
+        
+        users to totalCount
+    }.also {
+        LOGGER.info("查询用户列表成功，页码：$page，每页数量：$size，角色：$role，校区ID：$campusId")
+    }
 
     /**
      * 更新用户信息和专有信息
@@ -308,6 +353,36 @@ class UserService(
                 }
             }
         }
+
+    /**
+     * 修改用户密码
+     *
+     * 该函数用于用户修改自己的密码，需要提供旧密码进行验证
+     *
+     * @param uuid 用户UUID
+     * @param oldPassword 旧密码
+     * @param newPassword 新密码
+     * @throws Exception 当用户不存在或旧密码错误时抛出异常
+     */
+    fun changeUserPassword(uuid: String, oldPassword: String, newPassword: String) {
+        transaction(database) {
+            UserEntity.findById(UUID.fromString(uuid)).let { userEntity ->
+                if (userEntity == null) {
+                    throw Exception("用户不存在")
+                }
+                
+                // 验证旧密码
+                if (!validatePasswd(oldPassword, userEntity.encryptedPassword)) {
+                    throw Exception("旧密码错误")
+                }
+                
+                // 更新为新密码
+                userEntity.encryptedPassword = encryptPasswd(newPassword)
+            }.also {
+                LOGGER.info("修改用户密码成功，用户 ID：$uuid")
+            }
+        }
+    }
 
     /**
      * 删除用户

@@ -103,6 +103,105 @@ paths:
           description: "请求参数错误"
         "401":
           description: "未认证"
+  /user/change-password:
+    put:
+      summary: "修改密码"
+      description: "用户修改自己的密码"
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: "object"
+              properties:
+                oldPassword:
+                  type: "string"
+                newPassword:
+                  type: "string"
+              required:
+                - "oldPassword"
+                - "newPassword"
+        required: true
+      responses:
+        "200":
+          description: "修改成功"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  message:
+                    type: "string"
+        "400":
+          description: "请求参数错误"
+        "401":
+          description: "未认证"
+  /user/users:
+    get:
+      summary: "获取用户列表"
+      description: "分页获取用户列表，支持过滤"
+      parameters:
+        - name: "page"
+          in: "query"
+          description: "页码，从1开始"
+          required: false
+          schema:
+            type: "integer"
+            format: "int32"
+            default: 1
+        - name: "size"
+          in: "query"
+          description: "每页大小"
+          required: false
+          schema:
+            type: "integer"
+            format: "int32"
+            default: 10
+        - name: "role"
+          in: "query"
+          description: "用户角色过滤"
+          required: false
+          schema:
+            type: "string"
+            enum:
+              - "SUPER_ADMIN"
+              - "CAMPUS_ADMIN"
+              - "COACH"
+              - "STUDENT"
+        - name: "campusId"
+          in: "query"
+          description: "校区ID过滤"
+          required: false
+          schema:
+            type: "integer"
+            format: "int32"
+      responses:
+        "200":
+          description: "返回用户列表"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  users:
+                    type: "array"
+                    items:
+                      $ref: "#/components/schemas/User"
+                  totalCount:
+                    type: "integer"
+                    format: "int64"
+                  page:
+                    type: "integer"
+                    format: "int32"
+                  size:
+                    type: "integer"
+                    format: "int32"
+                  totalPages:
+                    type: "integer"
+                    format: "int32"
+        "400":
+          description: "请求参数错误"
+        "401":
+          description: "未认证"
   /user/create:
     post:
       summary: "创建用户"

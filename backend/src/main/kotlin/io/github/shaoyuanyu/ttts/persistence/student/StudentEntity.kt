@@ -16,11 +16,3 @@ class StudentEntity(id: EntityID<UUID>) : Entity<UUID>(id) {
     var maxCoach by StudentTable.max_coach
     var currentCoach by StudentTable.current_coach
 }
-
-fun StudentEntity.expose() = StudentInfo(
-//    uuid = id.value.toString(),
-//    username = userId.username,
-    balance = balance,
-    maxCoach = maxCoach,
-    currentCoach = currentCoach
-)

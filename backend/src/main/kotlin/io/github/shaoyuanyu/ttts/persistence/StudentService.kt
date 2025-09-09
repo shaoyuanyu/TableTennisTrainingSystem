@@ -184,8 +184,8 @@ class StudentService(
                 studentID = student
                 coachID = coach
                 status = "active"
-                start_time = startTime
-                end_time = endTime
+                this.startTime = startTime
+                this.endTime = endTime
                 createdAt = Clock.System.now()
             }
 

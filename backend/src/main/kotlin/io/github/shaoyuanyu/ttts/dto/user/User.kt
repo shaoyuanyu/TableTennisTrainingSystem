@@ -2,6 +2,8 @@ package io.github.shaoyuanyu.ttts.dto.user
 
 import io.github.shaoyuanyu.ttts.dto.student.StudentInfo
 import io.github.shaoyuanyu.ttts.dto.coach.CoachInfo
+import io.github.shaoyuanyu.ttts.persistence.coach.CoachEntity
+import io.github.shaoyuanyu.ttts.persistence.student.StudentEntity
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
 
@@ -26,3 +28,27 @@ data class User(
     val studentInfo: StudentInfo? = null,
     val coachInfo: CoachInfo? = null,
 )
+
+fun User.injectStudentEntity(studentEntity: StudentEntity) =
+    this.copy(
+        studentInfo = StudentInfo(
+            balance = studentEntity.balance,
+            maxCoach = studentEntity.maxCoach,
+            currentCoach = studentEntity.currentCoach
+        )
+    )
+
+fun User.injectCoachEntity(coachEntity: CoachEntity) =
+    this.copy(
+        coachInfo = CoachInfo(
+            balance = coachEntity.balance,
+            hourlyRate = coachEntity.hourlyRate,
+            maxStudents = coachEntity.maxStudents,
+            currentStudents = coachEntity.currentStudents,
+            isApproved = coachEntity.isApproved,
+            approvedBy = coachEntity.approvedBy,
+            photoUrl = coachEntity.photoUrl,
+            achievements = coachEntity.achievements,
+            level = coachEntity.level,
+        )
+    )
