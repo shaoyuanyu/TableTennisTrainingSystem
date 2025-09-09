@@ -20,74 +20,43 @@
       </div>
 
       <!-- 注册表单 -->
-      <el-form
-        ref="registerFormRef"
-        :model="registerForm"
-        :rules="registerRules"
-        class="coach-register-form"
-        label-position="top"
-        size="large"
-      >
+      <el-form ref="registerFormRef" :model="registerForm" :rules="registerRules" class="coach-register-form"
+        label-position="top" size="large">
         <!-- 基本信息部分 -->
         <div class="form-section">
           <div class="section-header">
             <div class="section-icon">👤</div>
             <h3>基本信息</h3>
           </div>
-          
+
           <el-row :gutter="20">
             <el-col :md="12" :sm="24">
               <el-form-item label="用户名" prop="username">
-                <el-input
-                  v-model="registerForm.username"
-                  placeholder="请输入3-20位用户名"
-                  clearable
-                  prefix-icon="User"
-                />
+                <el-input v-model="registerForm.username" placeholder="请输入3-20位用户名" clearable prefix-icon="User" />
               </el-form-item>
             </el-col>
             <el-col :md="12" :sm="24">
               <el-form-item label="真实姓名" prop="realName">
-                <el-input
-                  v-model="registerForm.realName"
-                  placeholder="请输入真实姓名"
-                  clearable
-                  prefix-icon="Edit"
-                />
+                <el-input v-model="registerForm.realName" placeholder="请输入真实姓名" clearable prefix-icon="Edit" />
               </el-form-item>
             </el-col>
           </el-row>
 
           <el-form-item label="手机号码" prop="phone">
-            <el-input
-              v-model="registerForm.phone"
-              placeholder="请输入11位手机号码"
-              clearable
-              prefix-icon="Iphone"
-            />
+            <el-input v-model="registerForm.phone" placeholder="请输入11位手机号码" clearable prefix-icon="Iphone" />
           </el-form-item>
 
           <el-row :gutter="20">
             <el-col :md="12" :sm="24">
               <el-form-item label="密码" prop="password">
-                <el-input
-                  v-model="registerForm.password"
-                  type="password"
-                  placeholder="8-16位含字母、数字、特殊字符"
-                  show-password
-                  clearable
-                />
+                <el-input v-model="registerForm.password" type="password" placeholder="8-16位含字母、数字、特殊字符" show-password
+                  clearable />
               </el-form-item>
             </el-col>
             <el-col :md="12" :sm="24">
               <el-form-item label="确认密码" prop="confirmPassword">
-                <el-input
-                  v-model="registerForm.confirmPassword"
-                  type="password"
-                  placeholder="请再次输入密码"
-                  show-password
-                  clearable
-                />
+                <el-input v-model="registerForm.confirmPassword" type="password" placeholder="请再次输入密码" show-password
+                  clearable />
               </el-form-item>
             </el-col>
           </el-row>
@@ -117,42 +86,22 @@
             </el-col>
             <el-col :md="8" :sm="24">
               <el-form-item label="年龄" prop="age">
-                <el-input-number
-                  v-model="registerForm.age"
-                  :min="18"
-                  :max="65"
-                  placeholder="请输入年龄"
-                  controls-position="right"
-                  style="width: 100%"
-                />
+                <el-input-number v-model="registerForm.age" :min="18" :max="65" placeholder="请输入年龄"
+                  controls-position="right" style="width: 100%" />
               </el-form-item>
             </el-col>
             <el-col :md="8" :sm="24">
               <el-form-item label="校区" prop="campusId">
-                <el-select
-                  v-model="registerForm.campusId"
-                  placeholder="请选择校区"
-                  loading-text="加载中..."
-                  :loading="loadingCampuses"
-                >
-                  <el-option
-                    v-for="campus in campusList"
-                    :key="campus.id"
-                    :label="campus.name"
-                    :value="campus.id"
-                  />
+                <el-select v-model="registerForm.campusId" placeholder="请选择校区" loading-text="加载中..."
+                  :loading="loadingCampuses">
+                  <el-option v-for="campus in campusList" :key="campus.id" :label="campus.name" :value="campus.id" />
                 </el-select>
               </el-form-item>
             </el-col>
           </el-row>
 
           <el-form-item label="邮箱（选填）" prop="email">
-            <el-input
-              v-model="registerForm.email"
-              placeholder="请输入邮箱地址"
-              clearable
-              prefix-icon="Message"
-            />
+            <el-input v-model="registerForm.email" placeholder="请输入邮箱地址" clearable prefix-icon="Message" />
           </el-form-item>
         </div>
 
@@ -165,23 +114,11 @@
 
           <el-form-item label="教练照片" prop="avatar">
             <div class="avatar-upload-container">
-              <el-upload
-                ref="uploadRef"
-                class="avatar-uploader"
-                :show-file-list="false"
-                :before-upload="beforeAvatarUpload"
-                :on-success="handleAvatarSuccess"
-                :on-error="handleAvatarError"
-                :action="uploadApi"
-                :headers="uploadHeaders"
-                :disabled="uploading"
-              >
+              <el-upload ref="uploadRef" class="avatar-uploader" :show-file-list="false"
+                :before-upload="beforeAvatarUpload" :on-success="handleAvatarSuccess" :on-error="handleAvatarError"
+                :action="uploadApi" :headers="uploadHeaders" :disabled="uploading">
                 <div class="avatar-upload-area">
-                  <img
-                    v-if="registerForm.avatar"
-                    :src="registerForm.avatar"
-                    class="avatar-preview"
-                  />
+                  <img v-if="registerForm.avatar" :src="registerForm.avatar" class="avatar-preview" />
                   <div v-else class="avatar-placeholder">
                     <el-icon size="24" class="upload-icon">
                       <Plus />
@@ -189,7 +126,9 @@
                     <p>点击上传照片</p>
                   </div>
                   <div v-if="uploading" class="uploading-overlay">
-                    <el-icon class="loading-icon"><Loading /></el-icon>
+                    <el-icon class="loading-icon">
+                      <Loading />
+                    </el-icon>
                   </div>
                 </div>
               </el-upload>
@@ -201,15 +140,8 @@
           </el-form-item>
 
           <el-form-item label="比赛成绩描述" prop="achievements">
-            <el-input
-              v-model="registerForm.achievements"
-              type="textarea"
-              :rows="5"
-              placeholder="请详细描述您的乒乓球比赛经历、获得的成绩和教学经验（不少于50字）"
-              maxlength="500"
-              show-word-limit
-              resize="none"
-            />
+            <el-input v-model="registerForm.achievements" type="textarea" :rows="5"
+              placeholder="请详细描述您的乒乓球比赛经历、获得的成绩和教学经验（不少于50字）" maxlength="500" show-word-limit resize="none" />
             <div class="achievement-tips">
               <el-text type="info" size="small">
                 💡 温馨提示：详细的比赛成绩描述，有助于学员了解您的专业水平
@@ -232,22 +164,12 @@
 
         <!-- 提交按钮 -->
         <div class="submit-section">
-          <el-button
-            type="primary"
-            class="register-btn"
-            :loading="submitting"
-            @click="handleSubmit"
-          >
+          <el-button type="primary" class="register-btn" :loading="submitting" @click="handleSubmit">
             {{ submitting ? '提交中...' : '提交申请' }}
           </el-button>
-          
+
           <div class="audit-notice">
-            <el-alert
-              title="提示：提交申请后需校区管理员审核后方可使用"
-              type="info"
-              :closable="false"
-              show-icon
-            />
+            <el-alert title="提示：提交申请后需校区管理员审核后方可使用" type="info" :closable="false" show-icon />
           </div>
         </div>
       </el-form>
@@ -262,12 +184,7 @@
     </div>
 
     <!-- 协议对话框 -->
-    <el-dialog
-      v-model="agreementDialog.visible"
-      :title="agreementDialog.title"
-      width="70%"
-      top="5vh"
-    >
+    <el-dialog v-model="agreementDialog.visible" :title="agreementDialog.title" width="70%" top="5vh">
       <div class="agreement-content">
         <p v-if="agreementDialog.loading">加载中...</p>
         <div v-else v-html="agreementDialog.content"></div>
@@ -343,10 +260,10 @@ const registerRules = {
   username: [
     { required: true, message: '请输入用户名', trigger: 'blur' },
     { min: 3, max: 20, message: '用户名长度在3-20个字符', trigger: 'blur' },
-    { 
-      pattern: /^[a-zA-Z0-9_]+$/, 
-      message: '用户名只能包含字母、数字和下划线', 
-      trigger: 'blur' 
+    {
+      pattern: /^[a-zA-Z0-9_]+$/,
+      message: '用户名只能包含字母、数字和下划线',
+      trigger: 'blur'
     }
   ],
   realName: [
@@ -355,16 +272,16 @@ const registerRules = {
   ],
   phone: [
     { required: true, message: '请输入手机号码', trigger: 'blur' },
-    { 
-      pattern: /^1[3-9]\d{9}$/, 
-      message: '请输入正确的手机号码格式', 
-      trigger: 'blur' 
+    {
+      pattern: /^1[3-9]\d{9}$/,
+      message: '请输入正确的手机号码格式',
+      trigger: 'blur'
     }
   ],
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' },
     { min: 8, max: 16, message: '密码长度在8-16个字符', trigger: 'blur' },
-    { 
+    {
       pattern: /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[\W_]).{8,16}$/,
       message: '必须包含字母、数字和特殊字符',
       trigger: 'blur'
@@ -425,7 +342,7 @@ const fetchCampuses = async () => {
     // const response = await fetch(campusesApi)
     // const data = await response.json()
     // campusList.value = data
-    
+
     // 临时测试数据
     campusList.value = [
       { id: 1, name: '北京总部校区' },
@@ -455,7 +372,7 @@ const beforeAvatarUpload = (file) => {
     ElMessage.error('头像大小不能超过 2MB!')
     return false
   }
-  
+
   uploading.value = true
   return true
 }
@@ -486,9 +403,9 @@ const showAgreement = async (type) => {
     // 模拟API调用获取协议内容
     // const response = await fetch(`${agreementApi}/${type}`)
     // agreementDialog.content = await response.text()
-    
+
     // 临时内容
-    agreementDialog.content = type === 'coach' 
+    agreementDialog.content = type === 'coach'
       ? '<p>这里是教练员协议的具体内容...</p>'
       : '<p>这里是隐私政策的具体内容...</p>'
   } catch (error) {
@@ -539,7 +456,7 @@ const handleSubmit = async () => {
     //   },
     //   body: JSON.stringify(submitData)
     // })
-    
+
     // if (response.ok) {
     //   const result = await response.json()
     //   ElMessage.success('注册申请提交成功！请等待管理员审核')
@@ -576,22 +493,24 @@ onMounted(() => {
 <style scoped>
 .coach-register-container {
   min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  padding: 20px 0 100px 0;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 20px;
   position: relative;
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  box-sizing: border-box;
 }
 
 .decorative-background {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  height: 100%;
+  height: 100vh;
   pointer-events: none;
+  z-index: 1;
 }
 
 .floating-element {
@@ -601,10 +520,29 @@ onMounted(() => {
   animation: float 6s ease-in-out infinite;
 }
 
-.element-1 { top: 10%; left: 5%; animation-delay: 0s; }
-.element-2 { top: 20%; right: 10%; animation-delay: 2s; }
-.element-3 { bottom: 30%; left: 15%; animation-delay: 4s; }
-.element-4 { bottom: 15%; right: 5%; animation-delay: 1s; }
+.element-1 {
+  top: 10%;
+  left: 5%;
+  animation-delay: 0s;
+}
+
+.element-2 {
+  top: 20%;
+  right: 10%;
+  animation-delay: 2s;
+}
+
+.element-3 {
+  bottom: 30%;
+  left: 15%;
+  animation-delay: 4s;
+}
+
+.element-4 {
+  bottom: 15%;
+  right: 5%;
+  animation-delay: 1s;
+}
 
 .gradient-circle {
   position: absolute;
@@ -632,11 +570,13 @@ onMounted(() => {
   backdrop-filter: blur(20px);
   border-radius: 20px;
   padding: 40px;
-  width: 100%;
+  width: calc(100% - 40px);
   max-width: 800px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
   position: relative;
   z-index: 10;
+  margin: 20px auto 0 auto;
+  flex-shrink: 0;
 }
 
 .register-header {
@@ -827,9 +767,12 @@ onMounted(() => {
 }
 
 @keyframes float {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0) rotate(0deg);
   }
+
   50% {
     transform: translateY(-20px) rotate(5deg);
   }
@@ -839,6 +782,7 @@ onMounted(() => {
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
@@ -846,24 +790,29 @@ onMounted(() => {
 
 /* 响应式设计 */
 @media (max-width: 768px) {
+  .coach-register-container {
+    padding: 10px 0 80px 0;
+  }
+
   .register-content {
     padding: 25px;
-    margin: 10px;
+    margin: 10px auto 0 auto;
+    width: calc(100% - 20px);
   }
-  
+
   .main-title {
     font-size: 2rem;
   }
-  
+
   .form-section {
     padding: 20px;
   }
-  
+
   .avatar-upload-container {
     flex-direction: column;
     align-items: center;
   }
-  
+
   .upload-tips {
     text-align: center;
     margin-top: 15px;
@@ -871,16 +820,42 @@ onMounted(() => {
 }
 
 @media (max-width: 480px) {
+  .coach-register-container {
+    padding: 10px 0 60px 0;
+  }
+
   .register-content {
     padding: 20px;
+    margin: 5px auto 0 auto;
+    width: calc(100% - 10px);
   }
-  
+
   .main-title {
     font-size: 1.8rem;
   }
-  
+
   .form-section {
     padding: 15px;
   }
+}
+</style>
+
+<style>
+/* 全局样式，确保页面滚动正常 */
+html,
+body {
+  height: auto !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+#app {
+  height: auto !important;
+  min-height: 100vh !important;
+}
+
+.router-view {
+  height: auto !important;
+  min-height: 100vh !important;
 }
 </style>
