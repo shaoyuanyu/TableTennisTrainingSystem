@@ -9,6 +9,8 @@ import io.github.shaoyuanyu.ttts.persistence.user.UserEntity
 import io.github.shaoyuanyu.ttts.persistence.user.UserTable
 import io.github.shaoyuanyu.ttts.persistence.user.expose
 import io.github.shaoyuanyu.ttts.persistence.user.exposeWithoutPassword
+import io.github.shaoyuanyu.ttts.persistence.student.StudentEntity
+import io.github.shaoyuanyu.ttts.persistence.coach.CoachEntity
 import io.github.shaoyuanyu.ttts.utils.encryptPasswd
 import io.github.shaoyuanyu.ttts.utils.validatePasswd
 import org.jetbrains.exposed.v1.jdbc.Database
@@ -68,6 +70,51 @@ class UserService(
             }.id.value.toString()
         }.also { uuid ->
             LOGGER.info("创建用户成功，用户 ID：$uuid，用户名：${newUser.username}")
+        }
+
+    /**
+     * 创建学生
+     */
+    fun createStudent(username: String, balance: Float = 0.0f, maxCoach: Int = 3) =
+        transaction(database) {
+            StudentEntity.new {
+                this.username = username
+                this.balance = balance
+                this.maxCoach = maxCoach
+                this.currentCoach = 0
+                this.createdAt = Clock.System.now()
+                this.lastLoginAt = createdAt
+            }.id.value.toString()
+        }.also { uuid ->
+            LOGGER.info("创建学生成功，用户 ID：$uuid，用户名：$username")
+        }
+
+    /**
+     * 创建教练
+     */
+    fun createCoach(
+        username: String,
+        photoUrl: String? = null,
+        achievements: String? = null,
+        level: String? = null,
+        hourlyRate: Float = 0.0f
+    ) =
+        transaction(database) {
+            CoachEntity.new {
+                this.username = username
+                this.photo_url = photoUrl ?: ""
+                this.achievements = achievements ?: ""
+                this.level_ = level ?: ""
+                this.hourly_rate = hourlyRate
+                this.max_students = 20 // 默认值
+                this.current_students = 0
+                this.is_approved = false // 默认需要审批
+                this.approved_by = 0 // 未审批
+                this.createdAt = Clock.System.now()
+                this.lastLoginAt = createdAt
+            }.id.value.toString()
+        }.also { uuid ->
+            LOGGER.info("创建教练成功，用户 ID：$uuid，用户名：$username")
         }
 
     /**

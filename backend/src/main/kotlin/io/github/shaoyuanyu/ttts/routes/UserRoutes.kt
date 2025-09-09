@@ -1,8 +1,12 @@
 package io.github.shaoyuanyu.ttts.routes
 
+import io.github.shaoyuanyu.ttts.dto.coach.toUser
+import io.github.shaoyuanyu.ttts.dto.student.toUser
+import io.github.shaoyuanyu.ttts.dto.user.RegistrationRequest
 import io.github.shaoyuanyu.ttts.dto.user.User
 import io.github.shaoyuanyu.ttts.dto.user.UserRole
 import io.github.shaoyuanyu.ttts.dto.user.UserSession
+import io.github.shaoyuanyu.ttts.exceptions.BadRequestException
 import io.github.shaoyuanyu.ttts.persistence.UserService
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.*
@@ -44,17 +48,60 @@ fun Application.userRoutes(userService: UserService) {
  */
 fun Route.signup(userService: UserService) {
     post("/signup") {
-        val newUser = call.receive<User>()
+        val request = call.receive<RegistrationRequest>()
+        
+        when (request.role) {
+            UserRole.STUDENT -> {
+                val studentReg = request.studentRegistration 
+                    ?: throw BadRequestException("学生注册信息不能为空")
+                
+                // 创建用户账户
+                val user = studentReg.toUser()
+                val userId = userService.createUser(user)
+                
+                // 创建学生记录
+                userService.createStudent(
+                    username = studentReg.username,
+                    balance = studentReg.initialBalance,
+                    maxCoach = studentReg.maxCoach
+                )
 
-        if (newUser.role == UserRole.STUDENT || newUser.role == UserRole.COACH) {
-            val userId = userService.createUser(newUser)
-            call.sessions.set(
-                UserSession(userId = userId, username = newUser.username, userRole = newUser.role)
-            )
-            call.respondText("signup success")
-        } else {
-            // TODO: 使用 Status Page
-            call.respondText("role error")
+                // 设置 session
+                call.sessions.set(
+                    UserSession(userId = userId, username = user.username, userRole = user.role)
+                )
+                
+                call.response.status(HttpStatusCode.Created)
+            }
+            
+            UserRole.COACH -> {
+                val coachReg = request.coachRegistration
+                    ?: throw BadRequestException("教练注册信息不能为空")
+                    
+                // 创建用户账户
+                val user = coachReg.toUser()
+                val userId = userService.createUser(user)
+                
+                // 创建教练记录
+                userService.createCoach(
+                    username = coachReg.username,
+                    photoUrl = coachReg.photoUrl,
+                    achievements = coachReg.achievements,
+                    level = coachReg.level,
+                    hourlyRate = coachReg.hourlyRate
+                )
+
+                // 设置 session
+                call.sessions.set(
+                    UserSession(userId = userId, username = user.username, userRole = user.role)
+                )
+                
+                call.response.status(HttpStatusCode.Created)
+            }
+            
+            else -> {
+                throw BadRequestException("只允许注册为学生或教练")
+            }
         }
     }
 }
@@ -93,9 +140,9 @@ fun Route.getSelfInfo(userService: UserService) {
     get("/info") {
         val userId = call.sessions.get<UserSession>().let {
             if (it == null) {
-                Exception("未登录")
+                throw Exception("未登录")
             }
-            it!!.userId
+            it.userId
         }
 
         call.respond(
@@ -109,6 +156,6 @@ fun Route.getSelfInfo(userService: UserService) {
  */
 fun Route.createUser(userService: UserService) {
     post("/create") {
-//        val newUser = call.receive<User>()
+        val newUser = call.receive<User>()
     }
 }

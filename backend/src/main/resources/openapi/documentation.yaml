@@ -15,6 +15,16 @@ paths:
             schema:
               $ref: "#/components/schemas/User"
         required: true
+  /user/info:
+    get:
+      description: ""
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/User"
   /user/login:
     post:
       description: ""
@@ -25,6 +35,25 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/User"
+  /user/logout:
+    post:
+      description: ""
+  /user/signup:
+    post:
+      description: ""
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegistrationRequest"
+        required: true
+      responses:
+        "400":
+          description: "Bad Request"
+          content:
+            text/plain:
+              schema:
+                type: "string"
   /:
     get:
       description: ""
@@ -95,3 +124,127 @@ components:
         - "campusId"
         - "role"
         - "status"
+    StudentRegistration:
+      type: "object"
+      properties:
+        username:
+          type: "string"
+        plainPassword:
+          type: "string"
+        realName:
+          type: "string"
+        gender:
+          type: "string"
+        age:
+          type: "integer"
+          format: "int32"
+        phoneNumber:
+          type: "string"
+        email:
+          type: "string"
+        campusId:
+          type: "integer"
+          format: "int32"
+        initialBalance:
+          type: "number"
+          format: "float"
+        maxCoach:
+          type: "integer"
+          format: "int32"
+          default: "3"
+        role:
+          type: "string"
+          enum:
+            - "SUPER_ADMIN"
+            - "CAMPUS_ADMIN"
+            - "COACH"
+            - "STUDENT"
+        status:
+          type: "string"
+          default: "active"
+      required:
+        - "username"
+        - "plainPassword"
+        - "realName"
+        - "gender"
+        - "age"
+        - "phoneNumber"
+        - "email"
+        - "campusId"
+        - "initialBalance"
+        - "maxCoach"
+        - "role"
+        - "status"
+    CoachRegistration:
+      type: "object"
+      properties:
+        username:
+          type: "string"
+        plainPassword:
+          type: "string"
+        realName:
+          type: "string"
+        gender:
+          type: "string"
+        age:
+          type: "integer"
+          format: "int32"
+        phoneNumber:
+          type: "string"
+        email:
+          type: "string"
+        campusId:
+          type: "integer"
+          format: "int32"
+        photoUrl:
+          type: "string"
+          nullable: true
+        achievements:
+          type: "string"
+          nullable: true
+        level:
+          type: "string"
+          nullable: true
+        hourlyRate:
+          type: "number"
+          format: "float"
+        role:
+          type: "string"
+          enum:
+            - "SUPER_ADMIN"
+            - "CAMPUS_ADMIN"
+            - "COACH"
+            - "STUDENT"
+        status:
+          type: "string"
+          default: "pending_approval"
+      required:
+        - "username"
+        - "plainPassword"
+        - "realName"
+        - "gender"
+        - "age"
+        - "phoneNumber"
+        - "email"
+        - "campusId"
+        - "hourlyRate"
+        - "role"
+        - "status"
+    RegistrationRequest:
+      type: "object"
+      properties:
+        role:
+          type: "string"
+          enum:
+            - "SUPER_ADMIN"
+            - "CAMPUS_ADMIN"
+            - "COACH"
+            - "STUDENT"
+        studentRegistration:
+          nullable: true
+          $ref: "#/components/schemas/StudentRegistration"
+        coachRegistration:
+          nullable: true
+          $ref: "#/components/schemas/CoachRegistration"
+      required:
+        - "role"
