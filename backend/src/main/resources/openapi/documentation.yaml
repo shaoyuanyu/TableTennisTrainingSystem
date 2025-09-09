@@ -80,6 +80,109 @@ paths:
                 $ref: "#/components/schemas/User"
         "401":
           description: "未认证"
+    put:
+      summary: "更新用户信息"
+      description: "更新当前登录用户的信息"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+        required: true
+      responses:
+        "200":
+          description: "更新成功"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  message:
+                    type: "string"
+        "400":
+          description: "请求参数错误"
+        "401":
+          description: "未认证"
+  /user/create:
+    post:
+      summary: "创建用户"
+      description: "超级管理员创建校区管理员"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+        required: true
+      responses:
+        "201":
+          description: "创建成功"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  message:
+                    type: "string"
+                  userId:
+                    type: "string"
+        "400":
+          description: "请求参数错误"
+        "401":
+          description: "未认证"
+        "403":
+          description: "权限不足"
+  /user/{userId}:
+    delete:
+      summary: "删除用户"
+      description: "超级管理员删除校区管理员"
+      parameters:
+        - name: "userId"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        "200":
+          description: "删除成功"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  message:
+                    type: "string"
+        "400":
+          description: "请求参数错误"
+        "401":
+          description: "未认证"
+        "403":
+          description: "权限不足"
+  /user/{userId}/reset-password:
+    put:
+      summary: "重置用户密码"
+      description: "超级管理员重置校区管理员密码"
+      parameters:
+        - name: "userId"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        "200":
+          description: "重置成功"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  message:
+                    type: "string"
+        "400":
+          description: "请求参数错误"
+        "401":
+          description: "未认证"
+        "403":
+          description: "权限不足"
   /:
     get:
       summary: "根路径"
@@ -209,121 +312,3 @@ components:
         - "currentStudents"
         - "isApproved"
         - "approvedBy"
-    StudentRegistration:
-      type: "object"
-      properties:
-        username:
-          type: "string"
-        plainPassword:
-          type: "string"
-        realName:
-          type: "string"
-        gender:
-          type: "string"
-        age:
-          type: "integer"
-          format: "int32"
-        phoneNumber:
-          type: "string"
-        email:
-          type: "string"
-        campusId:
-          type: "integer"
-          format: "int32"
-        initialBalance:
-          type: "number"
-          format: "float"
-        maxCoach:
-          type: "integer"
-          format: "int32"
-          default: 3
-        role:
-          type: "string"
-          enum:
-            - "STUDENT"
-        status:
-          type: "string"
-          default: "active"
-      required:
-        - "username"
-        - "plainPassword"
-        - "realName"
-        - "gender"
-        - "age"
-        - "phoneNumber"
-        - "email"
-        - "campusId"
-        - "initialBalance"
-        - "maxCoach"
-        - "role"
-        - "status"
-    CoachRegistration:
-      type: "object"
-      properties:
-        username:
-          type: "string"
-        plainPassword:
-          type: "string"
-        realName:
-          type: "string"
-        gender:
-          type: "string"
-        age:
-          type: "integer"
-          format: "int32"
-        phoneNumber:
-          type: "string"
-        email:
-          type: "string"
-        campusId:
-          type: "integer"
-          format: "int32"
-        photoUrl:
-          type: "string"
-          nullable: true
-        achievements:
-          type: "string"
-          nullable: true
-        level:
-          type: "string"
-          nullable: true
-        hourlyRate:
-          type: "number"
-          format: "float"
-        role:
-          type: "string"
-          enum:
-            - "COACH"
-        status:
-          type: "string"
-          default: "pending_approval"
-      required:
-        - "username"
-        - "plainPassword"
-        - "realName"
-        - "gender"
-        - "age"
-        - "phoneNumber"
-        - "email"
-        - "campusId"
-        - "hourlyRate"
-        - "role"
-        - "status"
-    RegistrationRequest:
-      type: "object"
-      properties:
-        role:
-          type: "string"
-          enum:
-            - "SUPER_ADMIN"
-            - "CAMPUS_ADMIN"
-            - "COACH"
-            - "STUDENT"
-        studentRegistration:
-          nullable: true
-          $ref: "#/components/schemas/StudentRegistration"
-        coachRegistration:
-          nullable: true
-          $ref: "#/components/schemas/CoachRegistration"
-      required:
-        - "role"
