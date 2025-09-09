@@ -2,6 +2,7 @@ package io.github.shaoyuanyu.ttts
 
 import io.github.shaoyuanyu.ttts.persistence.UserService
 import io.github.shaoyuanyu.ttts.plugins.configureAuthentication
+import io.github.shaoyuanyu.ttts.plugins.configureCORS
 import io.github.shaoyuanyu.ttts.plugins.configureSerialization
 import io.github.shaoyuanyu.ttts.plugins.configureDatabase
 import io.ktor.server.application.*
@@ -28,6 +29,9 @@ fun Application.module() {
 
     // serialization
     configureSerialization()
+
+    // CORS
+    configureCORS()
 
     // session & authentication
     configureSessions()
