@@ -9,11 +9,11 @@
 
       <div class="header-right">
         <!-- 消息通知 -->
-        <el-tooltip content="消息中心" placement="bottom">
-          <el-badge :value="unreadCount" :hidden="unreadCount === 0" class="notification-badge">
-            <el-button :icon="Bell" @click="goToMessages" circle text class="header-button" />
-          </el-badge>
-        </el-tooltip>
+<el-tooltip content="消息中心" placement="bottom">
+  <el-badge :value="unreadCount" :hidden="unreadCount === 0" class="notification-badge">
+    <el-button :icon="Bell" @click="goToMessages" circle text class="header-button" />
+  </el-badge>
+</el-tooltip>
 
         <!-- 用户下拉菜单 -->
         <el-dropdown @command="handleUserCommand" class="user-dropdown">
@@ -76,6 +76,13 @@ import { ElMessageBox } from 'element-plus'
 import { Expand, Bell, User, ArrowDown, Setting, SwitchButton } from '@element-plus/icons-vue'
 import AppSidebar from '@/components/AppSidebar.vue'
 
+import { useMessageStore } from '@/stores/messageStore'
+import { storeToRefs } from 'pinia'
+
+// 使用 Pinia Store
+const messageStore = useMessageStore()
+const { unreadCount } = storeToRefs(messageStore)
+
 const router = useRouter()
 const userStore = useUserStore()
 
@@ -87,8 +94,7 @@ const sidebarWidth = computed(() => (sidebarCollapsed.value ? '64px' : '220px'))
 const userInfo = computed(() => userStore.userInfo)
 const userName = computed(() => userStore.userName)
 
-// 消息通知数量（模拟数据）
-const unreadCount = ref(3)
+
 
 // 切换侧边栏
 const toggleSidebar = () => {
