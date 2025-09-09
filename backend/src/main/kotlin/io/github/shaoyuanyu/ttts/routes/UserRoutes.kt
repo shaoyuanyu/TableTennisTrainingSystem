@@ -41,6 +41,7 @@ fun Application.userRoutes(userService: UserService) {
                 deleteUser(userService)
                 resetCampusAdminPassword(userService)
                 getAllUsers(userService)
+                getUserByUsername(userService)
             }
         }
     }
@@ -273,5 +274,25 @@ fun Route.resetCampusAdminPassword(userService: UserService) {
         
         call.response.status(HttpStatusCode.OK)
         call.respond(mapOf("message" to "校区管理员密码已重置为默认密码"))
+    }
+}
+
+/**
+ * 根据用户名获取用户信息
+ *
+ * 该函数用于超级管理员根据用户名查询用户详细信息。
+ *
+ * @param userService UserService实例，用于查询用户信息
+ */
+fun Route.getUserByUsername(userService: UserService) {
+    get("/users/{username}") {
+        val username = call.parameters["username"] ?: throw BadRequestException("缺少用户名参数")
+        
+        try {
+            val user = userService.queryUserByUsername(username)
+            call.respond(user)
+        } catch (e: Exception) {
+            throw BadRequestException(e.message ?: "用户不存在")
+        }
     }
 }
