@@ -1,6 +1,7 @@
 package io.github.shaoyuanyu.ttts.persistence.student
 
 import io.github.shaoyuanyu.ttts.dto.student.Student
+import io.github.shaoyuanyu.ttts.dto.student.StudentInfo
 import io.github.shaoyuanyu.ttts.persistence.user.UserEntity
 import org.jetbrains.exposed.v1.core.dao.id.EntityID
 import org.jetbrains.exposed.v1.dao.Entity
@@ -16,9 +17,9 @@ class StudentEntity(id: EntityID<UUID>) : Entity<UUID>(id) {
     var currentCoach by StudentTable.current_coach
 }
 
-fun StudentEntity.expose() = Student(
-    uuid = id.value.toString(),
-    username = userId.username,
+fun StudentEntity.expose() = StudentInfo(
+//    uuid = id.value.toString(),
+//    username = userId.username,
     balance = balance,
     maxCoach = maxCoach,
     currentCoach = currentCoach
