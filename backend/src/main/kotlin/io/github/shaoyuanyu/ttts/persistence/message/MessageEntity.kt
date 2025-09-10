@@ -2,6 +2,7 @@
 
 package io.github.shaoyuanyu.ttts.persistence.message
 
+import io.github.shaoyuanyu.ttts.dto.message.Message
 import io.github.shaoyuanyu.ttts.persistence.user.UserEntity
 import org.jetbrains.exposed.v1.core.dao.id.EntityID
 import org.jetbrains.exposed.v1.dao.UUIDEntity
@@ -20,4 +21,18 @@ class MessageEntity(uuid: EntityID<UUID>) : UUIDEntity(uuid) {
     var isRead by MessageTable.isRead
     var createdAt by MessageTable.createdAt
     var readAt by MessageTable.readAt
+}
+
+fun MessageEntity.expose(): Message {
+    return Message(
+        id = id.value.toString(),
+        senderId = sender?.id?.value?.toString(),
+        recipientId = recipient.id.value.toString(),
+        title = title,
+        content = content,
+        type = type,
+        isRead = isRead,
+        createdAt = createdAt,
+        readAt = readAt
+    )
 }

@@ -113,7 +113,7 @@ fun Route.getSelfInfo(userService: UserService) {
     get("/info") {
         val userId = call.sessions.get<UserSession>().let {
             if (it == null) {
-                throw Exception("未登录")
+                throw UnauthorizedException("未登录")
             }
             it.userId
         }

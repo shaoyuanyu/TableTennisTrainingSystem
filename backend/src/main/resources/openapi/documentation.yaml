@@ -5,16 +5,65 @@ info:
   version: "1.0.0"
 servers:
   - url: "http://localhost:8080"
+tags:
+  - name: "用户认证"
+    description: "用户注册、登录、登出相关接口"
+  - name: "用户管理"
+    description: "用户信息查询和管理接口"
+  - name: "消息系统"
+    description: "站内消息相关接口"
+  - name: "系统监控"
+    description: "系统状态和监控接口"
 paths:
   /user/signup:
     post:
+      tags:
+        - "用户认证"
       summary: "用户注册"
       description: "允许学生或教练注册账户"
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/User"
+              $ref: "#/components/schemas/UserCreateRequest"
+            examples:
+              student_example:
+                summary: "学生注册示例"
+                value:
+                  username: "student001"
+                  plainPassword: "password123"
+                  realName: "张三"
+                  gender: "男"
+                  age: 20
+                  phoneNumber: "13800138000"
+                  email: "student@example.com"
+                  campusId: 1
+                  role: "STUDENT"
+                  status: "ACTIVE"
+                  studentInfo:
+                    balance: 100.0
+                    maxCoach: 3
+                    currentCoach: 0
+              coach_example:
+                summary: "教练注册示例"
+                value:
+                  username: "coach001"
+                  plainPassword: "password123"
+                  realName: "李教练"
+                  gender: "女"
+                  age: 35
+                  phoneNumber: "13900139000"
+                  email: "coach@example.com"
+                  campusId: 1
+                  role: "COACH"
+                  status: "ACTIVE"
+                  coachInfo:
+                    hourlyRate: 100.0
+                    balance: 0.0
+                    maxStudents: 20
+                    currentStudents: 0
+                    isApproved: false
+                    approvedBy: -1
         required: true
       responses:
         "201":
@@ -28,6 +77,11 @@ paths:
                     type: "string"
                   userId:
                     type: "string"
+              examples:
+                success:
+                  value:
+                    message: "注册成功"
+                    userId: "550e8400-e29b-41d4-a716-446655440000"
         "400":
           description: "请求参数错误"
           content:
@@ -36,6 +90,8 @@ paths:
                 type: "string"
   /user/login:
     post:
+      tags:
+        - "用户认证"
       summary: "用户登录"
       description: "通过表单验证用户身份"
       requestBody:
@@ -51,6 +107,12 @@ paths:
               required:
                 - "username"
                 - "password"
+            examples:
+              login_example:
+                summary: "登录示例"
+                value:
+                  username: "student001"
+                  password: "password123"
       responses:
         "200":
           description: "登录成功"
@@ -58,17 +120,50 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/User"
+              examples:
+                student_response:
+                  summary: "学生登录响应"
+                  value:
+                    uuid: "550e8400-e29b-41d4-a716-446655440000"
+                    username: "student001"
+                    realName: "张三"
+                    gender: "男"
+                    age: 20
+                    phoneNumber: "13800138000"
+                    email: "student@example.com"
+                    campusId: 1
+                    role: "STUDENT"
+                    status: "ACTIVE"
+                    studentInfo:
+                      balance: 100.0
+                      maxCoach: 3
+                      currentCoach: 0
         "401":
           description: "认证失败"
   /user/logout:
     post:
+      tags:
+        - "用户认证"
       summary: "用户登出"
       description: "清除用户会话"
       responses:
         "200":
           description: "登出成功"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  message:
+                    type: "string"
+              examples:
+                success:
+                  value:
+                    message: "登出成功"
   /user/info:
     get:
+      tags:
+        - "用户管理"
       summary: "获取用户信息"
       description: "获取当前登录用户的信息"
       responses:
@@ -81,13 +176,33 @@ paths:
         "401":
           description: "未认证"
     put:
+      tags:
+        - "用户管理"
       summary: "更新用户信息"
       description: "更新当前登录用户的信息"
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/User"
+              $ref: "#/components/schemas/UserUpdateRequest"
+            examples:
+              student_update:
+                summary: "学生更新信息示例"
+                value:
+                  uuid: "550e8400-e29b-41d4-a716-446655440000"
+                  username: "student001"
+                  realName: "张三"
+                  gender: "男"
+                  age: 21
+                  phoneNumber: "13800138000"
+                  email: "student@example.com"
+                  campusId: 1
+                  role: "STUDENT"
+                  status: "ACTIVE"
+                  studentInfo:
+                    balance: 80.0
+                    maxCoach: 3
+                    currentCoach: 1
         required: true
       responses:
         "200":
@@ -99,12 +214,18 @@ paths:
                 properties:
                   message:
                     type: "string"
+              examples:
+                success:
+                  value:
+                    message: "用户信息更新成功"
         "400":
           description: "请求参数错误"
         "401":
           description: "未认证"
   /user/change-password:
     put:
+      tags:
+        - "用户管理"
       summary: "修改密码"
       description: "用户修改自己的密码"
       requestBody:
@@ -120,6 +241,12 @@ paths:
               required:
                 - "oldPassword"
                 - "newPassword"
+            examples:
+              change_password:
+                summary: "修改密码示例"
+                value:
+                  oldPassword: "oldpassword123"
+                  newPassword: "newpassword456"
         required: true
       responses:
         "200":
@@ -131,12 +258,18 @@ paths:
                 properties:
                   message:
                     type: "string"
+              examples:
+                success:
+                  value:
+                    message: "密码修改成功"
         "400":
           description: "请求参数错误"
         "401":
           description: "未认证"
   /user/users:
     get:
+      tags:
+        - "用户管理"
       summary: "获取用户列表"
       description: "分页获取用户列表，支持过滤"
       parameters:
@@ -198,19 +331,57 @@ paths:
                   totalPages:
                     type: "integer"
                     format: "int32"
+              examples:
+                user_list:
+                  value:
+                    users:
+                      - uuid: "550e8400-e29b-41d4-a716-446655440000"
+                        username: "student001"
+                        realName: "张三"
+                        gender: "男"
+                        age: 20
+                        phoneNumber: "13800138000"
+                        email: "student@example.com"
+                        campusId: 1
+                        role: "STUDENT"
+                        status: "ACTIVE"
+                        studentInfo:
+                          balance: 100.0
+                          maxCoach: 3
+                          currentCoach: 0
+                    totalCount: 1
+                    page: 1
+                    size: 10
+                    totalPages: 1
         "400":
           description: "请求参数错误"
         "401":
           description: "未认证"
   /user/create:
     post:
+      tags:
+        - "用户管理"
       summary: "创建用户"
       description: "超级管理员创建校区管理员"
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/User"
+              $ref: "#/components/schemas/UserCreateRequest"
+            examples:
+              campus_admin_create:
+                summary: "创建校区管理员示例"
+                value:
+                  username: "campusadmin001"
+                  plainPassword: "password123"
+                  realName: "王管理员"
+                  gender: "男"
+                  age: 30
+                  phoneNumber: "13700137000"
+                  email: "campusadmin@example.com"
+                  campusId: 1
+                  role: "CAMPUS_ADMIN"
+                  status: "ACTIVE"
         required: true
       responses:
         "201":
@@ -224,6 +395,11 @@ paths:
                     type: "string"
                   userId:
                     type: "string"
+              examples:
+                success:
+                  value:
+                    message: "校区管理员创建成功"
+                    userId: "550e8400-e29b-41d4-a716-446655440001"
         "400":
           description: "请求参数错误"
         "401":
@@ -232,6 +408,8 @@ paths:
           description: "权限不足"
   /user/{userId}:
     delete:
+      tags:
+        - "用户管理"
       summary: "删除用户"
       description: "超级管理员删除校区管理员"
       parameters:
@@ -250,6 +428,10 @@ paths:
                 properties:
                   message:
                     type: "string"
+              examples:
+                success:
+                  value:
+                    message: "校区管理员删除成功"
         "400":
           description: "请求参数错误"
         "401":
@@ -258,6 +440,8 @@ paths:
           description: "权限不足"
   /user/{userId}/reset-password:
     put:
+      tags:
+        - "用户管理"
       summary: "重置用户密码"
       description: "超级管理员重置校区管理员密码"
       parameters:
@@ -276,6 +460,10 @@ paths:
                 properties:
                   message:
                     type: "string"
+              examples:
+                success:
+                  value:
+                    message: "校区管理员密码已重置为默认密码"
         "400":
           description: "请求参数错误"
         "401":
@@ -284,6 +472,8 @@ paths:
           description: "权限不足"
   /user/users/{username}:
     get:
+      tags:
+        - "用户管理"
       summary: "根据用户名获取用户信息"
       description: "超级管理员根据用户名查询用户详细信息"
       parameters:
@@ -307,8 +497,202 @@ paths:
           description: "权限不足"
         "404":
           description: "用户不存在"
+  /messages:
+    get:
+      tags:
+        - "消息系统"
+      summary: "获取消息列表"
+      description: "获取当前用户的消息列表，支持分页和过滤"
+      parameters:
+        - name: "type"
+          in: "query"
+          description: "消息类型过滤"
+          required: false
+          schema:
+            type: "string"
+        - name: "unreadOnly"
+          in: "query"
+          description: "只获取未读消息"
+          required: false
+          schema:
+            type: "boolean"
+            default: false
+        - name: "page"
+          in: "query"
+          description: "页码，从0开始"
+          required: false
+          schema:
+            type: "integer"
+            format: "int32"
+            default: 0
+        - name: "size"
+          in: "query"
+          description: "每页大小"
+          required: false
+          schema:
+            type: "integer"
+            format: "int32"
+            default: 20
+      responses:
+        "200":
+          description: "返回消息列表"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageListResponse"
+        "400":
+          description: "请求参数错误"
+        "401":
+          description: "未认证"
+    post:
+      tags:
+        - "消息系统"
+      summary: "发送消息"
+      description: "发送消息给指定用户（仅限超级管理员）"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMessageRequest"
+            examples:
+              send_message:
+                summary: "发送消息示例"
+                value:
+                  recipientId: "550e8400-e29b-41d4-a716-446655440000"
+                  title: "系统通知"
+                  content: "欢迎使用乒乓球训练系统"
+                  type: "SYSTEM"
+        required: true
+      responses:
+        "201":
+          description: "消息发送成功"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  id:
+                    type: "string"
+                  message:
+                    type: "string"
+              examples:
+                success:
+                  value:
+                    id: "550e8400-e29b-41d4-a716-446655440002"
+                    message: "消息发送成功"
+        "400":
+          description: "请求参数错误"
+        "401":
+          description: "未认证"
+        "403":
+          description: "权限不足"
+  /messages/unread-count:
+    get:
+      tags:
+        - "消息系统"
+      summary: "获取未读消息数量"
+      description: "获取当前用户的未读消息数量"
+      responses:
+        "200":
+          description: "返回未读消息数量"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnreadCountResponse"
+              examples:
+                unread_count:
+                  value:
+                    count: 5
+        "401":
+          description: "未认证"
+  /messages/{id}/read:
+    put:
+      tags:
+        - "消息系统"
+      summary: "标记消息为已读"
+      description: "将指定消息标记为已读"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        "200":
+          description: "标记成功"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  success:
+                    type: "boolean"
+                  message:
+                    type: "string"
+              examples:
+                success:
+                  value:
+                    success: true
+                    message: "消息已标记为已读"
+        "400":
+          description: "请求参数错误"
+        "401":
+          description: "未认证"
+        "404":
+          description: "消息不存在"
+  /messages/read-all:
+    put:
+      tags:
+        - "消息系统"
+      summary: "标记所有消息为已读"
+      description: "将所有未读消息标记为已读"
+      responses:
+        "200":
+          description: "标记成功"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  success:
+                    type: "boolean"
+                  message:
+                    type: "string"
+                  count:
+                    type: "integer"
+              examples:
+                success:
+                  value:
+                    success: true
+                    message: "成功标记 5 条消息为已读"
+                    count: 5
+        "401":
+          description: "未认证"
+  /messages/{id}:
+    delete:
+      tags:
+        - "消息系统"
+      summary: "删除消息"
+      description: "删除指定消息"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        "204":
+          description: "删除成功"
+        "400":
+          description: "请求参数错误"
+        "401":
+          description: "未认证"
+        "404":
+          description: "消息不存在"
   /:
     get:
+      tags:
+        - "系统监控"
       summary: "根路径"
       description: "测试服务器是否运行"
       responses:
@@ -323,20 +707,103 @@ paths:
                   value: "Hello World!"
 components:
   schemas:
+    UserCreateRequest:
+      type: "object"
+      properties:
+        username:
+          type: "string"
+        plainPassword:
+          type: "string"
+        realName:
+          type: "string"
+        gender:
+          type: "string"
+        age:
+          type: "integer"
+          format: "int32"
+        phoneNumber:
+          type: "string"
+        email:
+          type: "string"
+        campusId:
+          type: "integer"
+          format: "int32"
+        role:
+          type: "string"
+          enum:
+            - "SUPER_ADMIN"
+            - "CAMPUS_ADMIN"
+            - "COACH"
+            - "STUDENT"
+        status:
+          type: "string"
+        studentInfo:
+          $ref: "#/components/schemas/StudentInfo"
+        coachInfo:
+          $ref: "#/components/schemas/CoachInfo"
+      required:
+        - "username"
+        - "plainPassword"
+        - "realName"
+        - "gender"
+        - "age"
+        - "phoneNumber"
+        - "email"
+        - "campusId"
+        - "role"
+        - "status"
+    UserUpdateRequest:
+      type: "object"
+      properties:
+        uuid:
+          type: "string"
+        username:
+          type: "string"
+        realName:
+          type: "string"
+        gender:
+          type: "string"
+        age:
+          type: "integer"
+          format: "int32"
+        phoneNumber:
+          type: "string"
+        email:
+          type: "string"
+        campusId:
+          type: "integer"
+          format: "int32"
+        role:
+          type: "string"
+          enum:
+            - "SUPER_ADMIN"
+            - "CAMPUS_ADMIN"
+            - "COACH"
+            - "STUDENT"
+        status:
+          type: "string"
+        studentInfo:
+          $ref: "#/components/schemas/StudentInfo"
+        coachInfo:
+          $ref: "#/components/schemas/CoachInfo"
+      required:
+        - "uuid"
+        - "username"
+        - "realName"
+        - "gender"
+        - "age"
+        - "phoneNumber"
+        - "email"
+        - "campusId"
+        - "role"
+        - "status"
     User:
       type: "object"
       properties:
         uuid:
           type: "string"
-          nullable: true
         username:
           type: "string"
-        plainPassword:
-          type: "string"
-          nullable: true
-        encryptedPassword:
-          type: "string"
-          nullable: true
         realName:
           type: "string"
         gender:
@@ -363,18 +830,15 @@ components:
         createdAt:
           type: "string"
           format: "date-time"
-          nullable: true
         lastLoginAt:
           type: "string"
           format: "date-time"
-          nullable: true
         studentInfo:
           $ref: "#/components/schemas/StudentInfo"
-          nullable: true
         coachInfo:
           $ref: "#/components/schemas/CoachInfo"
-          nullable: true
       required:
+        - "uuid"
         - "username"
         - "realName"
         - "gender"
@@ -436,3 +900,73 @@ components:
         - "currentStudents"
         - "isApproved"
         - "approvedBy"
+    CreateMessageRequest:
+      type: "object"
+      properties:
+        recipientId:
+          type: "string"
+        title:
+          type: "string"
+        content:
+          type: "string"
+        type:
+          type: "string"
+      required:
+        - "recipientId"
+        - "title"
+        - "content"
+        - "type"
+    Message:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+        senderId:
+          type: "string"
+          nullable: true
+        recipientId:
+          type: "string"
+        title:
+          type: "string"
+        content:
+          type: "string"
+        type:
+          type: "string"
+        isRead:
+          type: "boolean"
+        createdAt:
+          type: "string"
+          format: "date-time"
+        readAt:
+          type: "string"
+          format: "date-time"
+          nullable: true
+      required:
+        - "id"
+        - "recipientId"
+        - "title"
+        - "content"
+        - "type"
+        - "isRead"
+        - "createdAt"
+    MessageListResponse:
+      type: "object"
+      properties:
+        messages:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Message"
+        totalCount:
+          type: "integer"
+          format: "int64"
+      required:
+        - "messages"
+        - "totalCount"
+    UnreadCountResponse:
+      type: "object"
+      properties:
+        count:
+          type: "integer"
+          format: "int32"
+      required:
+        - "count"
