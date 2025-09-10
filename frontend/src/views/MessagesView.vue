@@ -1,4 +1,3 @@
-import { ElIconCheck, ElIconDelete, ElIconMore } from '@element-plus/icons-vue'
 <template>
   <div class="messages-view">
     <!-- 3D背景装饰 -->
@@ -6,16 +5,16 @@ import { ElIconCheck, ElIconDelete, ElIconMore } from '@element-plus/icons-vue'
       <div class="particle-network"></div>
       <div class="floating-icons">
         <div class="floating-icon" style="top: 15%; left: 10%; animation-delay: 0s;">
-          <el-icon><el-icon-message /></el-icon>
+          <el-icon-message />
         </div>
         <div class="floating-icon" style="top: 25%; right: 12%; animation-delay: 1s;">
-          <el-icon><el-icon-bell /></el-icon>
+          <el-icon-bell />
         </div>
         <div class="floating-icon" style="bottom: 20%; left: 15%; animation-delay: 2s;">
-          <el-icon><el-icon-chat-dot-round /></el-icon>
+          <el-icon-chat-dot-round />
         </div>
         <div class="floating-icon" style="bottom: 30%; right: 10%; animation-delay: 3s;">
-          <el-icon><el-icon-postcard /></el-icon>
+          <el-icon-postcard />
         </div>
       </div>
     </div>
@@ -88,15 +87,10 @@ import { ElIconCheck, ElIconDelete, ElIconMore } from '@element-plus/icons-vue'
           :class="{ unread: !message.read }"
           @click="handleMessageClick(message)"
         >
-          <div class="message-icon" style="display: flex; align-items: center; gap: 8px;">
-            <el-icon v-if="message.type === 'system'"><el-icon-message /></el-icon>
-            <el-icon v-else-if="message.type === 'appointment'"><el-icon-calendar /></el-icon>
-            <el-icon v-else-if="message.type === 'evaluation'"><el-icon-star /></el-icon>
-            <el-icon v-else-if="message.type === 'user'"><el-icon-user /></el-icon>
-            <el-icon v-else-if="message.type === 'event'"><el-icon-trophy /></el-icon>
-            <el-icon v-else-if="message.type === 'reminder'"><el-icon-bell /></el-icon>
-            <el-icon v-else><el-icon-bell /></el-icon>
-            <el-avatar :size="40" :src="message.avatar" />
+          <div class="message-icon">
+<el-avatar :size="40" :src="message.avatar">
+  <component :is="getMessageIcon(message.type)" />
+</el-avatar>
           </div>
 
           <div class="message-content">
@@ -114,10 +108,10 @@ import { ElIconCheck, ElIconDelete, ElIconMore } from '@element-plus/icons-vue'
           </div>
 
           <div class="message-actions">
-  <el-button 
-    size="small" 
-    type="danger" 
-    plain 
+  <el-button
+    size="small"
+    type="danger"
+    plain
     @click.stop="messageStore.deleteMessage(message.id)"
   >
     删除
@@ -170,26 +164,26 @@ import { ElIconCheck, ElIconDelete, ElIconMore } from '@element-plus/icons-vue'
 
     <!-- 浮动操作按钮 -->
     <div class="floating-action-buttons">
-      
-      
+
+
       <transition-group name="fab-item">
         <el-tooltip v-if="fabMenuOpen" content="全部标为已读" placement="left">
           <el-button class="fab-item" type="success" circle @click="messageStore.markAllRead">
-            <el-icon><ElIconCheck /></el-icon>
+            <el-icon><el-icon-check /></el-icon>
           </el-button>
         </el-tooltip>
-        
+
         <el-tooltip v-if="fabMenuOpen" content="清空消息" placement="left">
           <el-button class="fab-item" type="danger" circle @click="messageStore.clearAll">
-            <el-icon><ElIconDelete /></el-icon>
+            <el-icon><el-icon-delete /></el-icon>
           </el-button>
         </el-tooltip>
         <el-tooltip content="快捷操作" placement="left">
-          <el-button class="fab-main" type="primary" circle @click="toggleFabMenu">
-            <el-icon><ElIconMore /></el-icon>
-          </el-button>
-        </el-tooltip>
-        
+        <el-button class="fab-main" type="primary" circle @click="toggleFabMenu">
+          <el-icon><el-icon-more /></el-icon>
+        </el-button>
+      </el-tooltip>
+
         <!-- <el-tooltip v-if="fabMenuOpen" content="刷新消息" placement="left">
           <el-button class="fab-item" type="info" circle @click="refreshMessages">
             <el-icon><el-icon-refresh /></el-icon>
@@ -264,7 +258,7 @@ const formatTime = (time) => {
   const date = new Date(time)
   const now = new Date()
   const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24))
-  
+
   if (diffDays === 0) {
     const hours = String(date.getHours()).padStart(2, '0')
     const minutes = String(date.getMinutes()).padStart(2, '0')
@@ -308,7 +302,7 @@ const markPageRead = async () => {
       cancelButtonText: '取消',
       type: 'warning'
     })
-    
+
     paginatedMessages.value
       .filter(msg => !msg.read)
       .forEach(msg => messageStore.markAsRead(msg.id))
@@ -369,7 +363,7 @@ onMounted(() => {
     margin-top: 20px;
     border: 1px solid var(--el-border-color-light);
     border-radius: 4px;
-    
+
     .special-message {
       padding: 12px;
       &:hover {
@@ -394,7 +388,7 @@ onMounted(() => {
   height: 100%;
   z-index: 0;
   overflow: hidden;
-  
+
   .particle-network {
     position: absolute;
     top: 0;
@@ -403,20 +397,20 @@ onMounted(() => {
     height: 100%;
     background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, transparent 70%);
   }
-  
+
   .floating-icons {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    
+
     .floating-icon {
       position: absolute;
       font-size: 32px;
       color: rgba(255, 255, 255, 0.15);
       animation: float 6s ease-in-out infinite;
-      
+
       :deep(svg) {
         width: 1em;
         height: 1em;
@@ -434,18 +428,18 @@ onMounted(() => {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
   border: none;
   overflow: hidden;
-  
+
   :deep(.el-card__header) {
     background: linear-gradient(to right, #409EFF, #64b5ff);
     color: white;
     padding: 16px 24px;
     border-bottom: none;
-    
+
     .messages-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      
+
       .header-title {
         display: flex;
         align-items: center;
@@ -453,11 +447,11 @@ onMounted(() => {
         font-weight: 600;
         font-size: 18px;
         color: white;
-        
+
         .header-icon {
           font-size: 24px;
         }
-        
+
         .unread-badge {
           :deep(.el-badge__content) {
             background: #ff4d4f;
@@ -465,14 +459,14 @@ onMounted(() => {
           }
         }
       }
-      
+
       .header-actions {
         display: flex;
         gap: 12px;
           .el-dropdown .el-button {
     min-width: 100px;  // 设置最小宽度
     padding: 0 15px;  // 调整内边距
-    
+
     span {
       display: inline-block;
       width: 100%;
@@ -494,7 +488,7 @@ onMounted(() => {
   border-radius: 12px;
   margin: 16px 24px;
   border: 1px solid rgba(255, 255, 255, 0.3);
-  
+
   .filter-right {
     display: flex;
     align-items: center;
@@ -520,12 +514,12 @@ onMounted(() => {
   border-radius: 12px;
   margin-bottom: 12px;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  
+
     &[data-type="event"] {
     border-left: 4px solid #F56C6C;
     background: linear-gradient(135deg, rgba(245, 108, 108, 0.1), rgba(255, 255, 255, 0.7));
   }
-  
+
   // 课程提醒特殊样式
   &[data-type="reminder"] {
     border-left: 4px solid #E6A23C;
@@ -536,7 +530,7 @@ onMounted(() => {
     transform: translateY(-2px);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   }
-  
+
   &.unread {
     background: linear-gradient(135deg, rgba(24, 144, 255, 0.1), rgba(255, 255, 255, 0.7));
     border-left: 4px solid #1890ff;
@@ -545,13 +539,13 @@ onMounted(() => {
 }
 .el-tag {
   // ...原有样式...
-  
+
   // 赛事消息标签
   &[type="event"] {
     background-color: #F56C6C;
     color: white;
   }
-  
+
   // 课程提醒标签
   &[type="reminder"] {
     background-color: #be3ce6;
@@ -568,13 +562,13 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 8px;
-  
+
   .message-title {
     font-weight: 600;
     font-size: 16px;
     color: #333;
   }
-  
+
   .message-time {
     font-size: 12px;
     color: #999;
@@ -598,7 +592,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 12px;
-  
+
   .message-from {
     font-size: 12px;
     color: #999;
@@ -622,7 +616,7 @@ onMounted(() => {
 
 .message-detail {
   line-height: 1.6;
-  
+
   .detail-meta {
     display: flex;
     justify-content: space-between;
@@ -632,10 +626,10 @@ onMounted(() => {
     font-size: 14px;
     color: #666;
   }
-  
+
   .detail-content {
     color: #333;
-    
+
     :deep(p) {
       margin: 8px 0;
     }
@@ -651,23 +645,23 @@ onMounted(() => {
   align-items: center;
   gap: 16px;
   z-index: 100;
-  
+
   .fab-main {
     width: 56px;
     height: 56px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    
+
     .el-icon {
       font-size: 24px;
     }
   }
-  
+
   .fab-item {
     width: 48px;
     height: 48px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
     transition: all 0.3s ease;
-    
+
     .el-icon {
       font-size: 20px;
     }
@@ -700,33 +694,33 @@ onMounted(() => {
   .messages-view {
     padding: 16px;
   }
-  
+
   .message-filters {
     flex-direction: column;
     gap: 12px;
-    
+
     .filter-right {
       width: 100%;
-      
+
       .el-input {
         width: 100%;
       }
     }
   }
-  
+
   .message-item {
     padding: 16px;
     flex-direction: column;
- 
+
   }
-  
+
   .message-actions {
     flex-direction: row;
     justify-content: flex-end;
     width: 100%;
     margin-top: 12px;
   }
-  
+
   .floating-action-buttons {
     right: 20px;
     bottom: 20px;

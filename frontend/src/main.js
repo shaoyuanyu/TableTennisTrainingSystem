@@ -1,3 +1,4 @@
+// main.js - 优化版本
 import './assets/main.css'
 
 import { createApp } from 'vue'
@@ -12,16 +13,19 @@ import router from './router'
 
 const app = createApp(App)
 
-// 注册Element Plus
+// 配置 Element Plus
 app.use(ElementPlus, {
   locale: zhCn,
+  size: 'default', // 添加全局尺寸配置
+  zIndex: 3000,   // 设置初始 z-index
 })
 
-// 注册所有图标
-for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
-  app.component(key, component)
-}
+// 批量注册图标（更优雅的方式）
+Object.entries(ElementPlusIconsVue).forEach(([key, component]) => {
+  app.component(`el-icon-${key.toLowerCase()}`, component)
+})
 
+// 注册状态管理和路由
 app.use(createPinia())
 app.use(router)
 
