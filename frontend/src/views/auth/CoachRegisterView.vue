@@ -50,7 +50,7 @@
             <el-col :md="12" :sm="24">
               <el-form-item label="密码" prop="password">
                 <el-input v-model="registerForm.password" type="password" placeholder="8-16位含字母、数字、特殊字符" show-password
-                  clearable />
+                  clearable style="text-align: left;" />
               </el-form-item>
             </el-col>
             <el-col :md="12" :sm="24">
@@ -87,7 +87,7 @@
             <el-col :md="8" :sm="24">
               <el-form-item label="年龄" prop="age">
                 <el-input-number v-model="registerForm.age" :min="18" :max="65" placeholder="请输入年龄"
-                  controls-position="right" style="width: 100%" />
+                  controls-position="right" style="width: 100%; text-align: left;" />
               </el-form-item>
             </el-col>
             <el-col :md="8" :sm="24">
@@ -176,10 +176,10 @@
 
       <!-- 底部导航 -->
       <div class="register-footer">
-        <p>已有账户？</p>
-        <el-link type="primary" :underline="false" @click="navigateToLogin">
-          <el-button text type="primary">立即登录</el-button>
-        </el-link>
+          <span class="login-tip-text">
+            已有账户？
+            <el-link type="primary" :underline="false" @click="navigateToLogin" class="login-tip-link">立即登录</el-link>
+          </span>
       </div>
     </div>
 
@@ -753,11 +753,24 @@ onMounted(() => {
 .register-footer {
   text-align: center;
   padding-top: 20px;
-  border-top: 1px solid #eee;
+  border-top: 1px solid #c0c0c0;
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 10px;
+}
+
+.login-tip-text {
+  font-size: 16px;
+  color: #409EFF;
+  font-weight: 500;
+}
+.login-tip-link {
+  font-size: 16px;
+  color: #409EFF;
+  font-weight: 500;
+  margin-left: 2px;
+  vertical-align: baseline;
 }
 
 .agreement-content {

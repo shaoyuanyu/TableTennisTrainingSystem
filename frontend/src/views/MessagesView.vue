@@ -1,3 +1,4 @@
+import { ElIconCheck, ElIconDelete, ElIconMore } from '@element-plus/icons-vue'
 <template>
   <div class="messages-view">
     <!-- 3D背景装饰 -->
@@ -5,16 +6,16 @@
       <div class="particle-network"></div>
       <div class="floating-icons">
         <div class="floating-icon" style="top: 15%; left: 10%; animation-delay: 0s;">
-          <el-icon-message />
+          <el-icon><el-icon-message /></el-icon>
         </div>
         <div class="floating-icon" style="top: 25%; right: 12%; animation-delay: 1s;">
-          <el-icon-bell />
+          <el-icon><el-icon-bell /></el-icon>
         </div>
         <div class="floating-icon" style="bottom: 20%; left: 15%; animation-delay: 2s;">
-          <el-icon-chat-dot-round />
+          <el-icon><el-icon-chat-dot-round /></el-icon>
         </div>
         <div class="floating-icon" style="bottom: 30%; right: 10%; animation-delay: 3s;">
-          <el-icon-postcard />
+          <el-icon><el-icon-postcard /></el-icon>
         </div>
       </div>
     </div>
@@ -87,10 +88,15 @@
           :class="{ unread: !message.read }"
           @click="handleMessageClick(message)"
         >
-          <div class="message-icon">
-<el-avatar :size="40" :src="message.avatar">
-  <component :is="getMessageIcon(message.type)" />
-</el-avatar>
+          <div class="message-icon" style="display: flex; align-items: center; gap: 8px;">
+            <el-icon v-if="message.type === 'system'"><el-icon-message /></el-icon>
+            <el-icon v-else-if="message.type === 'appointment'"><el-icon-calendar /></el-icon>
+            <el-icon v-else-if="message.type === 'evaluation'"><el-icon-star /></el-icon>
+            <el-icon v-else-if="message.type === 'user'"><el-icon-user /></el-icon>
+            <el-icon v-else-if="message.type === 'event'"><el-icon-trophy /></el-icon>
+            <el-icon v-else-if="message.type === 'reminder'"><el-icon-bell /></el-icon>
+            <el-icon v-else><el-icon-bell /></el-icon>
+            <el-avatar :size="40" :src="message.avatar" />
           </div>
 
           <div class="message-content">
@@ -169,20 +175,20 @@
       <transition-group name="fab-item">
         <el-tooltip v-if="fabMenuOpen" content="全部标为已读" placement="left">
           <el-button class="fab-item" type="success" circle @click="messageStore.markAllRead">
-            <el-icon><el-icon-check /></el-icon>
+            <el-icon><ElIconCheck /></el-icon>
           </el-button>
         </el-tooltip>
         
         <el-tooltip v-if="fabMenuOpen" content="清空消息" placement="left">
           <el-button class="fab-item" type="danger" circle @click="messageStore.clearAll">
-            <el-icon><el-icon-delete /></el-icon>
+            <el-icon><ElIconDelete /></el-icon>
           </el-button>
         </el-tooltip>
         <el-tooltip content="快捷操作" placement="left">
-        <el-button class="fab-main" type="primary" circle @click="toggleFabMenu">
-          <el-icon><el-icon-more /></el-icon>
-        </el-button>
-      </el-tooltip>
+          <el-button class="fab-main" type="primary" circle @click="toggleFabMenu">
+            <el-icon><ElIconMore /></el-icon>
+          </el-button>
+        </el-tooltip>
         
         <!-- <el-tooltip v-if="fabMenuOpen" content="刷新消息" placement="left">
           <el-button class="fab-item" type="info" circle @click="refreshMessages">
