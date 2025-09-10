@@ -7,12 +7,15 @@ import io.github.shaoyuanyu.ttts.persistence.student.StudentEntity
 import io.github.shaoyuanyu.ttts.persistence.student_coach.StudentCoachRelationEntity
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.util.UUID
 import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
+internal val STUDENT_SERVICE_LOGGER: Logger = LoggerFactory.getLogger("io.github.shaoyuanyu.ttts.persistence.student")
 
 class StudentService(
     private val database: Database,
@@ -36,7 +39,7 @@ class StudentService(
 //
 //                it.expose()
 //            }.also {
-//                LOGGER.info("查询用户成功，用户 ID：$uuid，用户名：${it.username}")
+//                STUDENT_SERVICE_LOGGER.info("查询用户成功，用户 ID：$uuid，用户名：${it.username}")
 //            }
 //        }
 
@@ -49,10 +52,9 @@ class StudentService(
                 if (it == null) {
                     throw Exception("用户不存在")
                 }
-                val newbalance=it.balance
                 it.balance
-            }.also {newbalance->
-                LOGGER.info("查询用户余额成功，用户 ID：$uuid，余额：${newbalance}")
+            }.also { newBalance ->
+                STUDENT_SERVICE_LOGGER.info("查询用户余额成功，用户 ID：$uuid，余额：${newBalance}")
             }
         }
 
@@ -66,9 +68,8 @@ class StudentService(
                     throw Exception("用户不存在")
                 }
                 it.balance = newBalance
-                val newbalance=it.balance
-            }.also {newbalance->
-                LOGGER.info("更新用户余额成功，用户 ID：$uuid，余额：${newbalance}")
+            }.also { newBalance ->
+                STUDENT_SERVICE_LOGGER.info("更新用户余额成功，用户 ID：$uuid，余额：${newBalance}")
             }
         }
 
@@ -82,29 +83,27 @@ class StudentService(
                     throw Exception("用户不存在")
                 }
                 it.balance += amount
-                val newbalance=it.balance
-            }.also {newbalance->
-                LOGGER.info("充值成功，用户 ID：$uuid，余额：${newbalance}")
+            }.also { newBalance ->
+                STUDENT_SERVICE_LOGGER.info("充值成功，用户 ID：$uuid，余额：${newBalance}")
             }
         }
 
     /**
      * 扣费
      */
-    fun deduct(uuid: String, amount: Float) =
+    fun deductBalance(uuid: String, amount: Float): Float =
         transaction(database) {
-            StudentEntity.findById(UUID.fromString(uuid)).let { student ->
-                if (student == null) {
+            StudentEntity.findById(UUID.fromString(uuid)).let {
+                if (it == null) {
                     throw Exception("用户不存在")
                 }
-                if (student.balance < amount) {
+                if (it.balance < amount) {
                     throw Exception("余额不足")
                 }
-                student.balance -= amount
-
-                student
+                it.balance -= amount
+                it.balance
             }.also { student ->
-                LOGGER.info("扣费成功，用户 ID：$uuid，余额：${student.balance}")
+                STUDENT_SERVICE_LOGGER.info("扣费成功，用户 ID：$uuid，余额：${student}")
             }
         }
 //
@@ -123,17 +122,17 @@ class StudentService(
 //                it.currentCoach+=1
 //                true
 //            }.also {
-//                LOGGER.info("选择教练成功，用户 ID：$uuid")
+//                STUDENT_SERVICE_LOGGER.info("选择教练成功，用户 ID：$uuid")
 //            }
 //        }
     /**
      * 选择教练课程
      */
-    fun selectCourse(studentuuid: String, coachuuid: String, startTime: Instant, endTime:Instant) =
+    fun selectCourse(studentUUID: String, coachUUID: String, startTime: Instant, endTime:Instant) =
         transaction(database) {
-            val student = StudentEntity.findById(UUID.fromString(studentuuid))
+            val student = StudentEntity.findById(UUID.fromString(studentUUID))
                 ?: throw Exception("学生不存在")
-            val coach = CoachEntity.findById(UUID.fromString(coachuuid))
+            val coach = CoachEntity.findById(UUID.fromString(coachUUID))
                 ?: throw Exception("教练不存在")
 
             if (student.currentCoach >= student.maxCoach) {
@@ -144,7 +143,7 @@ class StudentService(
                 throw Exception("教练已达到最大学生接收数量")
             }
             // 获取教练所属的校区
-            val campusID =userService.queryUserByUUID(coachuuid).campusId
+            val campusID =userService.queryUserByUUID(coachUUID).campusId
 
             //根据campusID获取校区实体
             val campus = queryCampusById(campusID)
@@ -158,8 +157,7 @@ class StudentService(
             }
 
             // 根据教练等级计算费用
-            val coachLevel = coach.level
-            val hourlyRate = when (coachLevel) {
+            val hourlyRate = when (val coachLevel = coach.level) {
                 "初级" -> 80.0f
                 "中级" -> 150.0f
                 "高级" -> 200.0f
@@ -169,7 +167,7 @@ class StudentService(
             val totalCost = hourlyRate * durationHours
 
             // 调用扣费函数
-            deduct(studentuuid, totalCost)
+            deductBalance(studentUUID, totalCost)
 
             // 为教练增加余额（扣费金额的60%）
             val coachEarnings = totalCost * 0.6f
@@ -193,7 +191,7 @@ class StudentService(
             student.currentCoach += 1
             coach.currentStudents += 1
 
-            LOGGER.info("选择教练课程成功，课程时长: ${durationHours}小时，总费用: ${totalCost}元")
+            STUDENT_SERVICE_LOGGER.info("选择教练课程成功，课程时长: ${durationHours}小时，总费用: ${totalCost}元")
 
             // 返回成功信息
             mapOf(
@@ -218,7 +216,7 @@ class StudentService(
 
                 it
             }.also {
-                LOGGER.info("查询校区成功，校区 ID：$campusId，校区名称：${it.campus_name}")
+                STUDENT_SERVICE_LOGGER.info("查询校区成功，校区 ID：$campusId，校区名称：${it.campus_name}")
             }
         }
 
