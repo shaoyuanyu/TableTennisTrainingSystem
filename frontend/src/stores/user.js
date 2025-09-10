@@ -44,10 +44,14 @@ export const useUserStore = defineStore('user', () => {
   // 注册
   const register = async (registerData) => {
     try {
-      const response = await api.post('/auth/register', registerData)
+      const response = await api.post('/user/signup', registerData)
       return response.data
     } catch (error) {
       console.error('注册失败:', error)
+      // 处理后端返回的错误信息
+      if (error.response && error.response.data) {
+        throw new Error(error.response.data)
+      }
       throw error
     }
   }

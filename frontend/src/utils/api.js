@@ -4,7 +4,7 @@ import { useUserStore } from '@/stores/user'
 
 // 创建axios实例
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://49.140.92.33:8080',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
@@ -28,14 +28,8 @@ api.interceptors.request.use(
 // 响应拦截器
 api.interceptors.response.use(
   (response) => {
-    const { code, message } = response.data
-
-    if (code === 200) {
-      return response.data
-    } else {
-      ElMessage.error(message || '请求失败')
-      return Promise.reject(new Error(message || '请求失败'))
-    }
+    // 直接返回响应数据，让各个API自己处理
+    return response
   },
   (error) => {
     if (error.response) {
