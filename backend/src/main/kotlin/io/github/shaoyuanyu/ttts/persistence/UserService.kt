@@ -8,6 +8,7 @@ import io.github.shaoyuanyu.ttts.dto.user.injectCoachEntity
 import io.github.shaoyuanyu.ttts.dto.user.injectStudentEntity
 import io.github.shaoyuanyu.ttts.exceptions.BadRequestException
 import io.github.shaoyuanyu.ttts.exceptions.UnauthorizedException
+import io.github.shaoyuanyu.ttts.exceptions.NotFoundException
 import io.github.shaoyuanyu.ttts.persistence.coach.CoachEntity
 import io.github.shaoyuanyu.ttts.persistence.student.StudentEntity
 import io.github.shaoyuanyu.ttts.persistence.user.UserEntity
@@ -161,7 +162,7 @@ class UserService(
         transaction(database) {
             UserEntity.findById(UUID.fromString(uuid)).let { userEntity ->
                 if (userEntity == null) {
-                    throw BadRequestException("用户不存在")
+                    throw NotFoundException("用户不存在")
                 }
 
                 // 根据用户角色附加角色特定信息
@@ -197,7 +198,7 @@ class UserService(
         transaction(database) {
             UserEntity.find { UserTable.username eq username }.also {
                 if (it.empty()) {
-                    throw BadRequestException("用户不存在")
+                    throw NotFoundException("用户不存在")
                 }
             }.first().exposeWithoutPassword().also {
                 LOGGER.info("查询用户成功，用户 ID：${it.uuid}, 用户名：${it.username}")
@@ -369,7 +370,7 @@ class UserService(
         transaction(database) {
             UserEntity.findById(UUID.fromString(uuid)).let { userEntity ->
                 if (userEntity == null) {
-                    throw BadRequestException("用户不存在")
+                    throw NotFoundException("用户不存在")
                 }
                 
                 // 验证旧密码
@@ -392,32 +393,12 @@ class UserService(
         transaction(database) {
             UserEntity.findById(UUID.fromString(uuid)).let {
                 if (it == null) {
-                    throw BadRequestException("用户不存在")
+                    throw NotFoundException("用户不存在")
                 }
 
                 it.delete()
             }.also {
                 LOGGER.info("删除用户成功，用户 ID：$uuid")
-            }
-        }
-    }
-
-    /**
-     * 更新用户密码
-     */
-    fun updateUserPassword(uuid: String, oldPassword: String, newPassword: String) {
-        transaction(database) {
-            UserEntity.findById(UUID.fromString(uuid)).let {
-                if (it == null) {
-                    throw BadRequestException("用户不存在")
-                }
-                if(!validatePasswd(oldPassword, it.encryptedPassword)){
-                    throw BadRequestException("原密码错误")
-                }
-
-                it.encryptedPassword = encryptPasswd(newPassword)
-            }.also {
-                LOGGER.info("更新用户密码成功，用户 ID：$uuid")
             }
         }
     }

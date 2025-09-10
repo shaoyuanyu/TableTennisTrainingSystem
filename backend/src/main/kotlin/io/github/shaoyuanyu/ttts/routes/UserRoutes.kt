@@ -5,6 +5,7 @@ import io.github.shaoyuanyu.ttts.dto.user.UserRole
 import io.github.shaoyuanyu.ttts.dto.user.UserSession
 import io.github.shaoyuanyu.ttts.exceptions.BadRequestException
 import io.github.shaoyuanyu.ttts.exceptions.UnauthorizedException
+import io.github.shaoyuanyu.ttts.exceptions.NotFoundException
 import io.github.shaoyuanyu.ttts.persistence.UserService
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -275,7 +276,7 @@ fun Route.resetCampusAdminPassword(userService: UserService) {
         // 重置密码为默认密码 "123456"
         // TODO: 默认密码改为通过配置文件读取
         val defaultPassword = "123456"
-        userService.updateUserPassword(userId, defaultPassword, defaultPassword)
+        userService.changeUserPassword(userId, defaultPassword, defaultPassword)
         
         call.response.status(HttpStatusCode.OK)
         call.respond(mapOf("message" to "校区管理员密码已重置为默认密码"))
@@ -296,8 +297,8 @@ fun Route.getUserByUsername(userService: UserService) {
         try {
             val user = userService.queryUserByUsername(username)
             call.respond(user)
-        } catch (e: Exception) {
-            throw BadRequestException(e.message ?: "用户不存在")
+        } catch (_: NotFoundException) {
+            throw BadRequestException("用户不存在")
         }
     }
 }

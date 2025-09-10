@@ -3,6 +3,8 @@
 package io.github.shaoyuanyu.ttts.persistence
 
 import io.github.shaoyuanyu.ttts.dto.message.Message
+import io.github.shaoyuanyu.ttts.exceptions.BadRequestException
+import io.github.shaoyuanyu.ttts.exceptions.SecurityException
 import io.github.shaoyuanyu.ttts.persistence.message.MessageEntity
 import io.github.shaoyuanyu.ttts.persistence.message.MessageTable
 import io.github.shaoyuanyu.ttts.persistence.message.expose
@@ -36,7 +38,7 @@ class MessageService(
             this.sender = senderId?.let {
                 UserEntity.findById(UUID.fromString(it))
             }
-            this.recipient = UserEntity.Companion[UUID.fromString(recipientId)]
+            this.recipient = UserEntity[UUID.fromString(recipientId)]
             this.title = title
             this.content = content
             this.type = type
@@ -107,11 +109,11 @@ class MessageService(
      */
     fun markAsRead(messageId: String, userId: String) = transaction(database) {
         val message = MessageEntity.findById(UUID.fromString(messageId))
-            ?: throw IllegalArgumentException("Message not found")
+            ?: throw BadRequestException("消息未找到")
 
         // 验证用户权限（只能操作自己的消息）
         if (message.recipient.id.value != UUID.fromString(userId)) {
-            throw SecurityException("User can only mark their own messages as read")
+            throw SecurityException("用户只能标记自己的消息为已读")
         }
 
         if (!message.isRead) {
@@ -128,11 +130,11 @@ class MessageService(
      */
     fun deleteMessage(messageId: String, userId: String) = transaction(database) {
         val message = MessageEntity.findById(UUID.fromString(messageId))
-            ?: throw IllegalArgumentException("Message not found")
+            ?: throw BadRequestException("消息未找到")
 
         // 验证用户权限（只能删除自己的消息）
         if (message.recipient.id.value != UUID.fromString(userId)) {
-            throw SecurityException("User can only delete their own messages")
+            throw SecurityException("用户只能删除自己的消息")
         }
 
         message.delete()

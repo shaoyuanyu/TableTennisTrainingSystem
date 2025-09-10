@@ -1,7 +1,10 @@
 package io.github.shaoyuanyu.ttts.routes
 
-import io.github.shaoyuanyu.ttts.dto.message.*
+import io.github.shaoyuanyu.ttts.dto.message.CreateMessageRequest
+import io.github.shaoyuanyu.ttts.dto.message.MessageListResponse
+import io.github.shaoyuanyu.ttts.dto.message.UnreadCountResponse
 import io.github.shaoyuanyu.ttts.dto.user.UserSession
+import io.github.shaoyuanyu.ttts.exceptions.BadRequestException
 import io.github.shaoyuanyu.ttts.exceptions.UnauthorizedException
 import io.github.shaoyuanyu.ttts.persistence.MessageService
 import io.ktor.http.*
@@ -61,13 +64,11 @@ fun Route.getMessages(messageService: MessageService) {
 
         // 参数验证
         if (page < 0) {
-            call.respond(HttpStatusCode.BadRequest, mapOf("error" to "页码必须大于等于0"))
-            return@get
+            throw BadRequestException("页码必须大于等于0")
         }
 
         if (size !in 1..100) {
-            call.respond(HttpStatusCode.BadRequest, mapOf("error" to "每页大小必须在1-100之间"))
-            return@get
+            throw BadRequestException("每页大小必须在1-100之间")
         }
 
         val (messages, totalCount) = messageService.getUserMessages(
@@ -151,7 +152,7 @@ fun Route.markMessageAsRead(messageService: MessageService) {
         }
 
         val messageId = call.parameters["id"]
-            ?: throw IllegalArgumentException("Message ID is required")
+            ?: throw BadRequestException("Message ID is required")
 
         messageService.markAsRead(messageId, userId)
         call.response.status(HttpStatusCode.OK)
@@ -218,7 +219,7 @@ fun Route.deleteMessage(messageService: MessageService) {
         }
 
         val messageId = call.parameters["id"]
-            ?: throw IllegalArgumentException("Message ID is required")
+            ?: throw BadRequestException("Message ID is required")
 
         messageService.deleteMessage(messageId, userId)
         call.response.status(HttpStatusCode.NoContent)
