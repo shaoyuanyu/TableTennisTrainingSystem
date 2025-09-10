@@ -116,7 +116,7 @@
           </el-col>
         </el-row>
 
-        <el-form-item label="邮箱（选填）" prop="email">
+        <el-form-item label="邮箱" prop="email">
           <el-input v-model="registerForm.email" placeholder="请输入邮箱地址" clearable />
         </el-form-item>
 
@@ -232,7 +232,10 @@ const registerRules = {
   password: [{ required: true, validator: validatePassword, trigger: 'blur' }],
   confirmPassword: [{ required: true, validator: validateConfirmPassword, trigger: 'blur' }],
   campusId: [{ required: true, message: '请选择校区', trigger: 'change' }],
-  email: [{ type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' }],
+  email: [
+    { required: true, message: '请输入邮箱地址', trigger: 'blur' },
+    { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' }
+  ],
   agreement: [
     {
       validator: (rule, value, callback) => {
@@ -270,22 +273,24 @@ const handleRegister = async () => {
 
     // 根据后端API规范构造注册数据
     const registerData = {
-      username: registerForm.username,
+      username: registerForm.username.trim(),
       plainPassword: registerForm.password,
-      realName: registerForm.realName,
+      realName: registerForm.realName.trim(),
       gender: registerForm.gender,
-      age: registerForm.age,
-      phoneNumber: registerForm.phone,
-      email: registerForm.email || undefined,
-      campusId: registerForm.campusId,
+      age: parseInt(registerForm.age),
+      phoneNumber: registerForm.phone.trim(),
+      email: registerForm.email.trim(),
+      campusId: parseInt(registerForm.campusId),
       role: 'STUDENT',
       status: 'ACTIVE',
       studentInfo: {
-        balance: 0.0,
+        balance: 100.0,
         maxCoach: 3,
         currentCoach: 0
       }
     }
+
+    console.log('发送到后端的注册数据:', JSON.stringify(registerData, null, 2))
 
     await userStore.register(registerData)
 
