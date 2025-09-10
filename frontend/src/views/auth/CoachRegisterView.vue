@@ -1,245 +1,185 @@
 <template>
-  <div class="coach-register-container">
-    <!-- 装饰背景 -->
-    <div class="decorative-background">
-      <div class="floating-element element-1">🏓</div>
-      <div class="floating-element element-2">🏆</div>
-      <div class="floating-element element-3">⭐</div>
-      <div class="floating-element element-4">👨‍🏫</div>
-      <div class="gradient-circle circle-1"></div>
-      <div class="gradient-circle circle-2"></div>
+  <div class="register-container">
+    <!-- 背景装饰元素 -->
+    <div class="bg-decorations">
+      <div class="table-tennis-table"></div>
+      <div class="ping-pong-ball ball-1"></div>
+      <div class="ping-pong-ball ball-2"></div>
+      <div class="ping-pong-ball ball-3"></div>
+      <div class="racket racket-1"></div>
+      <div class="racket racket-2"></div>
+      <div class="art-text">
+        <div class="art-text-main">COACH</div>
+        <div class="art-text-sub">教练注册</div>
+      </div>
     </div>
 
-    <div class="register-content">
-      <!-- 顶部标题区 -->
+    <div class="register-box">
       <div class="register-header">
-        <h1 class="main-title">教练员注册</h1>
-        <p class="sub-title">Coach Registration</p>
-        <div class="title-divider"></div>
-        <p class="description">提交入职申请，开启您的教练生涯</p>
+        <div class="header-icon">
+          <div class="student-icon">🏓</div>
+        </div>
+        <h1 class="register-title">教练注册</h1>
+        <p class="register-subtitle">加入我们，开启乒乓球执教之旅</p>
       </div>
 
-      <!-- 注册表单 -->
-      <el-form ref="registerFormRef" :model="registerForm" :rules="registerRules" class="coach-register-form"
-        label-position="top" size="large">
-        <!-- 基本信息部分 -->
-        <div class="form-section">
-          <div class="section-header">
-            <div class="section-icon">👤</div>
-            <h3>基本信息</h3>
-          </div>
+      <el-form
+        ref="registerFormRef"
+        :model="registerForm"
+        :rules="registerRules"
+        class="register-form"
+        label-position="top"
+        size="large"
+      >
+        <el-row :gutter="16">
+          <el-col :span="12">
+            <el-form-item label="用户名" prop="username">
+              <el-input v-model="registerForm.username" placeholder="请输入用户名" clearable />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="真实姓名" prop="realName">
+              <el-input v-model="registerForm.realName" placeholder="请输入真实姓名" clearable />
+            </el-form-item>
+          </el-col>
+        </el-row>
 
-          <el-row :gutter="20">
-            <el-col :md="12" :sm="24">
-              <el-form-item label="用户名" prop="username">
-                <el-input v-model="registerForm.username" placeholder="请输入3-20位用户名" clearable prefix-icon="User" />
-              </el-form-item>
-            </el-col>
-            <el-col :md="12" :sm="24">
-              <el-form-item label="真实姓名" prop="realName">
-                <el-input v-model="registerForm.realName" placeholder="请输入真实姓名" clearable prefix-icon="Edit" />
-              </el-form-item>
-            </el-col>
-          </el-row>
+        <el-form-item label="手机号码" prop="phone">
+          <el-input v-model="registerForm.phone" placeholder="请输入手机号码" clearable />
+        </el-form-item>
 
-          <el-form-item label="手机号码" prop="phone">
-            <el-input v-model="registerForm.phone" placeholder="请输入11位手机号码" clearable prefix-icon="Iphone" />
-          </el-form-item>
+        <el-row :gutter="16">
+          <el-col :span="12">
+            <el-form-item label="密码" prop="password">
+              <el-input
+                v-model="registerForm.password"
+                type="password"
+                placeholder="请输入密码"
+                show-password
+                clearable
+              />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="确认密码" prop="confirmPassword">
+              <el-input
+                v-model="registerForm.confirmPassword"
+                type="password"
+                placeholder="请确认密码"
+                show-password
+                clearable
+              />
+            </el-form-item>
+          </el-col>
+        </el-row>
 
-          <el-row :gutter="20">
-            <el-col :md="12" :sm="24">
-              <el-form-item label="密码" prop="password">
-                <el-input v-model="registerForm.password" type="password" placeholder="8-16位含字母、数字、特殊字符" show-password
-                  clearable style="text-align: left;" />
-              </el-form-item>
-            </el-col>
-            <el-col :md="12" :sm="24">
-              <el-form-item label="确认密码" prop="confirmPassword">
-                <el-input v-model="registerForm.confirmPassword" type="password" placeholder="请再次输入密码" show-password
-                  clearable />
-              </el-form-item>
-            </el-col>
-          </el-row>
+        <el-row :gutter="16">
+          <el-col :span="8">
+            <el-form-item label="性别" prop="gender">
+              <el-select v-model="registerForm.gender" placeholder="请选择">
+                <el-option label="男" value="男" />
+                <el-option label="女" value="女" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="年龄" prop="age">
+              <el-input-number
+                v-model="registerForm.age"
+                :min="18"
+                :max="80"
+                placeholder="年龄"
+                style="width: 100%"
+              />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="校区" prop="campusId">
+              <el-select v-model="registerForm.campusId" placeholder="请选择校区">
+                <el-option
+                  v-for="campus in campusList"
+                  :key="campus.id"
+                  :label="campus.name"
+                  :value="campus.id"
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
 
-          <div class="password-requirements">
-            <el-text type="info" size="small">
-              🔒 密码要求：8-16位，必须包含字母、数字和特殊字符
-            </el-text>
-          </div>
-        </div>
+        <el-form-item label="邮箱" prop="email">
+          <el-input v-model="registerForm.email" placeholder="请输入邮箱地址" clearable />
+        </el-form-item>
 
-        <!-- 个人信息部分 -->
-        <div class="form-section">
-          <div class="section-header">
-            <div class="section-icon">📋</div>
-            <h3>个人信息</h3>
-          </div>
+        <!-- 教练专属信息 -->
+        <el-row :gutter="16">
+          <el-col :span="12">
+            <el-form-item label="课时费 (元/小时)" prop="hourlyRate">
+              <el-input-number
+                v-model="registerForm.hourlyRate"
+                :min="50"
+                :max="1000"
+                placeholder="请输入课时费"
+                style="width: 100%"
+              />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="最大带学生数" prop="maxStudents">
+              <el-input-number
+                v-model="registerForm.maxStudents"
+                :min="1"
+                :max="100"
+                placeholder="请输入最大带学生数"
+                style="width: 100%"
+              />
+            </el-form-item>
+          </el-col>
+        </el-row>
 
-          <el-row :gutter="20">
-            <el-col :md="8" :sm="24">
-              <el-form-item label="性别" prop="gender">
-                <el-select v-model="registerForm.gender" placeholder="请选择性别">
-                  <el-option label="男" value="male" />
-                  <el-option label="女" value="female" />
-                </el-select>
-              </el-form-item>
-            </el-col>
-            <el-col :md="8" :sm="24">
-              <el-form-item label="年龄" prop="age">
-                <el-input-number v-model="registerForm.age" :min="18" :max="65" placeholder="请输入年龄"
-                  controls-position="right" style="width: 100%; text-align: left;" />
-              </el-form-item>
-            </el-col>
-            <el-col :md="8" :sm="24">
-              <el-form-item label="校区" prop="campusId">
-                <el-select v-model="registerForm.campusId" placeholder="请选择校区" loading-text="加载中..."
-                  :loading="loadingCampuses">
-                  <el-option v-for="campus in campusList" :key="campus.id" :label="campus.name" :value="campus.id" />
-                </el-select>
-              </el-form-item>
-            </el-col>
-          </el-row>
+        <el-form-item>
+          <el-checkbox v-model="registerForm.agreement">
+            我已阅读并同意
+            <el-link type="primary">《用户协议》</el-link>
+            和
+            <el-link type="primary">《隐私政策》</el-link>
+          </el-checkbox>
+        </el-form-item>
 
-          <el-form-item label="邮箱（选填）" prop="email">
-            <el-input v-model="registerForm.email" placeholder="请输入邮箱地址" clearable prefix-icon="Message" />
-          </el-form-item>
-        </div>
-
-        <!-- 教练资料部分 -->
-        <div class="form-section">
-          <div class="section-header">
-            <div class="section-icon">📸</div>
-            <h3>教练资料</h3>
-          </div>
-
-          <el-form-item label="教练照片" prop="avatar">
-            <div class="avatar-upload-container">
-              <el-upload ref="uploadRef" class="avatar-uploader" :show-file-list="false"
-                :before-upload="beforeAvatarUpload" :on-success="handleAvatarSuccess" :on-error="handleAvatarError"
-                :action="uploadApi" :headers="uploadHeaders" :disabled="uploading">
-                <div class="avatar-upload-area">
-                  <img v-if="registerForm.avatar" :src="registerForm.avatar" class="avatar-preview" />
-                  <div v-else class="avatar-placeholder">
-                    <el-icon size="24" class="upload-icon">
-                      <Plus />
-                    </el-icon>
-                    <p>点击上传照片</p>
-                  </div>
-                  <div v-if="uploading" class="uploading-overlay">
-                    <el-icon class="loading-icon">
-                      <Loading />
-                    </el-icon>
-                  </div>
-                </div>
-              </el-upload>
-              <div class="upload-tips">
-                <p>支持 JPG、PNG 格式，文件大小不超过 2MB</p>
-                <p>建议尺寸：200×200像素，正方形照片</p>
-              </div>
-            </div>
-          </el-form-item>
-
-          <el-form-item label="比赛成绩描述" prop="achievements">
-            <el-input v-model="registerForm.achievements" type="textarea" :rows="5"
-              placeholder="请详细描述您的乒乓球比赛经历、获得的成绩和教学经验（不少于50字）" maxlength="500" show-word-limit resize="none" />
-            <div class="achievement-tips">
-              <el-text type="info" size="small">
-                💡 温馨提示：详细的比赛成绩描述，有助于学员了解您的专业水平
-              </el-text>
-            </div>
-          </el-form-item>
-        </div>
-
-        <!-- 协议同意部分 -->
-        <div class="agreement-section">
-          <el-form-item prop="agreement">
-            <el-checkbox v-model="registerForm.agreement">
-              我已阅读并同意
-              <el-link type="primary" @click="showAgreement('coach')">《教练员协议》</el-link>
-              和
-              <el-link type="primary" @click="showAgreement('privacy')">《隐私政策》</el-link>
-            </el-checkbox>
-          </el-form-item>
-        </div>
-
-        <!-- 提交按钮 -->
-        <div class="submit-section">
-          <el-button type="primary" class="register-btn" :loading="submitting" @click="handleSubmit">
-            {{ submitting ? '提交中...' : '提交申请' }}
+        <el-form-item>
+          <el-button
+            type="primary"
+            class="register-button"
+            :loading="loading"
+            @click="handleRegister"
+          >
+            注册
           </el-button>
-
-          <div class="audit-notice">
-            <el-alert title="提示：提交申请后需校区管理员审核后方可使用" type="info" :closable="false" show-icon />
-          </div>
-        </div>
+        </el-form-item>
       </el-form>
 
-      <!-- 底部导航 -->
       <div class="register-footer">
-          <span class="login-tip-text">
-            已有账户？
-            <el-link type="primary" :underline="false" @click="navigateToLogin" class="login-tip-link">立即登录</el-link>
-          </span>
+        <p>已有账户？</p>
+        <el-link type="primary" @click="goToLogin">立即登录</el-link>
       </div>
     </div>
-
-    <!-- 协议对话框 -->
-    <el-dialog v-model="agreementDialog.visible" :title="agreementDialog.title" width="70%" top="5vh">
-      <div class="agreement-content">
-        <p v-if="agreementDialog.loading">加载中...</p>
-        <div v-else v-html="agreementDialog.content"></div>
-      </div>
-      <template #footer>
-        <el-button @click="agreementDialog.visible = false">取消</el-button>
-        <el-button type="primary" @click="agreeToAgreement">同意并继续</el-button>
-      </template>
-    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus, Loading } from '@element-plus/icons-vue'
+import { useUserStore } from '@/stores/user'
+import { ElMessage } from 'element-plus'
+import { getCampusList } from '@/api/auth'
 
-// 路由和状态管理
 const router = useRouter()
+const userStore = useUserStore()
 
-// 表单引用
 const registerFormRef = ref()
-const uploadRef = ref()
-
-// 加载状态
-const submitting = ref(false)
-const uploading = ref(false)
-const loadingCampuses = ref(false)
-
-// API端点配置（预留变量，实际使用时从环境配置获取）
-const API_BASE = import.meta.env.VITE_API_BASE || '/api'
-const uploadApi = `${API_BASE}/upload/avatar`
-const campusesApi = `${API_BASE}/campuses`
-const registerApi = `${API_BASE}/auth/coach/register`
-const agreementApi = `${API_BASE}/agreements`
-
-// 上传 headers（预留认证token）
-const uploadHeaders = computed(() => ({
-  Authorization: `Bearer ${localStorage.getItem('token') || ''}`
-}))
-
-// 校区列表（从API获取）
+const loading = ref(false)
 const campusList = ref([])
 
-// 协议对话框状态
-const agreementDialog = reactive({
-  visible: false,
-  title: '',
-  content: '',
-  loading: false,
-  type: ''
-})
-
-// 注册表单数据
 const registerForm = reactive({
   username: '',
   realName: '',
@@ -250,540 +190,374 @@ const registerForm = reactive({
   age: null,
   campusId: '',
   email: '',
-  avatar: '',
-  achievements: '',
-  agreement: false
+  hourlyRate: null,
+  maxStudents: null,
+  agreement: false,
 })
 
-// 表单验证规则
+// 校验函数（沿用学生注册）
+const validatePassword = (rule, value, callback) => {
+  if (!value) callback(new Error('请输入密码'))
+  else if (value.length < 8 || value.length > 16)
+    callback(new Error('密码长度在 8 到 16 个字符'))
+  else if (!/^(?=.*[a-zA-Z])(?=.*\d)(?=.*[\W_]).{8,16}$/.test(value))
+    callback(new Error('密码必须包含字母、数字和特殊字符'))
+  else callback()
+}
+
+const validateConfirmPassword = (rule, value, callback) => {
+  if (!value) callback(new Error('请确认密码'))
+  else if (value !== registerForm.password) callback(new Error('两次输入密码不一致'))
+  else callback()
+}
+
+const validatePhone = (rule, value, callback) => {
+  if (!value) callback(new Error('请输入手机号码'))
+  else if (!/^1[3-9]\d{9}$/.test(value)) callback(new Error('请输入正确的手机号码'))
+  else callback()
+}
+
 const registerRules = {
   username: [
     { required: true, message: '请输入用户名', trigger: 'blur' },
-    { min: 3, max: 20, message: '用户名长度在3-20个字符', trigger: 'blur' },
-    {
-      pattern: /^[a-zA-Z0-9_]+$/,
-      message: '用户名只能包含字母、数字和下划线',
-      trigger: 'blur'
-    }
+    { min: 3, max: 20, message: '用户名长度在 3 到 20 个字符', trigger: 'blur' },
+    { pattern: /^[a-zA-Z0-9_]+$/, message: '用户名只能包含字母、数字和下划线', trigger: 'blur' },
   ],
-  realName: [
-    { required: true, message: '请输入真实姓名', trigger: 'blur' },
-    { min: 2, max: 10, message: '姓名长度在2-10个字符', trigger: 'blur' }
-  ],
-  phone: [
-    { required: true, message: '请输入手机号码', trigger: 'blur' },
-    {
-      pattern: /^1[3-9]\d{9}$/,
-      message: '请输入正确的手机号码格式',
-      trigger: 'blur'
-    }
-  ],
-  password: [
-    { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 8, max: 16, message: '密码长度在8-16个字符', trigger: 'blur' },
-    {
-      pattern: /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[\W_]).{8,16}$/,
-      message: '必须包含字母、数字和特殊字符',
-      trigger: 'blur'
-    }
-  ],
-  confirmPassword: [
-    { required: true, message: '请确认密码', trigger: 'blur' },
-    {
-      validator: (rule, value, callback) => {
-        if (value !== registerForm.password) {
-          callback(new Error('两次输入的密码不一致'))
-        } else {
-          callback()
-        }
-      },
-      trigger: 'blur'
-    }
-  ],
-  gender: [
-    { required: true, message: '请选择性别', trigger: 'change' }
-  ],
-  age: [
-    { required: true, message: '请输入年龄', trigger: 'blur' },
-    { type: 'number', min: 18, max: 65, message: '年龄必须在18-65岁之间', trigger: 'blur' }
-  ],
-  campusId: [
-    { required: true, message: '请选择校区', trigger: 'change' }
-  ],
+  realName: [{ required: true, message: '请输入真实姓名', trigger: 'blur' }],
+  phone: [{ required: true, validator: validatePhone, trigger: 'blur' }],
+  password: [{ required: true, validator: validatePassword, trigger: 'blur' }],
+  confirmPassword: [{ required: true, validator: validateConfirmPassword, trigger: 'blur' }],
+  campusId: [{ required: true, message: '请选择校区', trigger: 'change' }],
   email: [
+    { required: true, message: '请输入邮箱地址', trigger: 'blur' },
     { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' }
   ],
-  avatar: [
-    { required: true, message: '请上传教练照片', trigger: 'change' }
-  ],
-  achievements: [
-    { required: true, message: '\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0请输入比赛成绩描述', trigger: 'blur' },
-    { min: 50, message: '描述不少于50个字', trigger: 'blur' }
-  ],
+  hourlyRate: [{ required: true, message: '请输入课时费', trigger: 'blur' }],
+  maxStudents: [{ required: true, message: '请输入最大带学生数', trigger: 'blur' }],
   agreement: [
     {
       validator: (rule, value, callback) => {
-        if (!value) {
-          callback(new Error('\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0请认真阅读教练员协议和隐私政策'))
-        } else {
-          callback()
-        }
+        if (!value) callback(new Error('请阅读并同意用户协议和隐私政策'))
+        else callback()
       },
-      trigger: 'change'
-    }
-  ]
+      trigger: 'change',
+    },
+  ],
 }
 
-// 获取校区列表
-const fetchCampuses = async () => {
+// 获取校区
+const fetchCampusList = async () => {
   try {
-    loadingCampuses.value = true
-    // 模拟API调用，实际使用时替换为真实的API调用
-    // const response = await fetch(campusesApi)
-    // const data = await response.json()
-    // campusList.value = data
-
-    // 临时测试数据
-    campusList.value = [
-      { id: 1, name: '北京总部校区' },
-      { id: 2, name: '上海浦东校区' },
-      { id: 3, name: '广州天河校区' },
-      { id: 4, name: '深圳南山校区' },
-      { id: 5, name: '杭州西湖校区' }
-    ]
+    const data = await getCampusList()
+    campusList.value = data || []
   } catch (error) {
+    console.error('获取校区列表失败:', error)
     ElMessage.error('获取校区列表失败')
-    console.error('Fetch campuses error:', error)
-  } finally {
-    loadingCampuses.value = false
   }
 }
 
-// 上传前验证
-const beforeAvatarUpload = (file) => {
-  const isJPGOrPNG = file.type === 'image/jpeg' || file.type === 'image/png'
-  const isLt2M = file.size / 1024 / 1024 < 2
-
-  if (!isJPGOrPNG) {
-    ElMessage.error('头像必须是 JPG 或 PNG 格式!')
-    return false
-  }
-  if (!isLt2M) {
-    ElMessage.error('头像大小不能超过 2MB!')
-    return false
-  }
-
-  uploading.value = true
-  return true
-}
-
-// 上传成功处理
-const handleAvatarSuccess = (response) => {
-  uploading.value = false
-  // 根据实际API响应结构调整
-  registerForm.avatar = response.data?.url || response.url
-  ElMessage.success('头像上传成功')
-}
-
-// 上传失败处理
-const handleAvatarError = (error) => {
-  uploading.value = false
-  ElMessage.error('头像上传失败')
-  console.error('Upload error:', error)
-}
-
-// 显示协议内容
-const showAgreement = async (type) => {
-  agreementDialog.type = type
-  agreementDialog.title = type === 'coach' ? '教练员协议' : '隐私政策'
-  agreementDialog.loading = true
-  agreementDialog.visible = true
-
-  try {
-    // 模拟API调用获取协议内容
-    // const response = await fetch(`${agreementApi}/${type}`)
-    // agreementDialog.content = await response.text()
-
-    // 临时内容
-    agreementDialog.content = type === 'coach'
-      ? '<p>这里是教练员协议的具体内容...</p>'
-      : '<p>这里是隐私政策的具体内容...</p>'
-  } catch (error) {
-    ElMessage.error('获取协议内容失败')
-    console.error('Fetch agreement error:', error)
-  } finally {
-    agreementDialog.loading = false
-  }
-}
-
-// 同意协议
-const agreeToAgreement = () => {
-  registerForm.agreement = true
-  agreementDialog.visible = false
-  ElMessage.success('已同意协议')
-}
-
-// 表单提交
-const handleSubmit = async () => {
+// 提交注册
+const handleRegister = async () => {
   if (!registerFormRef.value) return
-
   try {
-    // 表单验证
     const valid = await registerFormRef.value.validate()
     if (!valid) return
+    loading.value = true
 
-    submitting.value = true
-
-    // 准备提交数据
-    const submitData = {
-      username: registerForm.username,
-      realName: registerForm.realName,
-      phone: registerForm.phone,
-      password: registerForm.password,
+    const registerData = {
+      username: registerForm.username.trim(),
+      plainPassword: registerForm.password,
+      realName: registerForm.realName.trim(),
       gender: registerForm.gender,
-      age: registerForm.age,
-      campusId: registerForm.campusId,
-      email: registerForm.email,
-      avatar: registerForm.avatar,
-      achievements: registerForm.achievements
+      age: parseInt(registerForm.age),
+      phoneNumber: registerForm.phone.trim(),
+      email: registerForm.email.trim(),
+      campusId: parseInt(registerForm.campusId),
+      role: 'COACH',
+      status: 'ACTIVE',
+      coachInfo: {
+        hourlyRate: parseFloat(registerForm.hourlyRate),
+        balance: 0,
+        maxStudents: parseInt(registerForm.maxStudents),
+        currentStudents: 0,
+        isApproved: false,
+        approvedBy: -1
+      }
     }
 
-    // 模拟API调用
-    // const response = await fetch(registerApi, {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json'
-    //   },
-    //   body: JSON.stringify(submitData)
-    // })
+    console.log('发送到后端的教练注册数据:', JSON.stringify(registerData, null, 2))
+    await userStore.register(registerData)
 
-    // if (response.ok) {
-    //   const result = await response.json()
-    //   ElMessage.success('注册申请提交成功！请等待管理员审核')
-    //   router.push('/login')
-    // } else {
-    //   throw new Error('注册失败')
-    // }
-
-    // 模拟成功
-    setTimeout(() => {
-      ElMessage.success('注册申请提交成功！请等待管理员审核')
-      router.push('/login')
-    }, 1000)
-
+    ElMessage.success('注册成功！注册即生效，请登录')
+    router.push('/login')
   } catch (error) {
-    ElMessage.error(error.message || '提交失败，请稍后重试')
-    console.error('Submit error:', error)
+    console.error('注册错误:', error)
+    ElMessage.error(error.message || '注册失败，请稍后重试')
   } finally {
-    submitting.value = false
+    loading.value = false
   }
 }
 
-// 导航到登录页
-const navigateToLogin = () => {
-  router.push('/login')
-}
+const goToLogin = () => router.push('/login')
 
-// 组件挂载时获取校区列表
 onMounted(() => {
-  fetchCampuses()
+  fetchCampusList()
 })
 </script>
 
 <style scoped>
-.coach-register-container {
+.register-container {
   min-height: 100vh;
-  padding: 20px 0 100px 0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  position: relative;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
-  box-sizing: border-box;
+  justify-content: center;
+  background: linear-gradient(
+    135deg,
+    #a8e6cf 0%,
+    #88d8c0 25%,
+    #7fcdcd 50%,
+    #7d6caa 75%,
+    #8b5a96 100%
+  );
+  position: relative;
+  padding: 20px;
+  overflow: hidden;
 }
 
-.decorative-background {
-  position: fixed;
+/* 背景装饰元素 */
+.background-decorations {
+  position: absolute;
   top: 0;
   left: 0;
   width: 100%;
-  height: 100vh;
+  height: 100%;
   pointer-events: none;
-  z-index: 1;
+  overflow: hidden;
 }
 
-.floating-element {
+/* 桌球台装饰 */
+.table-tennis-table {
   position: absolute;
-  font-size: 3rem;
+  top: 60%;
+  right: -10%;
+  width: 400px;
+  height: 200px;
+  background: #4a6741;
+  border: 3px solid #fff;
+  border-radius: 10px;
   opacity: 0.1;
+  transform: perspective(300px) rotateX(45deg) rotateY(-15deg);
+  animation: float 8s ease-in-out infinite;
+}
+
+.table-tennis-table::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #fff;
+  transform: translateY(-50%);
+}
+
+.table-tennis-table::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  background: #fff;
+  transform: translateX(-50%);
+}
+
+/* 学员图标装饰 */
+.student-icon {
+  position: absolute;
+  top: 15%;
+  left: 10%;
+  font-size: 120px;
+  opacity: 0.08;
+  animation: rotate 20s linear infinite;
+  color: #fff;
+}
+
+/* 几何图形装饰 */
+.geometric-shape {
+  position: absolute;
+  opacity: 0.1;
+}
+
+.geometric-shape:nth-child(1) {
+  top: 20%;
+  right: 15%;
+  width: 80px;
+  height: 80px;
+  background: #fff;
+  border-radius: 50%;
   animation: float 6s ease-in-out infinite;
 }
 
-.element-1 {
-  top: 10%;
-  left: 5%;
-  animation-delay: 0s;
+.geometric-shape:nth-child(2) {
+  bottom: 25%;
+  left: 8%;
+  width: 60px;
+  height: 60px;
+  background: #fff;
+  transform: rotate(45deg);
+  animation: float 7s ease-in-out infinite reverse;
 }
 
-.element-2 {
-  top: 20%;
-  right: 10%;
-  animation-delay: 2s;
+.geometric-shape:nth-child(3) {
+  top: 70%;
+  left: 20%;
+  width: 0;
+  height: 0;
+  border-left: 40px solid transparent;
+  border-right: 40px solid transparent;
+  border-bottom: 70px solid #fff;
+  animation: float 5s ease-in-out infinite;
 }
 
-.element-3 {
-  bottom: 30%;
-  left: 15%;
-  animation-delay: 4s;
-}
-
-.element-4 {
-  bottom: 15%;
-  right: 5%;
-  animation-delay: 1s;
-}
-
-.gradient-circle {
+/* 艺术字装饰 */
+.art-text {
   position: absolute;
-  border-radius: 50%;
-  opacity: 0.1;
-  background: linear-gradient(135deg, #ff6b6b, #feca57);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  opacity: 0.15;
+  z-index: 1;
+  pointer-events: none;
+  user-select: none;
 }
 
-.circle-1 {
-  width: 300px;
-  height: 300px;
-  top: -100px;
-  right: -100px;
+.art-text-main {
+  font-size: 120px;
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.8);
+  letter-spacing: 10px;
+  text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.4);
+  font-family: 'Arial Black', sans-serif;
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.3);
 }
 
-.circle-2 {
-  width: 200px;
-  height: 200px;
-  bottom: -50px;
-  left: -50px;
+.art-text-sub {
+  font-size: 48px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 8px;
+  margin-top: -20px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  -webkit-text-stroke: 0.5px rgba(255, 255, 255, 0.2);
 }
 
-.register-content {
+.artistic-text {
+  position: absolute;
+  font-family: 'Arial Black', Arial, sans-serif;
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.05);
+  user-select: none;
+  z-index: 1;
+}
+
+.artistic-text.student {
+  top: 25%;
+  right: 5%;
+  font-size: 60px;
+  transform: rotate(-15deg);
+  animation: shimmer 4s ease-in-out infinite;
+}
+
+.artistic-text.register {
+  bottom: 15%;
+  left: 5%;
+  font-size: 48px;
+  transform: rotate(10deg);
+  animation: shimmer 4s ease-in-out infinite 2s;
+}
+
+/* 书本图标装饰 */
+.book-decoration {
+  position: absolute;
+  bottom: 30%;
+  right: 25%;
+  width: 60px;
+  height: 45px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+  animation: float 6s ease-in-out infinite 1s;
+}
+
+.book-decoration::before {
+  content: '';
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  right: 5px;
+  bottom: 5px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+}
+
+/* 注册框样式 */
+.register-box {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
-  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   padding: 40px;
-  width: calc(100% - 40px);
-  max-width: 800px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  border-radius: 20px;
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  width: 100%;
+  max-width: 600px;
   position: relative;
   z-index: 10;
-  margin: 20px auto 0 auto;
-  flex-shrink: 0;
+  animation: slideInUp 0.8s ease-out;
 }
 
 .register-header {
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 30px;
+  position: relative;
 }
 
-.main-title {
-  font-size: 2.5rem;
+.register-title {
+  font-size: 28px;
   font-weight: 700;
   background: linear-gradient(135deg, #667eea, #764ba2);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin-bottom: 10px;
+  margin: 0 0 8px 0;
+  animation: fadeInDown 0.8s ease-out 0.2s both;
 }
 
-.sub-title {
-  font-size: 1.2rem;
+.register-subtitle {
+  font-size: 15px;
   color: #666;
-  margin-bottom: 15px;
-}
-
-.title-divider {
-  width: 60px;
-  height: 3px;
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  margin: 0 auto 15px;
-  border-radius: 2px;
-}
-
-.description {
-  color: #888;
-  font-size: 0.95rem;
-}
-
-.coach-register-form {
-  margin-bottom: 30px;
-}
-
-.form-section {
-  margin-bottom: 30px;
-  padding: 25px;
-  background: #f8f9fa;
-  border-radius: 12px;
-  border-left: 4px solid #667eea;
-}
-
-.section-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.section-icon {
-  font-size: 1.5rem;
-  margin-right: 12px;
-}
-
-.section-header h3 {
   margin: 0;
-  color: #2c3e50;
-  font-weight: 600;
+  animation: fadeInDown 0.8s ease-out 0.4s both;
 }
 
-.password-requirements,
-.achievement-tips {
-  margin-top: 8px;
-  padding: 12px;
-  background: #e8f4ff;
-  border-radius: 8px;
-  border-left: 3px solid #1890ff;
-  width: 100%;
+.register-form {
+  margin-bottom: 20px;
+  animation: fadeInUp 0.8s ease-out 0.6s both;
 }
 
-.avatar-upload-container {
-  display: flex;
-  align-items: flex-start;
-  gap: 20px;
+.password-tips {
+  margin-top: -15px;
+  margin-bottom: 20px;
+  animation: fadeInUp 0.8s ease-out 0.8s both;
 }
 
-.avatar-upload-area {
-  width: 120px;
-  height: 120px;
-  border: 2px dashed #dcdfe6;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.avatar-upload-area:hover {
-  border-color: #409eff;
-  transform: scale(1.05);
-}
-
-.avatar-preview {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 50%;
-}
-
-.avatar-placeholder {
-  text-align: center;
-  color: #8c939d;
-}
-
-.upload-icon {
-  margin-bottom: 8px;
-}
-
-.uploading-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(255, 255, 255, 0.9);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.loading-icon {
-  animation: rotate 2s linear infinite;
-}
-
-.upload-tips {
-  flex: 1;
-  color: #666;
-  font-size: 0.85rem;
-}
-
-.upload-tips p {
-  margin: 4px 0;
-}
-
-.agreement-section {
-  margin: 25px 0;
-  padding: 20px;
-  background: #f0f8ff;
-  border-radius: 8px;
-}
-
-.submit-section {
-  margin-top: 30px;
-}
-
-.register-btn {
-  width: 100%;
-  height: 50px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  border: none;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-}
-
-.register-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
-}
-
-.audit-notice {
-  margin-top: 20px;
-}
-
-.register-footer {
-  text-align: center;
-  padding-top: 20px;
-  border-top: 1px solid #c0c0c0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-}
-
-.login-tip-text {
-  font-size: 16px;
-  color: #409EFF;
-  font-weight: 500;
-}
-.login-tip-link {
-  font-size: 16px;
-  color: #409EFF;
-  font-weight: 500;
-  margin-left: 2px;
-  vertical-align: baseline;
-}
-
-.agreement-content {
-  max-height: 60vh;
-  overflow-y: auto;
-  padding: 10px;
-}
-
+/* 动画定义 */
 @keyframes float {
-
   0%,
   100% {
-    transform: translateY(0) rotate(0deg);
+    transform: translateY(0px) rotate(0deg);
   }
 
   50% {
@@ -801,74 +575,83 @@ onMounted(() => {
   }
 }
 
-/* 响应式设计 */
+@keyframes shimmer {
+  0%,
+  100% {
+    opacity: 0.05;
+  }
+
+  50% {
+    opacity: 0.12;
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.register-button {
+  width: 100%;
+  height: 44px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.register-footer {
+  text-align: center;
+  padding-top: 20px;
+  border-top: 1px solid #e8e8e8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.register-footer p {
+  margin: 0;
+  font-size: 14px;
+  color: #666;
+}
+
 @media (max-width: 768px) {
-  .coach-register-container {
-    padding: 10px 0 80px 0;
+  .register-box {
+    padding: 30px 20px;
   }
 
-  .register-content {
-    padding: 25px;
-    margin: 10px auto 0 auto;
-    width: calc(100% - 20px);
+  .register-title {
+    font-size: 20px;
   }
-
-  .main-title {
-    font-size: 2rem;
-  }
-
-  .form-section {
-    padding: 20px;
-  }
-
-  .avatar-upload-container {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .upload-tips {
-    text-align: center;
-    margin-top: 15px;
-  }
-}
-
-@media (max-width: 480px) {
-  .coach-register-container {
-    padding: 10px 0 60px 0;
-  }
-
-  .register-content {
-    padding: 20px;
-    margin: 5px auto 0 auto;
-    width: calc(100% - 10px);
-  }
-
-  .main-title {
-    font-size: 1.8rem;
-  }
-
-  .form-section {
-    padding: 15px;
-  }
-}
-</style>
-
-<style>
-/* 全局样式，确保页面滚动正常 */
-html,
-body {
-  height: auto !important;
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
-}
-
-#app {
-  height: auto !important;
-  min-height: 100vh !important;
-}
-
-.router-view {
-  height: auto !important;
-  min-height: 100vh !important;
 }
 </style>
