@@ -149,21 +149,24 @@ const handleLogin = async () => {
     loading.value = true
 
     // session验证机制，调用后端API
-    const loginData = {
-      username: loginForm.username.trim(),
-      password: loginForm.password,
-    }
-    const res = await api.post('/user/login', loginData, { withCredentials: true })
-    if (res && res.data && res.data.success) {
-      ElMessage.success('登录成功')
-      // session已由后端写入，前端只需跳转
-      router.push('/dashboard')
-    } else {
-      ElMessage.error(res.data?.message || '登录失败，请检查用户名和密码')
-    }
+    // Ktor auth-form 认证要求 application/x-www-form-urlencoded
+    const loginData = new URLSearchParams()
+    loginData.append('username', loginForm.username.trim())
+    loginData.append('password', loginForm.password)
+    const res = await api.post('/user/login', loginData, {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      withCredentials: true
+    })
+        if (res && res.status === 200 && res.data && res.data.username) {
+          ElMessage.success('登录成功')
+          // session已由后端写入，前端只需跳转
+          router.push('/dashboard')
+        } else {
+          ElMessage.error(res.data?.message || '登录失败，请检查用户名和密码')
+        }
   } catch (error) {
     console.error('登录错误:', error)
-    ElMessage.error('登录失败，请稍后重试')
+     ElMessage.error('登录失败，请稍后重试')
   } finally {
     loading.value = false
   }

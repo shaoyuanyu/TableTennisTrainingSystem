@@ -2,18 +2,20 @@ import axios from 'axios'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/user'
 
-// 创建axios实例
+// 创建axios实例，统一携带 cookie
 const api = axios.create({
   baseURL: import.meta.env.DEV ? '/api' : 'http://49.140.92.33:8080',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true // 所有请求自动携带 cookie
 })
 
-// 请求拦截器
+// 请求拦截器，确保所有请求都带 withCredentials
 api.interceptors.request.use(
   (config) => {
+    config.withCredentials = true
     const userStore = useUserStore()
     if (userStore.token) {
       config.headers.Authorization = `Bearer ${userStore.token}`
