@@ -4,7 +4,7 @@ import { useUserStore } from '@/stores/user'
 
 // 创建axios实例，统一携带 cookie
 const api = axios.create({
-  baseURL: import.meta.env.DEV ? '/api' : 'http://49.140.92.33:8080',
+  baseURL: import.meta.env.VITE_API_BASE_URL,
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
