@@ -11,6 +11,9 @@ import zhCn from 'element-plus/es/locale/lang/zh-cn'
 import App from './App.vue'
 import router from './router'
 
+// 导入权限指令
+import { permissionDirective } from '@/composables/usePermissions'
+
 const app = createApp(App)
 
 // 配置 Element Plus
@@ -24,6 +27,9 @@ app.use(ElementPlus, {
 Object.entries(ElementPlusIconsVue).forEach(([key, component]) => {
   app.component(`el-icon-${key.toLowerCase()}`, component)
 })
+
+// 注册全局权限指令
+app.directive('permission', permissionDirective)
 
 // 注册状态管理和路由
 app.use(createPinia())

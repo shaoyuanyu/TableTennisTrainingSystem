@@ -69,15 +69,15 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { ElMessageBox } from 'element-plus'
 import { Expand, Bell, User, ArrowDown, Setting, SwitchButton } from '@element-plus/icons-vue'
 import AppSidebar from '@/components/AppSidebar.vue'
-
 import { useMessageStore } from '@/stores/messageStore'
 import { storeToRefs } from 'pinia'
+import { initializeAuth } from '@/utils/auth'
 
 // 使用 Pinia Store
 const messageStore = useMessageStore()
@@ -94,7 +94,10 @@ const sidebarWidth = computed(() => (sidebarCollapsed.value ? '64px' : '220px'))
 const userInfo = computed(() => userStore.userInfo)
 const userName = computed(() => userStore.userName)
 
-
+// 初始化认证状态
+onMounted(async () => {
+  await initializeAuth()
+})
 
 // 切换侧边栏
 const toggleSidebar = () => {

@@ -175,7 +175,7 @@
         <el-icon>
           <Grid />
         </el-icon>
-        <template #title>页面广场</template>
+        <template #title>开发测试控制台</template>
       </el-menu-item>
     </el-menu>
   </div>
@@ -184,7 +184,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { useUserStore } from '@/stores/user'
+import { usePermissions } from '@/composables/usePermissions'
 import {
   Odometer,
   Setting,
@@ -214,16 +214,15 @@ defineProps({
 })
 
 const route = useRoute()
-const userStore = useUserStore()
+const { 
+  isSuperAdmin, 
+  isCampusAdmin, 
+  isStudent, 
+  isCoach
+} = usePermissions()
 
 // 当前激活的菜单项
 const activeMenu = computed(() => route.path)
-
-// 用户角色判断
-const isSuperAdmin = computed(() => userStore.isSuperAdmin)
-const isCampusAdmin = computed(() => userStore.isCampusAdmin)
-const isStudent = computed(() => userStore.isStudent)
-const isCoach = computed(() => userStore.isCoach)
 </script>
 
 <style scoped>

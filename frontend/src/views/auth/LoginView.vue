@@ -108,7 +108,6 @@ import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { ElMessage } from 'element-plus'
 import { User, Lock } from '@element-plus/icons-vue'
-import api from '@/utils/api'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -148,25 +147,41 @@ const handleLogin = async () => {
 
     loading.value = true
 
-    // session验证机制，调用后端API
-    // Ktor auth-form 认证要求 application/x-www-form-urlencoded
-    const loginData = new URLSearchParams()
-    loginData.append('username', loginForm.username.trim())
-    loginData.append('password', loginForm.password)
-    const res = await api.post('/user/login', loginData, {
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      withCredentials: true
+    // 使用用户store的login方法
+    const result = await userStore.login({
+      username: loginForm.username,
+      password: loginForm.password
     })
-        if (res && res.status === 200 && res.data && res.data.username) {
-          ElMessage.success('登录成功')
-          // session已由后端写入，前端只需跳转
-          router.push('/dashboard')
-        } else {
-          ElMessage.error(res.data?.message || '登录失败，请检查用户名和密码')
-        }
+
+    if (result.success) {
+      ElMessage.success('登录成功')
+      
+      // 等待更长时间确保session完全建立和用户状态更新完成
+      await new Promise(resolve => setTimeout(resolve, 500))
+      
+      // 开发环境下输出调试信息
+      if (import.meta.env.DEV) {
+        console.log('登录成功后用户状态:', {
+          isLoggedIn: userStore.isLoggedIn,
+          userRole: userStore.userRole,
+          hasUserInfo: !!userStore.userInfo.id,
+          originalRole: result.user.role,
+          normalizedRole: userStore.userRole
+        })
+      }
+      
+      // 根据用户角色跳转到对应页面
+      const { getDefaultHomePage } = await import('@/utils/permissions')
+      const homePage = getDefaultHomePage(userStore.userRole) // 使用标准化后的角色
+      
+      console.log('即将跳转到首页:', homePage)
+      await router.push(homePage)
+    } else {
+      ElMessage.error(result.message || '登录失败，请检查用户名和密码')
+    }
   } catch (error) {
     console.error('登录错误:', error)
-     ElMessage.error('登录失败，请稍后重试')
+    ElMessage.error('登录失败，请稍后重试')
   } finally {
     loading.value = false
   }

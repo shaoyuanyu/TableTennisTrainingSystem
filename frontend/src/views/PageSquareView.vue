@@ -11,8 +11,8 @@
       <div class="navigation-decoration target-icon">🎯</div>
 
       <div class="art-text">
-        <div class="art-text-main">PAGES</div>
-        <div class="art-text-sub">页面广场</div>
+        <div class="art-text-main">CONSOLE</div>
+        <div class="art-text-sub">开发测试控制台</div>
       </div>
 
       <div class="geometric-decoration geo-1"></div>
@@ -78,7 +78,7 @@
       </el-card>
 
       <div class="page-header">
-        <h1>🎯 页面广场 - 测试导航中心</h1>
+        <h1>🎯 开发测试控制台 - 测试导航中心</h1>
         <p>乒乓球培训管理系统 - 所有页面功能测试</p>
         <div class="stats">
           <span class="stat-item">总页面: {{ totalPages }}</span>
@@ -271,10 +271,16 @@
         <template #header>
           <div class="section-header">
             <span class="icon">🔧</span>
-            <span>测试工具</span>
+            <span>开发工具</span>
           </div>
         </template>
         <div class="tools-grid">
+          <el-button type="danger" size="large" @click="goToDebugPage">
+            <el-icon>
+              <Tools />
+            </el-icon>
+            权限系统调试
+          </el-button>
           <el-button type="primary" @click="markAllTested">
             <el-icon>
               <Check />
@@ -316,10 +322,13 @@ import {
   View,
   Delete,
   InfoFilled,
+  Tools,
 } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
+import { useRouter } from 'vue-router'
 
 const userStore = useUserStore()
+const router = useRouter()
 
 // 角色控制台相关状态
 const currentRole = ref('guest')
@@ -511,6 +520,12 @@ const showRolePermissions = () => {
       type: 'info',
     },
   )
+}
+
+// 跳转到调试页面
+const goToDebugPage = () => {
+  router.push('/debug')
+  ElMessage.success('正在跳转到权限系统调试页面...')
 }
 
 // 从 localStorage 获取测试状态
@@ -734,8 +749,15 @@ const commonPages = ref([
     tested: false,
   },
   {
+    path: '/debug',
+    title: '权限系统调试',
+    description: '权限系统状态诊断和调试工具',
+    icon: '🔧',
+    tested: false,
+  },
+  {
     path: '/page-square',
-    title: '页面广场',
+    title: '开发测试控制台',
     description: '测试导航中心（当前页面）',
     icon: '🎯',
     tested: true,
