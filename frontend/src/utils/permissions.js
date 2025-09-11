@@ -29,12 +29,8 @@ export const PAGE_PERMISSIONS = {
   '/login': ['*'],
   '/register/student': ['*'],
   '/register/coach': ['*'],
-  '/dashboard': [
-    USER_ROLES.SUPER_ADMIN,
-    USER_ROLES.CAMPUS_ADMIN,
-    USER_ROLES.STUDENT,
-    USER_ROLES.COACH,
-  ],
+  '/dashboard': ['*'], // 允许游客访问首页
+  '/dev-tools': ['*'], // 开发工具允许游客访问
 
   // 超级管理员页面
   '/admin/campus': [USER_ROLES.SUPER_ADMIN],

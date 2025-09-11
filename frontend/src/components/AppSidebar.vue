@@ -170,13 +170,33 @@
       <!-- 通用菜单 -->
       <!-- 消息中心和个人中心已移至头部栏，避免重复 -->
 
-      <!-- 系统工具（如需要） -->
-      <el-menu-item index="/page-square" class="menu-item">
-        <el-icon>
-          <Grid />
-        </el-icon>
-        <template #title>开发测试控制台</template>
-      </el-menu-item>
+      <!-- 开发工具 -->
+      <el-sub-menu index="dev-tools" class="menu-item">
+        <template #title>
+          <el-icon>
+            <Grid />
+          </el-icon>
+          <span>开发工具</span>
+        </template>
+        <el-menu-item index="/dev-tools?tool=debug">
+          <el-icon>
+            <Setting />
+          </el-icon>
+          <template #title>权限调试</template>
+        </el-menu-item>
+        <el-menu-item index="/dev-tools?tool=roles">
+          <el-icon>
+            <User />
+          </el-icon>
+          <template #title>角色测试</template>
+        </el-menu-item>
+        <el-menu-item index="/dev-tools?tool=pages">
+          <el-icon>
+            <Document />
+          </el-icon>
+          <template #title>页面测试</template>
+        </el-menu-item>
+      </el-sub-menu>
     </el-menu>
   </div>
 </template>

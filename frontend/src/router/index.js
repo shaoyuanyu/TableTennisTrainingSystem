@@ -9,7 +9,7 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      redirect: '/login',
+      redirect: '/dashboard', // 游客和用户都跳转到首页
     },
 
     // 认证相关页面
@@ -17,12 +17,6 @@ const router = createRouter({
       path: '/login',
       name: 'Login',
       component: () => import('@/views/auth/LoginView.vue'),
-      meta: { requiresAuth: false },
-    },
-    {
-      path: '/debug',
-      name: 'Debug',
-      component: () => import('@/views/DebugView.vue'),
       meta: { requiresAuth: false },
     },
     {
@@ -44,15 +38,14 @@ const router = createRouter({
       component: () => import('@/layouts/MainLayout.vue'),
       meta: { requiresAuth: true },
       children: [
-        // 仪表盘 - 根据角色显示对应仪表板
+        // 仪表盘 - 根据角色显示对应仪表板，游客也可访问
         {
           path: 'dashboard',
           name: 'Dashboard',
           component: () => import('@/views/HomeView.vue'),
           meta: { 
-            requiresAuth: true,
-            title: '仪表盘',
-            roles: ['super_admin', 'campus_admin', 'student', 'coach']
+            requiresAuth: false, // 允许游客访问
+            title: '仪表盘'
           }
         },
 
@@ -286,13 +279,12 @@ const router = createRouter({
           }
         },
         {
-          path: 'page-square',
-          name: 'PageSquare',
-          component: () => import('@/views/PageSquareView.vue'),
+          path: 'dev-tools',
+          name: 'DevTools',
+          component: () => import('@/views/DevToolsView.vue'),
           meta: { 
-            requiresAuth: true,
-            title: '页面广场',
-            roles: ['super_admin', 'campus_admin', 'student', 'coach']
+            requiresAuth: false, // 允许游客访问
+            title: '开发工具'
           }
         },
       ],
@@ -322,9 +314,9 @@ router.beforeEach(async (to, from, next) => {
     要求角色: to.meta.roles
   })
 
-  // 如果是调试页面，直接通过
-  if (to.path === '/debug') {
-    console.log('✅ 调试页面，直接通过')
+  // 如果是开发工具页面，直接通过
+  if (to.path === '/dev-tools') {
+    console.log('✅ 开发工具页面，直接通过')
     next()
     return
   }

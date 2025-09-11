@@ -9,14 +9,14 @@
 
       <div class="header-right">
         <!-- 消息通知 -->
-<el-tooltip content="消息中心" placement="bottom">
-  <el-badge :value="unreadCount" :hidden="unreadCount === 0" class="notification-badge">
-    <el-button :icon="Bell" @click="goToMessages" circle text class="header-button" />
-  </el-badge>
-</el-tooltip>
+        <el-tooltip content="消息中心" placement="bottom" v-if="userStore.isLoggedIn">
+          <el-badge :value="unreadCount" :hidden="unreadCount === 0" class="notification-badge">
+            <el-button :icon="Bell" @click="goToMessages" circle text class="header-button" />
+          </el-badge>
+        </el-tooltip>
 
-        <!-- 用户下拉菜单 -->
-        <el-dropdown @command="handleUserCommand" class="user-dropdown">
+        <!-- 用户下拉菜单（登录用户） -->
+        <el-dropdown @command="handleUserCommand" class="user-dropdown" v-if="userStore.isLoggedIn">
           <span class="user-info">
             <el-avatar :size="32" :src="userInfo.avatar">
               <el-icon>
@@ -51,6 +51,35 @@
             </el-dropdown-menu>
           </template>
         </el-dropdown>
+
+        <!-- 游客登录按钮 -->
+        <div class="guest-actions" v-else>
+          <el-button type="primary" @click="goToLogin">登录</el-button>
+          <el-dropdown @command="handleRegisterCommand">
+            <el-button>
+              注册
+              <el-icon class="el-icon--right">
+                <ArrowDown />
+              </el-icon>
+            </el-button>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item command="student">
+                  <el-icon>
+                    <User />
+                  </el-icon>
+                  学员注册
+                </el-dropdown-item>
+                <el-dropdown-item command="coach">
+                  <el-icon>
+                    <User />
+                  </el-icon>
+                  教练注册
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+        </div>
       </div>
     </el-header>
 
@@ -107,6 +136,20 @@ const toggleSidebar = () => {
 // 前往消息页面
 const goToMessages = () => {
   router.push('/messages')
+}
+
+// 前往登录页面
+const goToLogin = () => {
+  router.push('/login')
+}
+
+// 处理注册命令
+const handleRegisterCommand = (command) => {
+  if (command === 'student') {
+    router.push('/register/student')
+  } else if (command === 'coach') {
+    router.push('/register/coach')
+  }
 }
 
 // 处理用户菜单命令
@@ -219,6 +262,12 @@ const handleUserCommand = async (command) => {
 .dropdown-icon {
   color: #999;
   font-size: 12px;
+}
+
+.guest-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .sidebar {
