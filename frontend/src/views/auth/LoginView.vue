@@ -153,7 +153,7 @@ const handleLogin = async () => {
       username: loginForm.username.trim(),
       password: loginForm.password,
     }
-    const res = await api.post('/auth/login', loginData, { withCredentials: true })
+    const res = await api.post('/user/login', loginData, { withCredentials: true })
     if (res && res.data && res.data.success) {
       ElMessage.success('登录成功')
       // session已由后端写入，前端只需跳转
