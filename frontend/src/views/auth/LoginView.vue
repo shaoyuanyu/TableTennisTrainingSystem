@@ -106,10 +106,9 @@
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
-// 原权限相关导入 - 暂时注释掉，权限管理将在后端实现
-// import { getDefaultHomePage } from '@/utils/permissions'
 import { ElMessage } from 'element-plus'
 import { User, Lock } from '@element-plus/icons-vue'
+import api from '@/utils/api'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -149,22 +148,18 @@ const handleLogin = async () => {
 
     loading.value = true
 
-    const success = await userStore.login({
-      username: loginForm.username,
+    // session验证机制，调用后端API
+    const loginData = {
+      username: loginForm.username.trim(),
       password: loginForm.password,
-      remember: loginForm.remember,
-    })
-
-    if (success) {
+    }
+    const res = await api.post('/auth/login', loginData, { withCredentials: true })
+    if (res && res.data && res.data.success) {
       ElMessage.success('登录成功')
-      // 原有的权限检查逻辑 - 暂时注释掉
-      // const homePage = getDefaultHomePage(userStore.userRole)
-      // router.push(homePage)
-
-      // 临时简化逻辑 - 直接跳转到仪表盘
+      // session已由后端写入，前端只需跳转
       router.push('/dashboard')
     } else {
-      ElMessage.error('登录失败，请检查用户名和密码')
+      ElMessage.error(res.data?.message || '登录失败，请检查用户名和密码')
     }
   } catch (error) {
     console.error('登录错误:', error)
