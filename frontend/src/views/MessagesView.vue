@@ -5,16 +5,16 @@
       <div class="particle-network"></div>
       <div class="floating-icons">
         <div class="floating-icon" style="top: 15%; left: 10%; animation-delay: 0s;">
-          <el-icon-message />
+          <el-icon><Message /></el-icon>
         </div>
         <div class="floating-icon" style="top: 25%; right: 12%; animation-delay: 1s;">
-          <el-icon-bell />
+          <el-icon><Bell /></el-icon>
         </div>
         <div class="floating-icon" style="bottom: 20%; left: 15%; animation-delay: 2s;">
-          <el-icon-chat-dot-round />
+          <el-icon><ChatDotRound /></el-icon>
         </div>
         <div class="floating-icon" style="bottom: 30%; right: 10%; animation-delay: 3s;">
-          <el-icon-postcard />
+          <el-icon><Postcard /></el-icon>
         </div>
       </div>
     </div>
@@ -25,7 +25,7 @@
         <div class="messages-header">
           <div class="header-title">
             <el-icon class="header-icon">
-              <el-icon-message />
+              <Message />
             </el-icon>
             <span>消息中心</span>
             <el-badge :value="unreadCount" :max="99" class="unread-badge" />
@@ -35,12 +35,12 @@
               <el-button type="primary" :disabled="!hasUnread">
                 <span>标为已读</span>
                 <el-icon class="el-icon--right">
-                  <el-icon-arrow-down />
+                  <ArrowDown />
                 </el-icon>
               </el-button>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item  @click="messageStore.markAllRead">全部标为已读</el-dropdown-item>
+                  <el-dropdown-item @click="messageStore.markAllRead">全部标为已读</el-dropdown-item>
                   <el-dropdown-item @click="markPageRead">本页标为已读</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
@@ -53,13 +53,13 @@
       <!-- 筛选区域 -->
       <div class="message-filters">
         <el-radio-group v-model="activeFilter" @change="filterMessages">
- <el-radio-button label="all">全部</el-radio-button>
-  <el-radio-button label="unread">未读</el-radio-button>
-  <el-radio-button label="system">系统通知</el-radio-button>
-  <el-radio-button label="appointment">预约相关</el-radio-button>
-  <el-radio-button label="evaluation">评价反馈</el-radio-button>
-  <el-radio-button label="event">赛事消息</el-radio-button>
-  <el-radio-button label="reminder">课程提醒</el-radio-button>
+          <el-radio-button label="all">全部</el-radio-button>
+          <el-radio-button label="unread">未读</el-radio-button>
+          <el-radio-button label="system">系统通知</el-radio-button>
+          <el-radio-button label="appointment">预约相关</el-radio-button>
+          <el-radio-button label="evaluation">评价反馈</el-radio-button>
+          <el-radio-button label="event">赛事消息</el-radio-button>
+          <el-radio-button label="reminder">课程提醒</el-radio-button>
         </el-radio-group>
 
         <div class="filter-right">
@@ -72,7 +72,7 @@
             @keyup.enter="searchMessages"
           >
             <template #prefix>
-              <el-icon><el-icon-search /></el-icon>
+              <el-icon><Search /></el-icon>
             </template>
           </el-input>
         </div>
@@ -88,9 +88,9 @@
           @click="handleMessageClick(message)"
         >
           <div class="message-icon">
-<el-avatar :size="40" :src="message.avatar">
-  <component :is="getMessageIcon(message.type)" />
-</el-avatar>
+            <el-avatar :size="40" :src="message.avatar">
+              <component :is="getMessageIcon(message.type)" />
+            </el-avatar>
           </div>
 
           <div class="message-content">
@@ -108,15 +108,15 @@
           </div>
 
           <div class="message-actions">
-  <el-button
-    size="small"
-    type="danger"
-    plain
-    @click.stop="messageStore.deleteMessage(message.id)"
-  >
-    删除
-  </el-button>
-</div>
+            <el-button
+              size="small"
+              type="danger"
+              plain
+              @click.stop="messageStore.deleteMessage(message.id)"
+            >
+              删除
+            </el-button>
+          </div>
         </div>
 
         <el-empty v-if="filteredMessages.length === 0" description="暂无消息" />
@@ -128,7 +128,7 @@
           v-model:current-page="currentPage"
           v-model:page-size="pageSize"
           :total="totalMessages"
-          :page-size="3"
+          :page-size="5"
           layout="total, prev, pager, next, jumper"
           @size-change="handleSizeChange"
           @current-change="handlePageChange"
@@ -164,46 +164,41 @@
 
     <!-- 浮动操作按钮 -->
     <div class="floating-action-buttons">
-
-
       <transition-group name="fab-item">
         <el-tooltip v-if="fabMenuOpen" content="全部标为已读" placement="left">
           <el-button class="fab-item" type="success" circle @click="messageStore.markAllRead">
-            <el-icon><el-icon-check /></el-icon>
+            <el-icon><Check /></el-icon>
           </el-button>
         </el-tooltip>
 
         <el-tooltip v-if="fabMenuOpen" content="清空消息" placement="left">
           <el-button class="fab-item" type="danger" circle @click="messageStore.clearAll">
-            <el-icon><el-icon-delete /></el-icon>
+            <el-icon><Delete /></el-icon>
           </el-button>
         </el-tooltip>
+        
         <el-tooltip content="快捷操作" placement="left">
-        <el-button class="fab-main" type="primary" circle @click="toggleFabMenu">
-          <el-icon><el-icon-more /></el-icon>
-        </el-button>
-      </el-tooltip>
-
-        <!-- <el-tooltip v-if="fabMenuOpen" content="刷新消息" placement="left">
-          <el-button class="fab-item" type="info" circle @click="refreshMessages">
-            <el-icon><el-icon-refresh /></el-icon>
+          <el-button class="fab-main" type="primary" circle @click="toggleFabMenu">
+            <el-icon><More /></el-icon>
           </el-button>
-        </el-tooltip> -->
+        </el-tooltip>
       </transition-group>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useMessageStore } from '@/stores/messageStore'
 import { storeToRefs } from 'pinia'
-
+import { 
+  Message, Bell, ChatDotRound, Postcard, ArrowDown, Search, Check, Delete, More,
+  Setting, Calendar, Star, User, Trophy
+} from '@element-plus/icons-vue'
 
 const messageStore = useMessageStore()
 const {
-  messages,
   unreadCount,
   hasUnread,
   activeFilter,
@@ -214,20 +209,22 @@ const {
   selectedMessage,
   filteredMessages,
   paginatedMessages,
-  totalMessages
+  totalMessages,
 } = storeToRefs(messageStore)
+
 const fabMenuOpen = ref(false)
-// 模拟API接口
+
+// 消息类型相关函数
 const getMessageIcon = (type) => {
   const iconMap = {
-    system: 'el-icon-setting',
-    appointment: 'el-icon-calendar',
-    evaluation: 'el-icon-star',
-    user: 'el-icon-user',
-    event: 'el-icon-trophy',
-    reminder: 'el-icon-bell'
+    system: Setting,
+    appointment: Calendar,
+    evaluation: Star,
+    user: User,
+    event: Trophy,
+    reminder: Bell
   }
-  return iconMap[type] || 'el-icon-bell'
+  return iconMap[type] || Bell
 }
 
 const getMessageTypeColor = (type) => {
@@ -286,7 +283,6 @@ const formatDetailTime = (time) => {
   return `${year}-${month}-${day} ${hours}:${minutes}`
 }
 
-// 操作方法
 const handleMessageClick = (message) => {
   selectedMessage.value = message
   detailDialogVisible.value = true
@@ -310,11 +306,6 @@ const markPageRead = async () => {
   } catch {
     // 用户取消
   }
-}
-
-const refreshMessages = () => {
-  messageStore.fetchMessages()
-  ElMessage.success('消息已刷新')
 }
 
 const filterMessages = () => {
@@ -343,41 +334,22 @@ const toggleFabMenu = () => {
   fabMenuOpen.value = !fabMenuOpen.value
 }
 
-// 初始化
 onMounted(() => {
-  messageStore.fetchMessages()
+  console.log('MessagesViewFinal mounted')
+  try {
+    messageStore.fetchMessages()
+  } catch (error) {
+    console.error('Error fetching messages:', error)
+  }
 })
 </script>
 
-<style scoped lang="scss">
+<style scoped>
 .messages-view {
   position: relative;
-  height: 100vh;
+  min-height: 100vh;
   padding: 20px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  overflow: hidden;
-    /* 原有样式保持不变 */
-
-  /* 新增样式示例 */
-  .special-messages {
-    margin-top: 20px;
-    border: 1px solid var(--el-border-color-light);
-    border-radius: 4px;
-
-    .special-message {
-      padding: 12px;
-      &:hover {
-        background-color: var(--el-color-primary-light-9);
-      }
-    }
-  }
-
-  /* 响应式调整示例 */
-  @media (max-width: 768px) {
-    .message-item {
-      flex-direction: column;
-    }
-  }
 }
 
 .background-3d {
@@ -389,34 +361,30 @@ onMounted(() => {
   z-index: 0;
   overflow: hidden;
 
-  .particle-network {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, transparent 70%);
-  }
+}
 
-  .floating-icons {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+.background-3d .particle-network {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, transparent 70%);
+}
 
-    .floating-icon {
-      position: absolute;
-      font-size: 32px;
-      color: rgba(255, 255, 255, 0.15);
-      animation: float 6s ease-in-out infinite;
+.background-3d .floating-icons {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
 
-      :deep(svg) {
-        width: 1em;
-        height: 1em;
-      }
-    }
-  }
+.background-3d .floating-icons .floating-icon {
+  position: absolute;
+  font-size: 32px;
+  color: rgba(255, 255, 255, 0.15);
+  animation: float 6s ease-in-out infinite;
 }
 
 .main-card {
@@ -429,53 +397,53 @@ onMounted(() => {
   border: none;
   overflow: hidden;
 
-  :deep(.el-card__header) {
-    background: linear-gradient(to right, #409EFF, #64b5ff);
-    color: white;
-    padding: 16px 24px;
-    border-bottom: none;
+}
 
-    .messages-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+.main-card :deep(.el-card__header) {
+  background: linear-gradient(to right, #409EFF, #64b5ff);
+  color: white;
+  padding: 16px 24px;
+  border-bottom: none;
+}
 
-      .header-title {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        font-weight: 600;
-        font-size: 18px;
-        color: white;
+.messages-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
 
-        .header-icon {
-          font-size: 24px;
-        }
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+  font-size: 18px;
+  color: white;
+}
 
-        .unread-badge {
-          :deep(.el-badge__content) {
-            background: #ff4d4f;
-            border: 2px solid white;
-          }
-        }
-      }
+.header-title .header-icon {
+  font-size: 24px;
+}
 
-      .header-actions {
-        display: flex;
-        gap: 12px;
-          .el-dropdown .el-button {
-    min-width: 100px;  // 设置最小宽度
-    padding: 0 15px;  // 调整内边距
+.header-title .unread-badge :deep(.el-badge__content) {
+  background: #ff4d4f;
+  border: 2px solid white;
+}
 
-    span {
-      display: inline-block;
-      width: 100%;
-      text-align: center;
-    }
-  }
-      }
-    }
-  }
+.header-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.header-actions .el-dropdown .el-button {
+  min-width: 100px;
+  padding: 0 15px;
+}
+
+.header-actions .el-dropdown .el-button span {
+  display: inline-block;
+  width: 100%;
+  text-align: center;
 }
 
 .message-filters {
@@ -489,10 +457,11 @@ onMounted(() => {
   margin: 16px 24px;
   border: 1px solid rgba(255, 255, 255, 0.3);
 
-  .filter-right {
-    display: flex;
-    align-items: center;
-  }
+}
+
+.message-filters .filter-right {
+  display: flex;
+  align-items: center;
 }
 
 .message-list {
@@ -515,43 +484,20 @@ onMounted(() => {
   margin-bottom: 12px;
   border: 1px solid rgba(255, 255, 255, 0.2);
 
-    &[data-type="event"] {
-    border-left: 4px solid #F56C6C;
-    background: linear-gradient(135deg, rgba(245, 108, 108, 0.1), rgba(255, 255, 255, 0.7));
-  }
-
-  // 课程提醒特殊样式
-  &[data-type="reminder"] {
-    border-left: 4px solid #E6A23C;
-    background: linear-gradient(135deg, rgba(190, 60, 230, 0.1), rgba(255, 255, 255, 0.7));
-  }
-  &:hover {
-    background: rgba(255, 255, 255, 0.8);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  }
-
-  &.unread {
-    background: linear-gradient(135deg, rgba(24, 144, 255, 0.1), rgba(255, 255, 255, 0.7));
-    border-left: 4px solid #1890ff;
-    box-shadow: 0 2px 15px rgba(24, 144, 255, 0.1);
-  }
 }
-.el-tag {
-  // ...原有样式...
 
-  // 赛事消息标签
-  &[type="event"] {
-    background-color: #F56C6C;
-    color: white;
-  }
-
-  // 课程提醒标签
-  &[type="reminder"] {
-    background-color: #be3ce6;
-    color: white;
-  }
+.message-item:hover {
+  background: rgba(255, 255, 255, 0.8);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
+
+.message-item.unread {
+  background: linear-gradient(135deg, rgba(24, 144, 255, 0.1), rgba(255, 255, 255, 0.7));
+  border-left: 4px solid #1890ff;
+  box-shadow: 0 2px 15px rgba(24, 144, 255, 0.1);
+}
+
 .message-content {
   flex: 1;
   min-width: 0;
@@ -563,17 +509,18 @@ onMounted(() => {
   justify-content: space-between;
   margin-bottom: 8px;
 
-  .message-title {
-    font-weight: 600;
-    font-size: 16px;
-    color: #333;
-  }
+}
 
-  .message-time {
-    font-size: 12px;
-    color: #999;
-    white-space: nowrap;
-  }
+.message-header .message-title {
+  font-weight: 600;
+  font-size: 16px;
+  color: #333;
+}
+
+.message-header .message-time {
+  font-size: 12px;
+  color: #999;
+  white-space: nowrap;
 }
 
 .message-summary {
@@ -593,10 +540,11 @@ onMounted(() => {
   align-items: center;
   gap: 12px;
 
-  .message-from {
-    font-size: 12px;
-    color: #999;
-  }
+}
+
+.message-meta .message-from {
+  font-size: 12px;
+  color: #999;
 }
 
 .message-actions {
@@ -617,23 +565,24 @@ onMounted(() => {
 .message-detail {
   line-height: 1.6;
 
-  .detail-meta {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 16px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid #e8e8e8;
-    font-size: 14px;
-    color: #666;
-  }
+}
 
-  .detail-content {
-    color: #333;
+.message-detail .detail-meta {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e8e8e8;
+  font-size: 14px;
+  color: #666;
+}
 
-    :deep(p) {
-      margin: 8px 0;
-    }
-  }
+.message-detail .detail-content {
+  color: #333;
+}
+
+.message-detail .detail-content :deep(p) {
+  margin: 8px 0;
 }
 
 .floating-action-buttons {
@@ -646,29 +595,29 @@ onMounted(() => {
   gap: 16px;
   z-index: 100;
 
-  .fab-main {
-    width: 56px;
-    height: 56px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-
-    .el-icon {
-      font-size: 24px;
-    }
-  }
-
-  .fab-item {
-    width: 48px;
-    height: 48px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-    transition: all 0.3s ease;
-
-    .el-icon {
-      font-size: 20px;
-    }
-  }
 }
 
-/* 动画定义 */
+.floating-action-buttons .fab-main {
+  width: 56px;
+  height: 56px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.floating-action-buttons .fab-main .el-icon {
+  font-size: 24px;
+}
+
+.floating-action-buttons .fab-item {
+  width: 48px;
+  height: 48px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  transition: all 0.3s ease;
+}
+
+.floating-action-buttons .fab-item .el-icon {
+  font-size: 20px;
+}
+
 @keyframes float {
   0%, 100% {
     transform: translateY(0px) rotate(0deg);
@@ -695,32 +644,34 @@ onMounted(() => {
     padding: 16px;
   }
 
+}
+
+@media (max-width: 768px) {
   .message-filters {
     flex-direction: column;
     gap: 12px;
-
-    .filter-right {
-      width: 100%;
-
-      .el-input {
-        width: 100%;
-      }
-    }
   }
-
+  
+  .message-filters .filter-right {
+    width: 100%;
+  }
+  
+  .message-filters .filter-right .el-input {
+    width: 100%;
+  }
+  
   .message-item {
     padding: 16px;
     flex-direction: column;
-
   }
-
+  
   .message-actions {
     flex-direction: row;
     justify-content: flex-end;
     width: 100%;
     margin-top: 12px;
   }
-
+  
   .floating-action-buttons {
     right: 20px;
     bottom: 20px;
