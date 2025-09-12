@@ -4,6 +4,7 @@ import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import io.github.shaoyuanyu.ttts.persistence.campus.CampusTable
 import io.github.shaoyuanyu.ttts.persistence.coach.CoachTable
+import io.github.shaoyuanyu.ttts.persistence.recharge.RechargeTable
 import io.github.shaoyuanyu.ttts.persistence.student.StudentTable
 import io.github.shaoyuanyu.ttts.persistence.student_coach.StudentCoachRelationTable
 import io.github.shaoyuanyu.ttts.persistence.user.UserTable
@@ -41,6 +42,7 @@ fun configureDatabase(
         SchemaUtils.create(StudentTable)
         SchemaUtils.create(StudentCoachRelationTable)
         SchemaUtils.create(CampusTable)
+        SchemaUtils.create(RechargeTable)
     }
 
     return database

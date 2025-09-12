@@ -2,6 +2,7 @@ package io.github.shaoyuanyu.ttts
 
 import io.github.shaoyuanyu.ttts.persistence.UserService
 import io.github.shaoyuanyu.ttts.persistence.MessageService
+import io.github.shaoyuanyu.ttts.persistence.StudentService
 import io.github.shaoyuanyu.ttts.plugins.configureAuthentication
 import io.github.shaoyuanyu.ttts.plugins.configureCORS
 import io.github.shaoyuanyu.ttts.plugins.configureSerialization
@@ -29,6 +30,7 @@ fun Application.module() {
     // 创建各类服务
     val userService = UserService(database)
     val messageService = MessageService(database)
+    val walletService = StudentService(database,userService)
 
     // monitoring
     configureMonitoring()
@@ -47,5 +49,5 @@ fun Application.module() {
     configureStatusPages()
 
     // routing
-    configureRouting(userService, messageService)
+    configureRouting(userService, messageService, walletService)
 }

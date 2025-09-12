@@ -1,12 +1,10 @@
 package io.github.shaoyuanyu.ttts.persistence.student
 
-import io.github.shaoyuanyu.ttts.dto.student.Student
-import io.github.shaoyuanyu.ttts.dto.student.StudentInfo
 import io.github.shaoyuanyu.ttts.persistence.user.UserEntity
 import org.jetbrains.exposed.v1.core.dao.id.EntityID
 import org.jetbrains.exposed.v1.dao.Entity
 import org.jetbrains.exposed.v1.dao.EntityClass
-import java.util.UUID
+import java.util.*
 
 class StudentEntity(id: EntityID<UUID>) : Entity<UUID>(id) {
     companion object : EntityClass<UUID, StudentEntity>(StudentTable)

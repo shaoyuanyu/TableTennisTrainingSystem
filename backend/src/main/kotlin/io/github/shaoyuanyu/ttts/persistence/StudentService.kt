@@ -1,48 +1,29 @@
 @file:OptIn(ExperimentalTime::class)
 package io.github.shaoyuanyu.ttts.persistence
 
+import io.github.shaoyuanyu.ttts.dto.recharge.RechargeRecord
 import io.github.shaoyuanyu.ttts.persistence.campus.CampusEntity
 import io.github.shaoyuanyu.ttts.persistence.coach.CoachEntity
+import io.github.shaoyuanyu.ttts.persistence.recharge.RechargeEntity
+import io.github.shaoyuanyu.ttts.persistence.recharge.RechargeTable
+import io.github.shaoyuanyu.ttts.persistence.recharge.expose
 import io.github.shaoyuanyu.ttts.persistence.student.StudentEntity
 import io.github.shaoyuanyu.ttts.persistence.student_coach.StudentCoachRelationEntity
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-import java.util.UUID
+import java.util.*
 import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
-internal val STUDENT_SERVICE_LOGGER: Logger = LoggerFactory.getLogger("io.github.shaoyuanyu.ttts.persistence.student")
+//internal val STUDENT_SERVICE_LOGGER: Logger = LoggerFactory.getLogger("io.github.shaoyuanyu.ttts.persistence.student")
+
 
 class StudentService(
     private val database: Database,
     private val userService: UserService
 ) {
-    init {
-        transaction(database) {
-
-        }
-    }
-
-//    /**
-//     * query student by uuid
-//     */
-//    fun queryStudentByUUID(uuid: String): Student =
-//        transaction(database) {
-//            StudentEntity.findById(UUID.fromString(uuid)).let {
-//                if (it == null) {
-//                    throw Exception("用户不存在")
-//                }
-//
-//                it.expose()
-//            }.also {
-//                STUDENT_SERVICE_LOGGER.info("查询用户成功，用户 ID：$uuid，用户名：${it.username}")
-//            }
-//        }
-
     /**
      * 查询余额
      */
@@ -54,7 +35,7 @@ class StudentService(
                 }
                 it.balance
             }.also { newBalance ->
-                STUDENT_SERVICE_LOGGER.info("查询用户余额成功，用户 ID：$uuid，余额：${newBalance}")
+                LOGGER.info("查询用户余额成功，用户 ID：$uuid，余额：${newBalance}")
             }
         }
 
@@ -69,7 +50,7 @@ class StudentService(
                 }
                 it.balance = newBalance
             }.also { newBalance ->
-                STUDENT_SERVICE_LOGGER.info("更新用户余额成功，用户 ID：$uuid，余额：${newBalance}")
+                LOGGER.info("更新用户余额成功，用户 ID：$uuid，余额：${newBalance}")
             }
         }
 
@@ -83,8 +64,13 @@ class StudentService(
                     throw Exception("用户不存在")
                 }
                 it.balance += amount
+                RechargeEntity.new {
+                    this.userId = uuid
+                    this.amount = amount
+                    this.createdAt = Clock.System.now()
+                }
             }.also { newBalance ->
-                STUDENT_SERVICE_LOGGER.info("充值成功，用户 ID：$uuid，余额：${newBalance}")
+                LOGGER.info("充值成功，用户 ID：$uuid，余额：${newBalance}")
             }
         }
 
@@ -103,28 +89,9 @@ class StudentService(
                 it.balance -= amount
                 it.balance
             }.also { student ->
-                STUDENT_SERVICE_LOGGER.info("扣费成功，用户 ID：$uuid，余额：${student}")
+                LOGGER.info("扣费成功，用户 ID：$uuid，余额：${student}")
             }
         }
-//
-//    /**
-//     * 选择教练前判断
-//     */
-//    fun judgeCoachNumber(uuid: String): Boolean =
-//        transaction(database) {
-//            StudentEntity.findById(UUID.fromString(uuid)).let {
-//                if (it == null) {
-//                    throw Exception("用户不存在")
-//                }
-//                if(it.currentCoach>=it.maxCoach){
-//                    throw Exception("已达最大可选教练数，无法选择更多教练")
-//                }
-//                it.currentCoach+=1
-//                true
-//            }.also {
-//                STUDENT_SERVICE_LOGGER.info("选择教练成功，用户 ID：$uuid")
-//            }
-//        }
     /**
      * 选择教练课程
      */
@@ -191,7 +158,7 @@ class StudentService(
             student.currentCoach += 1
             coach.currentStudents += 1
 
-            STUDENT_SERVICE_LOGGER.info("选择教练课程成功，课程时长: ${durationHours}小时，总费用: ${totalCost}元")
+            LOGGER.info("选择教练课程成功，课程时长: ${durationHours}小时，总费用: ${totalCost}元")
 
             // 返回成功信息
             mapOf(
@@ -216,8 +183,61 @@ class StudentService(
 
                 it
             }.also {
-                STUDENT_SERVICE_LOGGER.info("查询校区成功，校区 ID：$campusId，校区名称：${it.campus_name}")
+                LOGGER.info("查询校区成功，校区 ID：$campusId，校区名称：${it.campusName}")
             }
+        }
+    /**
+     * 获取用户充值历史记录
+     * @param userId 用户ID
+     * @param page 页码
+     * @param size 每页大小
+     * @return Pair<充值记录列表, 总记录数>
+     */
+    fun getRechargeHistory(userId: String, page: Int, size: Int): Pair<List<RechargeRecord>, Long> =
+        transaction(database) {
+            val query = RechargeEntity.find {
+                RechargeTable.userId eq userId
+            }.toList()
+            // 计算偏移量
+            val offset = (page - 1) * size
+
+            // 查询总记录数
+            val totalCount = query.size.toLong()
+
+            // 查询分页数据
+            val records = query
+                .sortedByDescending { it.createdAt }
+                .drop(offset)
+                .take(size)
+                .map { it.expose() }
+
+
+            records to totalCount
+        }
+
+    /**
+     * 获取所有充值记录（超级管理员）
+     * @return 充值记录列表
+     */
+    fun getAllRechargeRecords(page: Int, size: Int): Pair<List<RechargeRecord>,Long> =
+        transaction(database) {
+
+            val query = RechargeEntity.all().toList()
+
+            // 计算偏移量
+            val offset = (page - 1) * size
+
+            // 查询总记录数
+            val totalCount = query.size.toLong()
+
+            // 查询分页数据
+            val records = query
+                .sortedByDescending { it.createdAt }
+                .drop(offset)
+                .take(size)
+                .map { it.expose() }
+
+            records to totalCount
         }
 
 }
