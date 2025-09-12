@@ -1,0 +1,525 @@
+/* 
+  乒乓球训练系统 - 设计系统规范
+  Table Tennis Training System - Design System
+  
+  统一的glassmorphism风格组件库
+*/
+
+/* ==================== 根变量定义 ==================== */
+:root {
+  /* 主题色彩 */
+  --primary-color: #409eff;
+  --primary-light: #79bbff;
+  --primary-dark: #337ecc;
+  --success-color: #67c23a;
+  --warning-color: #e6a23c;
+  --danger-color: #f56c6c;
+  --info-color: #909399;
+  
+  /* 白色透明度层级 */
+  --white-alpha-10: rgba(255, 255, 255, 0.1);
+  --white-alpha-15: rgba(255, 255, 255, 0.15);
+  --white-alpha-20: rgba(255, 255, 255, 0.2);
+  --white-alpha-25: rgba(255, 255, 255, 0.25);
+  --white-alpha-30: rgba(255, 255, 255, 0.3);
+  --white-alpha-80: rgba(255, 255, 255, 0.8);
+  --white-alpha-85: rgba(255, 255, 255, 0.85);
+  --white-alpha-90: rgba(255, 255, 255, 0.9);
+  --white-alpha-95: rgba(255, 255, 255, 0.95);
+  
+  /* 黑色透明度层级 */
+  --black-alpha-10: rgba(0, 0, 0, 0.1);
+  --black-alpha-15: rgba(0, 0, 0, 0.15);
+  --black-alpha-20: rgba(0, 0, 0, 0.2);
+  --black-alpha-30: rgba(0, 0, 0, 0.3);
+  
+  /* 间距系统 */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 20px;
+  --spacing-2xl: 24px;
+  --spacing-3xl: 32px;
+  
+  /* 圆角系统 */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+  
+  /* 阴影系统 */
+  --shadow-sm: 0 2px 4px var(--black-alpha-10);
+  --shadow-md: 0 4px 8px var(--black-alpha-10);
+  --shadow-lg: 0 8px 16px var(--black-alpha-15);
+  --shadow-xl: 0 12px 24px var(--black-alpha-20);
+  --shadow-glow: 0 0 20px var(--black-alpha-15);
+  
+  /* 模糊程度 */
+  --blur-sm: blur(4px);
+  --blur-md: blur(8px);
+  --blur-lg: blur(12px);
+  --blur-xl: blur(16px);
+  
+  /* 过渡动画 */
+  --transition-fast: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* 字体系统 */
+  --font-size-xs: 12px;
+  --font-size-sm: 13px;
+  --font-size-md: 14px;
+  --font-size-lg: 16px;
+  --font-size-xl: 18px;
+  --font-size-2xl: 20px;
+  --font-size-3xl: 24px;
+  --font-size-4xl: 32px;
+  
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+}
+
+/* ==================== 基础Glassmorphism组件 ==================== */
+
+/* 玻璃卡片 - 基础版 */
+.glass-card {
+  background: var(--white-alpha-10);
+  border: 1px solid var(--white-alpha-15);
+  backdrop-filter: var(--blur-md);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  transition: var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-card:hover {
+  background: var(--white-alpha-15);
+  border-color: var(--white-alpha-20);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* 玻璃卡片 - 增强版 */
+.glass-card-enhanced {
+  background: var(--white-alpha-15);
+  border: 1px solid var(--white-alpha-20);
+  backdrop-filter: var(--blur-lg);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  transition: var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-card-enhanced::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--white-alpha-30), transparent);
+  transition: left 0.8s ease;
+}
+
+.glass-card-enhanced:hover {
+  background: var(--white-alpha-20);
+  border-color: var(--white-alpha-25);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-xl);
+}
+
+.glass-card-enhanced:hover::before {
+  left: 100%;
+}
+
+/* 内容区域卡片 */
+.content-card {
+  background: var(--white-alpha-10);
+  border: 1px solid var(--white-alpha-15);
+  backdrop-filter: var(--blur-md);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  transition: var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+  padding: var(--spacing-2xl);
+  margin-bottom: var(--spacing-2xl);
+}
+
+.content-card:hover {
+  background: var(--white-alpha-15);
+  border-color: var(--white-alpha-20);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* 侧边栏卡片 */
+.sidebar-card {
+  background: var(--white-alpha-10);
+  border: 1px solid var(--white-alpha-15);
+  backdrop-filter: var(--blur-md);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  transition: var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+  padding: var(--spacing-xl);
+  margin-bottom: var(--spacing-lg);
+}
+
+.sidebar-card:hover {
+  background: var(--white-alpha-15);
+  border-color: var(--white-alpha-20);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* ==================== 按钮系统 ==================== */
+
+/* 现代化按钮基础样式 */
+.btn-modern {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: var(--radius-lg);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-md);
+  text-decoration: none;
+  cursor: pointer;
+  transition: var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+  border: 1px solid transparent;
+  backdrop-filter: var(--blur-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-modern:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* 主要按钮 */
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+  border-color: rgba(64, 158, 255, 0.3);
+  color: white;
+  box-shadow: 0 4px 16px rgba(64, 158, 255, 0.2);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
+  border-color: rgba(64, 158, 255, 0.5);
+  box-shadow: 0 6px 20px rgba(64, 158, 255, 0.3);
+}
+
+/* 次要按钮 */
+.btn-secondary {
+  background: var(--white-alpha-10);
+  border-color: var(--white-alpha-15);
+  color: var(--white-alpha-90);
+}
+
+.btn-secondary:hover {
+  background: var(--white-alpha-15);
+  border-color: var(--white-alpha-20);
+}
+
+/* 成功按钮 */
+.btn-success {
+  background: linear-gradient(135deg, var(--success-color), #85ce61);
+  border-color: rgba(103, 194, 58, 0.3);
+  color: white;
+  box-shadow: 0 4px 16px rgba(103, 194, 58, 0.2);
+}
+
+.btn-success:hover {
+  box-shadow: 0 6px 20px rgba(103, 194, 58, 0.3);
+}
+
+/* 警告按钮 */
+.btn-warning {
+  background: linear-gradient(135deg, var(--warning-color), #ebb563);
+  border-color: rgba(230, 162, 60, 0.3);
+  color: white;
+  box-shadow: 0 4px 16px rgba(230, 162, 60, 0.2);
+}
+
+.btn-warning:hover {
+  box-shadow: 0 6px 20px rgba(230, 162, 60, 0.3);
+}
+
+/* 危险按钮 */
+.btn-danger {
+  background: linear-gradient(135deg, var(--danger-color), #f89898);
+  border-color: rgba(245, 108, 108, 0.3);
+  color: white;
+  box-shadow: 0 4px 16px rgba(245, 108, 108, 0.2);
+}
+
+.btn-danger:hover {
+  box-shadow: 0 6px 20px rgba(245, 108, 108, 0.3);
+}
+
+/* 按钮尺寸 */
+.btn-small {
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: var(--font-size-sm);
+  border-radius: var(--radius-md);
+}
+
+.btn-large {
+  padding: var(--spacing-lg) var(--spacing-2xl);
+  font-size: var(--font-size-lg);
+  border-radius: var(--radius-xl);
+}
+
+/* ==================== 标签系统 ==================== */
+
+.tag-glass {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  background: var(--white-alpha-15);
+  border: 1px solid var(--white-alpha-20);
+  color: var(--white-alpha-90);
+  backdrop-filter: var(--blur-sm);
+  transition: var(--transition-fast);
+}
+
+.tag-primary {
+  background: linear-gradient(135deg, rgba(64, 158, 255, 0.3), rgba(100, 181, 246, 0.2));
+  border-color: rgba(64, 158, 255, 0.4);
+  color: var(--white-alpha-95);
+}
+
+.tag-success {
+  background: linear-gradient(135deg, rgba(103, 194, 58, 0.3), rgba(139, 195, 74, 0.2));
+  border-color: rgba(103, 194, 58, 0.4);
+  color: var(--white-alpha-95);
+}
+
+.tag-warning {
+  background: linear-gradient(135deg, rgba(230, 162, 60, 0.3), rgba(255, 193, 7, 0.2));
+  border-color: rgba(230, 162, 60, 0.4);
+  color: var(--white-alpha-95);
+}
+
+.tag-danger {
+  background: linear-gradient(135deg, rgba(245, 108, 108, 0.3), rgba(244, 67, 54, 0.2));
+  border-color: rgba(245, 108, 108, 0.4);
+  color: var(--white-alpha-95);
+}
+
+/* ==================== 表单组件 ==================== */
+
+.form-glass {
+  background: var(--white-alpha-15);
+  border: 1px solid var(--white-alpha-20);
+  border-radius: var(--radius-lg);
+  backdrop-filter: var(--blur-lg);
+  padding: var(--spacing-3xl);
+  box-shadow: var(--shadow-lg);
+}
+
+.input-glass {
+  background: var(--white-alpha-10);
+  border: 1px solid var(--white-alpha-15);
+  border-radius: var(--radius-md);
+  backdrop-filter: var(--blur-sm);
+  padding: var(--spacing-md);
+  color: var(--white-alpha-90);
+  transition: var(--transition-normal);
+}
+
+.input-glass:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  background: var(--white-alpha-15);
+  box-shadow: 0 0 0 3px rgba(64, 158, 255, 0.1);
+}
+
+.input-glass::placeholder {
+  color: var(--white-alpha-80);
+}
+
+/* ==================== 进度条系统 ==================== */
+
+.progress-glass {
+  background: var(--white-alpha-10);
+  border: 1px solid var(--white-alpha-15);
+  border-radius: var(--radius-lg);
+  backdrop-filter: var(--blur-sm);
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-bar {
+  height: 100%;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+  box-shadow: inset 0 1px 0 var(--white-alpha-30);
+  position: relative;
+  overflow: hidden;
+  transition: var(--transition-normal);
+}
+
+.progress-bar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(to bottom, var(--white-alpha-20), transparent);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+/* ==================== 页面布局组件 ==================== */
+
+.page-header {
+  background: var(--white-alpha-15);
+  border: 1px solid var(--white-alpha-20);
+  backdrop-filter: var(--blur-lg);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-2xl);
+  margin-bottom: var(--spacing-2xl);
+  box-shadow: var(--shadow-md);
+}
+
+.page-title {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: white;
+  text-shadow: 0 2px 4px var(--black-alpha-30);
+  margin: 0;
+}
+
+.page-subtitle {
+  font-size: var(--font-size-lg);
+  color: var(--white-alpha-85);
+  margin: var(--spacing-sm) 0 0 0;
+}
+
+/* ==================== 动画效果 ==================== */
+
+/* 光晕扫过效果 */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  50% { transform: translateX(100%); }
+  100% { transform: translateX(100%); }
+}
+
+.shimmer-effect::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, var(--white-alpha-30), transparent);
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+/* 脉冲效果 */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+.pulse-effect {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* 悬浮效果 */
+.hover-lift {
+  transition: var(--transition-normal);
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-xl);
+}
+
+/* ==================== 响应式设计 ==================== */
+
+@media (max-width: 768px) {
+  .content-card, .sidebar-card {
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+  }
+  
+  .page-header {
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+  }
+  
+  .page-title {
+    font-size: var(--font-size-2xl);
+  }
+  
+  .btn-modern {
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: var(--font-size-sm);
+  }
+}
+
+@media (max-width: 480px) {
+  .content-card, .sidebar-card {
+    padding: var(--spacing-md);
+  }
+  
+  .page-title {
+    font-size: var(--font-size-xl);
+  }
+}
+
+/* ==================== 工具类 ==================== */
+
+/* 文本样式 */
+.text-white { color: white; }
+.text-white-80 { color: var(--white-alpha-80); }
+.text-white-90 { color: var(--white-alpha-90); }
+
+/* 间距工具 */
+.m-0 { margin: 0; }
+.mt-sm { margin-top: var(--spacing-sm); }
+.mt-md { margin-top: var(--spacing-md); }
+.mt-lg { margin-top: var(--spacing-lg); }
+.mb-sm { margin-bottom: var(--spacing-sm); }
+.mb-md { margin-bottom: var(--spacing-md); }
+.mb-lg { margin-bottom: var(--spacing-lg); }
+
+.p-sm { padding: var(--spacing-sm); }
+.p-md { padding: var(--spacing-md); }
+.p-lg { padding: var(--spacing-lg); }
+
+/* 显示工具 */
+.flex { display: flex; }
+.flex-center { display: flex; align-items: center; justify-content: center; }
+.flex-between { display: flex; align-items: center; justify-content: space-between; }
+.flex-col { flex-direction: column; }
+.flex-1 { flex: 1; }
+
+/* 圆角工具 */
+.rounded-sm { border-radius: var(--radius-sm); }
+.rounded-md { border-radius: var(--radius-md); }
+.rounded-lg { border-radius: var(--radius-lg); }
+.rounded-xl { border-radius: var(--radius-xl); }
+
+/* 阴影工具 */
+.shadow-sm { box-shadow: var(--shadow-sm); }
+.shadow-md { box-shadow: var(--shadow-md); }
+.shadow-lg { box-shadow: var(--shadow-lg); }
+.shadow-xl { box-shadow: var(--shadow-xl); }

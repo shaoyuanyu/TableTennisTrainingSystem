@@ -427,6 +427,10 @@
                   <span>📄</span>
                   <span>页面测试：系统页面访问测试</span>
                 </div>
+                <div class="tool-item">
+                  <span>🎨</span>
+                  <span>设计系统：Glassmorphism组件测试</span>
+                </div>
               </div>
             </div>
           </el-card>
@@ -819,6 +823,27 @@ const pageCategories = ref([
         description: '系统开发调试工具',
         icon: '🛠️',
         tested: getTestStatus('/dev-tools'),
+      },
+    ],
+  },
+  {
+    name: '设计系统测试',
+    icon: '🎨',
+    tagType: 'primary',
+    pages: [
+      {
+        path: '/design-system-test',
+        title: '设计系统组件',
+        description: '完整的设计系统组件展示',
+        icon: '🎨',
+        tested: getTestStatus('/design-system-test'),
+      },
+      {
+        path: '/navigation-test',
+        title: '页面导航测试',
+        description: '快速访问各个页面进行测试',
+        icon: '🧭',
+        tested: getTestStatus('/navigation-test'),
       },
     ],
   },
@@ -2231,7 +2256,6 @@ watch(() => route.query.tool, () => {
   font-size: 15px;
 }
 
-/* 响应式设计 */
 @media (max-width: 768px) {
   .debug-cards,
   .page-grid,

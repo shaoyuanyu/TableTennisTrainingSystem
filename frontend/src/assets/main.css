@@ -1,4 +1,5 @@
 @import './base.css';
+@import '../styles/design-system.css';
 
 /* 管理系统全局样式 */
 html,

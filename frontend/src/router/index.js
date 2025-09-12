@@ -307,6 +307,24 @@ const router = createRouter({
             title: '开发工具'
           }
         },
+        {
+          path: 'design-system-test',
+          name: 'DesignSystemTest',
+          component: () => import('@/views/DesignSystemTestView.vue'),
+          meta: { 
+            requiresAuth: false, // 允许游客访问
+            title: '设计系统测试'
+          }
+        },
+        {
+          path: 'navigation-test',
+          name: 'NavigationTest',
+          component: () => import('@/views/NavigationTestView.vue'),
+          meta: { 
+            requiresAuth: false, // 允许游客访问
+            title: '页面导航'
+          }
+        },
       ],
     },
 
@@ -334,9 +352,9 @@ router.beforeEach(async (to, from, next) => {
     要求角色: to.meta.roles
   })
 
-  // 如果是开发工具页面，直接通过
-  if (to.path === '/dev-tools') {
-    console.log('✅ 开发工具页面，直接通过')
+  // 如果是开发工具或测试页面，直接通过
+  if (to.path === '/dev-tools' || to.path === '/design-system-test' || to.path === '/navigation-test') {
+    console.log('✅ 开发工具或测试页面，直接通过')
     next()
     return
   }
