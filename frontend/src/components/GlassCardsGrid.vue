@@ -1,12 +1,12 @@
 <template>
-  <div class="debug-cards" :class="{ [`debug-cards--${layout}`]: layout !== 'auto' }">
+  <div class="glass-cards-grid" :class="{ [`glass-cards-grid--${layout}`]: layout !== 'auto' }">
     <slot></slot>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'DebugCardsContainer',
+  name: 'GlassCardsGrid',
   props: {
     // 布局方式
     layout: {
@@ -29,43 +29,43 @@ export default {
 </script>
 
 <style scoped>
-.debug-cards {
+.glass-cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(v-bind(minWidth), 1fr));
   gap: v-bind(gap);
 }
 
-.debug-cards--fixed-2 {
+.glass-cards-grid--fixed-2 {
   grid-template-columns: repeat(2, 1fr);
 }
 
-.debug-cards--fixed-3 {
+.glass-cards-grid--fixed-3 {
   grid-template-columns: repeat(3, 1fr);
 }
 
-.debug-cards--fixed-4 {
+.glass-cards-grid--fixed-4 {
   grid-template-columns: repeat(4, 1fr);
 }
 
 /* 响应式调整 */
 @media (max-width: 1200px) {
-  .debug-cards--fixed-4 {
+  .glass-cards-grid--fixed-4 {
     grid-template-columns: repeat(3, 1fr);
   }
 }
 
 @media (max-width: 968px) {
-  .debug-cards--fixed-3,
-  .debug-cards--fixed-4 {
+  .glass-cards-grid--fixed-3,
+  .glass-cards-grid--fixed-4 {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (max-width: 640px) {
-  .debug-cards,
-  .debug-cards--fixed-2,
-  .debug-cards--fixed-3,
-  .debug-cards--fixed-4 {
+  .glass-cards-grid,
+  .glass-cards-grid--fixed-2,
+  .glass-cards-grid--fixed-3,
+  .glass-cards-grid--fixed-4 {
     grid-template-columns: 1fr;
   }
 }

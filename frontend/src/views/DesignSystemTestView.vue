@@ -86,8 +86,8 @@
         </a>
         <a href="#development" class="nav-card">
           <div class="nav-icon">🛠️</div>
-          <h3>开发工具</h3>
-          <p>调试与监控</p>
+          <h3>通用卡片</h3>
+          <p>GlassCard 系列</p>
         </a>
         <a href="#utilities" class="nav-card">
           <div class="nav-icon">🔧</div>
@@ -502,24 +502,24 @@
       </div>
     </div>
 
-    <!-- 开发工具组件展示 -->
+    <!-- 通用玻璃卡片组件展示 -->
     <div class="component-showcase" id="development">
-      <h2 class="section-title">🛠️ 开发工具组件系列</h2>
+      <h2 class="section-title">🛠️ 通用玻璃卡片组件系列</h2>
       <p class="section-description">
-        专为开发和调试场景设计的专业组件，提供系统状态监控、权限测试、环境信息展示等功能
+        基于Glassmorphism设计的通用卡片组件，提供完整的布局和样式解决方案，适用于各种场景
       </p>
       
-      <DebugCardsContainer>
-        <!-- 用户状态调试卡片 -->
+      <GlassCardsGrid>
+        <!-- 用户状态展示卡片 -->
         <GlassCardWithHeader 
-          title="用户状态监控" 
+          title="用户状态信息" 
           icon="👤" 
           type="primary"
         >
           <StatusGrid :items="userStatusItems" />
         </GlassCardWithHeader>
 
-        <!-- 系统环境调试卡片 -->
+        <!-- 系统环境信息卡片 -->
         <GlassCardWithHeader 
           title="系统环境信息" 
           icon="💻" 
@@ -528,15 +528,15 @@
           <StatusGrid :items="systemEnvItems" />
         </GlassCardWithHeader>
 
-        <!-- 本地存储调试卡片 -->
+        <!-- 本地存储信息卡片 -->
         <GlassCardWithHeader 
-          title="本地存储" 
+          title="本地存储信息" 
           icon="💾" 
           type="warning"
         >
-          <DebugCardContent type="form">
+          <GlassCardBody type="form">
             <StorageInfo :items="storageItems" />
-          </DebugCardContent>
+          </GlassCardBody>
         </GlassCardWithHeader>
 
         <!-- 权限测试调试卡片 - 使用GlassCardWithHeader组件 -->
@@ -589,13 +589,13 @@
           />
         </GlassCardWithHeader>
 
-        <!-- 高级调试功能卡片 -->
+        <!-- 高级功能展示卡片 -->
         <GlassCardWithHeader 
-          title="高级调试" 
+          title="高级功能展示" 
           icon="🔬" 
           type="default"
         >
-          <DebugCardContent type="grid">
+          <GlassCardBody type="grid">
             <StatusGrid :items="advancedDebugItems" />
             <div style="margin-top: 16px;">
               <ActionButtons 
@@ -604,34 +604,34 @@
                 @actionClick="handleAdvancedAction"
               />
             </div>
-          </DebugCardContent>
+          </GlassCardBody>
         </GlassCardWithHeader>
 
-        <!-- 带有header操作的调试卡片 -->
+        <!-- 带操作区域的展示卡片 -->
         <GlassCardWithHeader 
-          title="角色控制台" 
+          title="角色信息展示" 
           icon="🎭" 
           type="primary"
         >
           <template #actions>
             <el-tag type="success" size="small">
-              开发者模式
+              展示模式
             </el-tag>
           </template>
           <StatusGrid :items="roleStatusItems" />
         </GlassCardWithHeader>
-      </DebugCardsContainer>
+      </GlassCardsGrid>
       
       <!-- 使用说明 -->
       <div class="usage-note">
         <h3>💡 使用说明</h3>
-        <p>这些调试卡片组件与DevToolsView中的样式完全一致，可以直接替换使用：</p>
+        <p>这些玻璃卡片组件提供了完整的Glassmorphism设计体验，可以在任何场景下使用：</p>
         <ul>
-          <li><strong>DebugCard</strong>：主卡片容器，支持不同类型的头部主题</li>
+          <li><strong>GlassCard</strong>：通用玻璃卡片容器，支持不同类型的头部主题</li>
           <li><strong>StatusGrid</strong>：状态信息网格，支持标签、状态、文本等类型</li>
           <li><strong>StorageInfo</strong>：存储信息展示，支持文本域、状态标签等</li>
           <li><strong>ActionButtons</strong>：操作按钮组，支持水平、垂直、网格布局</li>
-          <li><strong>DebugCardContent</strong>：卡片内容容器，提供统一的布局样式</li>
+          <li><strong>GlassCardBody</strong>：卡片内容容器，提供统一的布局样式</li>
         </ul>
       </div>
     </div>
@@ -894,8 +894,9 @@ import GlassCardWithHeader from '@/components/GlassCardWithHeader.vue'
 import StatusGrid from '@/components/StatusGrid.vue'
 import StorageInfo from '@/components/StorageInfo.vue'
 import ActionButtons from '@/components/ActionButtons.vue'
-import DebugCardsContainer from '@/components/DebugCardsContainer.vue'
-import DebugCardContent from '@/components/DebugCardContent.vue'
+import GlassCard from '@/components/GlassCard.vue'
+import GlassCardsGrid from '@/components/GlassCardsGrid.vue'
+import GlassCardBody from '@/components/GlassCardBody.vue'
 
 export default {
   name: 'DesignLanguageShowcase',
@@ -909,8 +910,9 @@ export default {
     StatusGrid,
     StorageInfo,
     ActionButtons,
-    DebugCardsContainer,
-    DebugCardContent
+    GlassCard,
+    GlassCardsGrid,
+    GlassCardBody
   },
   data() {
     return {

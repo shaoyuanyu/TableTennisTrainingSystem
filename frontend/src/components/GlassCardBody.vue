@@ -6,7 +6,7 @@
 
 <script>
 export default {
-  name: 'DebugCardContent',
+  name: 'GlassCardBody',
   props: {
     // 内容类型，影响布局和样式
     type: {
@@ -22,10 +22,10 @@ export default {
   },
   computed: {
     contentClasses() {
-      const classes = ['debug-card-content'];
+      const classes = ['glass-card-body'];
       
       if (this.type !== 'default') {
-        classes.push(`debug-card-content--${this.type}`);
+        classes.push(`glass-card-body--${this.type}`);
       }
       
       if (this.extraClasses) {
@@ -39,28 +39,28 @@ export default {
 </script>
 
 <style scoped>
-.debug-card-content {
-  /* 基础内容样式 - 与DevToolsView保持一致 */
+.glass-card-body {
+  /* 基础内容样式 - 统一的卡片内容布局 */
   margin: 0;
   padding: 0;
 }
 
 /* 网格布局类型（用于status-grid等） */
-.debug-card-content--grid {
+.glass-card-body--grid {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
 /* 表单布局类型（用于存储信息等） */
-.debug-card-content--form {
+.glass-card-body--form {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
 /* 操作按钮布局类型 */
-.debug-card-content--actions {
+.glass-card-body--actions {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
   gap: 12px;
@@ -68,10 +68,10 @@ export default {
   margin-top: 16px;
 }
 
-/* 确保内部组件与DevToolsView样式一致 */
-.debug-card-content :deep(.storage-item),
-.debug-card-content :deep(.test-item),
-.debug-card-content :deep(.status-item) {
+/* 确保内部组件样式一致 */
+.glass-card-body :deep(.storage-item),
+.glass-card-body :deep(.test-item),
+.glass-card-body :deep(.status-item) {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -84,17 +84,17 @@ export default {
   box-sizing: border-box;
 }
 
-.debug-card-content :deep(.storage-item:hover),
-.debug-card-content :deep(.test-item:hover),
-.debug-card-content :deep(.status-item:hover) {
+.glass-card-body :deep(.storage-item:hover),
+.glass-card-body :deep(.test-item:hover),
+.glass-card-body :deep(.status-item:hover) {
   background: rgba(255, 255, 255, 0.3);
   transform: translateX(4px);
   border-color: rgba(255, 255, 255, 0.2);
 }
 
-.debug-card-content :deep(.storage-item label),
-.debug-card-content :deep(.test-item label),
-.debug-card-content :deep(.status-item label) {
+.glass-card-body :deep(.storage-item label),
+.glass-card-body :deep(.test-item label),
+.glass-card-body :deep(.status-item label) {
   font-weight: 600;
   color: #2d3748;
   font-size: 14px;
@@ -104,20 +104,20 @@ export default {
 }
 
 /* 表单项特殊样式 */
-.debug-card-content--form :deep(.storage-item) {
+.glass-card-body--form :deep(.storage-item) {
   flex-direction: column;
   align-items: flex-start;
   gap: 8px;
   padding: 16px;
 }
 
-.debug-card-content--form :deep(.storage-item label) {
+.glass-card-body--form :deep(.storage-item label) {
   display: block;
   margin-bottom: 8px;
 }
 
 /* 文本域增强样式 */
-.debug-card-content :deep(.enhanced-textarea .el-textarea__inner) {
+.glass-card-body :deep(.enhanced-textarea .el-textarea__inner) {
   background: rgba(255, 255, 255, 0.08) !important;
   border: 1px solid rgba(255, 255, 255, 0.15) !important;
   color: #fff !important;
@@ -129,12 +129,12 @@ export default {
   transition: all 0.3s ease !important;
 }
 
-.debug-card-content :deep(.enhanced-textarea .el-textarea__inner:hover) {
+.glass-card-body :deep(.enhanced-textarea .el-textarea__inner:hover) {
   border-color: rgba(255, 255, 255, 0.25) !important;
   background: rgba(255, 255, 255, 0.12) !important;
 }
 
-.debug-card-content :deep(.enhanced-textarea .el-textarea__inner:focus) {
+.glass-card-body :deep(.enhanced-textarea .el-textarea__inner:focus) {
   border-color: #409eff !important;
   background: rgba(255, 255, 255, 0.15) !important;
   box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2) !important;
@@ -142,37 +142,37 @@ export default {
 
 /* 响应式调整 */
 @media (max-width: 768px) {
-  .debug-card-content--actions {
+  .glass-card-body--actions {
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;
   }
   
-  .debug-card-content :deep(.storage-item),
-  .debug-card-content :deep(.test-item),
-  .debug-card-content :deep(.status-item) {
+  .glass-card-body :deep(.storage-item),
+  .glass-card-body :deep(.test-item),
+  .glass-card-body :deep(.status-item) {
     padding: 10px 14px;
     min-height: 40px;
   }
 }
 
 @media (max-width: 480px) {
-  .debug-card-content--actions {
+  .glass-card-body--actions {
     grid-template-columns: 1fr;
     gap: 8px;
   }
   
-  .debug-card-content :deep(.storage-item),
-  .debug-card-content :deep(.test-item),
-  .debug-card-content :deep(.status-item) {
+  .glass-card-body :deep(.storage-item),
+  .glass-card-body :deep(.test-item),
+  .glass-card-body :deep(.status-item) {
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
     padding: 12px;
   }
   
-  .debug-card-content :deep(.storage-item > *:last-child),
-  .debug-card-content :deep(.test-item > *:last-child),
-  .debug-card-content :deep(.status-item > *:last-child) {
+  .glass-card-body :deep(.storage-item > *:last-child),
+  .glass-card-body :deep(.test-item > *:last-child),
+  .glass-card-body :deep(.status-item > *:last-child) {
     align-self: flex-end;
   }
 }
