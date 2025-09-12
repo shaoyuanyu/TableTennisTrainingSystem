@@ -340,42 +340,58 @@
                 @click="navigateToPage(page)"
                 @contextmenu.prevent="showPageMenu(page)"
               >
-                <div class="page-icon">{{ page.icon }}</div>
-                <div class="page-info">
-                  <div class="page-title">{{ page.title }}</div>
-                  <div class="page-description">{{ page.description }}</div>
-                  <div class="page-path">{{ page.path }}</div>
+                <!-- 悬浮操作按钮组 -->
+                <div class="page-actions-overlay">
+                  <el-button 
+                    v-if="!page.tested"
+                    type="success" 
+                    size="small" 
+                    circle
+                    @click.stop="markPageTested(page)"
+                    title="标记已测试"
+                  >
+                    <el-icon><Check /></el-icon>
+                  </el-button>
+                  <el-button 
+                    v-if="page.tested"
+                    type="warning" 
+                    size="small" 
+                    circle
+                    @click.stop="resetPageStatus(page)"
+                    title="重置状态"
+                  >
+                    <el-icon><Refresh /></el-icon>
+                  </el-button>
+                  <el-button 
+                    type="primary" 
+                    size="small" 
+                    circle
+                    @click.stop="navigateToPage(page)"
+                    title="访问页面"
+                  >
+                    <el-icon><View /></el-icon>
+                  </el-button>
                 </div>
-                <div class="page-actions">
-                  <div class="page-status">
-                    <el-tag :type="page.tested ? 'success' : 'warning'" size="small">
-                      {{ page.tested ? '已测试' : '未测试' }}
-                    </el-tag>
+
+                <!-- 卡片内容 -->
+                <div class="page-content">
+                  <div class="page-header">
+                    <div class="page-icon">{{ page.icon }}</div>
+                    <div class="page-title">{{ page.title }}</div>
                   </div>
-                  <div class="page-buttons">
-                    <el-button 
-                      v-if="!page.tested"
-                      type="success" 
-                      size="small" 
-                      @click.stop="markPageTested(page)"
-                    >
-                      <el-icon><Check /></el-icon>
-                    </el-button>
-                    <el-button 
-                      v-if="page.tested"
-                      type="warning" 
-                      size="small" 
-                      @click.stop="resetPageStatus(page)"
-                    >
-                      <el-icon><Refresh /></el-icon>
-                    </el-button>
-                    <el-button 
-                      type="primary" 
-                      size="small" 
-                      @click.stop="navigateToPage(page)"
-                    >
-                      <el-icon><View /></el-icon>
-                    </el-button>
+                  <div class="page-description">{{ page.description }}</div>
+                  <div class="page-footer">
+                    <div class="page-path-container">
+                      <div class="page-path">{{ page.path }}</div>
+                      <div class="path-copy-btn" @click.stop="copyPath(page.path)" title="复制路径">
+                        <el-icon><DocumentCopy /></el-icon>
+                      </div>
+                    </div>
+                    <div class="page-status">
+                      <el-tag :type="page.tested ? 'success' : 'warning'" size="small">
+                        {{ page.tested ? '已测试' : '未测试' }}
+                      </el-tag>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -432,6 +448,7 @@ import {
   Check,
   Download,
   FolderOpened,
+  DocumentCopy,
 } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
 
@@ -1088,6 +1105,28 @@ const refreshData = () => {
   ElMessage.success('数据已刷新')
 }
 
+// 复制路径到剪贴板
+const copyPath = async (path) => {
+  try {
+    await navigator.clipboard.writeText(path)
+    ElMessage.success('路径已复制到剪贴板')
+  } catch (error) {
+    console.error('复制失败:', error)
+    // 降级方案：使用传统方法
+    const textArea = document.createElement('textarea')
+    textArea.value = path
+    document.body.appendChild(textArea)
+    textArea.select()
+    try {
+      document.execCommand('copy')
+      ElMessage.success('路径已复制到剪贴板')
+    } catch {
+      ElMessage.error('复制失败，请手动复制')
+    }
+    document.body.removeChild(textArea)
+  }
+}
+
 // 组件挂载时初始化
 onMounted(() => {
   initializeRole()
@@ -1386,47 +1425,35 @@ watch(() => route.query.tool, () => {
 
 /* 统一按钮设计 - 适用于所有按钮 */
 .el-button {
-  border-radius: 16px !important;
-  font-weight: 700 !important;
-  padding: 14px 24px !important;
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+  padding: 10px 16px !important;
   border: none !important;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
   position: relative !important;
   overflow: hidden !important;
-  font-size: 14px !important;
-  min-width: 120px;
+  font-size: 13px !important;
+  min-width: 80px;
   white-space: nowrap;
-  height: 44px !important;  /* 统一按钮高度 */
+  height: 36px !important;  /* 统一按钮高度 */
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   box-sizing: border-box !important;
 }
 
-.el-button[size="small"] {
-  padding: 12px 20px !important;
-  font-size: 13px !important;
-  min-width: 100px;
-  height: 38px !important;  /* 统一小按钮高度 */
-}
-
 .el-button[size="large"] {
-  padding: 16px 28px !important;
-  font-size: 15px !important;
-  min-width: 140px;
-  height: 48px !important;  /* 统一大按钮高度 */
+  padding: 12px 20px !important;
+  font-size: 14px !important;
+  min-width: 100px;
+  height: 40px !important;  /* 统一大按钮高度 */
 }
 
 .el-button .el-icon {
-  margin-right: 6px !important;
-  font-size: 16px !important;
+  margin-right: 4px !important;
+  font-size: 14px !important;
   position: relative;
   z-index: 2;
-}
-
-.el-button[size="small"] .el-icon {
-  margin-right: 5px !important;
-  font-size: 14px !important;
 }
 
 .el-button::before {
@@ -1458,52 +1485,52 @@ watch(() => route.query.tool, () => {
 }
 
 .el-button--primary:hover {
-  transform: translateY(-3px) !important;
-  box-shadow: 0 12px 30px rgba(102, 126, 234, 0.6) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.5) !important;
 }
 
 .el-button--success {
   background: linear-gradient(135deg, #48bb78, #38a169) !important;
   color: white !important;
-  box-shadow: 0 6px 20px rgba(72, 187, 120, 0.4) !important;
+  box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3) !important;
 }
 
 .el-button--success:hover {
-  transform: translateY(-3px) !important;
-  box-shadow: 0 12px 30px rgba(72, 187, 120, 0.6) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 20px rgba(72, 187, 120, 0.5) !important;
 }
 
 .el-button--warning {
   background: linear-gradient(135deg, #ed8936, #dd6b20) !important;
   color: white !important;
-  box-shadow: 0 6px 20px rgba(237, 137, 54, 0.4) !important;
+  box-shadow: 0 4px 15px rgba(237, 137, 54, 0.3) !important;
 }
 
 .el-button--warning:hover {
-  transform: translateY(-3px) !important;
-  box-shadow: 0 12px 30px rgba(237, 137, 54, 0.6) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 20px rgba(237, 137, 54, 0.5) !important;
 }
 
 .el-button--info {
   background: linear-gradient(135deg, #4299e1, #3182ce) !important;
   color: white !important;
-  box-shadow: 0 6px 20px rgba(66, 153, 225, 0.4) !important;
+  box-shadow: 0 4px 15px rgba(66, 153, 225, 0.3) !important;
 }
 
 .el-button--info:hover {
-  transform: translateY(-3px) !important;
-  box-shadow: 0 12px 30px rgba(66, 153, 225, 0.6) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 20px rgba(66, 153, 225, 0.5) !important;
 }
 
 .el-button--danger {
   background: linear-gradient(135deg, #f56565, #e53e3e) !important;
   color: white !important;
-  box-shadow: 0 6px 20px rgba(245, 101, 101, 0.4) !important;
+  box-shadow: 0 4px 15px rgba(245, 101, 101, 0.3) !important;
 }
 
 .el-button--danger:hover {
-  transform: translateY(-3px) !important;
-  box-shadow: 0 12px 30px rgba(245, 101, 101, 0.6) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 20px rgba(245, 101, 101, 0.5) !important;
 }
 
 .el-button--default {
@@ -1534,15 +1561,15 @@ watch(() => route.query.tool, () => {
 .role-buttons,
 .test-actions {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 16px;
-  margin-top: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
   align-items: stretch;  /* 确保所有按钮高度一致 */
 }
 
 .role-buttons {
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  margin-bottom: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  margin-bottom: 20px;
 }
 
 /* 响应式按钮布局 */
@@ -1550,12 +1577,12 @@ watch(() => route.query.tool, () => {
   .action-buttons,
   .role-actions,
   .test-actions {
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+    gap: 10px;
   }
   
   .role-buttons {
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
   }
 }
 
@@ -1564,21 +1591,21 @@ watch(() => route.query.tool, () => {
   .role-actions,
   .role-buttons,
   .test-actions {
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
   }
   
   .el-button {
     min-width: unset;
-    padding: 12px 16px !important;
-    font-size: 12px !important;
-    height: 36px !important;
+    padding: 8px 12px !important;
+    font-size: 11px !important;
+    height: 32px !important;
   }
   
   .el-button[size="small"] {
-    padding: 10px 14px !important;
-    font-size: 11px !important;
-    height: 32px !important;
+    padding: 6px 10px !important;
+    font-size: 10px !important;
+    height: 28px !important;
   }
 }
 
@@ -1588,7 +1615,7 @@ watch(() => route.query.tool, () => {
   .role-buttons,
   .test-actions {
     grid-template-columns: 1fr;
-    gap: 10px;
+    gap: 8px;
   }
 }
 
@@ -1713,15 +1740,14 @@ watch(() => route.query.tool, () => {
 
 .page-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
 }
 
 .page-card {
   display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 20px;
+  flex-direction: column;
+  padding: 16px;
   background: rgba(255, 255, 255, 0.2);
   border-radius: 16px;
   cursor: pointer;
@@ -1729,37 +1755,308 @@ watch(() => route.query.tool, () => {
   border: 1px solid rgba(255, 255, 255, 0.1);
   position: relative;
   overflow: hidden;
+  min-height: 120px;
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.05),
+    0 2px 8px rgba(0, 0, 0, 0.03),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
-.page-card::before {
+.page-card::after {
   content: '';
   position: absolute;
   top: 0;
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.5s;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.2) 50%,
+    transparent 100%
+  );
+  transition: left 0.6s ease;
+  z-index: 1;
+  pointer-events: none;
 }
 
-.page-card:hover::before {
+.page-card:hover::after {
   left: 100%;
 }
 
-.page-card:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: translateY(-4px) scale(1.02);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
-  border-color: rgba(255, 255, 255, 0.3);
+/* 悬浮操作按钮组 */
+.page-actions-overlay {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  gap: 6px;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+  z-index: 10;
+}
+
+.page-card:hover .page-actions-overlay {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* 卡片内容布局 */
+.page-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 8px;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 4px;
+  padding: 12px;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.1) 0%, 
+    rgba(255, 255, 255, 0.05) 50%, 
+    rgba(255, 255, 255, 0.08) 100%);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.page-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(255, 255, 255, 0.1), 
+    transparent);
+  transition: left 0.6s ease;
+}
+
+.page-card:hover .page-header::before {
+  left: 100%;
+}
+
+.page-card:hover .page-header {
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.15) 0%, 
+    rgba(255, 255, 255, 0.08) 50%, 
+    rgba(255, 255, 255, 0.12) 100%);
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .page-icon {
-  font-size: 28px;
-  min-width: 28px;
+  font-size: 24px;
+  min-width: 24px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, 
+    rgba(102, 126, 234, 0.2) 0%, 
+    rgba(118, 75, 162, 0.2) 100%);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8px);
+  box-shadow: 
+    0 2px 8px rgba(102, 126, 234, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.page-icon::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, 
+    transparent, 
+    rgba(255, 255, 255, 0.1), 
+    transparent);
+  transform: rotate(45deg);
+  transition: all 0.6s ease;
+  opacity: 0;
+}
+
+.page-card:hover .page-icon::before {
+  opacity: 1;
+  transform: rotate(45deg) translate(50%, 50%);
+}
+
+.page-card:hover .page-icon {
+  transform: scale(1.05);
+  background: linear-gradient(135deg, 
+    rgba(102, 126, 234, 0.3) 0%, 
+    rgba(118, 75, 162, 0.3) 100%);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 
+    0 4px 12px rgba(102, 126, 234, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.page-title {
+  font-weight: 700;
+  font-size: 15px;
+  color: #1a202c;
+  line-height: 1.2;
+  flex: 1;
+  min-width: 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.page-card:hover .page-title {
+  color: #0f172a;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+.page-description {
+  font-size: 13px;
+  color: #4a5568;
+  line-height: 1.3;
+  margin-bottom: 8px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.page-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: auto;
+  gap: 12px;
+}
+
+.page-path-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.page-path {
+  font-size: 12px !important;
+  color: #e2e8f0 !important;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  padding: 4px 8px !important;
+  border-radius: 6px !important;
+  font-weight: 600 !important;
+  backdrop-filter: blur(8px) !important;
+  transition: all 0.3s ease !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+  letter-spacing: 0.3px !important;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.page-status {
+  flex-shrink: 0;
+}
+
+.path-copy-btn {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(71, 85, 105, 0.7);
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  transform: translateX(-8px);
+  flex-shrink: 0;
+}
+
+.page-card:hover .path-copy-btn {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.path-copy-btn:hover {
+  background: rgba(51, 65, 85, 0.8);
+  border-color: rgba(148, 163, 184, 0.7);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.path-copy-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.path-copy-btn .el-icon {
+  font-size: 13px;
+  color: #ffffff;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+  transition: all 0.3s ease;
+}
+
+.path-copy-btn:hover .el-icon {
+  color: #f1f5f9;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+  transform: scale(1.1);
+}
+
+.page-card:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-3px);
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.08),
+    0 6px 20px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.page-card:hover .page-actions-overlay {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.page-icon {
+  font-size: 24px;
+  min-width: 24px;
   background: linear-gradient(135deg, #667eea, #764ba2);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  flex-shrink: 0;
 }
 
 .page-info {
@@ -1767,67 +2064,8 @@ watch(() => route.query.tool, () => {
   min-width: 0;
 }
 
-.page-actions {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 12px;
-}
-
-.page-buttons {
-  display: flex;
-  gap: 6px;
-  opacity: 0;
-  transform: translateX(10px);
-  transition: all 0.3s ease;
-}
-
-.page-card:hover .page-buttons {
-  opacity: 1;
-  transform: translateX(0);
-}
-
 .page-status {
-  margin-bottom: 4px;
-}
-
-.page-title {
-  font-weight: 700;
-  font-size: 16px;
-  color: #1a202c;
-  margin-bottom: 6px;
-}
-
-.page-description {
-  font-size: 14px;
-  color: #4a5568;
-  margin-bottom: 6px;
-  line-height: 1.4;
-}
-
-.page-path {
-  font-size: 14px !important;
-  color: #e2e8f0 !important;
-  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace !important;
-  background: rgba(255, 255, 255, 0.15) !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
-  padding: 8px 12px !important;
-  border-radius: 8px !important;
-  display: inline-block !important;
-  font-weight: 600 !important;
-  backdrop-filter: blur(8px) !important;
-  transition: all 0.3s ease !important;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
-  letter-spacing: 0.5px !important;
-  margin-top: 4px !important;
-}
-
-.page-path:hover {
-  background: rgba(255, 255, 255, 0.2) !important;
-  border-color: rgba(255, 255, 255, 0.3) !important;
-  color: #fff !important;
-  transform: translateY(-1px) !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+  flex-shrink: 0;
 }
 
 /* 测试管理卡片 */
@@ -1848,21 +2086,21 @@ watch(() => route.query.tool, () => {
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 20px;
-  margin-bottom: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
 }
 
 .stat-item {
   text-align: center;
-  padding: 16px;
+  padding: 12px;
   background: rgba(255, 255, 255, 0.2);
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .stat-number {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 800;
   color: #1a202c;
   margin-bottom: 4px;
@@ -1870,12 +2108,14 @@ watch(() => route.query.tool, () => {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  line-height: 1;
 }
 
 .stat-label {
-  font-size: 14px;
+  font-size: 12px;
   color: #4a5568;
   font-weight: 600;
+  line-height: 1.2;
 }
 
 .test-actions {
@@ -1977,18 +2217,24 @@ watch(() => route.query.tool, () => {
   .page-grid,
   .stats-grid {
     grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .page-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   }
 
   .current-role-display {
     flex-direction: column;
     text-align: center;
     gap: 16px;
+    padding: 20px;
   }
 
   .role-avatar {
-    width: 80px;
-    height: 80px;
-    font-size: 44px;
+    width: 70px;
+    height: 70px;
+    font-size: 36px;
   }
 
   .header-left {
@@ -1998,7 +2244,74 @@ watch(() => route.query.tool, () => {
   }
 
   .main-content {
-    padding: 24px 16px;
+    padding: 20px 16px;
+  }
+
+  .page-card {
+    min-height: 100px;
+    padding: 12px;
+    border-radius: 12px;
+  }
+
+  .page-card:hover {
+    transform: translateY(-1px);
+    box-shadow: 
+      0 8px 24px rgba(0, 0, 0, 0.06),
+      0 4px 12px rgba(0, 0, 0, 0.04),
+      inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  }
+
+  .page-actions-overlay {
+    top: 6px;
+    right: 6px;
+    gap: 4px;
+  }
+
+  .page-actions-overlay .el-button {
+    width: 24px !important;
+    height: 24px !important;
+    min-width: 24px !important;
+  }
+
+  .page-actions-overlay .el-button .el-icon {
+    font-size: 12px !important;
+  }
+
+  .page-header {
+    gap: 8px;
+  }
+
+  .page-icon {
+    font-size: 20px;
+    min-width: 20px;
+  }
+
+  .path-copy-btn {
+    width: 20px;
+    height: 20px;
+  }
+
+  .path-copy-btn .el-icon {
+    font-size: 11px;
+    color: #ffffff;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
+  }
+
+  .page-path-container {
+    gap: 6px;
+  }
+
+  .page-title {
+    font-size: 14px;
+  }
+
+  .page-description {
+    font-size: 12px;
+  }
+
+  .page-path {
+    font-size: 11px !important;
+    padding: 3px 6px !important;
   }
 }
 
@@ -2027,9 +2340,78 @@ watch(() => route.query.tool, () => {
 }
 
 .el-tag {
-  border-radius: 8px;
-  font-weight: 600;
-  padding: 4px 12px;
+  border: none !important;
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+  padding: 6px 14px !important;
+  font-size: 12px !important;
+  backdrop-filter: blur(8px) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  position: relative !important;
+  overflow: hidden !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+}
+
+.el-tag--success {
+  background: linear-gradient(135deg, 
+    rgba(16, 185, 129, 0.9) 0%, 
+    rgba(5, 150, 105, 0.9) 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(16, 185, 129, 0.8) !important;
+  box-shadow: 
+    0 4px 12px rgba(16, 185, 129, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+  font-weight: 700 !important;
+}
+
+.el-tag--warning {
+  background: linear-gradient(135deg, 
+    rgba(239, 68, 68, 0.9) 0%, 
+    rgba(220, 38, 127, 0.9) 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(239, 68, 68, 0.8) !important;
+  box-shadow: 
+    0 4px 12px rgba(239, 68, 68, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+  font-weight: 700 !important;
+}
+
+.el-tag:hover {
+  transform: translateY(-1px) scale(1.05);
+  box-shadow: 
+    0 6px 16px rgba(0, 0, 0, 0.2) !important;
+}
+
+.el-tag--success:hover {
+  box-shadow: 
+    0 6px 20px rgba(16, 185, 129, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
+}
+
+.el-tag--warning:hover {
+  box-shadow: 
+    0 6px 20px rgba(239, 68, 68, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
+}
+
+.el-tag::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    transparent 100%
+  );
+  transition: left 0.5s ease;
+}
+
+.page-card:hover .el-tag::before {
+  left: 100%;
 }
 
 .el-input :deep(.el-input__wrapper) {
@@ -2054,5 +2436,47 @@ watch(() => route.query.tool, () => {
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* 悬浮操作按钮专用样式 */
+.page-actions-overlay .el-button {
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  padding: 0 !important;
+  border-radius: 10px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  backdrop-filter: blur(12px) !important;
+  background: rgba(255, 255, 255, 0.25) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  color: #4a5568 !important;
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.page-actions-overlay .el-button .el-icon {
+  margin: 0 !important;
+  font-size: 14px !important;
+}
+
+.page-actions-overlay .el-button:hover {
+  background: rgba(255, 255, 255, 0.35) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  transform: translateY(-1px) scale(1.05) !important;
+  box-shadow: 
+    0 6px 16px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5) !important;
+  color: #2d3748 !important;
+}
+
+.page-actions-overlay .el-button:active {
+  transform: translateY(0) scale(1.02) !important;
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
 }
 </style>
