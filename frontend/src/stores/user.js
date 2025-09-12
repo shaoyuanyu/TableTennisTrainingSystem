@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import api from '@/utils/api'
 import { normalizeRole } from '@/utils/permissions'
+import { getErrorMessage } from '@/utils/errorHandler'
 
 export const useUserStore = defineStore('user', () => {
   // 安全解析localStorage中的数据
@@ -102,19 +103,20 @@ export const useUserStore = defineStore('user', () => {
         const { status, data } = error.response
         switch (status) {
           case 401:
-            errorMessage = '用户名或密码错误'
+            // 优先使用后端返回的具体错误信息，如"用户名不存在"、"密码错误"等
+            errorMessage = getErrorMessage(data, '用户名或密码错误')
             break
           case 422:
-            errorMessage = data?.message || '请求参数错误'
+            errorMessage = getErrorMessage(data, '请求参数错误')
             break
           case 429:
-            errorMessage = '登录尝试过于频繁，请稍后再试'
+            errorMessage = getErrorMessage(data, '登录尝试过于频繁，请稍后再试')
             break
           case 500:
-            errorMessage = '服务器内部错误，请稍后重试'
+            errorMessage = getErrorMessage(data, '服务器内部错误，请稍后重试')
             break
           default:
-            errorMessage = data?.message || `登录失败 (${status})`
+            errorMessage = getErrorMessage(data, `登录失败 (${status})`)
         }
       } else if (error.code === 'NETWORK_ERROR' || error.message === 'Network Error') {
         errorMessage = '网络连接失败，请检查网络状态'
@@ -140,9 +142,34 @@ export const useUserStore = defineStore('user', () => {
       }
     } catch (error) {
       console.error('注册失败:', error)
-      // 处理后端返回的错误信息
-      const message = error.response?.data?.message || error.message || '注册失败'
-      return { success: false, message }
+      
+      let errorMessage = '注册失败，请稍后重试'
+      
+      if (error.response) {
+        const { status, data } = error.response
+        switch (status) {
+          case 400:
+            errorMessage = getErrorMessage(data, '请求参数错误')
+            break
+          case 409:
+            errorMessage = getErrorMessage(data, '用户名已存在')
+            break
+          case 422:
+            errorMessage = getErrorMessage(data, '请求参数错误')
+            break
+          case 500:
+            errorMessage = getErrorMessage(data, '服务器内部错误，请稍后重试')
+            break
+          default:
+            errorMessage = getErrorMessage(data, `注册失败 (${status})`)
+        }
+      } else if (error.code === 'NETWORK_ERROR' || error.message === 'Network Error') {
+        errorMessage = '网络连接失败，请检查网络状态'
+      } else if (error.code === 'ECONNABORTED') {
+        errorMessage = '请求超时，请稍后重试'
+      }
+      
+      return { success: false, message: errorMessage }
     }
   }
 
