@@ -12,6 +12,10 @@ tags:
     description: "用户信息查询和管理接口"
   - name: "消息系统"
     description: "站内消息相关接口"
+  - name: "钱包系统"
+    description: "钱包充值和查询相关接口"
+  - name: "校区管理"
+    description: "校区信息管理相关接口"
 paths:
   /user/signup:
     post:
@@ -863,6 +867,98 @@ paths:
           description: "权限不足"
         "404":
           description: "用户不存在"
+  /campus/names:
+    get:
+      tags:
+        - "校区管理"
+      summary: "获取校区列表"
+      description: "获取所有校区名称列表，支持分页"
+      parameters:
+        - name: "page"
+          in: "query"
+          description: "页码，从1开始"
+          required: false
+          schema:
+            type: "integer"
+            format: "int32"
+            default: 1
+        - name: "size"
+          in: "query"
+          description: "每页大小"
+          required: false
+          schema:
+            type: "integer"
+            format: "int32"
+            default: 10
+      responses:
+        "200":
+          description: "返回校区列表"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  campuses:
+                    type: "array"
+                    items:
+                      $ref: "#/components/schemas/Campus"
+                  totalCount:
+                    type: "integer"
+                    format: "int64"
+                  page:
+                    type: "integer"
+                    format: "int32"
+                  size:
+                    type: "integer"
+                    format: "int32"
+                  totalPages:
+                    type: "integer"
+                    format: "int32"
+        "400":
+          description: "请求参数错误"
+        "401":
+          description: "未认证"
+  /campus/create:
+    post:
+      tags:
+        - "校区管理"
+      summary: "创建校区"
+      description: "超级管理员创建新校区"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CampusCreateRequest"
+            examples:
+              campus_create:
+                summary: "创建校区示例"
+                value:
+                  campusName: "海淀校区"
+                  address: "北京市海淀区中关村大街1号"
+                  contactPerson: "张主任"
+                  phone: "010-12345678"
+                  email: "hd@ttts.edu.cn"
+        required: true
+      responses:
+        "201":
+          description: "创建成功"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  message:
+                    type: "string"
+              examples:
+                success:
+                  value:
+                    message: "创建校区成功"
+        "400":
+          description: "请求参数错误"
+        "401":
+          description: "未认证"
+        "403":
+          description: "权限不足"
 components:
   schemas:
     UserCreateRequest:
@@ -1162,3 +1258,48 @@ components:
         - "balanceAfter"
         - "createdAt"
         - "description"
+    CampusCreateRequest:
+      type: "object"
+      properties:
+        campusName:
+          type: "string"
+        address:
+          type: "string"
+        contactPerson:
+          type: "string"
+        phone:
+          type: "string"
+        email:
+          type: "string"
+      required:
+        - "campusName"
+        - "address"
+        - "contactPerson"
+        - "phone"
+        - "email"
+    Campus:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int32"
+        campusName:
+          type: "string"
+        address:
+          type: "string"
+        contactPerson:
+          type: "string"
+        phone:
+          type: "string"
+        email:
+          type: "string"
+        createdAt:
+          type: "string"
+          format: "date-time"
+      required:
+        - "id"
+        - "campusName"
+        - "address"
+        - "contactPerson"
+        - "phone"
+        - "email"
