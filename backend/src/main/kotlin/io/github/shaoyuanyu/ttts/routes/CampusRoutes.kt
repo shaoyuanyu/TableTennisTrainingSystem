@@ -18,9 +18,13 @@ fun Application.campusRoutes(campusService: CampusService) {
     routing {
         route("/campus") {
 
+            run{
+                getCampusNames(campusService)
+            }
+
             // 所有用户都有权限获取校区名称列表
             authenticate("auth-session-all") {
-                getCampusNames(campusService)
+
             }
 
             // 只有超级管理员能创建校区
