@@ -14,7 +14,7 @@ object CampusTable : IntIdTable("campus") {
     val address: Column<String> = varchar("address", 64)
 
     //TODO foreign key
-    val contact_person: Column<Int> = integer("contact_person")
+    val contact_person: Column<String> = varchar("contact_person", 32)
 
     val phone: Column<String> = varchar("phone", 32)
 

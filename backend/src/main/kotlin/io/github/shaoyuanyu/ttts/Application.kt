@@ -1,5 +1,6 @@
 package io.github.shaoyuanyu.ttts
 
+import io.github.shaoyuanyu.ttts.persistence.CampusService
 import io.github.shaoyuanyu.ttts.persistence.UserService
 import io.github.shaoyuanyu.ttts.persistence.MessageService
 import io.github.shaoyuanyu.ttts.persistence.StudentService
@@ -31,6 +32,7 @@ fun Application.module() {
     val userService = UserService(database)
     val messageService = MessageService(database)
     val walletService = StudentService(database,userService)
+    val campusService = CampusService(database)
 
     // monitoring
     configureMonitoring()
@@ -49,5 +51,5 @@ fun Application.module() {
     configureStatusPages()
 
     // routing
-    configureRouting(userService, messageService, walletService)
+    configureRouting(userService, messageService, walletService, campusService)
 }
