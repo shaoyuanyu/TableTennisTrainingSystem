@@ -1,34 +1,9 @@
 <template>
   <div class="super-admin-dashboard">
-    <!-- 背景装饰元素 -->
-    <div class="background-decorations">
-      <!-- 系统级图标 -->
-      <div class="system-icon database-icon">🗄️</div>
-      <div class="system-icon server-icon">🖥️</div>
-      <div class="system-icon network-icon">🌐</div>
-      <div class="system-icon security-icon">🔐</div>
-
-      <!-- 高级管理装饰 -->
-      <div class="admin-decoration crown-icon">👑</div>
-      <div class="admin-decoration shield-icon">🛡️</div>
-      <div class="admin-decoration control-icon">🎛️</div>
-      <div class="admin-decoration analytics-icon">📊</div>
-
-      <!-- 艺术字装饰 -->
-      <div class="art-text">
-        <div class="art-text-main">SUPER</div>
-        <div class="art-text-sub">系统管理</div>
-      </div>
-
-      <!-- 高级几何装饰 -->
-      <div class="advanced-decoration adv-1"></div>
-      <div class="advanced-decoration adv-2"></div>
-      <div class="advanced-decoration adv-3"></div>
-      <div class="advanced-decoration adv-4"></div>
-    </div>
-
+    <!-- 极简背景 - 完全移除装饰元素以提升性能 -->
+    
     <!-- 系统概览 -->
-    <el-card class="dashboard-card overview-card" shadow="hover">
+    <el-card class="dashboard-card overview-card" shadow="never">
       <template #header>
         <div class="card-header">
           <el-icon class="header-icon">
@@ -86,7 +61,7 @@
     </el-card>
 
     <!-- 服务状态 -->
-    <el-card class="dashboard-card service-card" shadow="hover">
+    <el-card class="dashboard-card service-card" shadow="never">
       <template #header>
         <div class="card-header">
           <el-icon class="header-icon">
@@ -122,7 +97,7 @@
     </el-card>
 
     <!-- 校区管理快捷入口 -->
-    <el-card class="dashboard-card campus-card" shadow="hover">
+    <el-card class="dashboard-card campus-card" shadow="never">
       <template #header>
         <div class="card-header">
           <el-icon class="header-icon">
@@ -151,7 +126,7 @@
     </el-card>
 
     <!-- 系统日志 -->
-    <el-card class="dashboard-card log-card" shadow="hover">
+    <el-card class="dashboard-card log-card" shadow="never">
       <template #header>
         <div class="card-header">
           <el-icon class="header-icon">
@@ -228,25 +203,31 @@ const getExpiryStatus = () => {
   return '紧急'
 }
 
-// 格式化时间
+// 格式化时间（缓存结果以提升性能）
+const timeCache = new Map()
 const formatTime = (time) => {
-  return dayjs(time).fromNow()
+  const key = time.toString()
+  if (!timeCache.has(key)) {
+    timeCache.set(key, dayjs(time).fromNow())
+  }
+  return timeCache.get(key)
 }
 
-// 获取日志图标
+// 获取日志图标（静态映射，避免重复计算）
+const iconMap = {
+  success: SuccessFilled,
+  warning: WarningFilled,
+  error: CircleCloseFilled,
+  info: InfoFilled,
+}
+
 const getLogIcon = (level) => {
-  const iconMap = {
-    success: SuccessFilled,
-    warning: WarningFilled,
-    error: CircleCloseFilled,
-    info: InfoFilled,
-  }
   return iconMap[level] || InfoFilled
 }
 
-// 获取数据
+// 获取数据（一次性加载，避免重复请求）
 const fetchData = async () => {
-  // 模拟数据
+  // 模拟数据 - 实际项目中这里应该是API调用
   campusList.value = [
     {
       id: 1,
@@ -322,208 +303,31 @@ onMounted(() => {
 .super-admin-dashboard {
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  padding: 24px;
-  background: linear-gradient(
-    135deg,
-    #667eea 0%,
-    #764ba2 25%,
-    #667eea 50%,
-    #764ba2 75%,
-    #667eea 100%
-  );
+  gap: 20px;
+  padding: 20px;
+  /* 极简背景，提升性能 */
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   min-height: 100vh;
-  position: relative;
-  overflow: hidden;
-}
-
-/* 背景装饰元素 */
-.background-decorations {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 1;
-}
-
-/* 系统级图标装饰 */
-.system-icon {
-  position: absolute;
-  font-size: 65px;
-  opacity: 0.06;
-  animation: float 10s ease-in-out infinite;
-}
-
-.database-icon {
-  top: 20%;
-  left: 8%;
-  animation-delay: 0s;
-}
-
-.server-icon {
-  top: 65%;
-  right: 10%;
-  animation-delay: 2.5s;
-}
-
-.network-icon {
-  bottom: 30%;
-  left: 12%;
-  animation-delay: 5s;
-}
-
-.security-icon {
-  top: 45%;
-  left: 3%;
-  animation-delay: 7.5s;
-}
-
-/* 高级管理装饰 */
-.admin-decoration {
-  position: absolute;
-  font-size: 75px;
-  opacity: 0.08;
-  animation: rotate 25s linear infinite;
-}
-
-.crown-icon {
-  top: 30%;
-  right: 5%;
-  animation-delay: 1s;
-}
-
-.shield-icon {
-  bottom: 20%;
-  right: 18%;
-  animation-delay: 3s;
-}
-
-.control-icon {
-  top: 75%;
-  left: 18%;
-  animation-delay: 5s;
-}
-
-.analytics-icon {
-  top: 10%;
-  right: 25%;
-  animation-delay: 7s;
-}
-
-/* 艺术字装饰 */
-.art-text {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
-  opacity: 0.15;
-  z-index: 1;
-  pointer-events: none;
-  user-select: none;
-}
-
-.art-text-main {
-  font-size: 140px;
-  font-weight: 900;
-  color: rgba(255, 255, 255, 0.8);
-  letter-spacing: 15px;
-  text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4);
-  font-family: 'Arial Black', sans-serif;
-  -webkit-text-stroke: 2px rgba(255, 255, 255, 0.3);
-  background: linear-gradient(45deg, #667eea, #764ba2, #667eea);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.art-text-sub {
-  font-size: 50px;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.7);
-  letter-spacing: 10px;
-  margin-top: -25px;
-  text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
-}
-
-/* 高级几何装饰 */
-.advanced-decoration {
-  position: absolute;
-  background: linear-gradient(45deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.04));
-  border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
-  backdrop-filter: blur(2px);
-}
-
-.adv-1 {
-  top: 25%;
-  left: 2%;
-  width: 120px;
-  height: 120px;
-  animation: morphFloat 20s ease-in-out infinite;
-}
-
-.adv-2 {
-  bottom: 40%;
-  right: 8%;
-  width: 100px;
-  height: 100px;
-  animation: morphFloat 25s ease-in-out infinite reverse;
-}
-
-.adv-3 {
-  top: 60%;
-  right: 3%;
-  width: 80px;
-  height: 80px;
-  animation: morphPulse 15s ease-in-out infinite;
-}
-
-.adv-4 {
-  bottom: 15%;
-  left: 5%;
-  width: 90px;
-  height: 90px;
-  animation: morphFloat 30s ease-in-out infinite;
-  animation-delay: 5s;
+  /* 性能优化：启用硬件加速 */
+  transform: translateZ(0);
+  will-change: auto;
 }
 
 .dashboard-card {
   border: none;
-  border-radius: 20px;
-  backdrop-filter: blur(20px);
+  border-radius: 12px;
+  /* 移除复杂效果 */
   background: rgba(255, 255, 255, 0.95);
-  box-shadow:
-    0 10px 40px rgba(0, 0, 0, 0.15),
-    0 0 0 1px rgba(255, 255, 255, 0.25) inset;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   position: relative;
   z-index: 10;
-  overflow: hidden;
-  transition: all 0.4s ease;
+  /* 极简过渡效果 */
+  transition: transform 0.15s ease;
+  transform: translateZ(0);
 }
 
 .dashboard-card:hover {
-  transform: translateY(-6px);
-  box-shadow:
-    0 15px 50px rgba(0, 0, 0, 0.2),
-    0 0 0 1px rgba(255, 255, 255, 0.35) inset;
-}
-
-.overview-card {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(102, 126, 234, 0.08));
-}
-
-.service-card {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(118, 75, 162, 0.08));
-}
-
-.campus-card {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(102, 126, 234, 0.08));
-}
-
-.log-card {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(118, 75, 162, 0.08));
+  transform: translateY(-2px);
 }
 
 .card-header {
@@ -536,7 +340,7 @@ onMounted(() => {
 }
 
 .header-icon {
-  font-size: 22px;
+  font-size: 18px;
   color: #667eea;
 }
 
@@ -547,61 +351,59 @@ onMounted(() => {
 
 .overview-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
 }
 
 .overview-item {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 20px;
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(15px);
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  transition: all 0.3s ease;
+  gap: 12px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  /* 极简过渡 */
+  transition: background-color 0.15s ease;
 }
 
 .overview-item:hover {
-  transform: translateY(-3px);
-  background: rgba(255, 255, 255, 0.85);
-  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.12);
+  background: rgba(255, 255, 255, 0.9);
 }
 
 .overview-icon {
-  width: 55px;
-  height: 55px;
-  border-radius: 16px;
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  font-size: 24px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  font-size: 20px;
+  flex-shrink: 0;
 }
 
 .overview-icon.campus {
-  background: linear-gradient(135deg, #1890ff, #40a9ff);
+  background: #1890ff;
 }
 
 .overview-icon.users {
-  background: linear-gradient(135deg, #52c41a, #73d13d);
+  background: #52c41a;
 }
 
 .overview-icon.revenue {
-  background: linear-gradient(135deg, #faad14, #ffc53d);
+  background: #faad14;
 }
 
 .overview-icon.courses {
-  background: linear-gradient(135deg, #f759ab, #ff85c0);
+  background: #f759ab;
 }
 
 .overview-value {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 700;
   color: #333;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .overview-label {
@@ -615,33 +417,37 @@ onMounted(() => {
 .log-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
 
 .service-item,
-.campus-item {
+.campus-item,
+.log-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 18px;
-  background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(12px);
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  transition: all 0.3s ease;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  /* 极简过渡 */
+  transition: background-color 0.15s ease;
 }
 
 .service-item:hover,
-.campus-item:hover {
-  background: rgba(255, 255, 255, 0.8);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+.campus-item:hover,
+.log-item:hover {
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.log-item {
+  gap: 12px;
 }
 
 .service-name,
 .campus-name {
   font-weight: 600;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   color: #333;
   font-size: 15px;
 }
@@ -653,62 +459,46 @@ onMounted(() => {
 }
 
 .detail-item {
-  margin-right: 16px;
+  margin-right: 12px;
   font-weight: 500;
 }
 
-.log-item {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 16px;
-  background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(12px);
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  transition: all 0.3s ease;
-}
-
-.log-item:hover {
-  background: rgba(255, 255, 255, 0.8);
-  transform: translateY(-2px);
-}
-
 .log-icon {
-  width: 42px;
-  height: 42px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  font-size: 20px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  font-size: 16px;
+  flex-shrink: 0;
 }
 
 .log-icon.success {
-  background: linear-gradient(135deg, #52c41a, #73d13d);
+  background: #52c41a;
 }
 
 .log-icon.info {
-  background: linear-gradient(135deg, #1890ff, #40a9ff);
+  background: #1890ff;
 }
 
 .log-icon.warning {
-  background: linear-gradient(135deg, #faad14, #ffc53d);
+  background: #faad14;
 }
 
 .log-icon.error {
-  background: linear-gradient(135deg, #ff4d4f, #ff7875);
+  background: #ff4d4f;
 }
 
 .log-content {
   flex: 1;
+  min-width: 0;
 }
 
 .log-message {
-  font-size: 15px;
-  margin-bottom: 6px;
+  font-size: 14px;
+  margin-bottom: 4px;
   font-weight: 500;
   color: #333;
 }
@@ -718,89 +508,10 @@ onMounted(() => {
   color: #666;
 }
 
-/* 动画定义 */
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0px) rotate(0deg);
-  }
-
-  33% {
-    transform: translateY(-12px) rotate(2deg);
-  }
-
-  66% {
-    transform: translateY(-8px) rotate(-1deg);
-  }
-}
-
-@keyframes rotate {
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes morphFloat {
-  0%,
-  100% {
-    transform: translateY(0px);
-    border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
-  }
-
-  25% {
-    transform: translateY(-15px);
-    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
-  }
-
-  50% {
-    transform: translateY(-8px);
-    border-radius: 40% 60% 70% 30% / 40% 70% 30% 60%;
-  }
-
-  75% {
-    transform: translateY(-12px);
-    border-radius: 70% 30% 40% 60% / 30% 60% 40% 70%;
-  }
-}
-
-@keyframes morphPulse {
-  0%,
-  100% {
-    opacity: 0.08;
-    transform: scale(1);
-    border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
-  }
-
-  50% {
-    opacity: 0.15;
-    transform: scale(1.2);
-    border-radius: 70% 30% 30% 70% / 70% 70% 30% 30%;
-  }
-}
-
 /* 响应式设计 */
 @media (max-width: 768px) {
   .super-admin-dashboard {
     padding: 16px;
-  }
-
-  .art-text-main {
-    font-size: 100px;
-    letter-spacing: 8px;
-  }
-
-  .art-text-sub {
-    font-size: 36px;
-    letter-spacing: 6px;
-  }
-
-  .system-icon,
-  .admin-decoration {
-    font-size: 45px;
   }
 
   .overview-grid {
@@ -808,7 +519,7 @@ onMounted(() => {
   }
 
   .overview-item {
-    padding: 16px;
+    padding: 12px;
   }
 }
 
@@ -816,5 +527,16 @@ onMounted(() => {
   .overview-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* Element Plus 样式覆盖 - 性能优化版本 */
+.dashboard-card :deep(.el-card__header) {
+  padding: 16px 18px;
+  background: transparent;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.dashboard-card :deep(.el-card__body) {
+  padding: 18px;
 }
 </style>

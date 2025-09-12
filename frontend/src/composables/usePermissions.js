@@ -1,4 +1,4 @@
-import { computed } from 'vue'
+import { computed, ref, watchEffect } from 'vue'
 import { useUserStore } from '@/stores/user'
 import { hasPagePermission, hasActionPermission, getAccessibleMenus } from '@/utils/permissions'
 
@@ -9,54 +9,81 @@ import { hasPagePermission, hasActionPermission, getAccessibleMenus } from '@/ut
 export function usePermissions() {
   const userStore = useUserStore()
 
+  // 性能优化：缓存权限计算结果
+  const cachedPermissions = ref({
+    isLoggedIn: false,
+    userRole: '',
+    isSuperAdmin: false,
+    isCampusAdmin: false,
+    isStudent: false,
+    isCoach: false,
+    hasManagementAccess: false
+  })
+
+  // 监听用户状态变化，更新缓存
+  watchEffect(() => {
+    const userRole = userStore.userRole
+    const isLoggedIn = userStore.isLoggedIn
+    
+    cachedPermissions.value = {
+      isLoggedIn,
+      userRole,
+      isSuperAdmin: userStore.isSuperAdmin,
+      isCampusAdmin: userStore.isCampusAdmin,
+      isStudent: userStore.isStudent,
+      isCoach: userStore.isCoach,
+      hasManagementAccess: userStore.isSuperAdmin || userStore.isCampusAdmin
+    }
+  })
+
   // 当前用户角色
-  const userRole = computed(() => userStore.userRole)
+  const userRole = computed(() => cachedPermissions.value.userRole)
 
   // 是否已登录
-  const isLoggedIn = computed(() => userStore.isLoggedIn)
+  const isLoggedIn = computed(() => cachedPermissions.value.isLoggedIn)
 
   // 角色判断
-  const isSuperAdmin = computed(() => userStore.isSuperAdmin)
-  const isCampusAdmin = computed(() => userStore.isCampusAdmin)
-  const isStudent = computed(() => userStore.isStudent)
-  const isCoach = computed(() => userStore.isCoach)
+  const isSuperAdmin = computed(() => cachedPermissions.value.isSuperAdmin)
+  const isCampusAdmin = computed(() => cachedPermissions.value.isCampusAdmin)
+  const isStudent = computed(() => cachedPermissions.value.isStudent)
+  const isCoach = computed(() => cachedPermissions.value.isCoach)
 
   /**
    * 检查页面访问权限
    */
   const canAccessPage = (path) => {
-    if (!isLoggedIn.value) return false
-    return hasPagePermission(path, userRole.value)
+    if (!cachedPermissions.value.isLoggedIn) return false
+    return hasPagePermission(path, cachedPermissions.value.userRole)
   }
 
   /**
    * 检查操作权限
    */
   const canPerformAction = (action, context = {}) => {
-    if (!isLoggedIn.value) return false
-    return hasActionPermission(action, userRole.value, context)
+    if (!cachedPermissions.value.isLoggedIn) return false
+    return hasActionPermission(action, cachedPermissions.value.userRole, context)
   }
 
   /**
    * 获取用户可访问的菜单
    */
   const accessibleMenus = computed(() => {
-    if (!isLoggedIn.value) return []
-    return getAccessibleMenus(userRole.value)
+    if (!cachedPermissions.value.isLoggedIn) return []
+    return getAccessibleMenus(cachedPermissions.value.userRole)
   })
 
   /**
    * 检查是否有任意一个权限
    */
   const hasAnyPermission = (permissions) => {
-    if (!isLoggedIn.value) return false
+    if (!cachedPermissions.value.isLoggedIn) return false
     return permissions.some(permission => {
       if (typeof permission === 'string') {
         // 页面权限
-        return hasPagePermission(permission, userRole.value)
+        return hasPagePermission(permission, cachedPermissions.value.userRole)
       } else if (typeof permission === 'object') {
         // 操作权限
-        return hasActionPermission(permission.action, userRole.value, permission.context)
+        return hasActionPermission(permission.action, cachedPermissions.value.userRole, permission.context)
       }
       return false
     })
@@ -66,14 +93,14 @@ export function usePermissions() {
    * 检查是否拥有所有权限
    */
   const hasAllPermissions = (permissions) => {
-    if (!isLoggedIn.value) return false
+    if (!cachedPermissions.value.isLoggedIn) return false
     return permissions.every(permission => {
       if (typeof permission === 'string') {
         // 页面权限
-        return hasPagePermission(permission, userRole.value)
+        return hasPagePermission(permission, cachedPermissions.value.userRole)
       } else if (typeof permission === 'object') {
         // 操作权限
-        return hasActionPermission(permission.action, userRole.value, permission.context)
+        return hasActionPermission(permission.action, cachedPermissions.value.userRole, permission.context)
       }
       return false
     })
@@ -83,15 +110,15 @@ export function usePermissions() {
    * 检查是否有管理权限
    */
   const hasManagementAccess = computed(() => {
-    return isSuperAdmin.value || isCampusAdmin.value
+    return cachedPermissions.value.hasManagementAccess
   })
 
   /**
    * 检查校区访问权限
    */
   const canAccessCampus = (campusId) => {
-    if (isSuperAdmin.value) return true
-    if (isCampusAdmin.value) {
+    if (cachedPermissions.value.isSuperAdmin) return true
+    if (cachedPermissions.value.isCampusAdmin) {
       // 校区管理员只能访问自己管理的校区
       return userStore.campusId === campusId
     }

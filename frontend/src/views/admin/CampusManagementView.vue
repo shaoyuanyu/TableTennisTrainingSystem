@@ -155,10 +155,10 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus } from '@element-plus/icons-vue'
 import api from '@/utils/api'
+import { debugSidebar } from '@/utils/debug'
 
 // 数据列表
 const campusList = ref([])
@@ -358,7 +358,15 @@ const saveAdmin = async () => {
 
 // 组件挂载时获取数据
 onMounted(() => {
-  fetchCampusList()
+  debugSidebar.logComponentLoad('CampusManagementView')
+  debugSidebar.startPerfMeasure('campus-management-init')
+  
+  try {
+    fetchCampusList()
+    debugSidebar.endPerfMeasure('campus-management-init')
+  } catch (error) {
+    debugSidebar.logError(error, 'CampusManagementView onMounted')
+  }
 })
 </script>
 

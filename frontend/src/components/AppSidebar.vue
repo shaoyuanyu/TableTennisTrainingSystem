@@ -8,6 +8,7 @@
       background-color="transparent"
       text-color="rgba(255, 255, 255, 0.95)"
       active-text-color="#ffffff"
+      @select="handleMenuSelect"
     >
       <!-- 仪表盘 -->
       <el-menu-item index="/dashboard" class="menu-item">
@@ -18,7 +19,7 @@
       </el-menu-item>
 
       <!-- 超级管理员菜单 -->
-      <template v-if="isSuperAdmin">
+      <template v-if="permissions.isSuperAdmin">
         <el-sub-menu index="admin" class="menu-item">
           <template #title>
             <el-icon>
@@ -42,7 +43,7 @@
       </template>
 
       <!-- 校区管理员菜单 -->
-      <template v-if="isCampusAdmin">
+      <template v-if="permissions.isCampusAdmin">
         <el-sub-menu index="campus" class="menu-item">
           <template #title>
             <el-icon>
@@ -78,7 +79,7 @@
       </template>
 
       <!-- 学员菜单 -->
-      <template v-if="isStudent">
+      <template v-if="permissions.isStudent">
         <el-sub-menu index="student" class="menu-item">
           <template #title>
             <el-icon>
@@ -138,7 +139,7 @@
       </template>
 
       <!-- 教练菜单 -->
-      <template v-if="isCoach">
+      <template v-if="permissions.isCoach">
         <el-sub-menu index="coach" class="menu-item">
           <template #title>
             <el-icon>
@@ -205,6 +206,7 @@
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { usePermissions } from '@/composables/usePermissions'
+import { debugSidebar } from '@/utils/debug'
 import {
   Odometer,
   Setting,
@@ -241,8 +243,41 @@ const {
   isCoach
 } = usePermissions()
 
+// 性能优化：缓存权限计算结果
+const permissions = computed(() => ({
+  isSuperAdmin: isSuperAdmin.value,
+  isCampusAdmin: isCampusAdmin.value,
+  isStudent: isStudent.value,
+  isCoach: isCoach.value
+}))
+
 // 当前激活的菜单项
 const activeMenu = computed(() => route.path)
+
+// 菜单选择处理
+const handleMenuSelect = (index, indexPath) => {
+  // 添加到全局调试器
+  if (window.debuggerAddLog) {
+    window.debuggerAddLog(`🔄 菜单选择: ${index} (路径: ${indexPath.join(' > ')})`, 'info')
+  }
+  
+  debugSidebar.logMenuClick(index, '菜单选择')
+  debugSidebar.startPerfMeasure('menu-select')
+  
+  console.log('Menu selected:', { index, indexPath })
+  
+  // 特殊处理系统管理菜单
+  if (index === 'admin' || indexPath.includes('admin')) {
+    debugSidebar.logComponentLoad('SystemManagement')
+    console.warn('系统管理菜单被点击，监控性能...')
+    
+    if (window.debuggerAddLog) {
+      window.debuggerAddLog(`⚠️ 系统管理菜单点击，开始性能监控`, 'warning')
+    }
+  }
+  
+  debugSidebar.endPerfMeasure('menu-select')
+}
 </script>
 
 <style scoped>
@@ -255,7 +290,9 @@ const activeMenu = computed(() => route.path)
   border-right: none;
   height: 100%;
   background: transparent;
+  /* 性能优化：减少重排和重绘 */
   will-change: auto;
+  transform: translate3d(0, 0, 0);
 }
 
 .menu-item {
@@ -265,19 +302,20 @@ const activeMenu = computed(() => route.path)
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
-:deep(.el-menu--collapse .el-sub-menu__title) {
+/* 性能优化：简化深度选择器 */
+.sidebar-menu :deep(.el-menu--collapse .el-sub-menu__title) {
   padding: 0 20px;
 }
 
-:deep(.el-menu--collapse .el-menu-item) {
+.sidebar-menu :deep(.el-menu--collapse .el-menu-item) {
   padding: 0 20px;
 }
 
-:deep(.el-sub-menu .el-menu-item) {
+.sidebar-menu :deep(.el-sub-menu .el-menu-item) {
   padding-left: 40px !important;
 }
 
-:deep(.el-menu-item.is-active) {
+.sidebar-menu :deep(.el-menu-item.is-active) {
   background: rgba(255, 255, 255, 0.25);
   border-right: 3px solid #ffffff;
   color: #ffffff !important;
@@ -285,45 +323,47 @@ const activeMenu = computed(() => route.path)
   box-shadow: inset 2px 0 0 rgba(255, 255, 255, 0.2);
 }
 
-:deep(.el-sub-menu__title:hover) {
+.sidebar-menu :deep(.el-sub-menu__title:hover) {
   background: rgba(255, 255, 255, 0.15);
   color: #ffffff !important;
 }
 
-:deep(.el-menu-item:hover) {
+.sidebar-menu :deep(.el-menu-item:hover) {
   background: rgba(255, 255, 255, 0.15);
   color: #ffffff !important;
 }
 
-:deep(.el-sub-menu__title) {
+.sidebar-menu :deep(.el-sub-menu__title) {
   color: rgba(255, 255, 255, 0.95) !important;
   font-weight: 500 !important;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
-  transition: background-color 0.2s ease !important;
-  transform: translateZ(0);
+  /* 性能优化：简化过渡效果 */
+  transition: background-color 0.15s ease !important;
+  transform: translate3d(0, 0, 0);
   will-change: background-color;
 }
 
-:deep(.el-menu-item) {
+.sidebar-menu :deep(.el-menu-item) {
   color: rgba(255, 255, 255, 0.95) !important;
   font-weight: 500 !important;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
-  transition: background-color 0.2s ease !important;
-  transform: translateZ(0);
+  /* 性能优化：简化过渡效果 */
+  transition: background-color 0.15s ease !important;
+  transform: translate3d(0, 0, 0);
   will-change: background-color;
 }
 
-:deep(.el-icon) {
+.sidebar-menu :deep(.el-icon) {
   color: rgba(255, 255, 255, 0.95) !important;
   filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.5)) !important;
 }
 
-/* 性能优化：简化复杂的动画 */
-:deep(.el-sub-menu__title .el-sub-menu__icon-arrow) {
-  transition: transform 0.2s ease !important;
+/* 性能优化：简化箭头动画 */
+.sidebar-menu :deep(.el-sub-menu__title .el-sub-menu__icon-arrow) {
+  transition: transform 0.15s ease !important;
 }
 
-:deep(.el-menu--vertical .el-sub-menu > .el-sub-menu__title .el-sub-menu__icon-arrow) {
-  transition: transform 0.2s ease !important;
+.sidebar-menu :deep(.el-menu--vertical .el-sub-menu > .el-sub-menu__title .el-sub-menu__icon-arrow) {
+  transition: transform 0.15s ease !important;
 }
 </style>

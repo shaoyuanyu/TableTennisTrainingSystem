@@ -86,7 +86,7 @@
     <el-container>
       <!-- 侧边栏 -->
       <el-aside :width="sidebarWidth" class="sidebar">
-        <AppSidebar :collapsed="sidebarCollapsed" />
+        <AppSidebarNew :collapsed="sidebarCollapsed" />
       </el-aside>
 
       <!-- 主内容区 -->
@@ -103,7 +103,7 @@ import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { ElMessageBox } from 'element-plus'
 import { Expand, Bell, User, ArrowDown, Setting, SwitchButton } from '@element-plus/icons-vue'
-import AppSidebar from '@/components/AppSidebar.vue'
+import AppSidebarNew from '@/components/AppSidebarNew.vue'
 import { useMessageStore } from '@/stores/messageStore'
 import { storeToRefs } from 'pinia'
 import { initializeAuth } from '@/utils/auth'
