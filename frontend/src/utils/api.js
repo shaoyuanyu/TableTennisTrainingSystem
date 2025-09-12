@@ -48,16 +48,35 @@ api.interceptors.response.use(
     return response
   },
   async (error) => {
-    const { response } = error
+    const { response, config } = error
     
     if (response) {
       const { status, data } = response
 
       switch (status) {
         case 401: {
+<<<<<<< HEAD
           ElMessage.error(data)
           const userStore = useUserStore()
           userStore.logout()
+=======
+          // 防止无限循环：只有在非登录、非登出请求时才处理401错误
+          const isLoginRequest = config.url?.includes('/user/login')
+          const isLogoutRequest = config.url?.includes('/user/logout')
+          
+          if (!isLoginRequest && !isLogoutRequest) {
+            ElMessage.error('会话已过期，请重新登录')
+            const userStore = useUserStore()
+            // 避免重复调用logout，检查用户是否确实已登录
+            if (userStore.isLoggedIn) {
+              userStore.logout()
+            }
+          } else if (isLoginRequest) {
+            // 登录请求失败时，不显示"会话过期"，而是显示登录相关错误
+            // 这里不处理错误消息，让具体的登录逻辑处理
+            console.log('登录请求失败，状态码401')
+          }
+>>>>>>> af09e5a (fix(前端):修复前端401死循环)
           break
         }
         case 403:

@@ -94,9 +94,37 @@ export const useUserStore = defineStore('user', () => {
       }
     } catch (error) {
       console.error('登录失败:', error)
+      
+      // 处理不同类型的错误
+      let errorMessage = '登录失败，请稍后重试'
+      
+      if (error.response) {
+        const { status, data } = error.response
+        switch (status) {
+          case 401:
+            errorMessage = '用户名或密码错误'
+            break
+          case 422:
+            errorMessage = data?.message || '请求参数错误'
+            break
+          case 429:
+            errorMessage = '登录尝试过于频繁，请稍后再试'
+            break
+          case 500:
+            errorMessage = '服务器内部错误，请稍后重试'
+            break
+          default:
+            errorMessage = data?.message || `登录失败 (${status})`
+        }
+      } else if (error.code === 'NETWORK_ERROR' || error.message === 'Network Error') {
+        errorMessage = '网络连接失败，请检查网络状态'
+      } else if (error.code === 'ECONNABORTED') {
+        errorMessage = '请求超时，请稍后重试'
+      }
+      
       return { 
         success: false, 
-        message: error.response?.data?.message || '登录失败，请稍后重试' 
+        message: errorMessage
       }
     }
   }
@@ -121,22 +149,32 @@ export const useUserStore = defineStore('user', () => {
   // 登出
   const logout = async () => {
     try {
+      // 检查是否确实需要登出（避免重复调用）
+      if (!userInfo.value.id) {
+        console.log('用户未登录，无需登出')
+        return
+      }
+
       // session认证模式：调用后端登出接口清除服务端session
       await api.post('/user/logout', {}, { withCredentials: true })
     } catch (error) {
       console.error('调用登出接口失败:', error)
       // 即使后端登出失败，也要清除前端状态
+    } finally {
+      // 清除前端存储的状态
+      token.value = ''
+      userInfo.value = {}
+      localStorage.removeItem('token')
+      localStorage.removeItem('userInfo')
+
+      // 使用动态导入避免循环依赖
+      const { default: router } = await import('@/router')
+      
+      // 只有当前不在登录页时才跳转
+      if (router.currentRoute.value.path !== '/login') {
+        router.push('/login')
+      }
     }
-
-    // 清除前端存储的状态
-    token.value = ''
-    userInfo.value = {}
-    localStorage.removeItem('token')
-    localStorage.removeItem('userInfo')
-
-    // 使用动态导入避免循环依赖
-    const { default: router } = await import('@/router')
-    router.push('/login')
   }
 
   // 更新用户信息（session认证模式暂不实现）
