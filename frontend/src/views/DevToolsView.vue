@@ -135,30 +135,6 @@
             </div>
           </el-card>
 
-          <!-- 性能测试卡片 -->
-          <el-card class="debug-card" shadow="hover">
-            <template #header>
-              <div class="card-header">
-                <span class="card-icon">📊</span>
-                <span>性能测试工具</span>
-              </div>
-            </template>
-            <div class="performance-tools">
-              <div class="tool-item">
-                <el-button type="primary" @click="showDashboardAnalyzer = true" size="small">
-                  📊 仪表板性能分析
-                </el-button>
-                <p class="tool-desc">分析各仪表板组件的性能指标</p>
-              </div>
-              <div class="tool-item">
-                <el-button type="success" @click="testOptimizedDashboards" size="small">
-                  🚀 测试优化版本
-                </el-button>
-                <p class="tool-desc">比较原版与优化版的性能差异</p>
-              </div>
-            </div>
-          </el-card>
-
           <el-card class="debug-card" shadow="hover">
             <template #header>
               <div class="card-header">
@@ -457,39 +433,6 @@
         </div>
       </div>
     </div>
-
-    <!-- 性能分析对话框 -->
-    <el-dialog
-      v-model="showDashboardAnalyzer"
-      title="📊 仪表板性能分析报告"
-      width="90%"
-      :destroy-on-close="true"
-    >
-      <DashboardAnalyzer />
-    </el-dialog>
-
-    <!-- 优化版本测试区域 -->
-    <div v-if="showOptimizedTest" class="optimized-test-overlay">
-      <el-card class="optimized-test-container">
-        <template #header>
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <h3>🚀 优化版仪表板测试</h3>
-            <el-button @click="showOptimizedTest = false" size="small">关闭</el-button>
-          </div>
-        </template>
-        <el-tabs v-model="activeOptimizedTab">
-          <el-tab-pane label="校区管理员(优化版)" name="campus">
-            <CampusAdminDashboardOptimized />
-          </el-tab-pane>
-          <el-tab-pane label="教练(优化版)" name="coach">
-            <CoachDashboardOptimized />
-          </el-tab-pane>
-          <el-tab-pane label="学员(优化版)" name="student">
-            <StudentDashboardOptimized />
-          </el-tab-pane>
-        </el-tabs>
-      </el-card>
-    </div>
   </div>
 </template>
 
@@ -508,12 +451,6 @@ import {
   DocumentCopy,
 } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
-
-// 导入性能分析和优化组件
-import DashboardAnalyzer from '@/components/DashboardAnalyzer.vue'
-import CampusAdminDashboardOptimized from '@/components/dashboard/CampusAdminDashboardOptimized.vue'
-import CoachDashboardOptimized from '@/components/dashboard/CoachDashboardOptimized.vue'
-import StudentDashboardOptimized from '@/components/dashboard/StudentDashboardOptimized.vue'
 
 const route = useRoute()
 const userStore = useUserStore()
@@ -593,11 +530,6 @@ const currentRole = ref('guest')
 const actualRole = ref('guest')
 const actualUserInfo = ref({})
 const actualToken = ref('')
-
-// 性能测试相关
-const showDashboardAnalyzer = ref(false)
-const showOptimizedTest = ref(false)
-const activeOptimizedTab = ref('campus')
 
 // 可用角色配置
 const availableRoles = ref([
@@ -1202,14 +1134,6 @@ const refreshData = () => {
 }
 
 // 复制路径到剪贴板
-// 性能测试方法
-const testOptimizedDashboards = () => {
-  showOptimizedTest.value = !showOptimizedTest.value
-  if (showOptimizedTest.value) {
-    ElMessage.success('已切换到优化版本仪表板测试')
-  }
-}
-
 // 复制路径功能
 const copyPath = async (path) => {
   try {
@@ -2570,45 +2494,5 @@ watch(() => route.query.tool, () => {
   box-shadow: 
     0 2px 8px rgba(0, 0, 0, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
-}
-
-/* 性能测试工具样式 */
-.performance-tools {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.tool-item {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.tool-desc {
-  font-size: 12px;
-  color: #666;
-  margin: 0;
-}
-
-.optimized-test-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2000;
-  padding: 20px;
-}
-
-.optimized-test-container {
-  width: 95%;
-  height: 90%;
-  max-width: 1400px;
-  overflow-y: auto;
 }
 </style>

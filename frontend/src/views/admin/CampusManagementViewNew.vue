@@ -123,22 +123,11 @@ const formRules = {
 const fetchCampusList = async () => {
   loading.value = true
   try {
-    // 添加性能监控
-    if (window.debuggerAddLog) {
-      window.debuggerAddLog('🔄 开始加载校区列表', 'info')
-    }
-    
     const response = await api.get('/admin/campuses?fields=id,name,address,contact,phone,status')
     campusList.value = response.data || []
-    
-    if (window.debuggerAddLog) {
-      window.debuggerAddLog(`✅ 校区列表加载完成，共 ${campusList.value.length} 条记录`, 'info')
-    }
   } catch (error) {
-    ElMessage.error('获取校区列表失败')
-    if (window.debuggerAddLog) {
-      window.debuggerAddLog(`❌ 校区列表加载失败: ${error.message}`, 'error')
-    }
+    console.error('获取校区列表失败:', error)
+    ElMessage.error('获取校区列表失败，请稍后重试')
   } finally {
     loading.value = false
   }
@@ -225,10 +214,6 @@ const deleteCampus = async (campus) => {
 
 // 组件挂载
 onMounted(async () => {
-  if (window.debuggerAddLog) {
-    window.debuggerAddLog('🚀 CampusManagement 组件开始挂载', 'info')
-  }
-  
   // 延迟加载，避免阻塞初始渲染
   await nextTick()
   fetchCampusList()

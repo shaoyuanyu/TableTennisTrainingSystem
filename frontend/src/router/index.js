@@ -3,7 +3,6 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { hasPagePermission, getDefaultHomePage, normalizeRole } from '@/utils/permissions'
 import { ElMessage } from 'element-plus'
-import { debugSidebar } from '@/utils/debug'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -320,16 +319,8 @@ const router = createRouter({
   ],
 })
 
-// 路由守卫 - 身份验证和权限控制（调试模式）
+// 路由守卫 - 身份验证和权限控制
 router.beforeEach(async (to, from, next) => {
-  // 路由调试
-  debugSidebar.logRouteChange(from, to)
-  
-  // 特殊监控管理员路由
-  if (to.path.includes('/admin/')) {
-    debugSidebar.startPerfMeasure('admin-route-load')
-    debugSidebar.logComponentLoad(`AdminRoute: ${to.path}`)
-  }
   const userStore = useUserStore()
 
   console.log('🔍 路由守卫检查:', {
@@ -410,22 +401,7 @@ router.beforeEach(async (to, from, next) => {
   }
 
   console.log('✅ 路由守卫检查通过，允许访问:', to.path)
-  
-  // 添加调试信息
-  if (window.debuggerAddLog) {
-    window.debuggerAddLog(`🔄 路由跳转: ${from.path} → ${to.path}`, 'info')
-    
-    // 特别监控系统管理相关路由
-    if (to.path.includes('/admin/')) {
-      window.debuggerAddLog(`⚠️ 进入系统管理页面: ${to.path}`, 'warning')
-    }
-  }
-  
-  // 结束管理员路由性能监控
-  if (to.path.includes('/admin/') && window.debugSidebar) {
-    window.debugSidebar.endPerfMeasure('admin-route-load')
-  }
-  
+
   next()
 })
 

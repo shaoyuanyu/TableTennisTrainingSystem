@@ -1,14 +1,9 @@
 <script setup>
 import { RouterView } from 'vue-router'
-import { onMounted, computed } from 'vue'
+import { onMounted } from 'vue'
 import { useUserStore } from '@/stores/user'
-import PerformanceDebugger from '@/components/PerformanceDebugger.vue'
-import '@/utils/debug' // 引入调试工具
 
 const userStore = useUserStore()
-
-// 检查是否为开发环境
-const isDev = computed(() => import.meta.env.DEV)
 
 // 应用启动时初始化认证状态
 onMounted(() => {
@@ -24,8 +19,6 @@ onMounted(() => {
 
 <template>
   <router-view />
-  <!-- 开发环境下显示性能调试器 -->
-  <PerformanceDebugger v-if="isDev" />
 </template>
 
 <style>
