@@ -55,11 +55,6 @@ api.interceptors.response.use(
 
       switch (status) {
         case 401: {
-<<<<<<< HEAD
-          ElMessage.error(data)
-          const userStore = useUserStore()
-          userStore.logout()
-=======
           // 防止无限循环：只有在非登录、非登出请求时才处理401错误
           const isLoginRequest = config.url?.includes('/user/login')
           const isLogoutRequest = config.url?.includes('/user/logout')
@@ -76,38 +71,37 @@ api.interceptors.response.use(
             // 这里不处理错误消息，让具体的登录逻辑处理
             console.log('登录请求失败，状态码401')
           }
->>>>>>> af09e5a (fix(前端):修复前端401死循环)
           break
         }
         case 403:
-          ElMessage.error(data)
+          ElMessage.error('权限不足，无法访问该资源')
           break
         case 404:
-          ElMessage.error(data)
+          ElMessage.error('请求的资源不存在')
           break
         case 422:
-          ElMessage.error(data)
+          ElMessage.error(data?.message || '请求参数错误')
           break
         case 429:
-          ElMessage.error(data)
+          ElMessage.error('请求过于频繁，请稍后再试')
           break
         case 500:
-          ElMessage.error(data)
+          ElMessage.error('服务器内部错误')
           break
         case 502:
         case 503:
         case 504:
-          ElMessage.error(data)
+          ElMessage.error('服务暂时不可用，请稍后重试')
           break
         default:
-          ElMessage.error(data)
+          ElMessage.error(data?.message || `请求失败 (${status})`)
       }
     } else if (error.code === 'NETWORK_ERROR' || error.message === 'Network Error') {
-      ElMessage.error(data)
+      ElMessage.error('网络连接失败，请检查网络状态')
     } else if (error.code === 'ECONNABORTED') {
-      ElMessage.error(data)
+      ElMessage.error('请求超时，请稍后重试')
     } else {
-      ElMessage.error(data)
+      ElMessage.error('网络错误，请稍后重试')
     }
 
     return Promise.reject(error)
