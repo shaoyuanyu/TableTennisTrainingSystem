@@ -62,6 +62,7 @@
                 placeholder="请输入密码"
                 show-password
                 clearable
+                @input="handlePasswordChange"
               />
             </el-form-item>
           </el-col>
@@ -120,7 +121,7 @@
           <el-input v-model="registerForm.email" placeholder="请输入邮箱地址" clearable />
         </el-form-item>
 
-        <el-form-item>
+        <el-form-item prop="agreement">
           <el-checkbox v-model="registerForm.agreement">
             我已阅读并同意
             <el-link type="primary">《用户协议》</el-link>
@@ -206,6 +207,13 @@ const validateConfirmPassword = (rule, value, callback) => {
   }
 }
 
+// 密码改变时重新验证确认密码
+const handlePasswordChange = () => {
+  if (registerForm.confirmPassword && registerFormRef.value) {
+    registerFormRef.value.validateField('confirmPassword')
+  }
+}
+
 // 手机号验证函数
 const validatePhone = (rule, value, callback) => {
   if (!value) {
@@ -245,7 +253,7 @@ const registerRules = {
           callback()
         }
       },
-      trigger: 'change',
+      trigger: ['change', 'blur'],
     },
   ],
 }
@@ -268,6 +276,12 @@ const handleRegister = async () => {
   try {
     const valid = await registerFormRef.value.validate()
     if (!valid) return
+
+    // 额外检查用户协议是否勾选
+    if (!registerForm.agreement) {
+      ElMessage.warning('请先阅读并同意用户协议和隐私政策')
+      return
+    }
 
     loading.value = true
 
