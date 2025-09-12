@@ -216,6 +216,19 @@ class StudentService(
         }
 
     /**
+     * 根据username查询用户充值历史记录
+     * @param username 用户名
+     * @param page 页码
+     * @param size 每页大小
+     * @return Pair<充值记录列表, 总记录数>
+     * @throws Exception 如果用户不存在
+     */
+    fun getRechargeHistoryByusername(username:String, page: Int, size: Int): Pair<List<RechargeRecord>, Long> {
+        val user = userService.queryUserByUsername(username)
+        return getRechargeHistory(user.uuid.toString(), page, size)
+    }
+
+    /**
      * 获取所有充值记录（超级管理员）
      * @return 充值记录列表
      */

@@ -10,7 +10,7 @@ import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.request.*
-import io.ktor.server.response.*
+import io.ktor.server.response.respond
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
 
@@ -57,7 +57,9 @@ fun Route.getWalletBalance(walletService: StudentService) {
         val balance = walletService.queryBalance(userId)
 
         call.response.status(HttpStatusCode.OK)
-        call.respond(balance)
+        call.respond(
+            mapOf("balance" to balance)
+        )
     }
 }
 
@@ -138,7 +140,7 @@ fun Route.getRechargeHistory(walletService: StudentService) {
 
         val records= walletService.getRechargeHistory(userId, page, size)
 
-        call.respond(records)
+        call.respond(HttpStatusCode.OK, records)
     }
 }
 
@@ -169,7 +171,7 @@ fun Route.getAllRechargeRecords(walletService: StudentService) {
 
         val records = walletService.getAllRechargeRecords(page,size)
 
-        call.respond(records)
+        call.respond(HttpStatusCode.OK, records)
     }
 }
 
@@ -181,8 +183,8 @@ fun Route.getAllRechargeRecords(walletService: StudentService) {
  * @param walletService WalletService实例，用于查询充值记录
  */
 fun Route.getRechargeRecordsByUserId(walletService: StudentService) {
-    get("/recharge/records/{userId}") {
-        val targetUserId = call.parameters["userId"] ?: throw BadRequestException("缺少用户ID参数")
+    get("/recharge/records/{username}") {
+        val targetUsername = call.parameters["username"] ?: throw BadRequestException("缺少用户name参数")
 
         // 获取查询参数
         val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 1
@@ -199,9 +201,9 @@ fun Route.getRechargeRecordsByUserId(walletService: StudentService) {
             throw BadRequestException("每页大小必须在1-100之间")
         }
 
-        val records= walletService.getRechargeHistory(targetUserId, page, size)
+        val records= walletService.getRechargeHistoryByusername(targetUsername, page, size)
 
-        call.respond(records)
+        call.respond(HttpStatusCode.OK, records)
     }
 }
 
