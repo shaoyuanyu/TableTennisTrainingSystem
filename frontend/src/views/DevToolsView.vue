@@ -1313,6 +1313,8 @@ watch(() => route.query.tool, () => {
   height: 2px;
   background: linear-gradient(90deg, #667eea, #764ba2, #f093fb);
   opacity: 0.8;
+  z-index: 1;
+  pointer-events: none;
 }
 
 .debug-card:hover {
@@ -1335,6 +1337,8 @@ watch(() => route.query.tool, () => {
   margin: -20px -20px 20px -20px;
   padding: 16px 20px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  position: relative;
+  z-index: 2;
 }
 
 .card-icon {
