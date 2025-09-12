@@ -5,9 +5,9 @@
       :collapse="collapsed"
       :router="true"
       class="sidebar-menu"
-      background-color="#fff"
-      text-color="#333"
-      active-text-color="#1890ff"
+      background-color="transparent"
+      text-color="rgba(255, 255, 255, 0.95)"
+      active-text-color="#ffffff"
     >
       <!-- 仪表盘 -->
       <el-menu-item index="/dashboard" class="menu-item">
@@ -180,7 +180,7 @@
         </template>
         <el-menu-item index="/dev-tools?tool=debug">
           <el-icon>
-            <Setting />
+            <EditPen />
           </el-icon>
           <template #title>权限调试</template>
         </el-menu-item>
@@ -248,15 +248,21 @@ const activeMenu = computed(() => route.path)
 <style scoped>
 .sidebar-container {
   height: 100%;
+  background: transparent;
 }
 
 .sidebar-menu {
   border-right: none;
   height: 100%;
+  background: transparent;
+  will-change: auto;
 }
 
 .menu-item {
   font-size: 14px;
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 500;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 :deep(.el-menu--collapse .el-sub-menu__title) {
@@ -272,15 +278,52 @@ const activeMenu = computed(() => route.path)
 }
 
 :deep(.el-menu-item.is-active) {
-  background-color: #e6f7ff;
-  border-right: 2px solid #1890ff;
+  background: rgba(255, 255, 255, 0.25);
+  border-right: 3px solid #ffffff;
+  color: #ffffff !important;
+  font-weight: 600;
+  box-shadow: inset 2px 0 0 rgba(255, 255, 255, 0.2);
 }
 
 :deep(.el-sub-menu__title:hover) {
-  background-color: #f0f0f0;
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff !important;
 }
 
 :deep(.el-menu-item:hover) {
-  background-color: #f0f0f0;
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff !important;
+}
+
+:deep(.el-sub-menu__title) {
+  color: rgba(255, 255, 255, 0.95) !important;
+  font-weight: 500 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+  transition: background-color 0.2s ease !important;
+  transform: translateZ(0);
+  will-change: background-color;
+}
+
+:deep(.el-menu-item) {
+  color: rgba(255, 255, 255, 0.95) !important;
+  font-weight: 500 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+  transition: background-color 0.2s ease !important;
+  transform: translateZ(0);
+  will-change: background-color;
+}
+
+:deep(.el-icon) {
+  color: rgba(255, 255, 255, 0.95) !important;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.5)) !important;
+}
+
+/* 性能优化：简化复杂的动画 */
+:deep(.el-sub-menu__title .el-sub-menu__icon-arrow) {
+  transition: transform 0.2s ease !important;
+}
+
+:deep(.el-menu--vertical .el-sub-menu > .el-sub-menu__title .el-sub-menu__icon-arrow) {
+  transition: transform 0.2s ease !important;
 }
 </style>

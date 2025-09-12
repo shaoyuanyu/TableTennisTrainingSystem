@@ -455,25 +455,47 @@ import { useUserStore } from '@/stores/user'
 const route = useRoute()
 const userStore = useUserStore()
 
-// 当前工具（通过URL参数控制）
-const currentTool = computed(() => route.query.tool || 'home')
+// 当前工具（通过URL参数控制）- 添加性能优化
+const currentTool = computed(() => {
+  const tool = route.query.tool || 'home'
+  // 只在需要时计算复杂数据
+  return tool
+})
 
 // 测试页面统计
-// 计算统计数据 - 基于 pageCategories
+// 计算统计数据 - 基于 pageCategories（优化性能）
 const totalPages = computed(() => {
-  return pageCategories.value.flatMap(category => category.pages).length
+  // 缓存结果，避免重复计算
+  let total = 0
+  for (const category of pageCategories.value) {
+    total += category.pages.length
+  }
+  return total
 })
 
 const testedPages = computed(() => {
-  return pageCategories.value.flatMap(category => category.pages).filter(page => page.tested).length
+  // 缓存结果，避免重复计算
+  let tested = 0
+  for (const category of pageCategories.value) {
+    for (const page of category.pages) {
+      if (page.tested) tested++
+    }
+  }
+  return tested
 })
 
 const passRate = computed(() => {
   return totalPages.value > 0 ? Math.round((testedPages.value / totalPages.value) * 100) : 0
 })
 
-// 环境信息
-const browserInfo = computed(() => {
+// 环境信息 - 静态数据，减少重新计算
+const browserInfo = ref('')
+const viewportSize = ref('')
+const isOnline = ref(navigator.onLine)
+const cookieEnabled = ref(navigator.cookieEnabled)
+
+// 初始化环境信息
+const initEnvInfo = () => {
   const userAgent = navigator.userAgent
   let browser = 'Unknown'
   
@@ -482,16 +504,9 @@ const browserInfo = computed(() => {
   else if (userAgent.includes('Safari')) browser = 'Safari'
   else if (userAgent.includes('Edge')) browser = 'Edge'
   
-  return `${browser} ${navigator.appVersion.split(' ')[0]}`
-})
-
-const viewportSize = computed(() => {
-  return `${window.innerWidth} × ${window.innerHeight}`
-})
-
-const isOnline = computed(() => navigator.onLine)
-
-const cookieEnabled = computed(() => navigator.cookieEnabled)
+  browserInfo.value = `${browser} ${navigator.appVersion.split(' ')[0]}`
+  viewportSize.value = `${window.innerWidth} × ${window.innerHeight}`
+}
 
 // 用户状态
 const isLoggedIn = computed(() => userStore.isLoggedIn)
@@ -978,9 +993,27 @@ const showPageMenu = (page) => {
   })
 }
 
+// 优化：缓存所有页面的结果，避免重复flatMap计算
+let _allPagesCache = null
+const getAllPages = () => {
+  if (!_allPagesCache) {
+    const allPages = []
+    for (const category of pageCategories.value) {
+      allPages.push(...category.pages)
+    }
+    _allPagesCache = allPages
+  }
+  return _allPagesCache
+}
+
+// 清除缓存
+const clearAllPagesCache = () => {
+  _allPagesCache = null
+}
+
 // 调试测试状态
 const debugTestStatus = () => {
-  const allPages = pageCategories.value.flatMap(category => category.pages)
+  const allPages = getAllPages()
   const localStorage_status = JSON.parse(localStorage.getItem('pageTestStatus') || '{}')
   
   const debugInfo = allPages.map(page => ({
@@ -1003,7 +1036,7 @@ const debugTestStatus = () => {
 
 // 批量打开所有页面进行测试
 const openAllPages = () => {
-  const allPages = pageCategories.value.flatMap(category => category.pages)
+  const allPages = getAllPages()
   
   ElMessageBox.confirm(
     `将在新标签页中打开 ${allPages.length} 个页面进行批量测试，这可能会占用较多系统资源。`,
@@ -1130,6 +1163,7 @@ const copyPath = async (path) => {
 // 组件挂载时初始化
 onMounted(() => {
   initializeRole()
+  initEnvInfo() // 初始化环境信息
   refreshTestStats() // 从 localStorage 加载测试状态
 })
 
@@ -1137,24 +1171,15 @@ onMounted(() => {
 watch(() => route.query.tool, () => {
   // 路由变化时可以做一些初始化工作
 }, { immediate: true })
-watch(() => route.query.tool, () => {
-  // 路由变化时可以做一些初始化工作
-}, { immediate: true })
 </script>
 
 <style scoped>
-/* 主体背景 - 动态渐变效果 */
+/* 主体样式 - 移除独立背景，使用全局背景 */
 .dev-tools {
   min-height: 100vh;
-  background: linear-gradient(135deg, 
-    #667eea 0%, 
-    #764ba2 25%, 
-    #f093fb 50%, 
-    #f5576c 75%, 
-    #4facfe 100%);
-  background-size: 300% 300%;
-  animation: gradientShift 8s ease infinite;
+  background: transparent;
   position: relative;
+  padding: 24px;
 }
 
 .dev-tools::before {
@@ -1166,13 +1191,8 @@ watch(() => route.query.tool, () => {
   bottom: 0;
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(1px);
+  pointer-events: none;
   z-index: 0;
-}
-
-@keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
 }
 
 /* 页面头部 - 玻璃形态效果 */
