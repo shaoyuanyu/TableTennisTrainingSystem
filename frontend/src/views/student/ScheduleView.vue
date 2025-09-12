@@ -490,162 +490,167 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* 样式不变，仅供参考。你的原有样式可以保留 */
 .schedule-view.ultra {
-  padding: 40px 0 40px 0;
-  background: radial-gradient(circle at 40% 60%, #f3f6fd 0%, #e7f0fa 60%, #aee2ff 100%);
   min-height: 100vh;
-  font-family: 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', Arial, sans-serif;
+  padding: var(--spacing-2xl);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  font-family: var(--font-family-base);
 }
 
 .schedule-header.ultra {
-  background: linear-gradient(90deg, #e3f2fd 0%, #ffffff 100%);
-  padding: 32px 38px 28px 38px;
-  border-radius: 22px;
-  margin-bottom: 44px;
-  box-shadow: 0 8px 40px rgba(33, 150, 243, 0.12);
+  background: var(--white-alpha-20);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--white-alpha-20);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-xl);
+  margin-bottom: var(--spacing-2xl);
+  box-shadow: var(--shadow-lg);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border: 2px solid #2196f350;
 }
 
 .schedule-header h2 {
   margin: 0;
-  color: #1565c0;
-  font-size: 2.6rem;
-  font-weight: 900;
-  letter-spacing: 2px;
-  text-shadow: 0 2px 8px #b3e5fc60;
+  color: var(--text-white);
+  font-size: 2rem;
+  font-weight: 600;
   display: flex;
   align-items: center;
 }
 .schedule-icon {
-  font-size: 2rem;
-  margin-right: 12px;
+  font-size: 1.8rem;
+  margin-right: var(--spacing-sm);
   vertical-align: middle;
-  filter: drop-shadow(0 2px 8px #b3e5fc60);
 }
 
 .schedule-controls.ultra {
   display: flex;
   align-items: center;
-  gap: 32px;
+  gap: var(--spacing-lg);
 }
 
 .header-btn.ultra-btn {
-  font-size: 1.08rem;
-  padding: 7px 22px;
-  border-radius: 10px !important;
-  box-shadow: 0 2px 6px #21cbf350;
+  background: var(--white-alpha-20);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--white-alpha-30);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-sm) var(--spacing-md);
+  color: var(--text-white);
+  font-weight: 500;
+  transition: all var(--transition-normal);
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-weight: 600;
-  transition: background 0.2s, color 0.2s;
+  gap: var(--spacing-xs);
 }
 .header-btn.ultra-btn .btn-icon {
   font-size: 1.2em;
-  margin-right: 2px;
 }
 .today-btn.ultra-btn {
-  background: linear-gradient(90deg, #2196f3 0%, #21cbf3 100%);
-  color: white !important;
-  border-radius: 24px !important;
-  font-weight: 700;
-  box-shadow: 0 0 16px #21cbf380;
-  padding: 7px 20px;
+  background: var(--gradient-primary);
+  color: var(--text-white) !important;
+  border: 1px solid var(--white-alpha-30);
+  border-radius: var(--radius-full);
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-weight: 600;
+  box-shadow: var(--shadow-lg);
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: var(--spacing-xs);
 }
 .today-btn.ultra-btn .btn-icon {
   font-size: 1.2em;
 }
 
 .today-btn.ultra-btn:hover {
-  box-shadow: 0 0 22px #21cbf3;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-xl);
 }
 
 .nav-btn.ultra-btn {
-  background: #f5f8fa;
-  color: #1976d2;
+  background: var(--white-alpha-20);
+  backdrop-filter: blur(10px);
+  color: var(--text-white);
+  border: 1px solid var(--white-alpha-30);
   border-radius: 50% !important;
-  box-shadow: 0 2px 8px #b9eaff40;
+  box-shadow: var(--shadow-md);
 }
 
 .date-navigation.ultra {
   display: flex;
   align-items: center;
-  gap: 22px;
-  background: #f5f8fa;
-  padding: 12px 22px;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px #aee2ff22;
+  gap: var(--spacing-md);
+  background: var(--white-alpha-10);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--white-alpha-20);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
 }
 
 .current-period.ultra {
-  font-weight: 700;
-  color: #1976d2;
-  min-width: 220px;
+  font-weight: 600;
+  color: var(--text-white);
+  min-width: 200px;
   text-align: center;
-  font-size: 1.18rem;
-  background: #e3f2fd;
-  padding: 6px 18px;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px #b9eaff22;
-  letter-spacing: 1px;
+  font-size: 1.1rem;
+  background: var(--white-alpha-20);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--white-alpha-30);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
 }
 
 .week-view.ultra, .month-view.ultra {
-  background: rgba(255,255,255,0.98);
-  border-radius: 20px;
+  background: var(--white-alpha-10);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--white-alpha-20);
+  border-radius: var(--radius-xl);
   overflow: hidden;
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.09);
+  box-shadow: var(--shadow-lg);
 }
 
 .week-header.ultra {
   display: grid;
   grid-template-columns: 100px repeat(7, 1fr);
-  background: linear-gradient(90deg,#e8f1fc 0%, #f8f9fa 100%);
-  border-bottom: 2px solid #e0e0e0;
+  background: var(--white-alpha-20);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--white-alpha-30);
 }
 
 .time-column {
-  padding: 20px 12px;
-  font-weight: 700;
+  padding: var(--spacing-md);
+  font-weight: 600;
   text-align: center;
-  border-right: 1.5px solid #e0e0e0;
-  background: #eafdff;
-  font-size: 1.08rem;
-  color: #2196f3;
+  border-right: 1px solid var(--white-alpha-30);
+  background: var(--white-alpha-10);
+  color: var(--text-white-80);
 }
 
 .day-header {
-  padding: 20px 0 10px 0;
+  padding: var(--spacing-md) 0;
   text-align: center;
-  border-right: 1.5px solid #e0e0e0;
-  transition: background-color 0.2s;
+  border-right: 1px solid var(--white-alpha-30);
+  color: var(--text-white-80);
+  transition: all var(--transition-normal);
 }
 
 .day-header.is-today {
-  background: linear-gradient(90deg, #e3f2fd 60%, #b9eaff 100%);
-  color: #1976d2;
-  box-shadow: 0 2px 12px #2196f344;
-  border-bottom: 2px solid #2196f3;
+  background: var(--gradient-primary);
+  color: var(--text-white);
+  box-shadow: var(--shadow-md);
 }
 
 .day-name {
-  font-weight: 700;
-  margin-bottom: 2px;
-  font-size: 1.1rem;
-  letter-spacing: 1px;
+  font-weight: 600;
+  margin-bottom: var(--spacing-xs);
+  font-size: 1rem;
 }
 
 .day-date {
-  font-size: 1.3rem;
-  font-weight: 800;
-  letter-spacing: 1px;
+  font-size: 1.2rem;
+  font-weight: 700;
 }
 
 .week-body {
@@ -656,35 +661,34 @@ onMounted(() => {
 .time-row {
   display: grid;
   grid-template-columns: 100px repeat(7, 1fr);
-  border-bottom: 1.5px solid #e0e0e0;
+  border-bottom: 1px solid var(--white-alpha-20);
   min-height: 64px;
-  background: #fcfcfd;
 }
 
 .day-cell {
-  border-right: 1.5px solid #e0e0e0;
-  padding: 7px 2px;
+  border-right: 1px solid var(--white-alpha-20);
+  padding: var(--spacing-xs);
   position: relative;
   cursor: pointer;
-  transition: background-color 0.18s;
-  border-radius: 7px;
+  transition: all var(--transition-normal);
 }
 
 .day-cell:hover {
-  background: #eaf6fe;
+  background: var(--white-alpha-10);
 }
 
 .schedule-item.ultra {
-  background: #2196f3;
-  color: white;
-  padding: 8px 14px 6px 14px;
-  border-radius: 10px;
-  margin-bottom: 4px;
-  font-size: 14px;
+  background: var(--gradient-primary);
+  color: var(--text-white);
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-xs);
+  font-size: 0.875rem;
   cursor: pointer;
-  box-shadow: 0 2px 12px #2196f333;
-  border: 2px solid #ffffff;
-  transition: all 0.2s;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--white-alpha-30);
+  backdrop-filter: blur(10px);
+  transition: all var(--transition-normal);
   display: flex;
   flex-direction: column;
   position: relative;
@@ -692,67 +696,58 @@ onMounted(() => {
 }
 .schedule-item.ultra .field-icon {
   font-size: 1em;
-  margin-right: 3px;
+  margin-right: var(--spacing-xs);
   vertical-align: middle;
 }
 .schedule-item.ultra .schedule-title {
-  font-weight: 700;
-  margin-bottom: 2px;
-  font-size: 14px;
-  letter-spacing: 1px;
+  font-weight: 600;
+  margin-bottom: var(--spacing-xs);
+  font-size: 0.875rem;
 }
 .schedule-item.ultra .schedule-coach,
 .schedule-item.ultra .schedule-location {
-  font-size: 12px;
-  opacity: 0.85;
-  margin-top: 1px;
-  font-weight: 500;
+  font-size: 0.75rem;
+  opacity: 0.9;
+  margin-top: 2px;
+  font-weight: 400;
 }
 .schedule-item.ultra.schedule-individual {
-  background: linear-gradient(90deg, #2196f3 60%, #21cbf3 100%);
+  background: var(--gradient-primary);
 }
 .schedule-item.ultra.schedule-group {
-  background: linear-gradient(90deg, #4caf50 60%, #8bc34a 100%);
+  background: var(--gradient-success);
 }
 .schedule-item.ultra.schedule-match {
-  background: linear-gradient(90deg, #ff9800 60%, #ffd54f 100%);
+  background: var(--gradient-warning);
 }
 .schedule-item.ultra.schedule-tournament {
-  background: linear-gradient(90deg, #f44336 60%, #ff8a65 100%);
+  background: var(--gradient-danger);
 }
 .schedule-item.ultra.status-pending {
   opacity: 0.7;
-  border: 2px dashed rgba(255, 255, 255, 0.7);
+  border: 1px dashed var(--white-alpha-50);
 }
 .schedule-item.ultra.status-cancelled {
-  background: #bdbdbd;
+  background: var(--color-gray-500);
   text-decoration: line-through;
-  color: #fff;
-}
-
-.month-view.ultra {
-  background: rgba(255,255,255,0.98);
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.09);
+  opacity: 0.6;
 }
 
 .month-header.ultra {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  background: linear-gradient(90deg,#e8f1fc 0%, #f8f9fa 100%);
-  border-bottom: 2px solid #e0e0e0;
+  background: var(--white-alpha-20);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--white-alpha-30);
 }
 
 .month-day-header {
-  padding: 19px 0 11px 0;
+  padding: var(--spacing-md) 0;
   text-align: center;
-  font-weight: 700;
-  border-right: 1.5px solid #e0e0e0;
-  color: #0d121b;
-  font-size: 1.12rem;
-  background: linear-gradient(90deg, #697a88 0%, #c2ddfb 100%);
-  letter-spacing: 1px;
+  font-weight: 600;
+  border-right: 1px solid var(--white-alpha-30);
+  color: var(--text-white-80);
+  font-size: 1rem;
 }
 
 .month-body {
@@ -763,122 +758,122 @@ onMounted(() => {
 .month-week {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  border-bottom: 1.5px solid #e0e0e0;
-  background: #fcfcfd;
+  border-bottom: 1px solid var(--white-alpha-20);
 }
 
 .month-day {
   min-height: 120px;
-  padding: 12px 5px;
-  border-right: 1.5px solid #e0e0e0;
+  padding: var(--spacing-sm);
+  border-right: 1px solid var(--white-alpha-20);
   cursor: pointer;
-  transition: background-color 0.18s;
+  transition: all var(--transition-normal);
   position: relative;
-  border-radius: 10px;
 }
 
 .month-day:hover {
-  background: #eaf6fe;
-  box-shadow: 0 2px 8px #2196f322;
+  background: var(--white-alpha-10);
+  box-shadow: var(--shadow-sm);
 }
 
 .month-day.is-today {
-  background: linear-gradient(120deg,#e3f2fd 60%, #b9eaff 100%);
-  border: 3px solid #2196f3;
-  box-shadow: 0 2px 16px #2196f344;
+  background: var(--gradient-primary);
+  border: 2px solid var(--white-alpha-50);
+  box-shadow: var(--shadow-lg);
 }
 
 .month-day.is-other-month {
-  color: #bbb;
-  background: #fafafa;
+  color: var(--text-white-40);
+  opacity: 0.5;
 }
 
 .month-day.has-schedules .day-number.ultra {
-  font-weight: 800;
-  color: #1976d2;
-  text-shadow: 0 2px 8px #b9eaff50;
+  font-weight: 700;
+  color: var(--text-white);
 }
 
 .day-number.ultra {
-  font-size: 19px;
-  margin-bottom: 7px;
-  font-weight: 700;
-  letter-spacing: 1px;
+  font-size: 1.125rem;
+  margin-bottom: var(--spacing-xs);
+  font-weight: 600;
+  color: var(--text-white-80);
 }
 
 .day-schedules.ultra {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--spacing-xs);
 }
 
 .month-schedule-item.ultra {
-  background: #2196f3;
-  color: white;
-  padding: 4px 14px;
-  border-radius: 7px;
-  font-size: 13px;
+  background: var(--gradient-primary);
+  color: var(--text-white);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--transition-normal);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  border: 2px solid #fff;
+  border: 1px solid var(--white-alpha-30);
+  backdrop-filter: blur(10px);
   margin-bottom: 2px;
   font-weight: 500;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--spacing-xs);
 }
 .month-schedule-item.ultra .dot-icon {
-  color: #1565c0;
+  color: var(--text-white);
   font-size: 1.2em;
-  margin-right: 1px;
 }
 .month-schedule-item.ultra.schedule-group {
-  background: linear-gradient(90deg, #4caf50 60%, #8bc34a 100%);
+  background: var(--gradient-success);
 }
 .month-schedule-item.ultra.schedule-match {
-  background: linear-gradient(90deg, #ff9800 60%, #ffd54f 100%);
+  background: var(--gradient-warning);
 }
 .month-schedule-item.ultra.schedule-tournament {
-  background: linear-gradient(90deg, #f44336 60%, #ff8a65 100%);
+  background: var(--gradient-danger);
 }
 .more-schedules.ultra {
-  font-size: 12px;
-  color: #666;
+  font-size: 0.75rem;
+  color: var(--text-white-80);
   text-align: center;
   margin-top: 2px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  background: #e3f2fd;
-  border-radius: 6px;
+  font-weight: 600;
+  background: var(--white-alpha-20);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--white-alpha-30);
+  border-radius: var(--radius-sm);
   padding: 2px 0;
 }
 
 .schedule-detail.ultra {
-  padding: 24px 0 6px 0;
-  font-size: 1.17rem;
-  background: linear-gradient(110deg,#e3f2fd 80%, #f8f9fa 100%);
-  border-radius: 12px;
+  padding: var(--spacing-lg) 0 var(--spacing-sm) 0;
+  background: var(--white-alpha-10);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--white-alpha-20);
+  border-radius: var(--radius-lg);
 }
 .schedule-detail.ultra .field-icon {
   font-size: 1.1em;
-  margin-right: 4px;
+  margin-right: var(--spacing-xs);
   vertical-align: middle;
 }
 
 .ultra-dialog ::deep(.el-dialog__body) {
-  background: linear-gradient(110deg,#e0eafc 80%, #ffffff 100%);
-  padding: 36px 28px 20px 28px;
-  border-radius: 14px;
+  background: var(--white-alpha-20);
+  backdrop-filter: blur(20px);
+  padding: var(--spacing-xl);
+  border-radius: var(--radius-lg);
 }
 
 .dialog-footer.ultra {
   display: flex;
   justify-content: flex-end;
-  gap: 22px;
-  padding-top: 16px;
+  gap: var(--spacing-md);
+  padding-top: var(--spacing-md);
 }
 
 .ultra-loading {
@@ -887,28 +882,32 @@ onMounted(() => {
 
 /* 响应式优化 */
 @media (max-width: 768px) {
+  .schedule-view.ultra {
+    padding: var(--spacing-lg);
+  }
+  
   .schedule-header.ultra {
     flex-direction: column;
-    gap: 20px;
+    gap: var(--spacing-md);
     align-items: stretch;
-    padding: 22px 7px;
+    padding: var(--spacing-lg);
   }
 
   .schedule-controls.ultra {
     flex-direction: column;
-    gap: 19px;
+    gap: var(--spacing-md);
   }
 
   .date-navigation.ultra {
     justify-content: center;
-    gap: 12px;
-    padding: 10px 10px;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm);
   }
 
   .current-period.ultra {
     min-width: auto;
-    font-size: 1.05rem;
-    padding: 4px 4px;
+    font-size: 1rem;
+    padding: var(--spacing-xs);
   }
 
   .week-header.ultra,
@@ -917,47 +916,49 @@ onMounted(() => {
   }
 
   .time-column {
-    padding: 9px 3px;
-    font-size: 12px;
+    padding: var(--spacing-xs);
+    font-size: 0.75rem;
   }
 
   .day-header {
-    padding: 9px 3px;
-    font-size: 14px;
+    padding: var(--spacing-xs);
+    font-size: 0.875rem;
   }
 
   .day-name {
-    font-size: 12px;
+    font-size: 0.75rem;
   }
 
   .day-date {
-    font-size: 15px;
+    font-size: 0.9375rem;
   }
 
   .month-day {
     min-height: 78px;
-    padding: 5px;
-    font-size: 12px;
+    padding: var(--spacing-xs);
+    font-size: 0.75rem;
   }
 
   .day-number.ultra {
-    font-size: 14px;
-    margin-bottom: 3px;
+    font-size: 0.875rem;
+    margin-bottom: var(--spacing-xs);
   }
 
   .month-schedule-item.ultra {
-    font-size: 11px;
-    padding: 2px 6px;
+    font-size: 0.6875rem;
+    padding: 2px var(--spacing-xs);
   }
+  
   .schedule-detail.ultra {
-    padding: 10px 2px 0 2px;
-    font-size: 1rem;
+    padding: var(--spacing-sm) 2px 0 2px;
   }
+  
   .ultra-dialog ::deep(.el-dialog__body) {
-    padding: 14px 8px 12px 8px;
+    padding: var(--spacing-md);
   }
+  
   .dialog-footer.ultra {
-    gap: 9px;
+    gap: var(--spacing-sm);
   }
 }
 </style>
