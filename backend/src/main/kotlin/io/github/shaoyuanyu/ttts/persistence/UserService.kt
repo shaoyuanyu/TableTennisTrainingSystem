@@ -80,30 +80,84 @@ class UserService(
             if (isUsernameExists(newUser.username)) {
                 throw BadRequestException("用户名已存在")
             }
-            
+
+            // 检查手机号是否已存在
+            if (newUser.phoneNumber.isNotBlank()) {
+                val existingPhoneUser = UserEntity.find { UserTable.phone_number eq newUser.phoneNumber }.firstOrNull()
+                if (existingPhoneUser != null) {
+                    throw BadRequestException("手机号已被注册")
+                }
+            }
+
+            // 检查邮箱是否已存在
+            if (newUser.email.isNotBlank()) {
+                val existingEmailUser = UserEntity.find { UserTable.email eq newUser.email}.firstOrNull()
+                if (existingEmailUser != null) {
+                    throw BadRequestException("邮箱已被注册")
+                }
+            }
+            if (newUser.username.isBlank()) {
+                throw BadRequestException("用户名不能为空")
+            }
+            if (newUser.plainPassword.isNullOrBlank()) {
+                throw BadRequestException("密码不能为空")
+            }
+            if (newUser.realName.isBlank()) {
+                throw BadRequestException("真实姓名不能为空")
+            }
+            // 验证字段格式
+            if (!newUser.username.matches(Regex("^[a-zA-Z0-9_]{4,20}$"))) {
+                throw BadRequestException("用户名必须是4-20位的字母、数字或下划线")
+            }
+
+            if (!newUser.plainPassword.matches(Regex("^(?=.*[A-Za-z])(?=.*\\d).{8,}$"))) {
+                throw BadRequestException("密码必须至少8位，包含字母和数字")
+            }
+
+            if ( !newUser.phoneNumber.matches(Regex("^1[3-9]\\d{9}$"))) {
+                throw BadRequestException("手机号格式不正确")
+            }
+
+            if (!newUser.email.matches(Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\$"))) {
+                throw BadRequestException("邮箱格式不正确")
+            }
+
+            if (newUser.age < 1 || newUser.age > 120) {
+                throw BadRequestException("年龄必须在1-120之间")
+            }
+
+
             // 提前验证角色特定信息
             when (newUser.role) {
                 UserRole.STUDENT -> {
                     if (newUser.studentInfo == null) {
                         throw BadRequestException("学生用户必须提供学生信息")
                     }
+                    // 验证学生信息
+                    if (newUser.studentInfo.balance < 0) {
+                        throw BadRequestException("学生余额不能为负数")
+                    }
                 }
-                
+
                 UserRole.COACH -> {
                     if (newUser.coachInfo == null) {
                         throw BadRequestException("教练用户必须提供教练信息")
                     }
+                    // 验证教练信息
+                    if (!newUser.coachInfo.photoUrl.isNullOrBlank() && !newUser.coachInfo.photoUrl.matches(Regex("^https?://.+"))) {
+                        throw BadRequestException("教练照片URL格式不正确")
+                    }
                 }
-                
+
                 else -> {
                     // 其他角色不需要额外验证
                 }
             }
-            
+
             // 创建用户账户
             val userEntity = UserEntity.new {
                 username = newUser.username
-                encryptedPassword = encryptPasswd(newUser.plainPassword!!)
+                encryptedPassword = encryptPasswd(newUser.plainPassword)
                 realName = newUser.realName
                 gender = newUser.gender
                 age = newUser.age
@@ -111,7 +165,7 @@ class UserService(
                 email = newUser.email
                 campusId = newUser.campusId
                 role = newUser.role
-                status = newUser.status
+                status = "ACTIVE"
                 createdAt = Clock.System.now()
                 lastLoginAt = createdAt
             }
@@ -123,8 +177,8 @@ class UserService(
                     val studentInfo = newUser.studentInfo!!
                     StudentEntity.new(UUID.fromString(userId)) {
                         this.userId = userEntity
-                        this.balance = studentInfo.balance
-                        this.maxCoach = studentInfo.maxCoach
+                        this.balance = 0.0f
+                        this.maxCoach = 2
                         this.currentCoach = 0
                     }
                 }
