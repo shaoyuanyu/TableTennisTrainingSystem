@@ -123,11 +123,7 @@
         </el-menu-item>
         <el-menu-item index="/design-system-test">
           <el-icon><Picture /></el-icon>
-          <template #title>设计系统测试</template>
-        </el-menu-item>
-        <el-menu-item index="/navigation-test">
-          <el-icon><Position /></el-icon>
-          <template #title>页面导航测试</template>
+          <template #title>设计语言样板间</template>
         </el-menu-item>
       </el-sub-menu>
     </el-menu>
@@ -155,7 +151,6 @@ import {
   Checked,
   EditPen,
   Picture,
-  Position,
 } from '@element-plus/icons-vue'
 
 defineProps({

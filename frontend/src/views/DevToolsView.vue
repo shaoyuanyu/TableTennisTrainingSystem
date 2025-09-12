@@ -1200,7 +1200,7 @@ watch(() => route.query.tool, () => {
   min-height: 100vh;
   background: transparent;
   position: relative;
-  padding: 24px;
+  padding: var(--spacing-2xl);
 }
 
 .dev-tools::before {
@@ -1210,23 +1210,20 @@ watch(() => route.query.tool, () => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(1px);
+  background: var(--white-alpha-05);
+  backdrop-filter: var(--blur-sm);
   pointer-events: none;
   z-index: 0;
 }
 
 /* 页面头部 - 玻璃形态效果 */
 .page-header {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-  padding: 24px 32px;
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.12),
-    0 2px 6px rgba(0, 0, 0, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  background: var(--white-alpha-95);
+  backdrop-filter: var(--blur-xl);
+  border: 1px solid var(--white-alpha-20);
+  border-bottom: 1px solid var(--black-alpha-10);
+  padding: var(--spacing-2xl) var(--spacing-3xl);
+  box-shadow: var(--shadow-lg);
   position: relative;
   z-index: 1;
 }
@@ -1242,7 +1239,7 @@ watch(() => route.query.tool, () => {
 .header-left {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: var(--spacing-xl);
 }
 
 .header-icon {
@@ -1251,32 +1248,32 @@ watch(() => route.query.tool, () => {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  filter: drop-shadow(0 2px 4px var(--black-alpha-10));
 }
 
 .header-text h1 {
   margin: 0;
-  font-size: 32px;
+  font-size: var(--font-size-4xl);
   background: linear-gradient(135deg, #2d3748, #4a5568);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  font-weight: 800;
+  font-weight: var(--font-weight-extrabold);
   letter-spacing: -0.02em;
 }
 
 .header-text p {
-  margin: 6px 0 0 0;
+  margin: var(--spacing-sm) 0 0 0;
   color: #64748b;
-  font-size: 15px;
-  font-weight: 500;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
 }
 
 /* 主内容区域 */
 .main-content {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 40px 32px;
+  padding: var(--spacing-3xl) var(--spacing-3xl);
   position: relative;
   z-index: 1;
 }
@@ -1286,45 +1283,42 @@ watch(() => route.query.tool, () => {
 }
 
 .panel-header {
-  margin-bottom: 36px;
+  margin-bottom: var(--spacing-3xl);
   text-align: center;
 }
 
 .panel-header h2 {
-  margin: 0 0 12px 0;
-  font-size: 28px;
+  margin: 0 0 var(--spacing-md) 0;
+  font-size: var(--font-size-4xl);
   background: linear-gradient(135deg, #fff, #f8fafc);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  font-weight: 700;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  font-weight: var(--font-weight-bold);
+  text-shadow: 0 2px 4px var(--black-alpha-10);
 }
 
 .panel-header p {
   margin: 0;
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 16px;
-  font-weight: 500;
+  color: var(--white-alpha-80);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
 }
 
 /* 调试卡片样式 - 玻璃形态设计 */
 .debug-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 24px;
+  gap: var(--spacing-2xl);
 }
 
 .debug-card {
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 20px;
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.1),
-    0 2px 6px rgba(0, 0, 0, 0.05),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--white-alpha-15);
+  backdrop-filter: var(--blur-xl);
+  border: 1px solid var(--white-alpha-20);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  transition: var(--transition-slow);
   overflow: hidden;
   position: relative;
 }

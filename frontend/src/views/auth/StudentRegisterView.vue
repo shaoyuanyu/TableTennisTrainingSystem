@@ -133,7 +133,7 @@
         <el-form-item>
           <el-button
             type="primary"
-            class="register-button"
+            class="register-button btn-modern btn-primary btn-large"
             :loading="loading"
             @click="handleRegister"
           >
@@ -344,7 +344,7 @@ onMounted(() => {
     #8b5a96 100%
   );
   position: relative;
-  padding: 20px;
+  padding: var(--spacing-xl);
   overflow: hidden;
 }
 
@@ -527,14 +527,12 @@ onMounted(() => {
 
 /* 注册框样式 */
 .register-box {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 40px;
-  border-radius: 20px;
-  box-shadow:
-    0 20px 40px rgba(0, 0, 0, 0.1),
-    0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  background: var(--white-alpha-95);
+  backdrop-filter: var(--blur-xl);
+  border: 1px solid var(--white-alpha-20);
+  padding: var(--spacing-3xl);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-xl);
   width: 100%;
   max-width: 600px;
   position: relative;
@@ -544,36 +542,36 @@ onMounted(() => {
 
 .register-header {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: var(--spacing-3xl);
   position: relative;
 }
 
 .register-title {
-  font-size: 28px;
-  font-weight: 700;
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-bold);
   background: linear-gradient(135deg, #667eea, #764ba2);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin: 0 0 8px 0;
+  margin: 0 0 var(--spacing-sm) 0;
   animation: fadeInDown 0.8s ease-out 0.2s both;
 }
 
 .register-subtitle {
-  font-size: 15px;
+  font-size: var(--font-size-lg);
   color: #666;
   margin: 0;
   animation: fadeInDown 0.8s ease-out 0.4s both;
 }
 
 .register-form {
-  margin-bottom: 20px;
+  margin-bottom: var(--spacing-xl);
   animation: fadeInUp 0.8s ease-out 0.6s both;
 }
 
 .password-tips {
-  margin-top: -15px;
-  margin-bottom: 20px;
+  margin-top: calc(-1 * var(--spacing-lg));
+  margin-bottom: var(--spacing-xl);
   animation: fadeInUp 0.8s ease-out 0.8s both;
 }
 
@@ -649,33 +647,33 @@ onMounted(() => {
 .register-button {
   width: 100%;
   height: 44px;
-  font-size: 16px;
-  font-weight: 500;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
 }
 
 .register-footer {
   text-align: center;
-  padding-top: 20px;
+  padding-top: var(--spacing-xl);
   border-top: 1px solid #e8e8e8;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: var(--spacing-sm);
 }
 
 .register-footer p {
   margin: 0;
-  font-size: 14px;
+  font-size: var(--font-size-md);
   color: #666;
 }
 
 @media (max-width: 768px) {
   .register-box {
-    padding: 30px 20px;
+    padding: var(--spacing-3xl) var(--spacing-xl);
   }
 
   .register-title {
-    font-size: 20px;
+    font-size: var(--font-size-3xl);
   }
 }
 </style>

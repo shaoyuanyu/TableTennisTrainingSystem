@@ -84,7 +84,7 @@
         </el-form-item>
 
         <el-form-item>
-          <el-button type="primary" class="login-button" :loading="loading" @click="handleLogin">
+          <el-button type="primary" class="login-button btn-modern btn-primary btn-large" :loading="loading" @click="handleLogin">
             登录
           </el-button>
         </el-form-item>
@@ -200,7 +200,7 @@ const goToRegister = (type) => {
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-  padding: 20px;
+  padding: var(--spacing-xl);
   position: relative;
   overflow: hidden;
 }
@@ -525,28 +525,28 @@ const goToRegister = (type) => {
 }
 
 .login-box {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
+  background: var(--white-alpha-95);
+  backdrop-filter: var(--blur-xl);
   padding: 50px 40px;
-  border-radius: 20px;
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-xl);
   width: 100%;
   max-width: 450px;
   position: relative;
   z-index: 1;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--white-alpha-20);
 }
 
 .login-header {
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: var(--spacing-3xl);
 }
 
 .logo-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: var(--spacing-lg);
 }
 
 .logo-icon {
@@ -557,8 +557,8 @@ const goToRegister = (type) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 20px;
-  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+  margin-bottom: var(--spacing-xl);
+  box-shadow: var(--shadow-lg);
   position: relative;
   overflow: hidden;
 }
@@ -590,8 +590,8 @@ const goToRegister = (type) => {
 }
 
 .login-title {
-  font-size: 28px;
-  font-weight: 700;
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-bold);
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -601,18 +601,18 @@ const goToRegister = (type) => {
 }
 
 .login-subtitle {
-  font-size: 16px;
+  font-size: var(--font-size-lg);
   color: #666;
   margin: 0;
-  font-weight: 400;
+  font-weight: var(--font-weight-normal);
 }
 
 .login-form {
-  margin-bottom: 30px;
+  margin-bottom: var(--spacing-3xl);
 }
 
 .login-form :deep(.el-form-item) {
-  margin-bottom: 24px;
+  margin-bottom: var(--spacing-2xl);
 }
 
 .login-form :deep(.el-form-item:last-child) {
@@ -626,10 +626,10 @@ const goToRegister = (type) => {
 }
 
 .login-form :deep(.el-input__wrapper) {
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
   border: 1px solid #e1e5e9;
-  transition: all 0.3s ease;
+  transition: var(--transition-normal);
 }
 
 .login-form :deep(.el-input__wrapper:hover) {
@@ -643,26 +643,19 @@ const goToRegister = (type) => {
 
 .forgot-password {
   margin-left: auto;
-  font-size: 13px;
-  font-weight: 500;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
 }
 
 .login-button {
   width: 100%;
   height: 50px;
-  font-size: 16px;
-  font-weight: 600;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border: none;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  border-radius: var(--radius-lg);
   position: relative;
   overflow: hidden;
-  transition: all 0.3s ease;
-}
-
-.login-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+  transition: var(--transition-normal);
 }
 
 .login-button:active {
@@ -671,45 +664,45 @@ const goToRegister = (type) => {
 
 .login-footer {
   text-align: center;
-  padding-top: 30px;
+  padding-top: var(--spacing-3xl);
   border-top: 1px solid #e8e8e8;
 }
 
 .login-footer p {
-  margin: 0 0 15px 0;
-  font-size: 14px;
+  margin: 0 0 var(--spacing-lg) 0;
+  font-size: var(--font-size-md);
   color: #666;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 .register-links {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 15px;
+  gap: var(--spacing-lg);
 }
 
 .register-links :deep(.el-link) {
-  font-weight: 600;
-  font-size: 14px;
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-md);
 }
 
 .divider {
   color: #ccc;
-  font-size: 14px;
+  font-size: var(--font-size-md);
 }
 
 @media (max-width: 480px) {
   .login-container {
-    padding: 15px;
+    padding: var(--spacing-lg);
   }
 
   .login-box {
-    padding: 40px 30px;
+    padding: var(--spacing-3xl) var(--spacing-3xl);
   }
 
   .login-title {
-    font-size: 24px;
+    font-size: var(--font-size-3xl);
   }
 
   .art-text-main {
@@ -735,11 +728,11 @@ const goToRegister = (type) => {
 
 @media (max-width: 320px) {
   .login-box {
-    padding: 30px 20px;
+    padding: var(--spacing-3xl) var(--spacing-xl);
   }
 
   .login-title {
-    font-size: 20px;
+    font-size: var(--font-size-2xl);
   }
 }
 </style>

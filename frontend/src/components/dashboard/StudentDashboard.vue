@@ -576,7 +576,7 @@ onMounted(() => {
 .student-dashboard {
   min-height: 100vh;
   background: transparent;
-  padding: 20px;
+  padding: var(--spacing-xl);
   position: relative;
 }
 
@@ -756,35 +756,29 @@ onMounted(() => {
 /* 欢迎横幅 - 玻璃形态设计 */
 /* 增强版欢迎横幅 */
 .welcome-banner-enhanced {
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 24px;
-  padding: 32px;
+  background: var(--white-alpha-15);
+  backdrop-filter: var(--blur-xl);
+  border: 1px solid var(--white-alpha-20);
+  border-radius: var(--radius-2xl);
+  padding: var(--spacing-3xl);
   color: white;
-  margin-bottom: 30px;
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.1),
-    0 2px 6px rgba(0, 0, 0, 0.05),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  margin-bottom: var(--spacing-3xl);
+  box-shadow: var(--shadow-lg);
   position: relative;
   z-index: 1;
-  transition: all 0.3s ease;
+  transition: var(--transition-normal);
 }
 
 .welcome-banner-enhanced:hover {
   transform: translateY(-2px);
-  box-shadow: 
-    0 12px 40px rgba(0, 0, 0, 0.15),
-    0 4px 8px rgba(0, 0, 0, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  box-shadow: var(--shadow-xl);
 }
 
 .banner-main {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 24px;
+  margin-bottom: var(--spacing-2xl);
 }
 
 .welcome-content {
@@ -792,10 +786,10 @@ onMounted(() => {
 }
 
 .welcome-title {
-  font-size: 32px;
-  font-weight: 700;
-  margin: 0 0 12px 0;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-bold);
+  margin: 0 0 var(--spacing-md) 0;
+  text-shadow: 0 2px 4px var(--black-alpha-30);
   background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -803,39 +797,39 @@ onMounted(() => {
 }
 
 .welcome-subtitle {
-  font-size: 18px;
+  font-size: var(--font-size-xl);
   opacity: 0.9;
-  margin: 0 0 20px 0;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  margin: 0 0 var(--spacing-xl) 0;
+  text-shadow: 0 1px 2px var(--black-alpha-20);
 }
 
 /* 今日概览 */
 .today-overview {
   display: flex;
-  gap: 24px;
+  gap: var(--spacing-2xl);
   flex-wrap: wrap;
 }
 
 .overview-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
-  transition: all 0.3s ease;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: var(--white-alpha-15);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--white-alpha-20);
+  backdrop-filter: var(--blur-md);
+  transition: var(--transition-normal);
 }
 
 .overview-item:hover {
-  background: rgba(255, 255, 255, 0.25);
+  background: var(--white-alpha-25);
   transform: translateY(-1px);
 }
 
 .overview-icon {
-  font-size: 20px;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+  font-size: var(--font-size-xl);
+  filter: drop-shadow(0 1px 2px var(--black-alpha-30));
 }
 
 .overview-content {
@@ -844,38 +838,38 @@ onMounted(() => {
 }
 
 .overview-value {
-  font-size: 20px;
-  font-weight: 600;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
   line-height: 1;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  text-shadow: 0 1px 2px var(--black-alpha-20);
 }
 
 .overview-label {
-  font-size: 12px;
+  font-size: var(--font-size-xs);
   opacity: 0.8;
   margin-top: 2px;
 }
 
 /* 学习统计概览 */
 .stats-overview {
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding-top: 24px;
+  border-top: 1px solid var(--white-alpha-10);
+  padding-top: var(--spacing-2xl);
 }
 
 .stats-title {
-  font-size: 18px;
-  font-weight: 600;
-  margin: 0 0 16px 0;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  margin: 0 0 var(--spacing-lg) 0;
   display: flex;
   align-items: center;
-  gap: 8px;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  gap: var(--spacing-sm);
+  text-shadow: 0 1px 2px var(--black-alpha-20);
 }
 
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
+  gap: var(--spacing-lg);
 }
 
 .mini-stat-card {
@@ -1060,17 +1054,14 @@ onMounted(() => {
 /* 内容卡片和边栏卡片 - 统一玻璃形态设计 */
 .content-card,
 .sidebar-card {
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 20px;
-  padding: 24px;
-  margin-bottom: 24px;
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.1),
-    0 2px 6px rgba(0, 0, 0, 0.05),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4);
-  transition: all 0.3s ease;
+  background: var(--white-alpha-15);
+  backdrop-filter: var(--blur-xl);
+  border: 1px solid var(--white-alpha-20);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-2xl);
+  margin-bottom: var(--spacing-2xl);
+  box-shadow: var(--shadow-md);
+  transition: var(--transition-normal);
   position: relative;
   overflow: hidden;
 }
@@ -1078,11 +1069,8 @@ onMounted(() => {
 .content-card:hover,
 .sidebar-card:hover {
   transform: translateY(-2px);
-  box-shadow: 
-    0 12px 40px rgba(0, 0, 0, 0.15),
-    0 4px 8px rgba(0, 0, 0, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.5);
-  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--white-alpha-30);
 }
 
 /* 卡片头部设计 */
@@ -1090,9 +1078,9 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 24px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  margin-bottom: var(--spacing-2xl);
+  padding-bottom: var(--spacing-xl);
+  border-bottom: 1px solid var(--white-alpha-15);
   position: relative;
   z-index: 2;
 }
@@ -1100,41 +1088,39 @@ onMounted(() => {
 .header-left {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: var(--spacing-lg);
 }
 
 .header-icon-wrapper {
   width: 48px;
   height: 48px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.1));
-  border-radius: 16px;
+  background: linear-gradient(135deg, var(--white-alpha-25), var(--white-alpha-10));
+  border-radius: var(--radius-lg);
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
-  box-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  border: 1px solid var(--white-alpha-20);
+  backdrop-filter: var(--blur-md);
+  box-shadow: var(--shadow-sm);
 }
 
 .header-icon {
   color: white;
-  font-size: 20px;
+  font-size: var(--font-size-xl);
 }
 
 .header-text h3 {
-  margin: 0 0 4px 0;
-  font-size: 18px;
-  font-weight: 700;
+  margin: 0 0 var(--spacing-xs) 0;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
   color: white;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 1px 2px var(--black-alpha-30);
 }
 
 .header-text p {
   margin: 0;
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.8);
+  font-size: var(--font-size-md);
+  color: var(--white-alpha-80);
 }
 
 /* 统一的按钮和标签样式 */
@@ -1962,43 +1948,43 @@ onMounted(() => {
 /* 响应式设计 */
 @media (max-width: 768px) {
   .student-dashboard {
-    padding: 15px;
+    padding: var(--spacing-lg);
   }
 
   .welcome-banner-enhanced {
-    padding: 24px 20px;
+    padding: var(--spacing-2xl) var(--spacing-xl);
   }
 
   .banner-main {
     flex-direction: column;
     text-align: center;
-    gap: 20px;
-    margin-bottom: 20px;
+    gap: var(--spacing-xl);
+    margin-bottom: var(--spacing-xl);
   }
 
   .today-overview {
     justify-content: center;
-    gap: 16px;
+    gap: var(--spacing-lg);
   }
 
   .overview-item {
     flex-direction: column;
     text-align: center;
-    gap: 8px;
-    padding: 12px 16px;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md) var(--spacing-lg);
   }
 
   .stats-grid {
     grid-template-columns: 1fr;
-    gap: 12px;
+    gap: var(--spacing-md);
   }
 
   .mini-stat-card {
-    padding: 16px 20px;
+    padding: var(--spacing-lg) var(--spacing-xl);
   }
 
   .welcome-title {
-    font-size: 24px;
+    font-size: var(--font-size-3xl);
   }
 
   .main-content .el-col {

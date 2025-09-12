@@ -367,6 +367,12 @@ const handleUserCommand = async (command) => {
   padding: 0;
   background: transparent;
   overflow-y: auto;
+  height: calc(100vh - 60px); /* 减去header高度 */
+}
+
+/* Element Plus的el-main样式调整 */
+:deep(.el-main) {
+  padding: 0;
 }
 
 :deep(.el-dropdown-menu__item) {
