@@ -177,11 +177,11 @@ const handleLogin = async () => {
       console.log('即将跳转到首页:', homePage)
       await router.push(homePage)
     } else {
-      ElMessage.error(result.message || '登录失败，请检查用户名和密码')
+      ElMessage.error(result.message )
     }
   } catch (error) {
     console.error('登录错误:', error)
-    ElMessage.error('登录失败，请稍后重试')
+    
   } finally {
     loading.value = false
   }

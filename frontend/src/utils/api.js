@@ -55,40 +55,40 @@ api.interceptors.response.use(
 
       switch (status) {
         case 401: {
-          ElMessage.error('会话已过期，请重新登录')
+          ElMessage.error(data)
           const userStore = useUserStore()
           userStore.logout()
           break
         }
         case 403:
-          ElMessage.error('权限不足，无法访问该资源')
+          ElMessage.error(data)
           break
         case 404:
-          ElMessage.error('请求的资源不存在')
+          ElMessage.error(data)
           break
         case 422:
-          ElMessage.error(data?.message || '请求参数错误')
+          ElMessage.error(data)
           break
         case 429:
-          ElMessage.error('请求过于频繁，请稍后再试')
+          ElMessage.error(data)
           break
         case 500:
-          ElMessage.error('服务器内部错误')
+          ElMessage.error(data)
           break
         case 502:
         case 503:
         case 504:
-          ElMessage.error('服务暂时不可用，请稍后重试')
+          ElMessage.error(data)
           break
         default:
-          ElMessage.error(data?.message || `请求失败 (${status})`)
+          ElMessage.error(data)
       }
     } else if (error.code === 'NETWORK_ERROR' || error.message === 'Network Error') {
-      ElMessage.error('网络连接失败，请检查网络状态')
+      ElMessage.error(data)
     } else if (error.code === 'ECONNABORTED') {
-      ElMessage.error('请求超时，请稍后重试')
+      ElMessage.error(data)
     } else {
-      ElMessage.error('网络错误，请稍后重试')
+      ElMessage.error(data)
     }
 
     return Promise.reject(error)
