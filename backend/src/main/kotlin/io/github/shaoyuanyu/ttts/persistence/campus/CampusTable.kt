@@ -3,7 +3,6 @@ package io.github.shaoyuanyu.ttts.persistence.campus
 
 import org.jetbrains.exposed.v1.core.Column
 import org.jetbrains.exposed.v1.core.dao.id.IntIdTable
-import org.jetbrains.exposed.v1.core.dao.id.UUIDTable
 import org.jetbrains.exposed.v1.datetime.timestamp
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
