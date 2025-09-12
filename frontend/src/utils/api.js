@@ -55,11 +55,6 @@ api.interceptors.response.use(
 
       switch (status) {
         case 401: {
-<<<<<<< HEAD
-          ElMessage.error(data)
-          const userStore = useUserStore()
-          userStore.logout()
-=======
           // 防止无限循环：只有在非登录、非登出请求时才处理401错误
           const isLoginRequest = config.url?.includes('/user/login')
           const isLogoutRequest = config.url?.includes('/user/logout')
@@ -76,7 +71,6 @@ api.interceptors.response.use(
             // 这里不处理错误消息，让具体的登录逻辑处理
             console.log('登录请求失败，状态码401')
           }
->>>>>>> af09e5a (fix(前端):修复前端401死循环)
           break
         }
         case 403:
