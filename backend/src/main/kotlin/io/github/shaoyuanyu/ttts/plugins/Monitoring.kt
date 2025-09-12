@@ -22,7 +22,19 @@ fun Application.configureMonitoring() {
             val userAgent = call.request.headers["User-Agent"]
             val uri = call.request.uri
             val queryString = call.request.queryString().let { if (it.isNotEmpty()) "?$it" else "" }
-            "Status: $status, HTTP method: $httpMethod, URI: $uri$queryString, User agent: $userAgent"
+            val cookies = call.request.headers["Cookie"] ?: ""
+            val contentType = call.request.headers["Content-Type"] ?: ""
+            val contentLength = call.request.headers["Content-Length"] ?: ""
+            val referer = call.request.headers["Referer"] ?: ""
+            val accept = call.request.headers["Accept"] ?: ""
+            val acceptLanguage = call.request.headers["Accept-Language"] ?: ""
+            val acceptEncoding = call.request.headers["Accept-Encoding"] ?: ""
+            val origin = call.request.headers["Origin"] ?: ""
+            
+            "Status: $status, HTTP method: $httpMethod, URI: $uri$queryString, " +
+            "User agent: $userAgent, Cookies: $cookies, Content-Type: $contentType, " +
+            "Content-Length: $contentLength, Referer: $referer, Accept: $accept, " +
+            "Accept-Language: $acceptLanguage, Accept-Encoding: $acceptEncoding, Origin: $origin"
         }
         
         mdc("userId") { call ->
