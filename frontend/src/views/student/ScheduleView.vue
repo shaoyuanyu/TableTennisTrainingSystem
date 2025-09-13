@@ -39,9 +39,6 @@
           <el-button @click="exportSchedule" class="action-btn ultra-btn">
             <span class="btn-icon">📤</span> 导出课表
           </el-button>
-          <el-button @click="syncToCalendar" class="action-btn ultra-btn" :loading="isSyncing">
-            <span class="btn-icon">📅</span> 日历同步
-          </el-button>
           <el-button @click="sendScheduleEmail" class="action-btn ultra-btn">
             <span class="btn-icon">📧</span> 邮件发送
           </el-button>
@@ -291,6 +288,256 @@
       </template>
     </el-dialog>
 
+    <!-- 课程管理对话框 -->
+    <el-dialog
+      v-model="showCourseManagementDialog"
+      title="📋 我的课程管理"
+      width="80%"
+      :before-close="() => showCourseManagementDialog = false"
+    >
+      <div class="course-management-panel">
+        <!-- 筛选工具栏 -->
+        <div class="management-toolbar">
+          <div class="toolbar-left">
+            <el-select v-model="courseFilter.status" placeholder="课程状态" clearable @change="filterCourses">
+              <el-option label="全部" value="" />
+              <el-option label="已预约" value="scheduled" />
+              <el-option label="已确认" value="confirmed" />
+              <el-option label="已完成" value="completed" />
+              <el-option label="已取消" value="cancelled" />
+            </el-select>
+            <el-select v-model="courseFilter.type" placeholder="课程类型" clearable @change="filterCourses" style="margin-left: 10px;">
+              <el-option label="全部" value="" />
+              <el-option label="一对一" value="individual" />
+              <el-option label="小组课" value="group" />
+            </el-select>
+            <el-date-picker
+              v-model="courseFilter.dateRange"
+              type="daterange"
+              range-separator="至"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"
+              format="YYYY-MM-DD"
+              value-format="YYYY-MM-DD"
+              @change="filterCourses"
+              style="margin-left: 10px;"
+            />
+          </div>
+          <div class="toolbar-right">
+            <el-button @click="refreshCourses" :loading="courseListLoading">
+              🔄 刷新
+            </el-button>
+          </div>
+        </div>
+
+        <!-- 课程列表 -->
+        <el-table 
+          :data="filteredCourses" 
+          v-loading="courseListLoading"
+          style="width: 100%; margin-top: 20px;"
+          @row-click="viewCourseDetail"
+        >
+          <el-table-column prop="date" label="日期" width="120">
+            <template #default="{ row }">
+              <el-tag :type="isToday(row.date) ? 'success' : 'info'" size="small">
+                {{ formatDate(row.date) }}
+              </el-tag>
+            </template>
+          </el-table-column>
+
+          <el-table-column label="时间" width="140">
+            <template #default="{ row }">
+              <div class="time-range">
+                <span>{{ row.startTime }} - {{ row.endTime }}</span>
+              </div>
+            </template>
+          </el-table-column>
+
+          <el-table-column prop="title" label="课程名称" min-width="150" />
+
+          <el-table-column prop="type" label="类型" width="80">
+            <template #default="{ row }">
+              <el-tag :type="row.type === 'individual' ? 'warning' : 'success'" size="small">
+                {{ row.type === 'individual' ? '一对一' : '小组课' }}
+              </el-tag>
+            </template>
+          </el-table-column>
+
+          <el-table-column prop="coachName" label="教练" width="100" />
+
+          <el-table-column prop="location" label="地点" width="120" />
+
+          <el-table-column prop="status" label="状态" width="100">
+            <template #default="{ row }">
+              <el-tag :type="getStatusType(row.status)" size="small">
+                {{ getStatusText(row.status) }}
+              </el-tag>
+            </template>
+          </el-table-column>
+
+          <el-table-column prop="enrollmentStatus" label="报名状态" width="100">
+            <template #default="{ row }">
+              <el-tag :type="getEnrollmentStatusType(row.enrollmentStatus)" size="small">
+                {{ getEnrollmentStatusText(row.enrollmentStatus) }}
+              </el-tag>
+            </template>
+          </el-table-column>
+
+          <el-table-column label="操作" width="200" fixed="right">
+            <template #default="{ row }">
+              <el-button 
+                size="small" 
+                @click.stop="viewCourseDetail(row)"
+              >
+                详情
+              </el-button>
+              <el-button 
+                v-if="canCancelCourse(row)"
+                size="small" 
+                type="danger" 
+                @click.stop="cancelCourseEnrollment(row)"
+              >
+                取消
+              </el-button>
+              <el-button 
+                v-if="canFeedback(row)"
+                size="small" 
+                type="success" 
+                @click.stop="openFeedbackDialog(row)"
+              >
+                反馈
+              </el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+
+        <!-- 分页 -->
+        <div class="pagination-wrapper">
+          <el-pagination
+            v-model:current-page="coursePagination.page"
+            v-model:page-size="coursePagination.pageSize"
+            :page-sizes="[10, 20, 50, 100]"
+            :total="coursePagination.total"
+            layout="total, sizes, prev, pager, next, jumper"
+            @size-change="loadStudentCourses"
+            @current-change="loadStudentCourses"
+          />
+        </div>
+      </div>
+
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="showCourseManagementDialog = false">关闭</el-button>
+        </div>
+      </template>
+    </el-dialog>
+
+    <!-- 课程详情对话框 -->
+    <el-dialog 
+      v-model="showCourseDetailDialog" 
+      title="课程详情" 
+      width="60%"
+      @close="selectedCourseDetail = null"
+    >
+      <div v-if="selectedCourseDetail" class="course-detail">
+        <div class="detail-header">
+          <h3>{{ selectedCourseDetail.title }}</h3>
+          <div class="course-badges">
+            <el-tag :type="selectedCourseDetail.type === 'individual' ? 'warning' : 'success'">
+              {{ selectedCourseDetail.type === 'individual' ? '一对一课程' : '小组课程' }}
+            </el-tag>
+            <el-tag :type="getStatusType(selectedCourseDetail.status)">
+              {{ getStatusText(selectedCourseDetail.status) }}
+            </el-tag>
+          </div>
+        </div>
+
+        <el-descriptions :column="2" border>
+          <el-descriptions-item label="日期时间">
+            {{ selectedCourseDetail.date }} {{ selectedCourseDetail.startTime }} - {{ selectedCourseDetail.endTime }}
+          </el-descriptions-item>
+          <el-descriptions-item label="课程时长">
+            {{ selectedCourseDetail.duration }} 分钟
+          </el-descriptions-item>
+          <el-descriptions-item label="教练">
+            {{ selectedCourseDetail.coachName }}
+          </el-descriptions-item>
+          <el-descriptions-item label="上课地点">
+            {{ selectedCourseDetail.location }}
+          </el-descriptions-item>
+          <el-descriptions-item label="课程等级">
+            {{ getLevelText(selectedCourseDetail.level) }}
+          </el-descriptions-item>
+          <el-descriptions-item label="课程价格">
+            ¥{{ selectedCourseDetail.price }}
+          </el-descriptions-item>
+          <el-descriptions-item label="报名状态">
+            <el-tag :type="getEnrollmentStatusType(selectedCourseDetail.enrollmentStatus)">
+              {{ getEnrollmentStatusText(selectedCourseDetail.enrollmentStatus) }}
+            </el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="支付状态">
+            <el-tag :type="getPaymentStatusType(selectedCourseDetail.paymentStatus)">
+              {{ getPaymentStatusText(selectedCourseDetail.paymentStatus) }}
+            </el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="课程描述" :span="2">
+            {{ selectedCourseDetail.description || '暂无描述' }}
+          </el-descriptions-item>
+        </el-descriptions>
+
+        <div v-if="selectedCourseDetail.feedback" class="feedback-section">
+          <h4>我的评价</h4>
+          <el-rate v-model="selectedCourseDetail.rating" disabled />
+          <p>{{ selectedCourseDetail.feedback }}</p>
+        </div>
+      </div>
+
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="showCourseDetailDialog = false">关闭</el-button>
+          <el-button 
+            v-if="selectedCourseDetail && canCancelCourse(selectedCourseDetail)"
+            type="danger" 
+            @click="cancelCourseEnrollment(selectedCourseDetail)"
+          >
+            取消课程
+          </el-button>
+          <el-button 
+            v-if="selectedCourseDetail && canFeedback(selectedCourseDetail)"
+            type="primary" 
+            @click="openFeedbackDialog(selectedCourseDetail)"
+          >
+            课程反馈
+          </el-button>
+        </div>
+      </template>
+    </el-dialog>
+
+    <!-- 课程反馈对话框 -->
+    <el-dialog v-model="showFeedbackDialog" title="课程反馈" width="40%">
+      <el-form :model="feedbackForm" :rules="feedbackRules" ref="feedbackFormRef">
+        <el-form-item label="课程评分" prop="rating">
+          <el-rate v-model="feedbackForm.rating" :max="5" show-text />
+        </el-form-item>
+        <el-form-item label="反馈内容" prop="feedback">
+          <el-input 
+            v-model="feedbackForm.feedback" 
+            type="textarea" 
+            :rows="4"
+            placeholder="请输入您对本次课程的反馈..."
+          />
+        </el-form-item>
+      </el-form>
+      
+      <template #footer>
+        <el-button @click="closeFeedbackDialog">取消</el-button>
+        <el-button type="primary" @click="submitFeedback" :loading="feedbackLoading">
+          提交反馈
+        </el-button>
+      </template>
+    </el-dialog>
+
     <!-- 加载状态 -->
     <el-loading
       v-loading="loading"
@@ -318,7 +565,6 @@ const showScheduleDialog = ref(false)
 const selectedSchedule = ref(null)
 
 // 新增功能相关数据
-const isSyncing = ref(false)
 const showSyncDialog = ref(false)
 const showEmailDialog = ref(false)
 const syncOptions = ref({
@@ -556,8 +802,8 @@ const cancelSchedule = async () => {
 
 // 新增功能方法
 const addCourse = () => {
-  // 添加课程逻辑（学生版本可能是预约课程）
-  ElMessage.info('预约课程功能开发中...')
+  showCourseManagementDialog.value = true
+  loadStudentCourses()
 }
 
 const refreshSchedule = () => {
@@ -575,24 +821,6 @@ const exportSchedule = () => {
   } catch (error) {
     console.error('导出失败:', error)
     ElMessage.error('课表导出失败，请重试')
-  }
-}
-
-const syncToCalendar = async () => {
-  if (isSyncing.value) return
-  
-  try {
-    isSyncing.value = true
-    ElMessage.info('开始同步到日历...')
-    
-    await scheduleSync.syncToCalendar(syncOptions.value.platform)
-    
-    ElMessage.success(`课表已成功同步到 ${syncOptions.value.platform === 'google' ? 'Google' : 'Outlook'} 日历`)
-  } catch (error) {
-    console.error('日历同步失败:', error)
-    ElMessage.error('日历同步失败，请检查网络连接或授权状态')
-  } finally {
-    isSyncing.value = false
   }
 }
 
@@ -727,6 +955,280 @@ const generateMockSchedules = () => {
   }
 
   return mockSchedules
+}
+
+// 课程管理功能
+const showCourseManagementDialog = ref(false)
+const showCourseDetailDialog = ref(false)
+const showFeedbackDialog = ref(false)
+const selectedCourseDetail = ref(null)
+const courseListLoading = ref(false)
+const feedbackLoading = ref(false)
+
+// 课程列表数据
+const studentCourses = ref([])
+const filteredCourses = ref([])
+const courseFilter = ref({
+  status: '',
+  type: '',
+  dateRange: []
+})
+const coursePagination = ref({
+  page: 1,
+  pageSize: 20,
+  total: 0
+})
+
+// 反馈表单
+const feedbackForm = ref({
+  rating: 5,
+  feedback: ''
+})
+const feedbackRules = {
+  rating: [{ required: true, message: '请给出评分', trigger: 'change' }],
+  feedback: [{ required: true, message: '请输入反馈内容', trigger: 'blur' }]
+}
+const feedbackFormRef = ref()
+const feedbackCourse = ref(null)
+
+// 导入API函数
+import { 
+  getStudentCourses, 
+  getStudentCourseDetail, 
+  cancelEnrollment, 
+  submitCourseFeedback 
+} from '@/api/courses'
+
+// 添加课程按钮功能（已在上面定义）
+
+// 加载学员课程列表
+const loadStudentCourses = async () => {
+  try {
+    courseListLoading.value = true
+    const params = {
+      page: coursePagination.value.page,
+      pageSize: coursePagination.value.pageSize
+    }
+
+    if (courseFilter.value.status) params.status = [courseFilter.value.status]
+    if (courseFilter.value.type) params.type = courseFilter.value.type
+    if (courseFilter.value.dateRange && courseFilter.value.dateRange.length === 2) {
+      params.startDate = courseFilter.value.dateRange[0]
+      params.endDate = courseFilter.value.dateRange[1]
+    }
+
+    const response = await getStudentCourses(params)
+    if (response.success) {
+      studentCourses.value = response.data.courses || []
+      filteredCourses.value = studentCourses.value
+      coursePagination.value.total = response.data.pagination?.total || 0
+    }
+  } catch (error) {
+    ElMessage.error('获取课程列表失败：' + error.message)
+  } finally {
+    courseListLoading.value = false
+  }
+}
+
+// 筛选课程
+const filterCourses = () => {
+  loadStudentCourses()
+}
+
+// 刷新课程
+const refreshCourses = () => {
+  loadStudentCourses()
+  fetchSchedules() // 同时刷新日历视图
+}
+
+// 查看课程详情
+const viewCourseDetail = async (course) => {
+  try {
+    const response = await getStudentCourseDetail(course.id)
+    if (response.success) {
+      selectedCourseDetail.value = response.data
+      showCourseDetailDialog.value = true
+    }
+  } catch (error) {
+    ElMessage.error('获取课程详情失败：' + error.message)
+  }
+}
+
+// 取消课程报名
+const cancelCourseEnrollment = async (course) => {
+  try {
+    await ElMessageBox.confirm(
+      '确定要取消这个课程吗？取消后可能会产生费用，请仔细阅读取消政策。',
+      '确认取消',
+      {
+        confirmButtonText: '确定取消',
+        cancelButtonText: '再想想',
+        type: 'warning',
+      }
+    )
+
+    const response = await cancelEnrollment(course.id)
+    if (response.success) {
+      ElMessage.success('课程已取消')
+      if (response.data.refundAmount) {
+        ElMessage.info(`退款金额：¥${response.data.refundAmount}`)
+      }
+      loadStudentCourses()
+      fetchSchedules() // 刷新日历视图
+      if (showCourseDetailDialog.value) {
+        showCourseDetailDialog.value = false
+      }
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('取消课程失败：' + error.message)
+    }
+  }
+}
+
+// 打开反馈对话框
+const openFeedbackDialog = (course) => {
+  feedbackCourse.value = course
+  // 如果已有反馈，填充表单
+  if (course.feedback) {
+    feedbackForm.value.rating = course.rating || 5
+    feedbackForm.value.feedback = course.feedback || ''
+  } else {
+    feedbackForm.value.rating = 5
+    feedbackForm.value.feedback = ''
+  }
+  showFeedbackDialog.value = true
+}
+
+// 关闭反馈对话框
+const closeFeedbackDialog = () => {
+  showFeedbackDialog.value = false
+  feedbackCourse.value = null
+  feedbackForm.value.rating = 5
+  feedbackForm.value.feedback = ''
+  if (feedbackFormRef.value) {
+    feedbackFormRef.value.clearValidate()
+  }
+}
+
+// 提交反馈
+const submitFeedback = async () => {
+  if (!feedbackFormRef.value) return
+  
+  try {
+    await feedbackFormRef.value.validate()
+    feedbackLoading.value = true
+    
+    const response = await submitCourseFeedback(feedbackCourse.value.id, {
+      rating: feedbackForm.value.rating,
+      feedback: feedbackForm.value.feedback
+    })
+    
+    if (response.success) {
+      ElMessage.success('反馈提交成功')
+      closeFeedbackDialog()
+      loadStudentCourses()
+    }
+  } catch (error) {
+    if (error.errors) {
+      // 表单验证错误
+      return
+    }
+    ElMessage.error('提交反馈失败：' + error.message)
+  } finally {
+    feedbackLoading.value = false
+  }
+}
+
+// 工具函数
+const canCancelCourse = (course) => {
+  const courseDate = dayjs(`${course.date} ${course.startTime}`)
+  const now = dayjs()
+  return (
+    ['scheduled', 'confirmed'].includes(course.status) &&
+    ['enrolled'].includes(course.enrollmentStatus) &&
+    courseDate.isAfter(now.add(24, 'hour')) // 至少提前24小时取消
+  )
+}
+
+const canFeedback = (course) => {
+  return course.status === 'completed' && course.enrollmentStatus === 'enrolled'
+}
+
+const isToday = (date) => {
+  return dayjs(date).isSame(dayjs(), 'day')
+}
+
+const formatDate = (date) => {
+  const day = dayjs(date)
+  if (day.isSame(dayjs(), 'day')) return '今天'
+  if (day.isSame(dayjs().add(1, 'day'), 'day')) return '明天'
+  return day.format('MM-DD')
+}
+
+const getStatusType = (status) => {
+  const typeMap = {
+    'scheduled': 'info',
+    'confirmed': 'success',
+    'completed': 'success',
+    'cancelled': 'danger'
+  }
+  return typeMap[status] || 'info'
+}
+
+const getStatusText = (status) => {
+  const textMap = {
+    'scheduled': '已预约',
+    'confirmed': '已确认',
+    'completed': '已完成',
+    'cancelled': '已取消'
+  }
+  return textMap[status] || status
+}
+
+const getEnrollmentStatusType = (status) => {
+  const typeMap = {
+    'enrolled': 'success',
+    'waitlist': 'warning',
+    'cancelled': 'danger'
+  }
+  return typeMap[status] || 'info'
+}
+
+const getEnrollmentStatusText = (status) => {
+  const textMap = {
+    'enrolled': '已报名',
+    'waitlist': '候补中',
+    'cancelled': '已取消'
+  }
+  return textMap[status] || status
+}
+
+const getPaymentStatusType = (status) => {
+  const typeMap = {
+    'pending': 'warning',
+    'paid': 'success',
+    'refunded': 'info'
+  }
+  return typeMap[status] || 'info'
+}
+
+const getPaymentStatusText = (status) => {
+  const textMap = {
+    'pending': '待支付',
+    'paid': '已支付',
+    'refunded': '已退款'
+  }
+  return textMap[status] || status
+}
+
+const getLevelText = (level) => {
+  const textMap = {
+    'beginner': '初级',
+    'intermediate': '中级',
+    'advanced': '高级'
+  }
+  return textMap[level] || level
 }
 
 // 监听视图和日期变化
@@ -1359,5 +1861,80 @@ onMounted(() => {
     font-size: 0.8125rem;
     max-height: 150px;
   }
+}
+
+/* 课程管理样式 */
+.course-management-panel {
+  padding: 20px 0;
+}
+
+.management-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.toolbar-right {
+  display: flex;
+  align-items: center;
+}
+
+.pagination-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.course-detail {
+  padding: 10px 0;
+}
+
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.detail-header h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #1f2937;
+}
+
+.course-badges {
+  display: flex;
+  gap: 8px;
+}
+
+.feedback-section {
+  margin-top: 20px;
+  padding: 16px;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.feedback-section h4 {
+  margin: 0 0 12px 0;
+  color: #374151;
+}
+
+.feedback-section p {
+  margin: 8px 0 0 0;
+  color: #6b7280;
+  line-height: 1.6;
+}
+
+.time-range {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 </style>

@@ -71,6 +71,12 @@
           <h3>导出课表</h3>
           <p>导出课表文件</p>
         </div>
+
+        <div class="nav-card" @click="sendScheduleEmail">
+          <div class="nav-icon">📧</div>
+          <h3>邮件发送</h3>
+          <p>发送课表给学员</p>
+        </div>
       </div>
       
       <!-- 日期导航区域 -->
@@ -421,6 +427,485 @@
       </div>
     </template>
   </el-dialog>
+
+  <!-- 课程管理对话框 -->
+  <el-dialog
+    v-model="showCourseManagementDialog"
+    title="📋 课程管理"
+    width="90%"
+    :before-close="() => showCourseManagementDialog = false"
+  >
+    <div class="course-management-panel">
+      <!-- 操作工具栏 -->
+      <div class="management-toolbar">
+        <div class="toolbar-left">
+          <el-button @click="openCreateDialog" type="primary">
+            ➕ 创建课程
+          </el-button>
+          <el-select v-model="courseFilter.status" placeholder="课程状态" clearable @change="filterCourses">
+            <el-option label="全部" value="" />
+            <el-option label="已预约" value="scheduled" />
+            <el-option label="已确认" value="confirmed" />
+            <el-option label="已完成" value="completed" />
+            <el-option label="已取消" value="cancelled" />
+          </el-select>
+          <el-select v-model="courseFilter.type" placeholder="课程类型" clearable @change="filterCourses" style="margin-left: 10px;">
+            <el-option label="全部" value="" />
+            <el-option label="一对一" value="individual" />
+            <el-option label="小组课" value="group" />
+          </el-select>
+          <el-date-picker
+            v-model="courseFilter.dateRange"
+            type="daterange"
+            range-separator="至"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+            format="YYYY-MM-DD"
+            value-format="YYYY-MM-DD"
+            @change="filterCourses"
+            style="margin-left: 10px;"
+          />
+        </div>
+        <div class="toolbar-right">
+          <el-button @click="refreshCourses" :loading="courseListLoading">
+            🔄 刷新
+          </el-button>
+        </div>
+      </div>
+
+      <!-- 课程列表 -->
+      <el-table 
+        :data="filteredCourses" 
+        v-loading="courseListLoading"
+        style="width: 100%; margin-top: 20px;"
+        @row-click="viewCourseDetail"
+      >
+        <el-table-column prop="date" label="日期" width="120">
+          <template #default="{ row }">
+            <el-tag :type="isToday(row.date) ? 'success' : 'info'" size="small">
+              {{ formatDate(row.date) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+
+        <el-table-column label="时间" width="140">
+          <template #default="{ row }">
+            <div class="time-range">
+              <span>{{ row.startTime }} - {{ row.endTime }}</span>
+            </div>
+          </template>
+        </el-table-column>
+
+        <el-table-column prop="title" label="课程名称" min-width="150" />
+
+        <el-table-column prop="type" label="类型" width="80">
+          <template #default="{ row }">
+            <el-tag :type="row.type === 'individual' ? 'warning' : 'success'" size="small">
+              {{ row.type === 'individual' ? '一对一' : '小组课' }}
+            </el-tag>
+          </template>
+        </el-table-column>
+
+        <el-table-column label="学员" width="100">
+          <template #default="{ row }">
+            <span>{{ row.currentStudents }}/{{ row.maxStudents || 1 }}</span>
+          </template>
+        </el-table-column>
+
+        <el-table-column prop="location" label="地点" width="120" />
+
+        <el-table-column prop="price" label="价格" width="100">
+          <template #default="{ row }">
+            <span>¥{{ row.price }}</span>
+          </template>
+        </el-table-column>
+
+        <el-table-column prop="status" label="状态" width="100">
+          <template #default="{ row }">
+            <el-tag :type="getStatusType(row.status)" size="small">
+              {{ getStatusText(row.status) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+
+        <el-table-column label="操作" width="220" fixed="right">
+          <template #default="{ row }">
+            <el-button 
+              size="small" 
+              @click.stop="viewCourseDetail(row)"
+            >
+              详情
+            </el-button>
+            <el-button 
+              v-if="canEdit(row)"
+              size="small" 
+              @click.stop="openEditDialog(row)"
+            >
+              编辑
+            </el-button>
+            <el-button 
+              v-if="canDelete(row)"
+              size="small" 
+              type="danger" 
+              @click.stop="deleteCourse(row)"
+            >
+              删除
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <!-- 分页 -->
+      <div class="pagination-wrapper">
+        <el-pagination
+          v-model:current-page="coursePagination.page"
+          v-model:page-size="coursePagination.pageSize"
+          :page-sizes="[10, 20, 50, 100]"
+          :total="coursePagination.total"
+          layout="total, sizes, prev, pager, next, jumper"
+          @size-change="loadCoachCourses"
+          @current-change="loadCoachCourses"
+        />
+      </div>
+    </div>
+
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="showCourseManagementDialog = false">关闭</el-button>
+      </div>
+    </template>
+  </el-dialog>
+
+  <!-- 课程详情对话框 -->
+  <el-dialog 
+    v-model="showCourseDetailDialog" 
+    title="课程详情" 
+    width="70%"
+    @close="selectedCourseDetail = null"
+  >
+    <div v-if="selectedCourseDetail" class="course-detail">
+      <div class="detail-header">
+        <h3>{{ selectedCourseDetail.title }}</h3>
+        <div class="course-badges">
+          <el-tag :type="selectedCourseDetail.type === 'individual' ? 'warning' : 'success'">
+            {{ selectedCourseDetail.type === 'individual' ? '一对一课程' : '小组课程' }}
+          </el-tag>
+          <el-tag :type="getStatusType(selectedCourseDetail.status)">
+            {{ getStatusText(selectedCourseDetail.status) }}
+          </el-tag>
+        </div>
+      </div>
+
+      <el-row :gutter="20">
+        <el-col :span="12">
+          <el-descriptions :column="1" border>
+            <el-descriptions-item label="日期时间">
+              {{ selectedCourseDetail.date }} {{ selectedCourseDetail.startTime }} - {{ selectedCourseDetail.endTime }}
+            </el-descriptions-item>
+            <el-descriptions-item label="课程时长">
+              {{ selectedCourseDetail.duration }} 分钟
+            </el-descriptions-item>
+            <el-descriptions-item label="上课地点">
+              {{ selectedCourseDetail.location }}
+            </el-descriptions-item>
+            <el-descriptions-item label="课程等级">
+              {{ getLevelText(selectedCourseDetail.level) }}
+            </el-descriptions-item>
+            <el-descriptions-item label="课程价格">
+              ¥{{ selectedCourseDetail.price }}
+            </el-descriptions-item>
+            <el-descriptions-item label="学员人数">
+              {{ selectedCourseDetail.currentStudents }}/{{ selectedCourseDetail.maxStudents || 1 }}
+            </el-descriptions-item>
+          </el-descriptions>
+        </el-col>
+
+        <el-col :span="12">
+          <div class="student-list">
+            <h4>报名学员</h4>
+            <el-table :data="selectedCourseDetail.studentList || []" style="width: 100%">
+              <el-table-column prop="studentName" label="学员姓名" />
+              <el-table-column prop="enrollmentStatus" label="报名状态" width="100">
+                <template #default="{ row }">
+                  <el-tag :type="getEnrollmentStatusType(row.enrollmentStatus)" size="small">
+                    {{ getEnrollmentStatusText(row.enrollmentStatus) }}
+                  </el-tag>
+                </template>
+              </el-table-column>
+              <el-table-column prop="attendanceStatus" label="出勤" width="80">
+                <template #default="{ row }">
+                  <el-tag 
+                    v-if="row.attendanceStatus"
+                    :type="getAttendanceStatusType(row.attendanceStatus)" 
+                    size="small"
+                  >
+                    {{ getAttendanceStatusText(row.attendanceStatus) }}
+                  </el-tag>
+                  <span v-else>-</span>
+                </template>
+              </el-table-column>
+            </el-table>
+          </div>
+        </el-col>
+      </el-row>
+
+      <div v-if="selectedCourseDetail.description" class="description-section">
+        <h4>课程描述</h4>
+        <p>{{ selectedCourseDetail.description }}</p>
+      </div>
+
+      <div v-if="selectedCourseDetail.notes" class="notes-section">
+        <h4>教练备注</h4>
+        <p>{{ selectedCourseDetail.notes }}</p>
+      </div>
+
+      <div v-if="selectedCourseDetail.objectives && selectedCourseDetail.objectives.length" class="objectives-section">
+        <h4>训练目标</h4>
+        <el-tag 
+          v-for="objective in selectedCourseDetail.objectives" 
+          :key="objective"
+          style="margin: 0 5px 5px 0;"
+        >
+          {{ objective }}
+        </el-tag>
+      </div>
+    </div>
+
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="showCourseDetailDialog = false">关闭</el-button>
+        <el-button 
+          v-if="selectedCourseDetail && canEdit(selectedCourseDetail)"
+          @click="openEditDialog(selectedCourseDetail)"
+        >
+          编辑课程
+        </el-button>
+        <el-button 
+          v-if="selectedCourseDetail && canManageAttendance(selectedCourseDetail)"
+          type="primary"
+          @click="openAttendanceDialog(selectedCourseDetail)"
+        >
+          出勤管理
+        </el-button>
+      </div>
+    </template>
+  </el-dialog>
+
+  <!-- 创建/编辑课程对话框 -->
+  <el-dialog 
+    v-model="showFormDialog" 
+    :title="isEdit ? '编辑课程' : '创建课程'" 
+    width="60%"
+  >
+    <el-form 
+      :model="courseForm" 
+      :rules="courseRules" 
+      ref="courseFormRef"
+      label-width="100px"
+    >
+      <el-row :gutter="20">
+        <el-col :span="12">
+          <el-form-item label="课程名称" prop="title">
+            <el-input v-model="courseForm.title" placeholder="请输入课程名称" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="课程类型" prop="type">
+            <el-select v-model="courseForm.type" placeholder="选择课程类型" style="width: 100%">
+              <el-option label="一对一" value="individual" />
+              <el-option label="小组课" value="group" />
+            </el-select>
+          </el-form-item>
+        </el-col>
+      </el-row>
+
+      <el-row :gutter="20">
+        <el-col :span="8">
+          <el-form-item label="课程日期" prop="date">
+            <el-date-picker
+              v-model="courseForm.date"
+              type="date"
+              placeholder="选择日期"
+              format="YYYY-MM-DD"
+              value-format="YYYY-MM-DD"
+              style="width: 100%"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="开始时间" prop="startTime">
+            <el-time-select
+              v-model="courseForm.startTime"
+              start="06:00"
+              step="00:30"
+              end="22:00"
+              placeholder="开始时间"
+              style="width: 100%"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="结束时间" prop="endTime">
+            <el-time-select
+              v-model="courseForm.endTime"
+              start="06:30"
+              step="00:30"
+              end="22:30"
+              placeholder="结束时间"
+              style="width: 100%"
+            />
+          </el-form-item>
+        </el-col>
+      </el-row>
+
+      <el-row :gutter="20">
+        <el-col :span="8">
+          <el-form-item label="课程等级" prop="level">
+            <el-select v-model="courseForm.level" placeholder="选择等级" style="width: 100%">
+              <el-option label="初级" value="beginner" />
+              <el-option label="中级" value="intermediate" />
+              <el-option label="高级" value="advanced" />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="上课地点" prop="location">
+            <el-input v-model="courseForm.location" placeholder="请输入地点" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="课程价格" prop="price">
+            <el-input-number 
+              v-model="courseForm.price" 
+              :min="0" 
+              :step="10"
+              style="width: 100%" 
+              placeholder="课程价格"
+            />
+          </el-form-item>
+        </el-col>
+      </el-row>
+
+      <el-row :gutter="20" v-if="courseForm.type === 'group'">
+        <el-col :span="12">
+          <el-form-item label="最大人数" prop="maxStudents">
+            <el-input-number 
+              v-model="courseForm.maxStudents" 
+              :min="2" 
+              :max="10"
+              style="width: 100%" 
+              placeholder="最大学员数"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="校区" prop="campusId">
+            <el-select v-model="courseForm.campusId" placeholder="选择校区" style="width: 100%">
+              <el-option 
+                v-for="campus in campusList" 
+                :key="campus.id" 
+                :label="campus.name" 
+                :value="campus.id" 
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+      </el-row>
+
+      <el-form-item label="课程描述">
+        <el-input 
+          v-model="courseForm.description" 
+          type="textarea" 
+          :rows="3"
+          placeholder="课程描述（可选）"
+        />
+      </el-form-item>
+
+      <el-form-item label="教练备注">
+        <el-input 
+          v-model="courseForm.notes" 
+          type="textarea" 
+          :rows="2"
+          placeholder="教练备注（可选）"
+        />
+      </el-form-item>
+
+      <el-form-item label="训练目标">
+        <el-select
+          v-model="courseForm.objectives"
+          multiple
+          filterable
+          allow-create
+          placeholder="添加训练目标（可选）"
+          style="width: 100%"
+        >
+          <el-option label="基础技术" value="基础技术" />
+          <el-option label="发球技巧" value="发球技巧" />
+          <el-option label="接发球" value="接发球" />
+          <el-option label="正手攻球" value="正手攻球" />
+          <el-option label="反手技术" value="反手技术" />
+          <el-option label="步法训练" value="步法训练" />
+          <el-option label="战术配合" value="战术配合" />
+          <el-option label="比赛技巧" value="比赛技巧" />
+        </el-select>
+      </el-form-item>
+    </el-form>
+
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="closeFormDialog">取消</el-button>
+        <el-button type="primary" @click="submitCourse" :loading="formLoading">
+          {{ isEdit ? '保存修改' : '创建课程' }}
+        </el-button>
+      </div>
+    </template>
+  </el-dialog>
+
+  <!-- 出勤管理对话框 -->
+  <el-dialog v-model="showAttendanceDialog" title="出勤管理" width="50%">
+    <div v-if="attendanceCourse" class="attendance-management">
+      <div class="course-info">
+        <h4>{{ attendanceCourse.title }}</h4>
+        <p>{{ attendanceCourse.date }} {{ attendanceCourse.startTime }} - {{ attendanceCourse.endTime }}</p>
+      </div>
+
+      <el-table :data="attendanceList" style="width: 100%">
+        <el-table-column prop="studentName" label="学员姓名" />
+        <el-table-column label="出勤状态" width="150">
+          <template #default="{ row, $index }">
+            <el-select 
+              v-model="row.status" 
+              placeholder="选择状态"
+              size="small"
+              style="width: 100%"
+            >
+              <el-option label="出席" value="present" />
+              <el-option label="缺席" value="absent" />
+              <el-option label="迟到" value="late" />
+            </el-select>
+          </template>
+        </el-table-column>
+        <el-table-column label="备注">
+          <template #default="{ row }">
+            <el-input 
+              v-model="row.notes" 
+              placeholder="备注信息"
+              size="small"
+            />
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
+
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button @click="showAttendanceDialog = false">取消</el-button>
+        <el-button type="primary" @click="saveAttendance" :loading="attendanceLoading">
+          保存出勤记录
+        </el-button>
+      </div>
+    </template>
+  </el-dialog>
 </template>
 
 <script setup>
@@ -654,8 +1139,8 @@ const closeScheduleDialog = () => {
 }
 
 const addCourse = () => {
-  // 添加课程逻辑
-  ElMessage.info('添加课程功能开发中...')
+  showCourseManagementDialog.value = true
+  loadCoachCourses()
 }
 
 const editSchedule = () => {
@@ -948,6 +1433,393 @@ const generateMockCoachSchedules = () => {
     }
   }
   return mockSchedules
+}
+
+// 课程管理功能
+const showCourseManagementDialog = ref(false)
+const showCourseDetailDialog = ref(false)
+const showFormDialog = ref(false)
+const showAttendanceDialog = ref(false)
+const selectedCourseDetail = ref(null)
+const courseListLoading = ref(false)
+const formLoading = ref(false)
+const attendanceLoading = ref(false)
+const isEdit = ref(false)
+
+// 课程列表数据
+const coachCourses = ref([])
+const filteredCourses = ref([])
+const courseFilter = ref({
+  status: '',
+  type: '',
+  dateRange: []
+})
+const coursePagination = ref({
+  page: 1,
+  pageSize: 20,
+  total: 0
+})
+
+// 课程表单
+const courseForm = ref({
+  title: '',
+  description: '',
+  type: 'individual',
+  level: 'beginner',
+  date: '',
+  startTime: '',
+  endTime: '',
+  location: '',
+  maxStudents: 2,
+  price: 100,
+  campusId: '',
+  notes: '',
+  materials: [],
+  objectives: []
+})
+
+const courseRules = {
+  title: [{ required: true, message: '请输入课程名称', trigger: 'blur' }],
+  type: [{ required: true, message: '请选择课程类型', trigger: 'change' }],
+  level: [{ required: true, message: '请选择课程等级', trigger: 'change' }],
+  date: [{ required: true, message: '请选择课程日期', trigger: 'change' }],
+  startTime: [{ required: true, message: '请选择开始时间', trigger: 'change' }],
+  endTime: [{ required: true, message: '请选择结束时间', trigger: 'change' }],
+  location: [{ required: true, message: '请输入上课地点', trigger: 'blur' }],
+  price: [{ required: true, message: '请输入课程价格', trigger: 'blur' }],
+  maxStudents: [{ required: true, message: '请输入最大学员数', trigger: 'blur' }],
+  campusId: [{ required: true, message: '请选择校区', trigger: 'change' }]
+}
+
+const courseFormRef = ref()
+const campusList = ref([])
+
+// 出勤管理
+const attendanceCourse = ref(null)
+const attendanceList = ref([])
+
+// 导入API函数
+import { 
+  getCoachCourses, 
+  getCoachCourseDetail, 
+  createCourse, 
+  updateCourse, 
+  deleteCourse as deleteCourseAPI, 
+  updateCourseAttendance,
+  getCampusList
+} from '@/api/courses'
+
+// 加载教练课程列表
+const loadCoachCourses = async () => {
+  try {
+    courseListLoading.value = true
+    const params = {
+      page: coursePagination.value.page,
+      pageSize: coursePagination.value.pageSize
+    }
+
+    if (courseFilter.value.status) params.status = [courseFilter.value.status]
+    if (courseFilter.value.type) params.type = courseFilter.value.type
+    if (courseFilter.value.dateRange && courseFilter.value.dateRange.length === 2) {
+      params.startDate = courseFilter.value.dateRange[0]
+      params.endDate = courseFilter.value.dateRange[1]
+    }
+
+    const response = await getCoachCourses(params)
+    if (response.success) {
+      coachCourses.value = response.data.courses || []
+      filteredCourses.value = coachCourses.value
+      coursePagination.value.total = response.data.pagination?.total || 0
+    }
+  } catch (error) {
+    ElMessage.error('获取课程列表失败：' + error.message)
+  } finally {
+    courseListLoading.value = false
+  }
+}
+
+// 筛选课程
+const filterCourses = () => {
+  loadCoachCourses()
+}
+
+// 刷新课程
+const refreshCourses = () => {
+  loadCoachCourses()
+  fetchSchedules() // 同时刷新日历视图
+}
+
+// 查看课程详情
+const viewCourseDetail = async (course) => {
+  try {
+    const response = await getCoachCourseDetail(course.id)
+    if (response.success) {
+      selectedCourseDetail.value = response.data
+      showCourseDetailDialog.value = true
+    }
+  } catch (error) {
+    ElMessage.error('获取课程详情失败：' + error.message)
+  }
+}
+
+// 打开创建对话框
+const openCreateDialog = (date = null) => {
+  isEdit.value = false
+  resetForm()
+  if (date) {
+    courseForm.value.date = date
+  }
+  showFormDialog.value = true
+  loadCampusList()
+}
+
+// 打开编辑对话框
+const openEditDialog = (course) => {
+  isEdit.value = true
+  resetForm()
+  // 填充表单数据
+  Object.keys(courseForm.value).forEach(key => {
+    if (course[key] !== undefined) {
+      courseForm.value[key] = course[key]
+    }
+  })
+  selectedCourseDetail.value = course
+  showCourseDetailDialog.value = false
+  showFormDialog.value = true
+  loadCampusList()
+}
+
+// 关闭表单对话框
+const closeFormDialog = () => {
+  showFormDialog.value = false
+  resetForm()
+  selectedCourseDetail.value = null
+}
+
+// 重置表单
+const resetForm = () => {
+  Object.assign(courseForm.value, {
+    title: '',
+    description: '',
+    type: 'individual',
+    level: 'beginner',
+    date: '',
+    startTime: '',
+    endTime: '',
+    location: '',
+    maxStudents: 2,
+    price: 100,
+    campusId: '',
+    notes: '',
+    materials: [],
+    objectives: []
+  })
+  if (courseFormRef.value) {
+    courseFormRef.value.clearValidate()
+  }
+}
+
+// 提交课程
+const submitCourse = async () => {
+  if (!courseFormRef.value) return
+  
+  try {
+    await courseFormRef.value.validate()
+    formLoading.value = true
+
+    // 计算课程时长
+    const start = dayjs(`2000-01-01 ${courseForm.value.startTime}`)
+    const end = dayjs(`2000-01-01 ${courseForm.value.endTime}`)
+    const duration = end.diff(start, 'minute')
+    
+    const courseData = {
+      ...courseForm.value,
+      duration
+    }
+
+    let response
+    if (isEdit.value) {
+      response = await updateCourse(selectedCourseDetail.value.id, courseData)
+    } else {
+      response = await createCourse(courseData)
+    }
+    
+    if (response.success) {
+      ElMessage.success(isEdit.value ? '课程更新成功' : '课程创建成功')
+      closeFormDialog()
+      loadCoachCourses()
+      fetchSchedules()
+    }
+  } catch (error) {
+    if (error.errors) {
+      return
+    }
+    ElMessage.error((isEdit.value ? '更新' : '创建') + '课程失败：' + error.message)
+  } finally {
+    formLoading.value = false
+  }
+}
+
+// 删除课程
+const deleteCourse = async (course) => {
+  try {
+    await ElMessageBox.confirm(
+      `确定要删除课程"${course.title}"吗？删除后无法恢复，已报名的学员将会收到通知。`,
+      '确认删除',
+      {
+        confirmButtonText: '确定删除',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }
+    )
+
+    const response = await deleteCourseAPI(course.id)
+    if (response.success) {
+      ElMessage.success('课程删除成功')
+      if (response.data.affectedStudents > 0) {
+        ElMessage.info(`已通知 ${response.data.affectedStudents} 名学员`)
+      }
+      loadCoachCourses()
+      fetchSchedules()
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('删除课程失败：' + error.message)
+    }
+  }
+}
+
+// 打开出勤管理对话框
+const openAttendanceDialog = (course) => {
+  attendanceCourse.value = course
+  // 准备出勤数据
+  attendanceList.value = (course.studentList || []).map(student => ({
+    studentId: student.studentId,
+    studentName: student.studentName,
+    status: student.attendanceStatus || 'present',
+    notes: ''
+  }))
+  showAttendanceDialog.value = true
+}
+
+// 保存出勤记录
+const saveAttendance = async () => {
+  try {
+    attendanceLoading.value = true
+    
+    const attendanceData = {
+      attendance: attendanceList.value.map(item => ({
+        studentId: item.studentId,
+        status: item.status,
+        notes: item.notes
+      }))
+    }
+
+    const response = await updateCourseAttendance(attendanceCourse.value.id, attendanceData)
+    if (response.success) {
+      ElMessage.success('出勤记录保存成功')
+      showAttendanceDialog.value = false
+      loadCoachCourses()
+      fetchSchedules()
+    }
+  } catch (error) {
+    ElMessage.error('保存出勤记录失败：' + error.message)
+  } finally {
+    attendanceLoading.value = false
+  }
+}
+
+// 加载校区列表
+const loadCampusList = async () => {
+  try {
+    const response = await getCampusList()
+    if (response.success) {
+      campusList.value = response.data.first || []
+    }
+  } catch (error) {
+    console.error('获取校区列表失败：', error)
+  }
+}
+
+// 工具函数
+const canEdit = (course) => {
+  const courseDate = dayjs(`${course.date} ${course.startTime}`)
+  const now = dayjs()
+  return (
+    ['scheduled', 'confirmed'].includes(course.status) &&
+    courseDate.isAfter(now)
+  )
+}
+
+const canDelete = (course) => {
+  const courseDate = dayjs(`${course.date} ${course.startTime}`)
+  const now = dayjs()
+  return (
+    ['scheduled'].includes(course.status) &&
+    courseDate.isAfter(now.add(24, 'hour'))
+  )
+}
+
+const canManageAttendance = (course) => {
+  return ['confirmed', 'completed'].includes(course.status) && 
+         course.currentStudents > 0
+}
+
+const isToday = (date) => {
+  return dayjs(date).isSame(dayjs(), 'day')
+}
+
+const formatDate = (date) => {
+  const day = dayjs(date)
+  if (day.isSame(dayjs(), 'day')) return '今天'
+  if (day.isSame(dayjs().add(1, 'day'), 'day')) return '明天'
+  return day.format('MM-DD')
+}
+
+// 新增的工具函数
+const getEnrollmentStatusType = (status) => {
+  const typeMap = {
+    'enrolled': 'success',
+    'waitlist': 'warning',
+    'cancelled': 'danger'
+  }
+  return typeMap[status] || 'info'
+}
+
+const getEnrollmentStatusText = (status) => {
+  const textMap = {
+    'enrolled': '已报名',
+    'waitlist': '候补中',
+    'cancelled': '已取消'
+  }
+  return textMap[status] || status
+}
+
+const getAttendanceStatusType = (status) => {
+  const typeMap = {
+    'present': 'success',
+    'absent': 'danger',
+    'late': 'warning'
+  }
+  return typeMap[status] || 'info'
+}
+
+const getAttendanceStatusText = (status) => {
+  const textMap = {
+    'present': '出席',
+    'absent': '缺席',
+    'late': '迟到'
+  }
+  return textMap[status] || status
+}
+
+const getLevelText = (level) => {
+  const textMap = {
+    'beginner': '初级',
+    'intermediate': '中级',
+    'advanced': '高级'
+  }
+  return textMap[level] || level
 }
 
 // 监听视图和日期变化
@@ -2729,6 +3601,116 @@ onMounted(() => {
   .dialog-footer.ultra {
     gap: 9px;
   }
+}
+
+/* 课程管理样式 */
+.course-management-panel {
+  padding: 20px 0;
+}
+
+.management-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.toolbar-right {
+  display: flex;
+  align-items: center;
+}
+
+.pagination-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.course-detail {
+  padding: 10px 0;
+}
+
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.detail-header h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #1f2937;
+}
+
+.course-badges {
+  display: flex;
+  gap: 8px;
+}
+
+.student-list {
+  margin-bottom: 20px;
+}
+
+.student-list h4 {
+  margin: 0 0 12px 0;
+  color: #374151;
+}
+
+.description-section,
+.notes-section,
+.objectives-section {
+  margin-top: 20px;
+  padding: 16px;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.description-section h4,
+.notes-section h4,
+.objectives-section h4 {
+  margin: 0 0 12px 0;
+  color: #374151;
+}
+
+.description-section p,
+.notes-section p {
+  margin: 0;
+  color: #6b7280;
+  line-height: 1.6;
+}
+
+.attendance-management {
+  padding: 10px 0;
+}
+
+.course-info {
+  margin-bottom: 20px;
+  padding: 16px;
+  background: #f3f4f6;
+  border-radius: 8px;
+}
+
+.course-info h4 {
+  margin: 0 0 8px 0;
+  color: #1f2937;
+}
+
+.course-info p {
+  margin: 0;
+  color: #6b7280;
+}
+
+.time-range {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 </style>
