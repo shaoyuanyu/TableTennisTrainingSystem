@@ -6,12 +6,23 @@ import io.github.shaoyuanyu.ttts.dto.coach.CoachRecord
 import io.github.shaoyuanyu.ttts.dto.user.UserRole
 import io.github.shaoyuanyu.ttts.dto.user.injectCoachEntity
 import io.github.shaoyuanyu.ttts.persistence.coach.CoachEntity
-import io.github.shaoyuanyu.ttts.persistence.user.UserEntity
-import io.github.shaoyuanyu.ttts.persistence.user.exposeWithoutPassword
+import io.github.shaoyuanyu.ttts.persistence.student.StudentEntity
+import io.github.shaoyuanyu.ttts.persistence.student_coach.StudentCoachRelationEntity
+import io.github.shaoyuanyu.ttts.persistence.student_coach.StudentCoachRelationTable
+import org.jetbrains.exposed.v1.core.SqlExpressionBuilder
+import org.jetbrains.exposed.v1.core.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+import io.github.shaoyuanyu.ttts.persistence.user.UserEntity
+import io.github.shaoyuanyu.ttts.persistence.user.exposeWithoutPassword
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.util.*
+import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
+
+internal val COACH_SERVICE_LOGGER: Logger = LoggerFactory.getLogger("io.github.shaoyuanyu.ttts.persistence.coach")
 
 class CoachService(
     private val database: Database,
@@ -41,6 +52,89 @@ class CoachService(
             LOGGER.info("更新教练等级成功，教练ID：$coachId，新等级：$newLevel，新时薪：$hourlyRate")
         }
     }
+    
+    /**
+     * 教练审核学生申请
+     */
+    fun reviewStudentApplication(coachUUID: String, relationId: String, approve: Boolean, message: String?) =
+        transaction(database) {
+            val coach = CoachEntity.findById(UUID.fromString(coachUUID))
+                ?: throw Exception("教练不存在")
+                
+            val relation = StudentCoachRelationEntity.findById(UUID.fromString(relationId))
+                ?: throw Exception("申请关系不存在")
+                
+            // 检查该关系是否属于该教练
+            if (relation.coachID.id != coach.id) {
+                throw Exception("无权限处理此申请")
+            }
+            
+            // 只能审核待处理的申请
+            if (relation.status != "pending") {
+                throw Exception("只能审核待处理的申请")
+            }
+            
+            // 更新申请状态
+            relation.status = if (approve) "approved" else "rejected"
+            relation.updatedAt = Clock.System.now()
+            relation.coachMessage = message
+            
+            if (approve) {
+                // 如果批准，更新实际开始时间
+                relation.actualStartTime = Clock.System.now()
+                
+                // 更新学生和教练的计数
+                relation.studentID.currentCoach += 1
+                relation.coachID.currentStudents += 1
+            }
+            
+            relation
+        }
+        
+    /**
+     * 获取教练申请记录
+     */
+    fun getCoachApplications(coachUUID: String, status: String?, page: Int, size: Int): List<StudentCoachRelationEntity> =
+        transaction(database) {
+            val coach = CoachEntity.findById(UUID.fromString(coachUUID))
+                ?: throw Exception("教练不存在")
+
+            val query = if (status != null) {
+                StudentCoachRelationEntity.find {
+                    (StudentCoachRelationTable.coach_id eq coach.id) and
+                            (StudentCoachRelationTable.status eq status)
+                }
+            } else {
+                StudentCoachRelationEntity.find {
+                    StudentCoachRelationTable.coach_id eq coach.id
+                }
+            }
+
+            // 计算偏移量
+            val offset = (page - 1) * size
+
+            // 查询分页数据
+            query
+                .sortedByDescending { it.applicationTime }
+                .drop(offset)
+                .take(size)
+                .toList()
+        }
+        
+    /**
+     * 获取教练待处理申请数量
+     */
+    fun getPendingApplicationCount(coachUUID: String): Int =
+        transaction(database) {
+            val coach = CoachEntity.findById(UUID.fromString(coachUUID))
+                ?: throw Exception("教练不存在")
+
+            StudentCoachRelationEntity.find {
+                (StudentCoachRelationTable.coach_id eq coach.id) and
+                        (StudentCoachRelationTable.status eq "pending")
+            }.count().toInt()
+        }
+
     /**
      * 获取管理员所在校区未审核通过的教练信息
      */

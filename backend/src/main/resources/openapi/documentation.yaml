@@ -16,6 +16,8 @@ tags:
     description: "钱包充值和查询相关接口"
   - name: "校区管理"
     description: "校区信息管理相关接口"
+  - name: "双选系统"
+    description: "学生-教练双选相关接口"
 paths:
   /user/signup:
     post:
@@ -162,6 +164,335 @@ paths:
                 success:
                   value:
                     message: "登出成功"
+  /student/apply-coach:
+    post:
+      tags:
+        - "双选系统"
+      summary: "学生申请教练"
+      description: "学生向教练发送申请"
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/ApplyForCoachRequest"
+            examples:
+              apply_example:
+                summary: "申请示例"
+                value:
+                  coachUuid: "550e8400-e29b-41d4-a716-446655440000"
+                  expectedStartTime: "2023-10-01T09:00:00Z"
+                  message: "希望能在周末进行训练"
+      responses:
+        "200":
+          description: "申请成功"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  success:
+                    type: "boolean"
+                  data:
+                    type: "object"
+                    properties:
+                      id:
+                        type: "string"
+                      status:
+                        type: "string"
+                      applicationTime:
+                        type: "string"
+              examples:
+                success:
+                  value:
+                    success: true
+                    data:
+                      id: "550e8400-e29b-41d4-a716-446655440000"
+                      status: "pending"
+                      applicationTime: "2023-09-20T10:00:00Z"
+        "400":
+          description: "申请失败"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  success:
+                    type: "boolean"
+                  message:
+                    type: "string"
+              examples:
+                failure:
+                  value:
+                    success: false
+                    message: "申请失败，已存在相同状态的申请"
+  /student/applications:
+    get:
+      tags:
+        - "双选系统"
+      summary: "获取学生申请记录"
+      description: "获取当前学生的所有申请记录"
+      parameters:
+        - name: "status"
+          in: "query"
+          description: "申请状态过滤"
+          required: false
+          schema:
+            type: "string"
+            enum:
+              - "pending"
+              - "approved"
+              - "rejected"
+              - "active"
+              - "inactive"
+        - name: "page"
+          in: "query"
+          description: "页码"
+          required: false
+          schema:
+            type: "integer"
+            format: "int32"
+            default: 1
+        - name: "size"
+          in: "query"
+          description: "每页大小"
+          required: false
+          schema:
+            type: "integer"
+            format: "int32"
+            default: 10
+      responses:
+        "200":
+          description: "获取成功"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  success:
+                    type: "boolean"
+                  data:
+                    type: "array"
+                    items:
+                      $ref: "#/components/schemas/StudentCoachRelation"
+              examples:
+                success:
+                  value:
+                    success: true
+                    data:
+                      - id: "550e8400-e29b-41d4-a716-446655440000"
+                        coachId: "550e8400-e29b-41d4-a716-446655440001"
+                        studentId: "550e8400-e29b-41d4-a716-446655440002"
+                        status: "pending"
+                        applicationTime: "2023-09-20T10:00:00Z"
+                        expectedStartTime: "2023-10-01T09:00:00Z"
+                        createdAt: "2023-09-20T10:00:00Z"
+                        updatedAt: "2023-09-20T10:00:00Z"
+        "400":
+          description: "获取失败"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  success:
+                    type: "boolean"
+                  message:
+                    type: "string"
+              examples:
+                failure:
+                  value:
+                    success: false
+                    message: "获取申请记录失败"
+  /coach/review-application:
+    post:
+      tags:
+        - "双选系统"
+      summary: "教练审核学生申请"
+      description: "教练审核学生的申请"
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/ReviewApplicationRequest"
+            examples:
+              approve_example:
+                summary: "批准申请示例"
+                value:
+                  relationId: "550e8400-e29b-41d4-a716-446655440000"
+                  approve: true
+                  message: "欢迎加入，期待与你一起训练"
+              reject_example:
+                summary: "拒绝申请示例"
+                value:
+                  relationId: "550e8400-e29b-41d4-a716-446655440000"
+                  approve: false
+                  message: "目前学生人数已满，请稍后再试"
+      responses:
+        "200":
+          description: "审核成功"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  success:
+                    type: "boolean"
+                  data:
+                    type: "object"
+                    properties:
+                      id:
+                        type: "string"
+                      status:
+                        type: "string"
+                      updatedAt:
+                        type: "string"
+              examples:
+                success:
+                  value:
+                    success: true
+                    data:
+                      id: "550e8400-e29b-41d4-a716-446655440000"
+                      status: "approved"
+                      updatedAt: "2023-09-20T11:00:00Z"
+        "400":
+          description: "审核失败"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  success:
+                    type: "boolean"
+                  message:
+                    type: "string"
+              examples:
+                failure:
+                  value:
+                    success: false
+                    message: "审核失败，申请不存在或状态不正确"
+  /coach/applications:
+    get:
+      tags:
+        - "双选系统"
+      summary: "获取教练申请记录"
+      description: "获取当前教练收到的所有申请记录"
+      parameters:
+        - name: "status"
+          in: "query"
+          description: "申请状态过滤"
+          required: false
+          schema:
+            type: "string"
+            enum:
+              - "pending"
+              - "approved"
+              - "rejected"
+              - "active"
+              - "inactive"
+        - name: "page"
+          in: "query"
+          description: "页码"
+          required: false
+          schema:
+            type: "integer"
+            format: "int32"
+            default: 1
+        - name: "size"
+          in: "query"
+          description: "每页大小"
+          required: false
+          schema:
+            type: "integer"
+            format: "int32"
+            default: 10
+      responses:
+        "200":
+          description: "获取成功"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  success:
+                    type: "boolean"
+                  data:
+                    type: "array"
+                    items:
+                      $ref: "#/components/schemas/StudentCoachRelation"
+              examples:
+                success:
+                  value:
+                    success: true
+                    data:
+                      - id: "550e8400-e29b-41d4-a716-446655440000"
+                        coachId: "550e8400-e29b-41d4-a716-446655440001"
+                        studentId: "550e8400-e29b-41d4-a716-446655440002"
+                        status: "pending"
+                        applicationTime: "2023-09-20T10:00:00Z"
+                        expectedStartTime: "2023-10-01T09:00:00Z"
+                        studentMessage: "希望能在周末进行训练"
+                        createdAt: "2023-09-20T10:00:00Z"
+                        updatedAt: "2023-09-20T10:00:00Z"
+        "400":
+          description: "获取失败"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  success:
+                    type: "boolean"
+                  message:
+                    type: "string"
+              examples:
+                failure:
+                  value:
+                    success: false
+                    message: "获取申请记录失败"
+  /coach/pending-count:
+    get:
+      tags:
+        - "双选系统"
+      summary: "获取教练待处理申请数量"
+      description: "获取当前教练待处理的申请数量"
+      responses:
+        "200":
+          description: "获取成功"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  success:
+                    type: "boolean"
+                  data:
+                    type: "object"
+                    properties:
+                      count:
+                        type: "integer"
+                        format: "int32"
+              examples:
+                success:
+                  value:
+                    success: true
+                    data:
+                      count: 5
+        "400":
+          description: "获取失败"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  success:
+                    type: "boolean"
+                  message:
+                    type: "string"
+              examples:
+                failure:
+                  value:
+                    success: false
+                    message: "获取待处理申请数量失败"
   /user/info:
     get:
       tags:
@@ -959,6 +1290,80 @@ paths:
           description: "未认证"
         "403":
           description: "权限不足"
+  /apply-for-coach:
+    post:
+      tags:
+        - "双选系统"
+      summary: "申请教练"
+      description: "学生申请教练"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApplyForCoachRequest"
+            examples:
+              apply_example:
+                summary: "申请教练示例"
+                value:
+                  coachUuid: "550e8400-e29b-41d4-a716-446655440001"
+                  expectedStartTime: "2023-10-01T09:00:00Z"
+                  message: "希望从10月1日开始上课"
+        required: true
+      responses:
+        "201":
+          description: "申请成功"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  message:
+                    type: "string"
+              examples:
+                success:
+                  value:
+                    message: "申请已提交"
+        "400":
+          description: "请求参数错误"
+        "401":
+          description: "未认证"
+  /review-application:
+    put:
+      tags:
+        - "双选系统"
+      summary: "审核申请"
+      description: "教练审核学生申请"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReviewApplicationRequest"
+            examples:
+              review_example:
+                summary: "审核申请示例"
+                value:
+                  relationId: "550e8400-e29b-41d4-a716-446655440002"
+                  approve: true
+                  message: "申请已通过"
+        required: true
+      responses:
+        "200":
+          description: "审核成功"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  message:
+                    type: "string"
+              examples:
+                success:
+                  value:
+                    message: "申请已通过"
+        "400":
+          description: "请求参数错误"
+        "401":
+          description: "未认证"
 components:
   schemas:
     UserCreateRequest:
@@ -1154,6 +1559,85 @@ components:
         - "currentStudents"
         - "isApproved"
         - "approvedBy"
+    StudentCoachRelation:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+        coachId:
+          type: "string"
+        studentId:
+          type: "string"
+        status:
+          type: "string"
+          enum:
+            - "pending"
+            - "approved"
+            - "rejected"
+            - "active"
+            - "inactive"
+        applicationTime:
+          type: "string"
+          format: "date-time"
+        expectedStartTime:
+          type: "string"
+          format: "date-time"
+        actualStartTime:
+          type: "string"
+          format: "date-time"
+          nullable: true
+        endTime:
+          type: "string"
+          format: "date-time"
+          nullable: true
+        createdAt:
+          type: "string"
+          format: "date-time"
+        updatedAt:
+          type: "string"
+          format: "date-time"
+        studentMessage:
+          type: "string"
+          nullable: true
+        coachMessage:
+          type: "string"
+          nullable: true
+      required:
+        - "id"
+        - "coachId"
+        - "studentId"
+        - "status"
+        - "applicationTime"
+        - "expectedStartTime"
+        - "createdAt"
+        - "updatedAt"
+    ApplyForCoachRequest:
+      type: "object"
+      properties:
+        coachUuid:
+          type: "string"
+        expectedStartTime:
+          type: "string"
+          format: "date-time"
+        message:
+          type: "string"
+          nullable: true
+      required:
+        - "coachUuid"
+        - "expectedStartTime"
+    ReviewApplicationRequest:
+      type: "object"
+      properties:
+        relationId:
+          type: "string"
+        approve:
+          type: "boolean"
+        message:
+          type: "string"
+          nullable: true
+      required:
+        - "relationId"
+        - "approve"
     CreateMessageRequest:
       type: "object"
       properties:
