@@ -1,36 +1,26 @@
 <template>
   <div class="register-container">
     <!-- 背景装饰元素 -->
-    <div class="background-decorations">
-      <!-- 教练哨子装饰 -->
-      <div class="whistle-decoration">🔔</div>
-
-      <!-- 乒乓球拍装饰 -->
-      <div class="paddle-decoration paddle-1">🏓</div>
-      <div class="paddle-decoration paddle-2">🏓</div>
-
-      <!-- 奖杯装饰 -->
-      <div class="trophy-decoration">🏆</div>
-
-      <!-- 几何图形装饰 -->
-      <div class="geometric-shape"></div>
-      <div class="geometric-shape"></div>
-      <div class="geometric-shape"></div>
-
-      <!-- 艺术字装饰 -->
+    <div class="bg-decorations">
+      <div class="table-tennis-table"></div>
+      <div class="ping-pong-ball ball-1"></div>
+      <div class="ping-pong-ball ball-2"></div>
+      <div class="ping-pong-ball ball-3"></div>
+      <div class="racket racket-1"></div>
+      <div class="racket racket-2"></div>
       <div class="art-text">
         <div class="art-text-main">COACH</div>
         <div class="art-text-sub">教练注册</div>
       </div>
-
-      <!-- 专业图标装饰 -->
-      <div class="professional-badge">⭐</div>
     </div>
 
     <div class="register-box">
       <div class="register-header">
+        <div class="header-icon">
+          <div class="student-icon">🏓</div>
+        </div>
         <h1 class="register-title">教练注册</h1>
-        <p class="register-subtitle">提交入职申请，需校区管理员审核后方可使用</p>
+        <p class="register-subtitle">加入我们，开启乒乓球执教之旅</p>
       </div>
 
       <el-form
@@ -83,16 +73,12 @@
           </el-col>
         </el-row>
 
-        <div class="password-tips">
-          <el-text size="small" type="info"> 密码要求：8-16位，包含字母、数字和特殊字符 </el-text>
-        </div>
-
         <el-row :gutter="16">
           <el-col :span="8">
             <el-form-item label="性别" prop="gender">
               <el-select v-model="registerForm.gender" placeholder="请选择">
-                <el-option label="男" value="male" />
-                <el-option label="女" value="female" />
+                <el-option label="男" value="男" />
+                <el-option label="女" value="女" />
               </el-select>
             </el-form-item>
           </el-col>
@@ -101,7 +87,7 @@
               <el-input-number
                 v-model="registerForm.age"
                 :min="18"
-                :max="65"
+                :max="80"
                 placeholder="年龄"
                 style="width: 100%"
               />
@@ -121,46 +107,40 @@
           </el-col>
         </el-row>
 
-        <el-form-item label="邮箱（选填）" prop="email">
+        <el-form-item label="邮箱" prop="email">
           <el-input v-model="registerForm.email" placeholder="请输入邮箱地址" clearable />
         </el-form-item>
 
-        <el-form-item label="教练照片" prop="avatar">
-          <el-upload
-            ref="uploadRef"
-            class="avatar-uploader"
-            :show-file-list="false"
-            :before-upload="beforeUpload"
-            :on-success="handleUploadSuccess"
-            :on-error="handleUploadError"
-            action="/api/upload/avatar"
-            :headers="{ Authorization: `Bearer ${userStore.token}` }"
-          >
-            <img v-if="registerForm.avatar" :src="registerForm.avatar" class="avatar" />
-            <el-icon v-else class="avatar-uploader-icon">
-              <Plus />
-            </el-icon>
-            <template #tip>
-              <div class="upload-tip">点击上传照片，支持 jpg/png 格式，文件大小不超过 2MB</div>
-            </template>
-          </el-upload>
-        </el-form-item>
-
-        <el-form-item label="比赛成绩描述" prop="achievements">
-          <el-input
-            v-model="registerForm.achievements"
-            type="textarea"
-            :rows="4"
-            placeholder="请详细描述您的乒乓球比赛经历和获得的成绩，这将有助于学员了解您的教学水平"
-            maxlength="500"
-            show-word-limit
-          />
-        </el-form-item>
+        <!-- 教练专属信息 -->
+        <el-row :gutter="16">
+          <el-col :span="12">
+            <el-form-item label="课时费 (元/小时)" prop="hourlyRate">
+              <el-input-number
+                v-model="registerForm.hourlyRate"
+                :min="50"
+                :max="1000"
+                placeholder="请输入课时费"
+                style="width: 100%"
+              />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="最大带学生数" prop="maxStudents">
+              <el-input-number
+                v-model="registerForm.maxStudents"
+                :min="1"
+                :max="100"
+                placeholder="请输入最大带学生数"
+                style="width: 100%"
+              />
+            </el-form-item>
+          </el-col>
+        </el-row>
 
         <el-form-item>
           <el-checkbox v-model="registerForm.agreement">
             我已阅读并同意
-            <el-link type="primary">《教练员协议》</el-link>
+            <el-link type="primary">《用户协议》</el-link>
             和
             <el-link type="primary">《隐私政策》</el-link>
           </el-checkbox>
@@ -173,7 +153,7 @@
             :loading="loading"
             @click="handleRegister"
           >
-            提交申请
+            注册
           </el-button>
         </el-form-item>
       </el-form>
@@ -191,23 +171,15 @@ import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { ElMessage } from 'element-plus'
-import { Plus } from '@element-plus/icons-vue'
-import api from '@/utils/api'
+import { getCampusList } from '@/api/auth'
 
 const router = useRouter()
 const userStore = useUserStore()
 
-// 表单引用
 const registerFormRef = ref()
-const uploadRef = ref()
-
-// 加载状态
 const loading = ref(false)
-
-// 校区列表
 const campusList = ref([])
 
-// 注册表单数据
 const registerForm = reactive({
   username: '',
   realName: '',
@@ -218,160 +190,116 @@ const registerForm = reactive({
   age: null,
   campusId: '',
   email: '',
-  avatar: '',
-  achievements: '',
+  hourlyRate: null,
+  maxStudents: null,
   agreement: false,
 })
 
-// 密码验证函数
+// 校验函数（沿用学生注册）
 const validatePassword = (rule, value, callback) => {
-  if (!value) {
-    callback(new Error('请输入密码'))
-  } else if (value.length < 8 || value.length > 16) {
+  if (!value) callback(new Error('请输入密码'))
+  else if (value.length < 8 || value.length > 16)
     callback(new Error('密码长度在 8 到 16 个字符'))
-  } else if (!/^(?=.*[a-zA-Z])(?=.*\d)(?=.*[\W_]).{8,16}$/.test(value)) {
+  else if (!/^(?=.*[a-zA-Z])(?=.*\d)(?=.*[\W_]).{8,16}$/.test(value))
     callback(new Error('密码必须包含字母、数字和特殊字符'))
-  } else {
-    callback()
-  }
+  else callback()
 }
 
-// 确认密码验证函数
 const validateConfirmPassword = (rule, value, callback) => {
-  if (!value) {
-    callback(new Error('请确认密码'))
-  } else if (value !== registerForm.password) {
-    callback(new Error('两次输入密码不一致'))
-  } else {
-    callback()
-  }
+  if (!value) callback(new Error('请确认密码'))
+  else if (value !== registerForm.password) callback(new Error('两次输入密码不一致'))
+  else callback()
 }
 
-// 手机号验证函数
 const validatePhone = (rule, value, callback) => {
-  if (!value) {
-    callback(new Error('请输入手机号码'))
-  } else if (!/^1[3-9]\d{9}$/.test(value)) {
-    callback(new Error('请输入正确的手机号码'))
-  } else {
-    callback()
-  }
+  if (!value) callback(new Error('请输入手机号码'))
+  else if (!/^1[3-9]\d{9}$/.test(value)) callback(new Error('请输入正确的手机号码'))
+  else callback()
 }
 
-// 表单验证规则
 const registerRules = {
   username: [
     { required: true, message: '请输入用户名', trigger: 'blur' },
     { min: 3, max: 20, message: '用户名长度在 3 到 20 个字符', trigger: 'blur' },
     { pattern: /^[a-zA-Z0-9_]+$/, message: '用户名只能包含字母、数字和下划线', trigger: 'blur' },
   ],
-  realName: [
-    { required: true, message: '请输入真实姓名', trigger: 'blur' },
-    { min: 2, max: 10, message: '姓名长度在 2 到 10 个字符', trigger: 'blur' },
-  ],
+  realName: [{ required: true, message: '请输入真实姓名', trigger: 'blur' }],
   phone: [{ required: true, validator: validatePhone, trigger: 'blur' }],
   password: [{ required: true, validator: validatePassword, trigger: 'blur' }],
   confirmPassword: [{ required: true, validator: validateConfirmPassword, trigger: 'blur' }],
   campusId: [{ required: true, message: '请选择校区', trigger: 'change' }],
-  email: [{ type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' }],
-  achievements: [
-    { required: true, message: '请描述您的比赛成绩', trigger: 'blur' },
-    { min: 20, max: 500, message: '成绩描述在 20 到 500 个字符', trigger: 'blur' },
+  email: [
+    { required: true, message: '请输入邮箱地址', trigger: 'blur' },
+    { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' }
   ],
+  hourlyRate: [{ required: true, message: '请输入课时费', trigger: 'blur' }],
+  maxStudents: [{ required: true, message: '请输入最大带学生数', trigger: 'blur' }],
   agreement: [
     {
       validator: (rule, value, callback) => {
-        if (!value) {
-          callback(new Error('请阅读并同意教练员协议和隐私政策'))
-        } else {
-          callback()
-        }
+        if (!value) callback(new Error('请阅读并同意用户协议和隐私政策'))
+        else callback()
       },
       trigger: 'change',
     },
   ],
 }
 
-// 获取校区列表
+// 获取校区
 const fetchCampusList = async () => {
   try {
-    const response = await api.get('/campuses')
-    campusList.value = response.data || []
+    const data = await getCampusList()
+    campusList.value = data || []
   } catch (error) {
     console.error('获取校区列表失败:', error)
     ElMessage.error('获取校区列表失败')
   }
 }
 
-// 上传前检查
-const beforeUpload = (file) => {
-  const isImage = file.type === 'image/jpeg' || file.type === 'image/png'
-  const isLt2M = file.size / 1024 / 1024 < 2
-
-  if (!isImage) {
-    ElMessage.error('上传头像图片只能是 JPG 或 PNG 格式!')
-    return false
-  }
-  if (!isLt2M) {
-    ElMessage.error('上传头像图片大小不能超过 2MB!')
-    return false
-  }
-  return true
-}
-
-// 上传成功回调
-const handleUploadSuccess = (response) => {
-  registerForm.avatar = response.data.url
-  ElMessage.success('照片上传成功')
-}
-
-// 上传失败回调
-const handleUploadError = () => {
-  ElMessage.error('照片上传失败，请重试')
-}
-
-// 处理注册
+// 提交注册
 const handleRegister = async () => {
   if (!registerFormRef.value) return
-
   try {
     const valid = await registerFormRef.value.validate()
     if (!valid) return
-
     loading.value = true
 
     const registerData = {
-      username: registerForm.username,
-      realName: registerForm.realName,
-      phone: registerForm.phone,
-      password: registerForm.password,
+      username: registerForm.username.trim(),
+      plainPassword: registerForm.password,
+      realName: registerForm.realName.trim(),
       gender: registerForm.gender,
-      age: registerForm.age,
-      campusId: registerForm.campusId,
-      email: registerForm.email,
-      avatar: registerForm.avatar,
-      achievements: registerForm.achievements,
-      role: 'coach',
+      age: parseInt(registerForm.age),
+      phoneNumber: registerForm.phone.trim(),
+      email: registerForm.email.trim(),
+      campusId: parseInt(registerForm.campusId),
+      role: 'COACH',
+      status: 'ACTIVE',
+      coachInfo: {
+        hourlyRate: parseFloat(registerForm.hourlyRate),
+        balance: 0,
+        maxStudents: parseInt(registerForm.maxStudents),
+        currentStudents: 0,
+        isApproved: false,
+        approvedBy: -1
+      }
     }
 
+    console.log('发送到后端的教练注册数据:', JSON.stringify(registerData, null, 2))
     await userStore.register(registerData)
 
-    ElMessage.success('申请提交成功！请等待校区管理员审核')
+    ElMessage.success('注册成功！注册即生效，请登录')
     router.push('/login')
   } catch (error) {
     console.error('注册错误:', error)
-    ElMessage.error(error.message || '提交申请失败，请稍后重试')
+    ElMessage.error(error.message || '注册失败，请稍后重试')
   } finally {
     loading.value = false
   }
 }
 
-// 前往登录页面
-const goToLogin = () => {
-  router.push('/login')
-}
+const goToLogin = () => router.push('/login')
 
-// 组件挂载时获取校区列表
 onMounted(() => {
   fetchCampusList()
 })
@@ -385,11 +313,11 @@ onMounted(() => {
   justify-content: center;
   background: linear-gradient(
     135deg,
-    #ff6b6b 0%,
-    #feca57 25%,
-    #48dbfb 50%,
-    #0abde3 75%,
-    #006ba6 100%
+    #a8e6cf 0%,
+    #88d8c0 25%,
+    #7fcdcd 50%,
+    #7d6caa 75%,
+    #8b5a96 100%
   );
   position: relative;
   padding: 20px;
@@ -407,46 +335,52 @@ onMounted(() => {
   overflow: hidden;
 }
 
-/* 哨子装饰 */
-.whistle-decoration {
+/* 桌球台装饰 */
+.table-tennis-table {
   position: absolute;
-  top: 20%;
-  left: 15%;
-  font-size: 80px;
+  top: 60%;
+  right: -10%;
+  width: 400px;
+  height: 200px;
+  background: #4a6741;
+  border: 3px solid #fff;
+  border-radius: 10px;
   opacity: 0.1;
-  animation: swing 4s ease-in-out infinite;
-  transform-origin: top center;
+  transform: perspective(300px) rotateX(45deg) rotateY(-15deg);
+  animation: float 8s ease-in-out infinite;
 }
 
-/* 乒乓球拍装饰 */
-.paddle-decoration {
+.table-tennis-table::before {
+  content: '';
   position: absolute;
-  font-size: 100px;
-  opacity: 0.08;
-  animation: float 6s ease-in-out infinite;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #fff;
+  transform: translateY(-50%);
 }
 
-.paddle-1 {
-  top: 10%;
-  right: 20%;
-  animation-delay: 0s;
+.table-tennis-table::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  background: #fff;
+  transform: translateX(-50%);
 }
 
-.paddle-2 {
-  bottom: 20%;
+/* 学员图标装饰 */
+.student-icon {
+  position: absolute;
+  top: 15%;
   left: 10%;
-  animation-delay: 3s;
-  transform: rotate(180deg);
-}
-
-/* 奖杯装饰 */
-.trophy-decoration {
-  position: absolute;
-  bottom: 15%;
-  right: 15%;
   font-size: 120px;
-  opacity: 0.1;
-  animation: glow 3s ease-in-out infinite;
+  opacity: 0.08;
+  animation: rotate 20s linear infinite;
+  color: #fff;
 }
 
 /* 几何图形装饰 */
@@ -455,35 +389,35 @@ onMounted(() => {
   opacity: 0.1;
 }
 
-.geometric-shape:nth-child(5) {
-  top: 30%;
-  right: 10%;
-  width: 60px;
-  height: 60px;
-  background: #fff;
-  border-radius: 50%;
-  animation: float 5s ease-in-out infinite;
-}
-
-.geometric-shape:nth-child(6) {
-  top: 60%;
-  left: 5%;
+.geometric-shape:nth-child(1) {
+  top: 20%;
+  right: 15%;
   width: 80px;
   height: 80px;
   background: #fff;
-  transform: rotate(45deg);
-  animation: rotate 15s linear infinite;
+  border-radius: 50%;
+  animation: float 6s ease-in-out infinite;
 }
 
-.geometric-shape:nth-child(7) {
-  bottom: 40%;
-  right: 30%;
+.geometric-shape:nth-child(2) {
+  bottom: 25%;
+  left: 8%;
+  width: 60px;
+  height: 60px;
+  background: #fff;
+  transform: rotate(45deg);
+  animation: float 7s ease-in-out infinite reverse;
+}
+
+.geometric-shape:nth-child(3) {
+  top: 70%;
+  left: 20%;
   width: 0;
   height: 0;
-  border-left: 30px solid transparent;
-  border-right: 30px solid transparent;
-  border-bottom: 50px solid #fff;
-  animation: float 7s ease-in-out infinite reverse;
+  border-left: 40px solid transparent;
+  border-right: 40px solid transparent;
+  border-bottom: 70px solid #fff;
+  animation: float 5s ease-in-out infinite;
 }
 
 /* 艺术字装饰 */
@@ -519,14 +453,52 @@ onMounted(() => {
   -webkit-text-stroke: 0.5px rgba(255, 255, 255, 0.2);
 }
 
-/* 专业徽章装饰 */
-.professional-badge {
+.artistic-text {
   position: absolute;
-  top: 50%;
-  left: 8%;
-  font-size: 90px;
-  opacity: 0.08;
-  animation: pulse 3s ease-in-out infinite;
+  font-family: 'Arial Black', Arial, sans-serif;
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.05);
+  user-select: none;
+  z-index: 1;
+}
+
+.artistic-text.student {
+  top: 25%;
+  right: 5%;
+  font-size: 60px;
+  transform: rotate(-15deg);
+  animation: shimmer 4s ease-in-out infinite;
+}
+
+.artistic-text.register {
+  bottom: 15%;
+  left: 5%;
+  font-size: 48px;
+  transform: rotate(10deg);
+  animation: shimmer 4s ease-in-out infinite 2s;
+}
+
+/* 书本图标装饰 */
+.book-decoration {
+  position: absolute;
+  bottom: 30%;
+  right: 25%;
+  width: 60px;
+  height: 45px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+  animation: float 6s ease-in-out infinite 1s;
+}
+
+.book-decoration::before {
+  content: '';
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  right: 5px;
+  bottom: 5px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
 }
 
 /* 注册框样式 */
@@ -537,10 +509,10 @@ onMounted(() => {
   padding: 40px;
   border-radius: 20px;
   box-shadow:
-    0 25px 50px rgba(0, 0, 0, 0.15),
+    0 20px 40px rgba(0, 0, 0, 0.1),
     0 0 0 1px rgba(255, 255, 255, 0.1) inset;
   width: 100%;
-  max-width: 700px;
+  max-width: 600px;
   position: relative;
   z-index: 10;
   animation: slideInUp 0.8s ease-out;
@@ -553,9 +525,9 @@ onMounted(() => {
 }
 
 .register-title {
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 700;
-  background: linear-gradient(135deg, #ff6b6b, #feca57, #48dbfb);
+  background: linear-gradient(135deg, #667eea, #764ba2);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -581,73 +553,6 @@ onMounted(() => {
   animation: fadeInUp 0.8s ease-out 0.8s both;
 }
 
-.avatar-uploader {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.avatar-uploader :deep(.el-upload) {
-  border: 2px dashed #d9d9d9;
-  border-radius: 50%;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-  transition: all 0.3s;
-  width: 120px;
-  height: 120px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-}
-
-.avatar-uploader :deep(.el-upload:hover) {
-  border-color: #409eff;
-  box-shadow: 0 8px 25px rgba(64, 158, 255, 0.3);
-  transform: translateY(-2px);
-}
-
-.avatar {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.avatar-uploader-icon {
-  font-size: 28px;
-  color: #8c939d;
-  transition: color 0.3s;
-}
-
-.avatar-uploader :deep(.el-upload:hover) .avatar-uploader-icon {
-  color: #409eff;
-}
-
-.upload-tip {
-  margin-top: 10px;
-  font-size: 12px;
-  color: #666;
-  text-align: center;
-}
-
-.register-button {
-  width: 100%;
-  height: 45px;
-  font-size: 16px;
-  font-weight: 600;
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  border: none;
-  border-radius: 8px;
-  transition: all 0.3s;
-}
-
-.register-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-}
-
 /* 动画定义 */
 @keyframes float {
   0%,
@@ -656,22 +561,7 @@ onMounted(() => {
   }
 
   50% {
-    transform: translateY(-15px) rotate(3deg);
-  }
-}
-
-@keyframes swing {
-  0%,
-  100% {
-    transform: rotate(0deg);
-  }
-
-  25% {
-    transform: rotate(10deg);
-  }
-
-  75% {
-    transform: rotate(-10deg);
+    transform: translateY(-20px) rotate(5deg);
   }
 }
 
@@ -682,32 +572,6 @@ onMounted(() => {
 
   to {
     transform: rotate(360deg);
-  }
-}
-
-@keyframes glow {
-  0%,
-  100% {
-    opacity: 0.1;
-    transform: scale(1);
-  }
-
-  50% {
-    opacity: 0.15;
-    transform: scale(1.05);
-  }
-}
-
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 0.08;
-    transform: scale(1);
-  }
-
-  50% {
-    opacity: 0.15;
-    transform: scale(1.1);
   }
 }
 
@@ -758,28 +622,36 @@ onMounted(() => {
   }
 }
 
-/* 响应式设计 */
-@media (max-width: 768px) {
-  .register-container {
-    padding: 10px;
-  }
+.register-button {
+  width: 100%;
+  height: 44px;
+  font-size: 16px;
+  font-weight: 500;
+}
 
+.register-footer {
+  text-align: center;
+  padding-top: 20px;
+  border-top: 1px solid #e8e8e8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.register-footer p {
+  margin: 0;
+  font-size: 14px;
+  color: #666;
+}
+
+@media (max-width: 768px) {
   .register-box {
-    padding: 20px;
+    padding: 30px 20px;
   }
 
   .register-title {
-    font-size: 24px;
-  }
-
-  .artistic-text {
-    font-size: 40px !important;
-  }
-
-  .whistle-decoration,
-  .paddle-decoration,
-  .trophy-decoration {
-    font-size: 60px;
+    font-size: 20px;
   }
 }
 </style>

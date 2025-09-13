@@ -62,6 +62,7 @@
                 placeholder="请输入密码"
                 show-password
                 clearable
+                @input="handlePasswordChange"
               />
             </el-form-item>
           </el-col>
@@ -86,8 +87,8 @@
           <el-col :span="8">
             <el-form-item label="性别" prop="gender">
               <el-select v-model="registerForm.gender" placeholder="请选择">
-                <el-option label="男" value="male" />
-                <el-option label="女" value="female" />
+                <el-option label="男" value="男" />
+                <el-option label="女" value="女" />
               </el-select>
             </el-form-item>
           </el-col>
@@ -116,11 +117,11 @@
           </el-col>
         </el-row>
 
-        <el-form-item label="邮箱（选填）" prop="email">
+        <el-form-item label="邮箱" prop="email">
           <el-input v-model="registerForm.email" placeholder="请输入邮箱地址" clearable />
         </el-form-item>
 
-        <el-form-item>
+        <el-form-item prop="agreement">
           <el-checkbox v-model="registerForm.agreement">
             我已阅读并同意
             <el-link type="primary">《用户协议》</el-link>
@@ -132,7 +133,7 @@
         <el-form-item>
           <el-button
             type="primary"
-            class="register-button"
+            class="register-button btn-modern btn-primary btn-large"
             :loading="loading"
             @click="handleRegister"
           >
@@ -154,7 +155,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { ElMessage } from 'element-plus'
-import api from '@/utils/api'
+import { getCampusList } from '@/api/auth'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -206,6 +207,13 @@ const validateConfirmPassword = (rule, value, callback) => {
   }
 }
 
+// 密码改变时重新验证确认密码
+const handlePasswordChange = () => {
+  if (registerForm.confirmPassword && registerFormRef.value) {
+    registerFormRef.value.validateField('confirmPassword')
+  }
+}
+
 // 手机号验证函数
 const validatePhone = (rule, value, callback) => {
   if (!value) {
@@ -232,7 +240,10 @@ const registerRules = {
   password: [{ required: true, validator: validatePassword, trigger: 'blur' }],
   confirmPassword: [{ required: true, validator: validateConfirmPassword, trigger: 'blur' }],
   campusId: [{ required: true, message: '请选择校区', trigger: 'change' }],
-  email: [{ type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' }],
+  email: [
+    { required: true, message: '请输入邮箱地址', trigger: 'blur' },
+    { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' }
+  ],
   agreement: [
     {
       validator: (rule, value, callback) => {
@@ -242,7 +253,7 @@ const registerRules = {
           callback()
         }
       },
-      trigger: 'change',
+      trigger: ['change', 'blur'],
     },
   ],
 }
@@ -250,8 +261,8 @@ const registerRules = {
 // 获取校区列表
 const fetchCampusList = async () => {
   try {
-    const response = await api.get('/campuses')
-    campusList.value = response.data || []
+    const data = await getCampusList()
+    campusList.value = data || []
   } catch (error) {
     console.error('获取校区列表失败:', error)
     ElMessage.error('获取校区列表失败')
@@ -266,19 +277,34 @@ const handleRegister = async () => {
     const valid = await registerFormRef.value.validate()
     if (!valid) return
 
+    // 额外检查用户协议是否勾选
+    if (!registerForm.agreement) {
+      ElMessage.warning('请先阅读并同意用户协议和隐私政策')
+      return
+    }
+
     loading.value = true
 
+    // 根据后端API规范构造注册数据
     const registerData = {
-      username: registerForm.username,
-      realName: registerForm.realName,
-      phone: registerForm.phone,
-      password: registerForm.password,
+      username: registerForm.username.trim(),
+      plainPassword: registerForm.password,
+      realName: registerForm.realName.trim(),
       gender: registerForm.gender,
-      age: registerForm.age,
-      campusId: registerForm.campusId,
-      email: registerForm.email,
-      role: 'student',
+      age: parseInt(registerForm.age),
+      phoneNumber: registerForm.phone.trim(),
+      email: registerForm.email.trim(),
+      campusId: parseInt(registerForm.campusId),
+      role: 'STUDENT',
+      status: 'ACTIVE',
+      studentInfo: {
+        balance: 100.0,
+        maxCoach: 3,
+        currentCoach: 0
+      }
     }
+
+    console.log('发送到后端的注册数据:', JSON.stringify(registerData, null, 2))
 
     await userStore.register(registerData)
 
@@ -318,7 +344,7 @@ onMounted(() => {
     #8b5a96 100%
   );
   position: relative;
-  padding: 20px;
+  padding: var(--spacing-xl);
   overflow: hidden;
 }
 
@@ -501,14 +527,12 @@ onMounted(() => {
 
 /* 注册框样式 */
 .register-box {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 40px;
-  border-radius: 20px;
-  box-shadow:
-    0 20px 40px rgba(0, 0, 0, 0.1),
-    0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  background: var(--white-alpha-95);
+  backdrop-filter: var(--blur-xl);
+  border: 1px solid var(--white-alpha-20);
+  padding: var(--spacing-3xl);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-xl);
   width: 100%;
   max-width: 600px;
   position: relative;
@@ -518,36 +542,36 @@ onMounted(() => {
 
 .register-header {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: var(--spacing-3xl);
   position: relative;
 }
 
 .register-title {
-  font-size: 28px;
-  font-weight: 700;
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-bold);
   background: linear-gradient(135deg, #667eea, #764ba2);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin: 0 0 8px 0;
+  margin: 0 0 var(--spacing-sm) 0;
   animation: fadeInDown 0.8s ease-out 0.2s both;
 }
 
 .register-subtitle {
-  font-size: 15px;
+  font-size: var(--font-size-lg);
   color: #666;
   margin: 0;
   animation: fadeInDown 0.8s ease-out 0.4s both;
 }
 
 .register-form {
-  margin-bottom: 20px;
+  margin-bottom: var(--spacing-xl);
   animation: fadeInUp 0.8s ease-out 0.6s both;
 }
 
 .password-tips {
-  margin-top: -15px;
-  margin-bottom: 20px;
+  margin-top: calc(-1 * var(--spacing-lg));
+  margin-bottom: var(--spacing-xl);
   animation: fadeInUp 0.8s ease-out 0.8s both;
 }
 
@@ -623,33 +647,33 @@ onMounted(() => {
 .register-button {
   width: 100%;
   height: 44px;
-  font-size: 16px;
-  font-weight: 500;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
 }
 
 .register-footer {
   text-align: center;
-  padding-top: 20px;
+  padding-top: var(--spacing-xl);
   border-top: 1px solid #e8e8e8;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: var(--spacing-sm);
 }
 
 .register-footer p {
   margin: 0;
-  font-size: 14px;
+  font-size: var(--font-size-md);
   color: #666;
 }
 
 @media (max-width: 768px) {
   .register-box {
-    padding: 30px 20px;
+    padding: var(--spacing-3xl) var(--spacing-xl);
   }
 
   .register-title {
-    font-size: 20px;
+    font-size: var(--font-size-3xl);
   }
 }
 </style>

@@ -46,11 +46,10 @@
                 <el-icon>
                   <Camera />
                 </el-icon>
-                更换头像
+              
               </el-button>
             </el-upload>
           </div>
-
           <div class="user-info">
             <h3>{{ userInfo.name || '未设置姓名' }}</h3>
             <p class="user-role">{{ getRoleText() }}</p>
@@ -74,15 +73,66 @@
             </div>
           </div>
         </el-card>
+        <!-- 动态功能菜单卡片 -->
+        <el-card class="profile-card" style="margin-top: 16px;">
+          <template #header>
+            <span>功能菜单</span>
+          </template>
+          <el-menu class="profile-menu" :default-active="''" router>
+            <el-menu-item v-if="isStudent" index="/student/schedule">
+              <el-icon><Clock /></el-icon>
+              我的课表
+            </el-menu-item>
+            <el-menu-item v-if="isStudent" index="/student/recharge">
+              <el-icon><Wallet /></el-icon>
+              账户管理
+            </el-menu-item>
+            <el-menu-item v-if="isStudent" index="/student/matches">
+              <el-icon><Medal /></el-icon>
+              我的比赛
+            </el-menu-item>
+            <el-menu-item v-if="isStudent" index="/student/evaluation">
+              <el-icon><EditPen /></el-icon>
+              训练评价
+            </el-menu-item>
+            <el-menu-item v-if="isCoach" index="/coach/schedule">
+              <el-icon><Clock /></el-icon>
+              我的课表
+            </el-menu-item>
+            <el-menu-item v-if="isCoach" index="/coach/evaluation">
+              <el-icon><EditPen /></el-icon>
+              学员评价
+            </el-menu-item>
+            <el-menu-item v-if="isCampusAdmin" index="/campus/students">
+              <el-icon><User /></el-icon>
+              学员管理
+            </el-menu-item>
+            <el-menu-item v-if="isCampusAdmin" index="/campus/coaches">
+              <el-icon><Avatar /></el-icon>
+              教练管理
+            </el-menu-item>
+            <el-menu-item v-if="isSuperAdmin" index="/admin/campus">
+              <el-icon><OfficeBuilding /></el-icon>
+              校区管理
+            </el-menu-item>
+            <el-menu-item v-if="isSuperAdmin" index="/admin/service">
+              <el-icon><CreditCard /></el-icon>
+              服务状态
+            </el-menu-item>
+            <!-- 通用功能 -->
+            <el-menu-item index="/messages">
+              <el-icon><Document /></el-icon>
+              消息通知
+            </el-menu-item>
+          </el-menu>
+        </el-card>
       </el-col>
-
       <el-col :span="16">
         <!-- 个人信息编辑 -->
         <el-card class="profile-card">
           <template #header>
             <span>个人信息</span>
           </template>
-
           <el-form
             ref="profileFormRef"
             :model="profileForm"
@@ -105,7 +155,6 @@
                 </el-form-item>
               </el-col>
             </el-row>
-
             <el-row :gutter="16">
               <el-col :span="12">
                 <el-form-item label="年龄" prop="age">
@@ -123,11 +172,9 @@
                 </el-form-item>
               </el-col>
             </el-row>
-
             <el-form-item label="邮箱地址" prop="email">
               <el-input v-model="profileForm.email" />
             </el-form-item>
-
             <el-form-item>
               <el-button type="primary" @click="updateProfile" :loading="updating">
                 保存修改
@@ -136,13 +183,11 @@
             </el-form-item>
           </el-form>
         </el-card>
-
         <!-- 修改密码 -->
         <el-card class="profile-card">
           <template #header>
             <span>修改密码</span>
           </template>
-
           <el-form
             ref="passwordFormRef"
             :model="passwordForm"
@@ -153,21 +198,29 @@
             <el-form-item label="当前密码" prop="oldPassword">
               <el-input v-model="passwordForm.oldPassword" type="password" show-password />
             </el-form-item>
-
             <el-form-item label="新密码" prop="newPassword">
               <el-input v-model="passwordForm.newPassword" type="password" show-password />
             </el-form-item>
-
             <el-form-item label="确认密码" prop="confirmPassword">
               <el-input v-model="passwordForm.confirmPassword" type="password" show-password />
             </el-form-item>
-
             <el-form-item>
               <el-button type="primary" @click="changePassword" :loading="changingPassword">
                 修改密码
               </el-button>
             </el-form-item>
           </el-form>
+        </el-card>
+        <!-- 操作日志卡片 -->
+        <el-card class="profile-card" style="margin-top: 16px;">
+          <template #header>
+            <span>操作日志</span>
+          </template>
+          <el-table :data="operationLogs" style="width: 100%">
+            <el-table-column prop="time" label="时间" width="160" />
+            <el-table-column prop="action" label="操作" />
+            <el-table-column prop="result" label="结果" width="100" />
+          </el-table>
         </el-card>
       </el-col>
     </el-row>
@@ -178,7 +231,22 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useUserStore } from '@/stores/user'
 import { ElMessage } from 'element-plus'
-import { User, Camera } from '@element-plus/icons-vue'
+import {
+  User, Camera, Clock, Wallet, Medal, EditPen, Avatar, OfficeBuilding, CreditCard, Document
+} from '@element-plus/icons-vue'
+
+// 角色判断
+const isStudent = computed(() => userInfo.value.role === 'student')
+const isCoach = computed(() => userInfo.value.role === 'coach')
+const isCampusAdmin = computed(() => userInfo.value.role === 'campus_admin')
+const isSuperAdmin = computed(() => userInfo.value.role === 'super_admin')
+
+// 操作日志（示例数据，实际应从后端获取）
+const operationLogs = ref([
+  { time: '2025-09-09 10:01', action: '修改个人信息', result: '成功' },
+  { time: '2025-09-08 15:23', action: '预约课程', result: '成功' },
+  { time: '2025-09-07 09:10', action: '修改密码', result: '成功' },
+])
 
 const userStore = useUserStore()
 
