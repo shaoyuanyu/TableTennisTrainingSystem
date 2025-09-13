@@ -1,11 +1,24 @@
 <script setup>
 import { RouterView } from 'vue-router'
+import { onMounted } from 'vue'
+import { useUserStore } from '@/stores/user'
+
+const userStore = useUserStore()
+
+// 应用启动时初始化认证状态
+onMounted(() => {
+  if (import.meta.env.DEV) {
+    console.log('应用启动，当前认证状态:', {
+      isLoggedIn: userStore.isLoggedIn,
+      userRole: userStore.userRole,
+      hasUserInfo: !!userStore.userInfo.id
+    })
+  }
+})
 </script>
 
 <template>
-  <div id="app">
-    <RouterView />
-  </div>
+  <router-view />
 </template>
 
 <style>

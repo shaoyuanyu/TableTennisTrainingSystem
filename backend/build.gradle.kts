@@ -32,6 +32,8 @@ dependencies {
     implementation("io.ktor:ktor-server-sessions:${ktor_version}")
     implementation("io.ktor:ktor-server-openapi:${ktor_version}")
     implementation("io.ktor:ktor-server-swagger:${ktor_version}")
+    implementation("io.ktor:ktor-server-status-pages:${ktor_version}")
+    implementation("io.ktor:ktor-server-call-logging:${ktor_version}")
     testImplementation("io.ktor:ktor-server-test-host:${ktor_version}")
 
     // kotlinx

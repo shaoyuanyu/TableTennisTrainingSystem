@@ -1,23 +1,22 @@
 package io.github.shaoyuanyu.ttts.persistence.coach
 
+import io.github.shaoyuanyu.ttts.persistence.user.UserEntity
 import org.jetbrains.exposed.v1.core.dao.id.EntityID
-import org.jetbrains.exposed.v1.dao.UUIDEntity
-import org.jetbrains.exposed.v1.dao.UUIDEntityClass
+import org.jetbrains.exposed.v1.dao.Entity
+import org.jetbrains.exposed.v1.dao.EntityClass
 import java.util.UUID
 
-class CoachEntity(uuid: EntityID<UUID>) : UUIDEntity(uuid) {
-    companion object : UUIDEntityClass<CoachEntity>(CoachTable)
+class CoachEntity(id: EntityID<UUID>) : Entity<UUID>(id) {
+    companion object : EntityClass<UUID, CoachEntity>(CoachTable)
 
-    var username by CoachTable.username
-    var photo_url by CoachTable.photo_url
+    var userId by UserEntity referencedOn CoachTable.id
+    var photoUrl by CoachTable.photo_url
     var achievements by CoachTable.achievements
-    var level_ by CoachTable.level_
-    var hourly_rate by CoachTable.hourly_rate
-    var max_students by CoachTable.max_students
-    var current_students by CoachTable.current_students
-    var is_approved by CoachTable.is_approved
-    var approved_by by CoachTable.approved_by
-    var created_at by CoachTable.created_at
-    var last_login_at by CoachTable.last_login_at
-
+    var level by CoachTable.level
+    var hourlyRate by CoachTable.hourly_rate
+    var balance by CoachTable.balance
+    var maxStudents by CoachTable.max_students
+    var currentStudents by CoachTable.current_students
+    var isApproved by CoachTable.is_approved
+    var approvedBy by CoachTable.approved_by
 }

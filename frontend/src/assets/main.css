@@ -1,4 +1,5 @@
 @import './base.css';
+@import '../styles/design-system.css';
 
 /* 管理系统全局样式 */
 html,
@@ -9,7 +10,27 @@ body {
   font-family:
     -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB',
     'Microsoft YaHei', sans-serif;
-  background-color: #f0f2f5;
+  background: linear-gradient(135deg, 
+    #667eea 0%, 
+    #764ba2 25%, 
+    #f093fb 50%, 
+    #f5576c 75%, 
+    #4facfe 100%);
+  background-size: 300% 300%;
+  animation: gradientShift 8s ease infinite;
+  background-attachment: fixed;
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 #app {
@@ -18,6 +39,7 @@ body {
   padding: 0;
   max-width: none;
   font-weight: normal;
+  background: transparent;
 }
 
 /* 链接样式 */

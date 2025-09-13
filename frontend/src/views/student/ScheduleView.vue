@@ -1,34 +1,38 @@
 <template>
-  <div class="schedule-view">
-    <div class="schedule-header">
-      <h2>我的课表</h2>
-      <div class="schedule-controls">
+  <div class="schedule-view ultra">
+    <div class="schedule-header ultra">
+      <h2><span class="schedule-icon">🏓</span> 我的课表</h2>
+      <div class="schedule-controls ultra">
         <el-button-group>
           <el-button
             :type="currentView === 'week' ? 'primary' : 'default'"
             @click="setView('week')"
+            class="header-btn ultra-btn"
           >
-            周视图
+            <span class="btn-icon">📅</span> 周视图
           </el-button>
           <el-button
             :type="currentView === 'month' ? 'primary' : 'default'"
             @click="setView('month')"
+            class="header-btn ultra-btn"
           >
-            月视图
+            <span class="btn-icon">🗓️</span> 月视图
           </el-button>
         </el-button-group>
-        <div class="date-navigation">
-          <el-button :icon="ArrowLeft" @click="previousPeriod" circle />
-          <span class="current-period">{{ currentPeriodText }}</span>
-          <el-button :icon="ArrowRight" @click="nextPeriod" circle />
-          <el-button @click="goToToday">今天</el-button>
+        <div class="date-navigation ultra">
+          <el-button :icon="ArrowLeft" @click="previousPeriod" circle class="nav-btn ultra-btn" />
+          <span class="current-period ultra">{{ currentPeriodText }}</span>
+          <el-button :icon="ArrowRight" @click="nextPeriod" circle class="nav-btn ultra-btn" />
+          <el-button @click="goToToday" class="today-btn ultra-btn">
+            <span class="btn-icon">⭐</span> 今天
+          </el-button>
         </div>
       </div>
     </div>
 
     <!-- 周视图 -->
-    <div v-if="currentView === 'week'" class="week-view">
-      <div class="week-header">
+    <div v-if="currentView === 'week'" class="week-view ultra">
+      <div class="week-header ultra">
         <div class="time-column">时间</div>
         <div
           v-for="day in weekDays"
@@ -52,13 +56,13 @@
             <div
               v-for="schedule in getSchedulesForDayAndHour(day.date, hour)"
               :key="schedule.id"
-              class="schedule-item"
+              class="schedule-item ultra"
               :class="getScheduleClass(schedule)"
               @click.stop="handleScheduleClick(schedule)"
             >
               <div class="schedule-title">{{ schedule.title }}</div>
-              <div class="schedule-coach">{{ schedule.coach }}</div>
-              <div class="schedule-location">{{ schedule.location }}</div>
+              <div class="schedule-coach"><span class="field-icon">🧑‍🏫</span>{{ schedule.coach }}</div>
+              <div class="schedule-location"><span class="field-icon">📍</span>{{ schedule.location }}</div>
             </div>
           </div>
         </div>
@@ -66,8 +70,8 @@
     </div>
 
     <!-- 月视图 -->
-    <div v-if="currentView === 'month'" class="month-view">
-      <div class="month-header">
+    <div v-if="currentView === 'month'" class="month-view ultra">
+      <div class="month-header ultra">
         <div v-for="dayName in weekDayNames" :key="dayName" class="month-day-header">
           {{ dayName }}
         </div>
@@ -85,18 +89,19 @@
             }"
             @click="handleDayClick(day)"
           >
-            <div v-if="day" class="day-number">{{ day.dayNumber }}</div>
-            <div v-if="day" class="day-schedules">
+            <div v-if="day" class="day-number ultra">{{ day.dayNumber }}</div>
+            <div v-if="day" class="day-schedules ultra">
               <div
                 v-for="schedule in getSchedulesForDay(day.date).slice(0, 3)"
                 :key="schedule.id"
-                class="month-schedule-item"
+                class="month-schedule-item ultra"
                 :class="getScheduleClass(schedule)"
                 @click.stop="handleScheduleClick(schedule)"
+                :title="schedule.title"
               >
-                {{ schedule.title }}
+                <span class="dot-icon">●</span> {{ schedule.title }}
               </div>
-              <div v-if="getSchedulesForDay(day.date).length > 3" class="more-schedules">
+              <div v-if="getSchedulesForDay(day.date).length > 3" class="more-schedules ultra">
                 +{{ getSchedulesForDay(day.date).length - 3 }} 更多
               </div>
             </div>
@@ -106,45 +111,45 @@
     </div>
 
     <!-- 课程详情对话框 -->
-    <el-dialog v-model="showScheduleDialog" title="课程详情" width="500px">
-      <div v-if="selectedSchedule" class="schedule-detail">
+    <el-dialog v-model="showScheduleDialog" title="课程详情" width="500px" class="ultra-dialog">
+      <div v-if="selectedSchedule" class="schedule-detail ultra">
         <el-descriptions :column="1" border>
           <el-descriptions-item label="课程名称">
-            {{ selectedSchedule.title }}
+            <span class="field-icon">🏓</span> {{ selectedSchedule.title }}
           </el-descriptions-item>
           <el-descriptions-item label="教练">
-            {{ selectedSchedule.coach }}
+            <span class="field-icon">🧑‍🏫</span> {{ selectedSchedule.coach }}
           </el-descriptions-item>
           <el-descriptions-item label="上课时间">
-            {{ formatScheduleTime(selectedSchedule) }}
+            <span class="field-icon">⏰</span> {{ formatScheduleTime(selectedSchedule) }}
           </el-descriptions-item>
           <el-descriptions-item label="上课地点">
-            {{ selectedSchedule.location }}
+            <span class="field-icon">📍</span> {{ selectedSchedule.location }}
           </el-descriptions-item>
           <el-descriptions-item label="课程类型">
             <el-tag :type="getScheduleTagType(selectedSchedule.type)">
-              {{ getScheduleTypeName(selectedSchedule.type) }}
+              <span class="field-icon">🏷️</span> {{ getScheduleTypeName(selectedSchedule.type) }}
             </el-tag>
           </el-descriptions-item>
           <el-descriptions-item label="课程状态">
             <el-tag :type="getStatusTagType(selectedSchedule.status)">
-              {{ getStatusName(selectedSchedule.status) }}
+              <span class="field-icon">🔖</span> {{ getStatusName(selectedSchedule.status) }}
             </el-tag>
           </el-descriptions-item>
           <el-descriptions-item v-if="selectedSchedule.description" label="课程描述">
-            {{ selectedSchedule.description }}
+            <span class="field-icon">📝</span> {{ selectedSchedule.description }}
           </el-descriptions-item>
         </el-descriptions>
       </div>
       <template #footer>
-        <span class="dialog-footer">
+        <span class="dialog-footer ultra">
           <el-button @click="showScheduleDialog = false">关闭</el-button>
           <el-button
             v-if="selectedSchedule?.status === 'confirmed' && canCancelSchedule(selectedSchedule)"
             type="danger"
             @click="cancelSchedule"
           >
-            取消课程
+            <span class="field-icon">❌</span> 取消课程
           </el-button>
         </span>
       </template>
@@ -155,6 +160,7 @@
       v-loading="loading"
       element-loading-text="加载课表数据..."
       element-loading-spinner="el-icon-loading"
+      class="ultra-loading"
     />
   </div>
 </template>
@@ -192,21 +198,25 @@ const timeSlots = [
   '21:00',
 ]
 
-const weekDayNames = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
+// 顺序改为周一到周日
+const weekDayNames = ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
 
 // 计算属性
 const currentPeriodText = computed(() => {
   if (currentView.value === 'week') {
-    const weekStart = currentDate.value.startOf('week')
-    const weekEnd = currentDate.value.endOf('week')
+    const weekStart = currentDate.value.startOf('week').add(1, 'day')
+    const weekEnd = weekStart.add(6, 'day')
     return `${weekStart.format('YYYY年MM月DD日')} - ${weekEnd.format('MM月DD日')}`
   } else {
     return currentDate.value.format('YYYY年MM月')
   }
 })
 
+// 以周一开始
 const weekDays = computed(() => {
-  const weekStart = currentDate.value.startOf('week')
+  // element官方 dayjs 的 startOf('week') 默认为周日
+  // 所以我们需要调整为周一
+  let weekStart = currentDate.value.startOf('week').add(1, 'day')
   const days = []
   for (let i = 0; i < 7; i++) {
     const day = weekStart.add(i, 'day')
@@ -220,16 +230,20 @@ const weekDays = computed(() => {
   return days
 })
 
+// 月视图顺序也调整为周一到周日
 const monthWeeks = computed(() => {
   const monthStart = currentDate.value.startOf('month')
   const monthEnd = currentDate.value.endOf('month')
-  const calendarStart = monthStart.startOf('week')
-  const calendarEnd = monthEnd.endOf('week')
+
+  // 让日历从周一开始，日历头部也从周一开始
+  // dayjs的startOf('week')是周日，需要+1天
+  const calendarStart = monthStart.startOf('week').add(1, 'day')
+  const calendarEnd = monthEnd.endOf('week').add(1, 'day')
 
   const weeks = []
   let currentWeekStart = calendarStart
 
-  while (currentWeekStart.isBefore(calendarEnd) || currentWeekStart.isSame(calendarEnd, 'day')) {
+  while (currentWeekStart.isBefore(calendarEnd)) {
     const week = []
     for (let i = 0; i < 7; i++) {
       const day = currentWeekStart.add(i, 'day')
@@ -241,7 +255,7 @@ const monthWeeks = computed(() => {
       })
     }
     weeks.push(week)
-    currentWeekStart = currentWeekStart.add(1, 'week')
+    currentWeekStart = currentWeekStart.add(7, 'day')
   }
 
   return weeks
@@ -391,8 +405,9 @@ const fetchSchedules = async () => {
 
     let startDate, endDate
     if (currentView.value === 'week') {
-      startDate = currentDate.value.startOf('week').format('YYYY-MM-DD')
-      endDate = currentDate.value.endOf('week').format('YYYY-MM-DD')
+      // 以周一为开始
+      startDate = currentDate.value.startOf('week').add(1, 'day').format('YYYY-MM-DD')
+      endDate = currentDate.value.startOf('week').add(7, 'day').format('YYYY-MM-DD')
     } else {
       startDate = currentDate.value.startOf('month').format('YYYY-MM-DD')
       endDate = currentDate.value.endOf('month').format('YYYY-MM-DD')
@@ -475,18 +490,21 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.schedule-view {
-  padding: 20px;
-  background: #f5f5f5;
+.schedule-view.ultra {
   min-height: 100vh;
+  padding: var(--spacing-2xl);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  font-family: var(--font-family-base);
 }
 
-.schedule-header {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+.schedule-header.ultra {
+  background: var(--white-alpha-20);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--white-alpha-20);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-xl);
+  margin-bottom: var(--spacing-2xl);
+  box-shadow: var(--shadow-lg);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -494,70 +512,145 @@ onMounted(() => {
 
 .schedule-header h2 {
   margin: 0;
-  color: #333;
-}
-
-.schedule-controls {
+  color: var(--text-white);
+  font-size: 2rem;
+  font-weight: 600;
   display: flex;
   align-items: center;
-  gap: 20px;
+}
+.schedule-icon {
+  font-size: 1.8rem;
+  margin-right: var(--spacing-sm);
+  vertical-align: middle;
 }
 
-.date-navigation {
+.schedule-controls.ultra {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: var(--spacing-lg);
 }
 
-.current-period {
+.header-btn.ultra-btn {
+  background: var(--white-alpha-20);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--white-alpha-30);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-sm) var(--spacing-md);
+  color: var(--text-white);
   font-weight: 500;
-  color: #333;
+  transition: all var(--transition-normal);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+.header-btn.ultra-btn .btn-icon {
+  font-size: 1.2em;
+}
+.today-btn.ultra-btn {
+  background: var(--gradient-primary);
+  color: var(--text-white) !important;
+  border: 1px solid var(--white-alpha-30);
+  border-radius: var(--radius-full);
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-weight: 600;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+.today-btn.ultra-btn .btn-icon {
+  font-size: 1.2em;
+}
+
+.today-btn.ultra-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-xl);
+}
+
+.nav-btn.ultra-btn {
+  background: var(--white-alpha-20);
+  backdrop-filter: blur(10px);
+  color: var(--text-white);
+  border: 1px solid var(--white-alpha-30);
+  border-radius: 50% !important;
+  box-shadow: var(--shadow-md);
+}
+
+.date-navigation.ultra {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  background: var(--white-alpha-10);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--white-alpha-20);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.current-period.ultra {
+  font-weight: 600;
+  color: var(--text-white);
   min-width: 200px;
   text-align: center;
+  font-size: 1.1rem;
+  background: var(--white-alpha-20);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--white-alpha-30);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
 }
 
-/* 周视图样式 */
-.week-view {
-  background: white;
-  border-radius: 8px;
+.week-view.ultra, .month-view.ultra {
+  background: var(--white-alpha-10);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--white-alpha-20);
+  border-radius: var(--radius-xl);
   overflow: hidden;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-lg);
 }
 
-.week-header {
+.week-header.ultra {
   display: grid;
-  grid-template-columns: 80px repeat(7, 1fr);
-  background: #f8f9fa;
-  border-bottom: 1px solid #e0e0e0;
+  grid-template-columns: 100px repeat(7, 1fr);
+  background: var(--white-alpha-20);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--white-alpha-30);
 }
 
 .time-column {
-  padding: 15px 10px;
-  font-weight: 500;
+  padding: var(--spacing-md);
+  font-weight: 600;
   text-align: center;
-  border-right: 1px solid #e0e0e0;
-  background: #f8f9fa;
+  border-right: 1px solid var(--white-alpha-30);
+  background: var(--white-alpha-10);
+  color: var(--text-white-80);
 }
 
 .day-header {
-  padding: 15px;
+  padding: var(--spacing-md) 0;
   text-align: center;
-  border-right: 1px solid #e0e0e0;
+  border-right: 1px solid var(--white-alpha-30);
+  color: var(--text-white-80);
+  transition: all var(--transition-normal);
 }
 
 .day-header.is-today {
-  background: #e3f2fd;
-  color: #1976d2;
+  background: var(--gradient-primary);
+  color: var(--text-white);
+  box-shadow: var(--shadow-md);
 }
 
 .day-name {
-  font-weight: 500;
-  margin-bottom: 5px;
+  font-weight: 600;
+  margin-bottom: var(--spacing-xs);
+  font-size: 1rem;
 }
 
 .day-date {
-  font-size: 20px;
-  font-weight: 600;
+  font-size: 1.2rem;
+  font-weight: 700;
 }
 
 .week-body {
@@ -567,96 +660,94 @@ onMounted(() => {
 
 .time-row {
   display: grid;
-  grid-template-columns: 80px repeat(7, 1fr);
-  border-bottom: 1px solid #e0e0e0;
-  min-height: 60px;
+  grid-template-columns: 100px repeat(7, 1fr);
+  border-bottom: 1px solid var(--white-alpha-20);
+  min-height: 64px;
 }
 
 .day-cell {
-  border-right: 1px solid #e0e0e0;
-  padding: 5px;
+  border-right: 1px solid var(--white-alpha-20);
+  padding: var(--spacing-xs);
   position: relative;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all var(--transition-normal);
 }
 
 .day-cell:hover {
-  background: #f5f5f5;
+  background: var(--white-alpha-10);
 }
 
-.schedule-item {
-  background: #2196f3;
-  color: white;
-  padding: 4px 8px;
-  border-radius: 4px;
-  margin-bottom: 2px;
-  font-size: 12px;
+.schedule-item.ultra {
+  background: var(--gradient-primary);
+  color: var(--text-white);
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-xs);
+  font-size: 0.875rem;
   cursor: pointer;
-  transition: all 0.2s;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--white-alpha-30);
+  backdrop-filter: blur(10px);
+  transition: all var(--transition-normal);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  align-items: flex-start;
 }
-
-.schedule-item:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+.schedule-item.ultra .field-icon {
+  font-size: 1em;
+  margin-right: var(--spacing-xs);
+  vertical-align: middle;
 }
-
-.schedule-item.schedule-individual {
-  background: #2196f3;
+.schedule-item.ultra .schedule-title {
+  font-weight: 600;
+  margin-bottom: var(--spacing-xs);
+  font-size: 0.875rem;
 }
-
-.schedule-item.schedule-group {
-  background: #4caf50;
-}
-
-.schedule-item.schedule-match {
-  background: #ff9800;
-}
-
-.schedule-item.schedule-tournament {
-  background: #f44336;
-}
-
-.schedule-item.status-pending {
-  opacity: 0.7;
-  border: 2px dashed rgba(255, 255, 255, 0.5);
-}
-
-.schedule-item.status-cancelled {
-  background: #9e9e9e;
-  text-decoration: line-through;
-}
-
-.schedule-title {
-  font-weight: 500;
-  margin-bottom: 2px;
-}
-
-.schedule-coach,
-.schedule-location {
-  font-size: 10px;
+.schedule-item.ultra .schedule-coach,
+.schedule-item.ultra .schedule-location {
+  font-size: 0.75rem;
   opacity: 0.9;
+  margin-top: 2px;
+  font-weight: 400;
+}
+.schedule-item.ultra.schedule-individual {
+  background: var(--gradient-primary);
+}
+.schedule-item.ultra.schedule-group {
+  background: var(--gradient-success);
+}
+.schedule-item.ultra.schedule-match {
+  background: var(--gradient-warning);
+}
+.schedule-item.ultra.schedule-tournament {
+  background: var(--gradient-danger);
+}
+.schedule-item.ultra.status-pending {
+  opacity: 0.7;
+  border: 1px dashed var(--white-alpha-50);
+}
+.schedule-item.ultra.status-cancelled {
+  background: var(--color-gray-500);
+  text-decoration: line-through;
+  opacity: 0.6;
 }
 
-/* 月视图样式 */
-.month-view {
-  background: white;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-}
-
-.month-header {
+.month-header.ultra {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  background: #f8f9fa;
-  border-bottom: 1px solid #e0e0e0;
+  background: var(--white-alpha-20);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--white-alpha-30);
 }
 
 .month-day-header {
-  padding: 15px;
+  padding: var(--spacing-md) 0;
   text-align: center;
-  font-weight: 500;
-  border-right: 1px solid #e0e0e0;
+  font-weight: 600;
+  border-right: 1px solid var(--white-alpha-30);
+  color: var(--text-white-80);
+  font-size: 1rem;
 }
 
 .month-body {
@@ -667,148 +758,207 @@ onMounted(() => {
 .month-week {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--white-alpha-20);
 }
 
 .month-day {
   min-height: 120px;
-  padding: 8px;
-  border-right: 1px solid #e0e0e0;
+  padding: var(--spacing-sm);
+  border-right: 1px solid var(--white-alpha-20);
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all var(--transition-normal);
   position: relative;
 }
 
 .month-day:hover {
-  background: #f5f5f5;
+  background: var(--white-alpha-10);
+  box-shadow: var(--shadow-sm);
 }
 
 .month-day.is-today {
-  background: #e3f2fd;
+  background: var(--gradient-primary);
+  border: 2px solid var(--white-alpha-50);
+  box-shadow: var(--shadow-lg);
 }
 
 .month-day.is-other-month {
-  color: #bbb;
-  background: #fafafa;
+  color: var(--text-white-40);
+  opacity: 0.5;
 }
 
-.month-day.has-schedules .day-number {
+.month-day.has-schedules .day-number.ultra {
+  font-weight: 700;
+  color: var(--text-white);
+}
+
+.day-number.ultra {
+  font-size: 1.125rem;
+  margin-bottom: var(--spacing-xs);
   font-weight: 600;
+  color: var(--text-white-80);
 }
 
-.day-number {
-  font-size: 16px;
-  margin-bottom: 5px;
-}
-
-.day-schedules {
+.day-schedules.ultra {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--spacing-xs);
 }
 
-.month-schedule-item {
-  background: #2196f3;
-  color: white;
-  padding: 2px 6px;
-  border-radius: 3px;
-  font-size: 11px;
+.month-schedule-item.ultra {
+  background: var(--gradient-primary);
+  color: var(--text-white);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--transition-normal);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  border: 1px solid var(--white-alpha-30);
+  backdrop-filter: blur(10px);
+  margin-bottom: 2px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
 }
-
-.month-schedule-item:hover {
-  transform: scale(1.02);
+.month-schedule-item.ultra .dot-icon {
+  color: var(--text-white);
+  font-size: 1.2em;
 }
-
-.month-schedule-item.schedule-group {
-  background: #4caf50;
+.month-schedule-item.ultra.schedule-group {
+  background: var(--gradient-success);
 }
-
-.month-schedule-item.schedule-match {
-  background: #ff9800;
+.month-schedule-item.ultra.schedule-match {
+  background: var(--gradient-warning);
 }
-
-.month-schedule-item.schedule-tournament {
-  background: #f44336;
+.month-schedule-item.ultra.schedule-tournament {
+  background: var(--gradient-danger);
 }
-
-.more-schedules {
-  font-size: 10px;
-  color: #666;
+.more-schedules.ultra {
+  font-size: 0.75rem;
+  color: var(--text-white-80);
   text-align: center;
   margin-top: 2px;
+  font-weight: 600;
+  background: var(--white-alpha-20);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--white-alpha-30);
+  border-radius: var(--radius-sm);
+  padding: 2px 0;
 }
 
-/* 对话框样式 */
-.schedule-detail {
-  padding: 10px 0;
+.schedule-detail.ultra {
+  padding: var(--spacing-lg) 0 var(--spacing-sm) 0;
+  background: var(--white-alpha-10);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--white-alpha-20);
+  border-radius: var(--radius-lg);
+}
+.schedule-detail.ultra .field-icon {
+  font-size: 1.1em;
+  margin-right: var(--spacing-xs);
+  vertical-align: middle;
 }
 
-.dialog-footer {
+.ultra-dialog ::deep(.el-dialog__body) {
+  background: var(--white-alpha-20);
+  backdrop-filter: blur(20px);
+  padding: var(--spacing-xl);
+  border-radius: var(--radius-lg);
+}
+
+.dialog-footer.ultra {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
+  gap: var(--spacing-md);
+  padding-top: var(--spacing-md);
 }
 
-/* 响应式设计 */
+.ultra-loading {
+  z-index: 9999;
+}
+
+/* 响应式优化 */
 @media (max-width: 768px) {
-  .schedule-header {
+  .schedule-view.ultra {
+    padding: var(--spacing-lg);
+  }
+  
+  .schedule-header.ultra {
     flex-direction: column;
-    gap: 15px;
+    gap: var(--spacing-md);
     align-items: stretch;
+    padding: var(--spacing-lg);
   }
 
-  .schedule-controls {
+  .schedule-controls.ultra {
     flex-direction: column;
-    gap: 15px;
+    gap: var(--spacing-md);
   }
 
-  .date-navigation {
+  .date-navigation.ultra {
     justify-content: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm);
   }
 
-  .current-period {
+  .current-period.ultra {
     min-width: auto;
+    font-size: 1rem;
+    padding: var(--spacing-xs);
   }
 
-  .week-header,
+  .week-header.ultra,
   .time-row {
-    grid-template-columns: 60px repeat(7, 1fr);
+    grid-template-columns: 64px repeat(7, 1fr);
   }
 
   .time-column {
-    padding: 10px 5px;
-    font-size: 12px;
+    padding: var(--spacing-xs);
+    font-size: 0.75rem;
   }
 
   .day-header {
-    padding: 10px 5px;
+    padding: var(--spacing-xs);
+    font-size: 0.875rem;
   }
 
   .day-name {
-    font-size: 12px;
+    font-size: 0.75rem;
   }
 
   .day-date {
-    font-size: 16px;
+    font-size: 0.9375rem;
   }
 
   .month-day {
-    min-height: 80px;
-    padding: 4px;
+    min-height: 78px;
+    padding: var(--spacing-xs);
+    font-size: 0.75rem;
   }
 
-  .day-number {
-    font-size: 14px;
+  .day-number.ultra {
+    font-size: 0.875rem;
+    margin-bottom: var(--spacing-xs);
   }
 
-  .month-schedule-item {
-    font-size: 10px;
-    padding: 1px 4px;
+  .month-schedule-item.ultra {
+    font-size: 0.6875rem;
+    padding: 2px var(--spacing-xs);
+  }
+  
+  .schedule-detail.ultra {
+    padding: var(--spacing-sm) 2px 0 2px;
+  }
+  
+  .ultra-dialog ::deep(.el-dialog__body) {
+    padding: var(--spacing-md);
+  }
+  
+  .dialog-footer.ultra {
+    gap: var(--spacing-sm);
   }
 }
 </style>

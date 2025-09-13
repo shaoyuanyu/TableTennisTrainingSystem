@@ -14,6 +14,14 @@ dist-ssr
 coverage
 *.local
 
+# Environment variables
+# 忽略本地个人配置
+.env.local
+.env.*.local
+
+# 忽略敏感环境配置（如果包含密钥）
+# .env.production.local
+
 /cypress/videos/
 /cypress/screenshots/
 

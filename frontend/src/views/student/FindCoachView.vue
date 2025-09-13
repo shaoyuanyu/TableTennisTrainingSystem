@@ -279,6 +279,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/user'
 import { ElMessage } from 'element-plus'
 import { Search, Refresh, Calendar, User } from '@element-plus/icons-vue'
 import dayjs from 'dayjs'
@@ -326,11 +327,14 @@ const searchCoaches = async () => {
       ...filters,
     }
 
-    const response = await api.get('/student/coaches', { params })
-    coachList.value = response.data.list || []
-    pagination.total = response.data.total || 0
-  } catch {
-    ElMessage.error('获取教练列表失败')
+    console.log('发送教练查询请求:', { url: '/coaches', params })
+    const response = await api.get('/coaches', { params })
+    coachList.value = response.data.list || response.data.content || []
+    pagination.total = response.data.total || response.data.totalElements || 0
+    console.log('获取教练列表成功:', { count: coachList.value.length, total: pagination.total })
+  } catch (error) {
+    console.error('获取教练列表失败:', error)
+    ElMessage.error('获取教练列表失败: ' + (error.response?.data?.message || error.message))
   } finally {
     loading.value = false
   }
@@ -353,12 +357,14 @@ const resetFilters = () => {
 // 查看教练详情
 const viewCoachDetail = async (coach) => {
   try {
-    const response = await api.get(`/student/coaches/${coach.id}`)
+    console.log('获取教练详情:', coach.id)
+    const response = await api.get(`/coaches/${coach.id}`)
     selectedCoach.value = response.data
     detailDialogVisible.value = true
     await loadSchedule()
-  } catch {
-    ElMessage.error('获取教练详情失败')
+  } catch (error) {
+    console.error('获取教练详情失败:', error)
+    ElMessage.error('获取教练详情失败: ' + (error.response?.data?.message || error.message))
   }
 }
 
@@ -419,7 +425,18 @@ const getSpecialtyText = (specialty) => {
 }
 
 // 组件挂载
-onMounted(() => {
+onMounted(async () => {
+  // 添加延迟，确保用户认证状态稳定
+  await new Promise(resolve => setTimeout(resolve, 200))
+  
+  // 检查用户是否已经正确登录
+  const userStore = useUserStore()
+  if (!userStore.isLoggedIn) {
+    console.warn('用户未登录，暂不获取教练列表')
+    return
+  }
+  
+  console.log('开始获取教练列表，用户角色:', userStore.userRole)
   searchCoaches()
 })
 </script>
