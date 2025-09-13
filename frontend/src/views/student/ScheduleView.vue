@@ -830,7 +830,7 @@ const sendScheduleEmail = () => {
 
 const handleEmailSend = async () => {
   try {
-    if (emailOptions.value.recipients.length === 0) {
+    if (emailOptions.value.recipients.filter(email => email.trim()).length === 0) {
       ElMessage.warning('请至少添加一个收件人')
       return
     }
