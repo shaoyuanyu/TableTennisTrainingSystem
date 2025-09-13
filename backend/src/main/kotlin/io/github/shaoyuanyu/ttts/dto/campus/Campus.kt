@@ -13,5 +13,6 @@ data class CampusCreateRequest(
 )
 @Serializable
 data class CampusqueryRequest(
+    val id: Int,
     val campusName : String,
 )

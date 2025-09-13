@@ -68,10 +68,11 @@ class CampusService(
             val offset = (page-1) * size
             val total = query.size
             val records = query
-                .sortedByDescending { it.createdAt }
+                .sortedBy { it.createdAt }
                 .drop(offset)
                 .take(size)
                 .map {CampusqueryRequest(
+                    id = it.id.value,
                     campusName = it.campusName,
                 )}
 
