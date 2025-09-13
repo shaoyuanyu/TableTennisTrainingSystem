@@ -10,3 +10,7 @@ data class Student(
     val maxCoach: Int,
     val currentCoach: Int,
 )
+@Serializable
+data class comsignupRequest(
+    val group:String,
+)

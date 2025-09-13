@@ -45,7 +45,7 @@ fun Application.coachRoutes(coachService: CoachService) {
     }
 }
 /**
- * 获取所有教练（分页）
+ * 获取本校区所有教练（分页）
  */
 fun Route.getAllCoach(coachService: CoachService) {
     get("/coaches") {

@@ -2,13 +2,20 @@
 package io.github.shaoyuanyu.ttts.persistence
 
 import io.github.shaoyuanyu.ttts.dto.recharge.RechargeRecord
+import io.github.shaoyuanyu.ttts.exceptions.NotFoundException
 import io.github.shaoyuanyu.ttts.persistence.campus.CampusEntity
 import io.github.shaoyuanyu.ttts.persistence.coach.CoachEntity
+import io.github.shaoyuanyu.ttts.persistence.competition.ComEntity
+import io.github.shaoyuanyu.ttts.persistence.competition.ComTable
 import io.github.shaoyuanyu.ttts.persistence.recharge.RechargeEntity
 import io.github.shaoyuanyu.ttts.persistence.recharge.RechargeTable
 import io.github.shaoyuanyu.ttts.persistence.recharge.expose
 import io.github.shaoyuanyu.ttts.persistence.student.StudentEntity
 import io.github.shaoyuanyu.ttts.persistence.student_coach.StudentCoachRelationEntity
+import io.github.shaoyuanyu.ttts.persistence.table.TableEntity
+import io.github.shaoyuanyu.ttts.persistence.table.TableTable
+import io.github.shaoyuanyu.ttts.persistence.user.UserEntity
+import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import java.util.*
@@ -77,7 +84,7 @@ class StudentService(
     /**
      * 扣费
      */
-    fun deductBalance(uuid: String, amount: Float): Float =
+    fun deduct(uuid: String, amount: Float) =
         transaction(database) {
             StudentEntity.findById(UUID.fromString(uuid)).let {
                 if (it == null) {
@@ -87,7 +94,11 @@ class StudentService(
                     throw Exception("余额不足")
                 }
                 it.balance -= amount
-                it.balance
+                RechargeEntity.new {
+                    this.userId = uuid
+                    this.amount = -amount
+                    this.createdAt = Clock.System.now()
+                }
             }.also { student ->
                 LOGGER.info("扣费成功，用户 ID：$uuid，余额：${student}")
             }
@@ -124,17 +135,12 @@ class StudentService(
             }
 
             // 根据教练等级计算费用
-            val hourlyRate = when (val coachLevel = coach.level) {
-                "初级" -> 80.0f
-                "中级" -> 150.0f
-                "高级" -> 200.0f
-                else -> throw Exception("未知的教练等级: $coachLevel")
-            }
+            val hourlyRate = coach.hourlyRate
 
             val totalCost = hourlyRate * durationHours
 
             // 调用扣费函数
-            deductBalance(studentUUID, totalCost)
+            deduct(studentUUID, totalCost)
 
             // 为教练增加余额（扣费金额的60%）
             val coachEarnings = totalCost * 0.6f
@@ -253,4 +259,96 @@ class StudentService(
             records to totalCount
         }
 
+    /**
+     * 报名参加比赛
+     */
+    fun signupCompetition(userId: String, group: String) =
+        transaction(database) {
+            // 验证小组名称是否有效
+            val validGroups = listOf("甲", "乙", "丙")
+            if (group !in validGroups) {
+                return@transaction Result.failure<String>(IllegalStateException("无效的小组名称，必须是甲、乙或丙"))
+            }
+
+            // 检查用户是否已经报名
+            val existingSignup = ComEntity.find { ComTable.userId eq userId }
+                .limit(1)
+                .singleOrNull()
+
+            if (existingSignup != null) {
+                return@transaction Result.failure<String>(IllegalStateException("用户已经报名过比赛"))
+            }
+
+            // 获取用户信息
+            UserEntity.findById(UUID.fromString(userId)).let { userEntity ->
+                if (userEntity == null) {
+                    throw NotFoundException("用户不存在")
+                }
+
+            val userCampusId = userEntity.campusId
+
+            // 1. 首先查找已经有一个同组人占用的球台（优先分配）
+            val partiallyOccupiedTables = TableEntity.find {
+                (TableTable.status eq "部分占用") and
+                        (TableTable.campusId eq userCampusId)and
+                        (TableTable.group eq group)
+            }.toList()
+
+            val selectedTable: TableEntity
+            val tableId: Int
+            val newTableStatus: String
+            val newgroup: String = group
+
+            if (partiallyOccupiedTables.isNotEmpty()) {
+                // 优先选择部分占用的球台
+                selectedTable = partiallyOccupiedTables.random()
+                tableId = selectedTable.id.value
+                newTableStatus = "已满" // 分配第二个人后，球台满员
+            } else {
+                // 如果没有部分占用的球台，选择空闲球台
+                val availableTables = TableEntity.find {
+                    (TableTable.status eq "空闲") and
+                    (TableTable.campusId eq userCampusId)
+                }.toList()
+
+                if (availableTables.isEmpty()) {
+                    return@transaction Result.failure<String>(IllegalStateException("当前校区没有可用球台"))
+                }
+
+                selectedTable = availableTables.random()
+                tableId = selectedTable.id.value
+                newTableStatus = "部分占用" // 分配第一个人，部分占用
+            }
+            // 插入报名记录
+            ComEntity.new {
+                this.userId = userId
+                username= userEntity.username
+                this.group = group
+                this.tableId = tableId
+                campusId = userCampusId
+                createdAt = Clock.System.now()
+            }
+                deduct(userId,30.0f) // 报名费30元
+
+            // 更新球台状态
+                TableEntity.findById(tableId).let{tableEntity ->
+                    if (tableEntity == null) {
+                        throw NotFoundException("球台不存在")
+                    }
+                    tableEntity.status = newTableStatus
+                    tableEntity.group = newgroup
+                }
+
+            Result.success("报名成功！小组：$group，分配球台：$tableId")
+
+        }
+}
+
+    /**
+     * 查询报名信息
+     */
+    fun querysignup(userId: String)=
+        transaction(database) {
+
+    }
 }
