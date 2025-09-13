@@ -1,18 +1,19 @@
 package io.github.shaoyuanyu.ttts.persistence.student
 
-import kotlinx.datetime.LocalDateTime
+import io.github.shaoyuanyu.ttts.persistence.user.UserTable
 import org.jetbrains.exposed.v1.core.Column
-import org.jetbrains.exposed.v1.core.dao.id.UUIDTable
-import org.jetbrains.exposed.v1.datetime.datetime
+import org.jetbrains.exposed.v1.core.dao.id.IdTable
+import org.jetbrains.exposed.v1.core.ReferenceOption
+import java.util.UUID
 
+object StudentTable: IdTable<UUID>("student")  {
+    override val id = reference("user_id", UserTable, ReferenceOption.CASCADE)
 
-object StudentTable: UUIDTable("student")  {
-    // TODO: 使用 foreign key
-    val username: Column<String> = varchar("username", 64).uniqueIndex()
-
+    override val primaryKey = PrimaryKey(id)
+    
     val balance: Column<Float> = float("balance")
 
-    val created_at: Column<LocalDateTime> = datetime("created_at")
+    val max_coach: Column<Int> = integer("max_coach").default(2)
 
-    val last_login_at: Column<LocalDateTime> = datetime("last_login_at")
+    val current_coach: Column<Int> = integer("current_coach")
 }
