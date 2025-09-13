@@ -20,12 +20,12 @@
             </PrimaryButton>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item @click="messageStore.markAllRead">全部标为已读</el-dropdown-item>
+                <el-dropdown-item @click="markAllRead">全部标为已读</el-dropdown-item>
                 <el-dropdown-item @click="markPageRead">本页标为已读</el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
-          <OutlineButton color="danger" @click="messageStore.clearAll">清空消息</OutlineButton>
+          <OutlineButton color="danger" @click="clearAll">清空消息</OutlineButton>
           <el-badge :value="unreadCount" :max="99" class="unread-badge" />
         </div>
       </template>
@@ -60,7 +60,7 @@
             </div>
           </div>
           <div class="right">
-            <OutlineButton size="sm" color="danger" @click.stop="messageStore.deleteMessage(message.id)">
+            <OutlineButton size="sm" color="danger" @click.stop="deleteMessageItem(message.id)">
               删除
             </OutlineButton>
           </div>
@@ -97,14 +97,14 @@
     <div class="floating-action-buttons">
       <transition-group name="fab-item">
         <el-tooltip v-if="fabMenuOpen" content="全部标为已读" placement="left">
-          <IconButton class="fab-item" color="success" @click="messageStore.markAllRead">
+          <IconButton class="fab-item" color="success" @click="markAllRead">
             <el-icon>
               <Check />
             </el-icon>
           </IconButton>
         </el-tooltip>
         <el-tooltip v-if="fabMenuOpen" content="清空消息" placement="left">
-          <IconButton class="fab-item" color="danger" @click="messageStore.clearAll">
+          <IconButton class="fab-item" color="danger" @click="clearAll">
             <el-icon>
               <Delete />
             </el-icon>
@@ -125,7 +125,8 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessageBox } from 'element-plus'
+import { useToast } from '@/composables/useToast'
 import { useMessageStore } from '@/stores/messageStore'
 import { storeToRefs } from 'pinia'
 import { PrimaryButton, OutlineButton, IconButton } from '@/components/buttons'
@@ -134,6 +135,7 @@ import { GlassHeaderCard } from '@/components/cards'
 import { ArrowDown, Search, Check, Delete, More, Bell, Setting, Calendar, Star, User, Trophy } from '@element-plus/icons-vue'
 
 const messageStore = useMessageStore()
+const toast = useToast()
 const { unreadCount, hasUnread, activeFilter, searchQuery, currentPage, pageSize, detailDialogVisible, selectedMessage, filteredMessages, paginatedMessages, totalMessages } = storeToRefs(messageStore)
 
 const fabMenuOpen = ref(false)
@@ -204,9 +206,42 @@ const markPageRead = async () => {
   try {
     await ElMessageBox.confirm('确定要将本页消息标为已读吗？', '确认操作', { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning' })
     paginatedMessages.value.filter((m) => !m.read).forEach((m) => messageStore.markAsRead(m.id))
-    ElMessage.success('本页消息已标为已读')
+    toast.success('本页消息已标为已读')
   } catch {
     // 用户取消或失败时静默处理
+  }
+}
+
+const markAllRead = async () => {
+  try {
+    await messageStore.markAllRead()
+    toast.success('全部消息已标为已读')
+  } catch (e) {
+    console.error('markAllRead failed', e)
+    toast.error('操作失败，请重试')
+  }
+}
+
+const clearAll = async () => {
+  try {
+    await ElMessageBox.confirm('清空后将无法恢复，确定要清空所有消息吗？', '确认操作', { confirmButtonText: '清空', cancelButtonText: '取消', type: 'warning' })
+    await messageStore.clearAll()
+    toast.success('消息已清空')
+  } catch (e) {
+    if (e !== 'cancel') {
+      console.error('clearAll failed', e)
+      toast.error('操作失败，请重试')
+    }
+  }
+}
+
+const deleteMessageItem = async (id) => {
+  try {
+    await messageStore.deleteMessage(id)
+    toast.success('已删除一条消息')
+  } catch (e) {
+    console.error('deleteMessage failed', e)
+    toast.error('删除失败，请重试')
   }
 }
 
@@ -216,8 +251,13 @@ const handleSizeChange = (size) => { pageSize.value = size; currentPage.value = 
 const handlePageChange = (page) => { currentPage.value = page }
 const toggleFabMenu = () => { fabMenuOpen.value = !fabMenuOpen.value }
 
-onMounted(() => {
-  try { messageStore.fetchMessages() } catch (e) { console.error('fetchMessages failed', e) }
+onMounted(async () => {
+  try {
+    await messageStore.fetchMessages()
+  } catch (e) {
+    console.error('fetchMessages failed', e)
+    toast.error('加载消息失败')
+  }
 })
 </script>
 

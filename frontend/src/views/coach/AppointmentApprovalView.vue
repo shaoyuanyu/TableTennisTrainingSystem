@@ -54,9 +54,10 @@
       </el-button>
     </div>
 
-    <!-- 预约列表 -->
+    <!-- 预约列表（GlassTable 包裹） -->
     <el-card>
-      <el-table :data="appointmentList" v-loading="loading" @selection-change="handleSelectionChange" stripe>
+      <GlassTable title="预约列表" :data="appointmentList" :loading="loading" density="md" :stripe="true"
+        @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" :selectable="isSelectable" />
 
         <el-table-column prop="id" label="预约编号" width="120" />
@@ -124,7 +125,7 @@
             <el-button size="small" @click="showDetailDialog(row)"> 详情 </el-button>
           </template>
         </el-table-column>
-      </el-table>
+      </GlassTable>
 
       <div class="pagination-wrapper">
         <el-pagination v-model:current-page="pagination.page" v-model:page-size="pagination.size"
@@ -239,6 +240,7 @@ import dayjs from 'dayjs'
 import api from '@/utils/api'
 import OutlineButton from '@/components/buttons/OutlineButton.vue'
 import DangerButton from '@/components/buttons/DangerButton.vue'
+import GlassTable from '@/components/data/Table.vue'
 
 // 数据列表
 const appointmentList = ref([])
