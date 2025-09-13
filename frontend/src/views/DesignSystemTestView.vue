@@ -151,7 +151,7 @@
         description="卡片网格系统：auto 自适应 / fixed 固定列。">
         <div class="grid-demo-container">
           <div class="grid-demo">
-            <div class="grid-label">auto 自适应</div>
+            <div class="grid-label section-title--sm">auto 自适应</div>
             <div class="mini-grid auto-grid">
               <div class="mini-item"></div>
               <div class="mini-item"></div>
@@ -159,7 +159,7 @@
             </div>
           </div>
           <div class="grid-demo">
-            <div class="grid-label">fixed-3 固定列</div>
+            <div class="grid-label section-title--sm">fixed-3 固定列</div>
             <div class="mini-grid fixed-grid">
               <div class="mini-item"></div>
               <div class="mini-item"></div>
@@ -200,7 +200,7 @@
         description="文档/设计系统中的展示容器，与网格组合统一排版。">
         <div class="showcase-demo">
           <div class="showcase-header">
-            <div class="demo-title">示例标题</div>
+            <div class="demo-title section-title--sm">示例标题</div>
             <div class="demo-desc">示例描述</div>
           </div>
           <div class="showcase-grid">
@@ -247,7 +247,7 @@
         ]">
         <div class="size-states-demo">
           <div class="size-group">
-            <h5 style="color: white; margin: 0 0 8px 0; font-size: 12px">尺寸系统</h5>
+            <h5 class="section-title--sm">尺寸系统</h5>
             <div class="button-row">
               <ModernButton text="小" type="primary" size="small" />
               <ModernButton text="中" type="primary" size="medium" />
@@ -255,7 +255,7 @@
             </div>
           </div>
           <div class="state-group">
-            <h5 style="color: white; margin: 12px 0 8px 0; font-size: 12px">状态系统</h5>
+            <h5 class="section-title--sm" style="margin-top: 12px">状态系统</h5>
             <div class="button-row">
               <ModernButton text="正常" type="primary" size="small" />
               <ModernButton text="禁用" type="primary" size="small" :disabled="true" />
@@ -482,21 +482,25 @@
       </template>
     </GlassModal>
 
-    <!-- 使用说明 -->
-    <div class="usage-note">
-      <h3>🚀 设计系统使用指南</h3>
-      <p>本设计系统采用现代化的Glassmorphism风格，为乒乓球训练系统提供统一、优雅的用户界面。</p>
-      <ul>
-        <li>
-          <strong>统一的卡片系统：</strong>基于GlassCardBase的统一卡片组件，支持多种变体和样式
-        </li>
-        <li><strong>现代按钮组件：</strong>支持多种类型、尺寸和状态的按钮系统</li>
-        <li><strong>完整的表单组件：</strong>包含输入框、状态管理和验证反馈</li>
-        <li><strong>丰富的反馈组件：</strong>状态展示、标签徽章等用户反馈组件</li>
-        <li><strong>实用的工具组件：</strong>存储管理、操作按钮等开发辅助工具</li>
-        <li><strong>响应式设计：</strong>完全适配桌面端、平板端和移动端设备</li>
-      </ul>
-    </div>
+    <!-- 使用说明（以 CardShowcase 统一宽度与排版） -->
+    <CardShowcase id="usage-guide" title="🚀 设计系统使用指南" layout="auto"
+      description="采用 Glassmorphism 风格，为系统提供统一、优雅、易复用的 UI 基础。">
+      <GlassDisplayCard title="快速上手" subtitle="Guidelines" icon="🚀" variant="display">
+        <div class="usage-content">
+          <p>本设计系统采用现代化的 Glassmorphism 风格，为乒乓球训练系统提供统一、优雅的用户界面。</p>
+          <ul>
+            <li>
+              <strong>统一的卡片系统：</strong>基于 GlassCardBase 的统一卡片组件，支持多种变体和样式
+            </li>
+            <li><strong>现代按钮组件：</strong>支持多种类型、尺寸和状态的按钮系统</li>
+            <li><strong>完整的表单组件：</strong>包含输入框、状态管理和验证反馈</li>
+            <li><strong>丰富的反馈组件：</strong>状态展示、标签徽章等用户反馈组件</li>
+            <li><strong>实用的工具组件：</strong>存储管理、操作按钮等开发辅助工具</li>
+            <li><strong>响应式设计：</strong>完全适配桌面端、平板端和移动端设备</li>
+          </ul>
+        </div>
+      </GlassDisplayCard>
+    </CardShowcase>
   </div>
 </template>
 
@@ -931,7 +935,7 @@ export default {
       rgba(240, 147, 251, 0.15) 100%);
   backdrop-filter: var(--blur-xl);
   border-bottom: 1px solid var(--white-alpha-20);
-  padding: var(--spacing-5xl) 0 var(--spacing-4xl) 0;
+  padding: var(--spacing-5xl) 0 var(--spacing-3xl) 0;
   text-align: center;
   position: relative;
   overflow: hidden;
@@ -951,11 +955,11 @@ export default {
 }
 
 .hero-content {
-  max-width: 800px;
+  max-width: 960px;
   margin: 0 auto;
   position: relative;
   z-index: 1;
-  padding: 0 var(--spacing-2xl);
+  padding: 0 var(--spacing-xl);
 }
 
 .hero-badge {
@@ -965,8 +969,8 @@ export default {
   background: var(--white-alpha-25);
   border: 1px solid var(--white-alpha-40);
   border-radius: var(--radius-full);
-  padding: var(--spacing-md) var(--spacing-xl);
-  margin-bottom: var(--spacing-2xl);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
   backdrop-filter: var(--blur-lg);
   color: white;
   font-size: var(--font-size-sm);
@@ -990,39 +994,41 @@ export default {
   font-size: var(--font-size-5xl);
   font-weight: var(--font-weight-extrabold);
   color: white;
-  margin: 0 0 var(--spacing-2xl) 0;
+  margin: 0 0 var(--spacing-xl) 0;
   text-shadow: 0 2px 4px var(--black-alpha-30);
   line-height: 1.2;
+  letter-spacing: 0.2px;
 }
 
 .hero-description {
   font-size: var(--font-size-lg);
   color: var(--white-alpha-90);
-  line-height: 1.6;
-  margin: 0 0 var(--spacing-4xl) 0;
+  line-height: 1.75;
+  margin: 0 0 var(--spacing-3xl) 0;
   text-shadow: 0 1px 2px var(--black-alpha-20);
-  max-width: 600px;
+  max-width: 720px;
   margin-left: auto;
   margin-right: auto;
+  letter-spacing: 0.1px;
 }
 
 .hero-stats {
   display: flex;
   justify-content: center;
-  gap: var(--spacing-4xl);
+  gap: var(--spacing-2xl);
   flex-wrap: wrap;
-  margin-top: var(--spacing-2xl);
+  margin-top: var(--spacing-xl);
 }
 
 .stat-item {
   text-align: center;
-  padding: var(--spacing-lg);
+  padding: var(--spacing-md);
   background: var(--white-alpha-10);
   border-radius: var(--radius-lg);
   border: 1px solid var(--white-alpha-20);
   backdrop-filter: var(--blur-md);
   transition: var(--transition-normal);
-  min-width: 120px;
+  min-width: 110px;
 }
 
 .stat-item:hover {
@@ -1055,14 +1061,6 @@ export default {
   text-align: center;
   max-width: 1200px;
   margin: 0 auto var(--spacing-2xl) auto;
-}
-
-.design-principles h2 {
-  color: white;
-  font-size: var(--font-size-3xl);
-  font-weight: var(--font-weight-bold);
-  margin: 0 0 var(--spacing-xl) 0;
-  text-shadow: 0 2px 4px var(--black-alpha-30);
 }
 
 .principles-grid {
@@ -1118,21 +1116,35 @@ export default {
   margin: 0 calc(-1 * var(--spacing-2xl)) var(--spacing-2xl) calc(-1 * var(--spacing-2xl));
 }
 
-.component-navigation h2 {
-  color: white;
-  font-size: var(--font-size-3xl);
-  font-weight: var(--font-weight-bold);
-  margin: 0 0 var(--spacing-xl) 0;
-  text-shadow: 0 2px 4px var(--black-alpha-30);
-}
-
 .nav-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  /* 固定列数，避免出现 5+1 的不均匀换行 */
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--spacing-xl);
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 var(--spacing-2xl);
+}
+
+/* 桌面大屏：6 列（六张卡片单行显示） */
+@media (min-width: 1440px) {
+  .nav-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
+/* 平板：2 列 */
+@media (max-width: 1024px) {
+  .nav-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* 手机：1 列 */
+@media (max-width: 640px) {
+  .nav-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .nav-card {
@@ -1189,17 +1201,17 @@ export default {
 
   .hero-description {
     font-size: var(--font-size-md);
-    margin-bottom: var(--spacing-3xl);
+    margin-bottom: var(--spacing-2xl);
   }
 
   .hero-stats {
-    gap: var(--spacing-2xl);
-    margin-top: var(--spacing-xl);
+    gap: var(--spacing-xl);
+    margin-top: var(--spacing-lg);
   }
 
   .stat-item {
-    min-width: 100px;
-    padding: var(--spacing-md);
+    min-width: 96px;
+    padding: var(--spacing-sm);
   }
 
   .stat-number {
@@ -1207,11 +1219,11 @@ export default {
   }
 
   .design-language-hero {
-    padding: var(--spacing-4xl) 0 var(--spacing-3xl) 0;
+    padding: var(--spacing-3xl) 0 var(--spacing-2xl) 0;
   }
 
   .hero-content {
-    padding: 0 var(--spacing-lg);
+    padding: 0 var(--spacing-md);
   }
 
   .design-system-test {
@@ -1307,37 +1319,21 @@ export default {
   backdrop-filter: var(--blur-sm);
 }
 
-/* 使用说明样式 */
-.usage-note {
-  margin-top: var(--spacing-3xl);
-  padding: var(--spacing-2xl);
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-xl);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  backdrop-filter: var(--blur-md);
-}
-
-.usage-note h3 {
-  margin: 0 0 var(--spacing-lg) 0;
-  color: white;
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-bold);
-}
-
-.usage-note p {
+/* 使用指南内容样式（嵌于 GlassDisplayCard 内） */
+.usage-content p {
   color: var(--white-alpha-85);
   font-size: var(--font-size-md);
   line-height: 1.6;
-  margin-bottom: var(--spacing-lg);
+  margin: 0 0 var(--spacing-lg) 0;
 }
 
-.usage-note ul {
+.usage-content ul {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-.usage-note li {
+.usage-content li {
   color: var(--white-alpha-85);
   font-size: var(--font-size-md);
   line-height: 1.6;
@@ -1346,7 +1342,7 @@ export default {
   position: relative;
 }
 
-.usage-note li::before {
+.usage-content li::before {
   content: '•';
   color: #667eea;
   font-weight: bold;
@@ -1355,24 +1351,15 @@ export default {
   top: 0;
 }
 
-.usage-note strong {
+.usage-content strong {
   color: white;
   font-weight: var(--font-weight-bold);
 }
 
-/* 使用说明响应式调整 */
 @media (max-width: 768px) {
-  .usage-note {
-    padding: var(--spacing-xl);
-    margin-top: var(--spacing-2xl);
-  }
 
-  .usage-note h3 {
-    font-size: var(--font-size-lg);
-  }
-
-  .usage-note p,
-  .usage-note li {
+  .usage-content p,
+  .usage-content li {
     font-size: var(--font-size-sm);
   }
 }
@@ -1814,12 +1801,7 @@ export default {
   text-align: center;
 }
 
-.demo-title {
-  font-weight: var(--font-weight-semibold);
-  color: white;
-  font-size: var(--font-size-sm);
-  margin-bottom: var(--spacing-xs);
-}
+/* 移除 .demo-title 的本地样式，使用 .section-title--sm 统一视觉 */
 
 .demo-desc {
   font-size: var(--font-size-xs);

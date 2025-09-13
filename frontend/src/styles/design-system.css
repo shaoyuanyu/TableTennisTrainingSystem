@@ -820,6 +820,26 @@
   }
 }
 
+/* 全局分节标题（统一样式，避免 emoji 被背景裁剪） */
+.section-title {
+  color: white;
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-extrabold);
+  margin: 0 0 var(--spacing-xl) 0;
+  text-shadow: 0 2px 4px var(--black-alpha-30);
+  text-align: center;
+}
+
+/* 小号分节标题：继承视觉语言，缩小字号与间距 */
+.section-title--sm {
+  color: white;
+  font-weight: var(--font-weight-extrabold);
+  text-shadow: 0 2px 4px var(--black-alpha-30);
+  font-size: var(--font-size-lg);
+  margin: 0 0 var(--spacing-md) 0;
+  text-align: center;
+}
+
 .shimmer-effect::before {
   content: '';
   position: absolute;

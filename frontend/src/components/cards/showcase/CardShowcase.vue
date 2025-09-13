@@ -1,7 +1,7 @@
 <template>
   <div class="card-showcase">
     <div class="showcase-header">
-      <h2 class="showcase-title">{{ title }}</h2>
+      <h2 class="showcase-title section-title">{{ title }}</h2>
       <p v-if="description" class="showcase-description">{{ description }}</p>
     </div>
 
@@ -58,15 +58,8 @@ export default {
 }
 
 .showcase-title {
-  color: white;
-  font-size: var(--font-size-3xl);
-  font-weight: var(--font-weight-bold);
-  margin: 0 0 var(--spacing-lg) 0;
-  text-shadow: 0 2px 4px var(--black-alpha-30);
-  background: linear-gradient(135deg, #ffffff, #e2e8f0);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  /* 使用全局 .section-title 统一标题样式，局部仅做必要微调 */
+  margin-bottom: var(--spacing-lg);
 }
 
 .showcase-description {
