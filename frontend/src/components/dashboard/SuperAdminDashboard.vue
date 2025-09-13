@@ -1,7 +1,7 @@
 <template>
   <div class="super-admin-dashboard">
     <!-- 极简背景 - 完全移除装饰元素以提升性能 -->
-    
+
     <!-- 系统概览 -->
     <el-card class="dashboard-card overview-card" shadow="never">
       <template #header>

@@ -4,8 +4,22 @@
     <div class="page-header">
       <h2>系统日志</h2>
       <div class="header-actions">
-        <el-button @click="exportLogs" :icon="Download"> 导出日志 </el-button>
-        <el-button @click="clearLogs" type="danger" :icon="Delete"> 清空日志 </el-button>
+        <OutlineButton @click="exportLogs">
+          <template #icon-left>
+            <el-icon>
+              <Download />
+            </el-icon>
+          </template>
+          导出日志
+        </OutlineButton>
+        <OutlineButton color="danger" @click="clearLogs">
+          <template #icon-left>
+            <el-icon>
+              <Delete />
+            </el-icon>
+          </template>
+          清空日志
+        </OutlineButton>
       </div>
     </div>
 
@@ -32,24 +46,12 @@
         </el-form-item>
 
         <el-form-item label="时间范围">
-          <el-date-picker
-            v-model="filters.dateRange"
-            type="datetimerange"
-            range-separator="至"
-            start-placeholder="开始时间"
-            end-placeholder="结束时间"
-            format="YYYY-MM-DD HH:mm:ss"
-            value-format="YYYY-MM-DD HH:mm:ss"
-          />
+          <el-date-picker v-model="filters.dateRange" type="datetimerange" range-separator="至" start-placeholder="开始时间"
+            end-placeholder="结束时间" format="YYYY-MM-DD HH:mm:ss" value-format="YYYY-MM-DD HH:mm:ss" />
         </el-form-item>
 
         <el-form-item label="关键词">
-          <el-input
-            v-model="filters.keyword"
-            placeholder="搜索关键词"
-            style="width: 200px"
-            @keyup.enter="fetchLogs"
-          />
+          <el-input v-model="filters.keyword" placeholder="搜索关键词" style="width: 200px" @keyup.enter="fetchLogs" />
         </el-form-item>
 
         <el-form-item>
@@ -65,7 +67,9 @@
         <el-card class="stat-card">
           <div class="stat-content">
             <div class="stat-icon info">
-              <el-icon><InfoFilled /></el-icon>
+              <el-icon>
+                <InfoFilled />
+              </el-icon>
             </div>
             <div class="stat-text">
               <div class="stat-number">{{ logStats.info }}</div>
@@ -79,7 +83,9 @@
         <el-card class="stat-card">
           <div class="stat-content">
             <div class="stat-icon warning">
-              <el-icon><WarningFilled /></el-icon>
+              <el-icon>
+                <WarningFilled />
+              </el-icon>
             </div>
             <div class="stat-text">
               <div class="stat-number">{{ logStats.warning }}</div>
@@ -93,7 +99,9 @@
         <el-card class="stat-card">
           <div class="stat-content">
             <div class="stat-icon error">
-              <el-icon><CircleCloseFilled /></el-icon>
+              <el-icon>
+                <CircleCloseFilled />
+              </el-icon>
             </div>
             <div class="stat-text">
               <div class="stat-number">{{ logStats.error }}</div>
@@ -107,7 +115,9 @@
         <el-card class="stat-card">
           <div class="stat-content">
             <div class="stat-icon debug">
-              <el-icon><Setting /></el-icon>
+              <el-icon>
+                <Setting />
+              </el-icon>
             </div>
             <div class="stat-text">
               <div class="stat-number">{{ logStats.debug }}</div>
@@ -167,15 +177,9 @@
       </el-table>
 
       <div class="pagination-wrapper">
-        <el-pagination
-          v-model:current-page="pagination.page"
-          v-model:page-size="pagination.size"
-          :total="pagination.total"
-          :page-sizes="[20, 50, 100, 200]"
-          layout="total, sizes, prev, pager, next, jumper"
-          @size-change="fetchLogs"
-          @current-change="fetchLogs"
-        />
+        <el-pagination v-model:current-page="pagination.page" v-model:page-size="pagination.size"
+          :total="pagination.total" :page-sizes="[20, 50, 100, 200]" layout="total, sizes, prev, pager, next, jumper"
+          @size-change="fetchLogs" @current-change="fetchLogs" />
       </div>
     </el-card>
 
@@ -233,6 +237,7 @@ import {
 } from '@element-plus/icons-vue'
 import dayjs from 'dayjs'
 import api from '@/utils/api'
+import OutlineButton from '@/components/buttons/OutlineButton.vue'
 
 // 数据列表
 const logList = ref([])

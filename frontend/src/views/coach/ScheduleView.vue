@@ -3,29 +3,38 @@
     <div class="schedule-header ultra">
       <h2><span class="schedule-icon">🏓</span> 我的课表</h2>
       <div class="schedule-controls ultra">
-        <el-button-group>
-          <el-button
-            :type="currentView === 'week' ? 'primary' : 'default'"
-            @click="setView('week')"
-            class="header-btn ultra-btn"
-          >
-            <span class="btn-icon">📅</span> 周视图
-          </el-button>
-          <el-button
-            :type="currentView === 'month' ? 'primary' : 'default'"
-            @click="setView('month')"
-            class="header-btn ultra-btn"
-          >
-            <span class="btn-icon">🗓️</span> 月视图
-          </el-button>
-        </el-button-group>
+        <div class="view-toggle">
+          <OutlineButton :class="['header-btn', 'ultra-btn']" :disabled="currentView === 'week'"
+            @click="setView('week')">
+            <template #icon-left>📅</template>
+            周视图
+          </OutlineButton>
+          <OutlineButton :class="['header-btn', 'ultra-btn']" :disabled="currentView === 'month'"
+            @click="setView('month')">
+            <template #icon-left>🗓️</template>
+            月视图
+          </OutlineButton>
+        </div>
         <div class="date-navigation ultra">
-          <el-button :icon="ArrowLeft" @click="previousPeriod" circle class="nav-btn ultra-btn" />
+          <OutlineButton @click="previousPeriod" class="nav-btn ultra-btn" circle>
+            <template #icon-left>
+              <el-icon>
+                <ArrowLeft />
+              </el-icon>
+            </template>
+          </OutlineButton>
           <span class="current-period ultra">{{ currentPeriodText }}</span>
-          <el-button :icon="ArrowRight" @click="nextPeriod" circle class="nav-btn ultra-btn" />
-          <el-button @click="goToToday" class="today-btn ultra-btn">
-            <span class="btn-icon">⭐</span> 今天
-          </el-button>
+          <OutlineButton @click="nextPeriod" class="nav-btn ultra-btn" circle>
+            <template #icon-left>
+              <el-icon>
+                <ArrowRight />
+              </el-icon>
+            </template>
+          </OutlineButton>
+          <PrimaryButton @click="goToToday" class="today-btn ultra-btn">
+            <template #icon-left>⭐</template>
+            今天
+          </PrimaryButton>
         </div>
       </div>
     </div>
@@ -34,12 +43,7 @@
     <div v-if="currentView === 'week'" class="week-view ultra">
       <div class="week-header ultra">
         <div class="time-column">时间</div>
-        <div
-          v-for="day in weekDays"
-          :key="day.date"
-          class="day-header"
-          :class="{ 'is-today': day.isToday }"
-        >
+        <div v-for="day in weekDays" :key="day.date" class="day-header" :class="{ 'is-today': day.isToday }">
           <div class="day-name">{{ day.name }}</div>
           <div class="day-date">{{ day.date }}</div>
         </div>
@@ -47,22 +51,18 @@
       <div class="week-body">
         <div v-for="hour in timeSlots" :key="hour" class="time-row">
           <div class="time-column">{{ hour }}</div>
-          <div
-            v-for="day in weekDays"
-            :key="`${day.date}-${hour}`"
-            class="day-cell"
-            @click="handleCellClick(day.date, hour)"
-          >
-            <div
-              v-for="schedule in getSchedulesForDayAndHour(day.date, hour)"
-              :key="schedule.id"
-              class="schedule-item ultra"
-              :class="getScheduleClass(schedule)"
-              @click.stop="handleScheduleClick(schedule)"
-            >
+          <div v-for="day in weekDays" :key="`${day.date}-${hour}`" class="day-cell"
+            @click="handleCellClick(day.date, hour)">
+            <div v-for="schedule in getSchedulesForDayAndHour(day.date, hour)" :key="schedule.id"
+              class="schedule-item ultra" :class="getScheduleClass(schedule)"
+              @click.stop="handleScheduleClick(schedule)">
               <div class="schedule-title">{{ schedule.title }}</div>
-              <div class="schedule-student"><span class="field-icon">👤</span>{{ studentNames(schedule.students) }}</div>
-              <div class="schedule-location"><span class="field-icon">📍</span>{{ schedule.location }}</div>
+              <div class="schedule-student">
+                <span class="field-icon">👤</span>{{ studentNames(schedule.students) }}
+              </div>
+              <div class="schedule-location">
+                <span class="field-icon">📍</span>{{ schedule.location }}
+              </div>
             </div>
           </div>
         </div>
@@ -78,28 +78,19 @@
       </div>
       <div class="month-body">
         <div v-for="week in monthWeeks" :key="week[0]?.date || Math.random()" class="month-week">
-          <div
-            v-for="day in week"
-            :key="day?.date || Math.random()"
-            class="month-day"
-            :class="{
-              'is-today': day?.isToday,
-              'is-other-month': day?.isOtherMonth,
-              'has-schedules': day && getSchedulesForDay(day.date).length > 0,
-            }"
-            @click="handleDayClick(day)"
-          >
+          <div v-for="day in week" :key="day?.date || Math.random()" class="month-day" :class="{
+            'is-today': day?.isToday,
+            'is-other-month': day?.isOtherMonth,
+            'has-schedules': day && getSchedulesForDay(day.date).length > 0,
+          }" @click="handleDayClick(day)">
             <div v-if="day" class="day-number ultra">{{ day.dayNumber }}</div>
             <div v-if="day" class="day-schedules ultra">
-              <div
-                v-for="schedule in getSchedulesForDay(day.date).slice(0, 3)"
-                :key="schedule.id"
-                class="month-schedule-item ultra"
-                :class="getScheduleClass(schedule)"
-                @click.stop="handleScheduleClick(schedule)"
-                :title="schedule.title"
-              >
-                <span class="dot-icon">●</span> {{ schedule.title }}<span v-if="schedule.students && schedule.students.length">（{{ studentNames(schedule.students) }}）</span>
+              <div v-for="schedule in getSchedulesForDay(day.date).slice(0, 3)" :key="schedule.id"
+                class="month-schedule-item ultra" :class="getScheduleClass(schedule)"
+                @click.stop="handleScheduleClick(schedule)" :title="schedule.title">
+                <span class="dot-icon">●</span> {{ schedule.title
+                }}<span v-if="schedule.students && schedule.students.length">（{{ studentNames(schedule.students)
+                }}）</span>
               </div>
               <div v-if="getSchedulesForDay(day.date).length > 3" class="more-schedules ultra">
                 +{{ getSchedulesForDay(day.date).length - 3 }} 更多
@@ -143,25 +134,18 @@
       </div>
       <template #footer>
         <span class="dialog-footer ultra">
-          <el-button @click="showScheduleDialog = false">关闭</el-button>
-          <el-button
-            v-if="selectedSchedule?.status === 'confirmed' && canCancelSchedule(selectedSchedule)"
-            type="danger"
-            @click="cancelSchedule"
-          >
+          <OutlineButton @click="showScheduleDialog = false">关闭</OutlineButton>
+          <DangerButton v-if="selectedSchedule?.status === 'confirmed' && canCancelSchedule(selectedSchedule)"
+            @click="cancelSchedule">
             <span class="field-icon">❌</span> 取消课程
-          </el-button>
+          </DangerButton>
         </span>
       </template>
     </el-dialog>
 
     <!-- 加载状态 -->
-    <el-loading
-      v-loading="loading"
-      element-loading-text="加载课表数据..."
-      element-loading-spinner="el-icon-loading"
-      class="ultra-loading"
-    />
+    <el-loading v-loading="loading" element-loading-text="加载课表数据..." element-loading-spinner="el-icon-loading"
+      class="ultra-loading" />
   </div>
 </template>
 
@@ -171,6 +155,9 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { ArrowLeft, ArrowRight } from '@element-plus/icons-vue'
 import dayjs from 'dayjs'
 import api from '@/utils/api'
+import PrimaryButton from '@/components/buttons/PrimaryButton.vue'
+import OutlineButton from '@/components/buttons/OutlineButton.vue'
+import DangerButton from '@/components/buttons/DangerButton.vue'
 
 // 响应式数据
 const currentView = ref('week')
@@ -283,7 +270,7 @@ const goToToday = () => {
 const studentNames = (students) => {
   if (!students || students.length === 0) return '无'
   // 假定 students 是数组 [{name: '张三'}, {name: '李四'}]
-  return students.map(s => s.name).join('，')
+  return students.map((s) => s.name).join('，')
 }
 
 const getSchedulesForDay = (date) => {
@@ -433,7 +420,11 @@ const generateMockCoachSchedules = () => {
   const mockSchedules = []
   const today = dayjs()
   const mockStudentPool = [
-    { name: '小明' }, { name: '小红' }, { name: '小强' }, { name: '小丽' }, { name: '小刚' }
+    { name: '小明' },
+    { name: '小红' },
+    { name: '小强' },
+    { name: '小丽' },
+    { name: '小刚' },
   ]
   // 生成两周示例课程
   for (let i = 0; i < 14; i++) {
@@ -534,6 +525,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
 }
+
 .schedule-icon {
   font-size: 2rem;
   margin-right: 12px;
@@ -556,12 +548,16 @@ onMounted(() => {
   align-items: center;
   gap: 6px;
   font-weight: 600;
-  transition: background 0.2s, color 0.2s;
+  transition:
+    background 0.2s,
+    color 0.2s;
 }
+
 .header-btn.ultra-btn .btn-icon {
   font-size: 1.2em;
   margin-right: 2px;
 }
+
 .today-btn.ultra-btn {
   background: linear-gradient(90deg, #2196f3 0%, #21cbf3 100%);
   color: white !important;
@@ -573,6 +569,7 @@ onMounted(() => {
   align-items: center;
   gap: 5px;
 }
+
 .today-btn.ultra-btn .btn-icon {
   font-size: 1.2em;
 }
@@ -611,8 +608,9 @@ onMounted(() => {
   letter-spacing: 1px;
 }
 
-.week-view.ultra, .month-view.ultra {
-  background: rgba(255,255,255,0.98);
+.week-view.ultra,
+.month-view.ultra {
+  background: rgba(255, 255, 255, 0.98);
   border-radius: 20px;
   overflow: hidden;
   box-shadow: 0 8px 40px rgba(0, 0, 0, 0.09);
@@ -621,7 +619,7 @@ onMounted(() => {
 .week-header.ultra {
   display: grid;
   grid-template-columns: 100px repeat(7, 1fr);
-  background: linear-gradient(90deg,#e8f1fc 0%, #f8f9fa 100%);
+  background: linear-gradient(90deg, #e8f1fc 0%, #f8f9fa 100%);
   border-bottom: 2px solid #e0e0e0;
 }
 
@@ -704,17 +702,20 @@ onMounted(() => {
   position: relative;
   align-items: flex-start;
 }
+
 .schedule-item.ultra .field-icon {
   font-size: 1em;
   margin-right: 3px;
   vertical-align: middle;
 }
+
 .schedule-item.ultra .schedule-title {
   font-weight: 700;
   margin-bottom: 2px;
   font-size: 14px;
   letter-spacing: 1px;
 }
+
 .schedule-item.ultra .schedule-coach,
 .schedule-item.ultra .schedule-location {
   font-size: 12px;
@@ -722,22 +723,28 @@ onMounted(() => {
   margin-top: 1px;
   font-weight: 500;
 }
+
 .schedule-item.ultra.schedule-individual {
   background: linear-gradient(90deg, #2196f3 60%, #21cbf3 100%);
 }
+
 .schedule-item.ultra.schedule-group {
   background: linear-gradient(90deg, #4caf50 60%, #8bc34a 100%);
 }
+
 .schedule-item.ultra.schedule-match {
   background: linear-gradient(90deg, #ff9800 60%, #ffd54f 100%);
 }
+
 .schedule-item.ultra.schedule-tournament {
   background: linear-gradient(90deg, #f44336 60%, #ff8a65 100%);
 }
+
 .schedule-item.ultra.status-pending {
   opacity: 0.7;
   border: 2px dashed rgba(255, 255, 255, 0.7);
 }
+
 .schedule-item.ultra.status-cancelled {
   background: #bdbdbd;
   text-decoration: line-through;
@@ -745,7 +752,7 @@ onMounted(() => {
 }
 
 .month-view.ultra {
-  background: rgba(255,255,255,0.98);
+  background: rgba(255, 255, 255, 0.98);
   border-radius: 20px;
   overflow: hidden;
   box-shadow: 0 8px 40px rgba(0, 0, 0, 0.09);
@@ -754,7 +761,7 @@ onMounted(() => {
 .month-header.ultra {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  background: linear-gradient(90deg,#e8f1fc 0%, #f8f9fa 100%);
+  background: linear-gradient(90deg, #e8f1fc 0%, #f8f9fa 100%);
   border-bottom: 2px solid #e0e0e0;
 }
 
@@ -797,7 +804,7 @@ onMounted(() => {
 }
 
 .month-day.is-today {
-  background: linear-gradient(120deg,#e3f2fd 60%, #b9eaff 100%);
+  background: linear-gradient(120deg, #e3f2fd 60%, #b9eaff 100%);
   border: 3px solid #2196f3;
   box-shadow: 0 2px 16px #2196f344;
 }
@@ -844,20 +851,25 @@ onMounted(() => {
   align-items: center;
   gap: 6px;
 }
+
 .month-schedule-item.ultra .dot-icon {
   color: #1565c0;
   font-size: 1.2em;
   margin-right: 1px;
 }
+
 .month-schedule-item.ultra.schedule-group {
   background: linear-gradient(90deg, #4caf50 60%, #8bc34a 100%);
 }
+
 .month-schedule-item.ultra.schedule-match {
   background: linear-gradient(90deg, #ff9800 60%, #ffd54f 100%);
 }
+
 .month-schedule-item.ultra.schedule-tournament {
   background: linear-gradient(90deg, #f44336 60%, #ff8a65 100%);
 }
+
 .more-schedules.ultra {
   font-size: 12px;
   color: #666;
@@ -873,9 +885,10 @@ onMounted(() => {
 .schedule-detail.ultra {
   padding: 24px 0 6px 0;
   font-size: 1.17rem;
-  background: linear-gradient(110deg,#e3f2fd 80%, #f8f9fa 100%);
+  background: linear-gradient(110deg, #e3f2fd 80%, #f8f9fa 100%);
   border-radius: 12px;
 }
+
 .schedule-detail.ultra .field-icon {
   font-size: 1.1em;
   margin-right: 4px;
@@ -883,7 +896,7 @@ onMounted(() => {
 }
 
 .ultra-dialog ::deep(.el-dialog__body) {
-  background: linear-gradient(110deg,#e0eafc 80%, #ffffff 100%);
+  background: linear-gradient(110deg, #e0eafc 80%, #ffffff 100%);
   padding: 36px 28px 20px 28px;
   border-radius: 14px;
 }
@@ -963,16 +976,18 @@ onMounted(() => {
     font-size: 11px;
     padding: 2px 6px;
   }
+
   .schedule-detail.ultra {
     padding: 10px 2px 0 2px;
     font-size: 1rem;
   }
+
   .ultra-dialog ::deep(.el-dialog__body) {
     padding: 14px 8px 12px 8px;
   }
+
   .dialog-footer.ultra {
     gap: 9px;
   }
 }
-
 </style>

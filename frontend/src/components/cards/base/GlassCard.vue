@@ -1,6 +1,15 @@
 <template>
-  <GlassCardBase :title="title" :icon="icon" :variant="variant" :size="size" :hoverable="hoverable"
-    :show-decoration="showDecoration" :extra-classes="extraClasses" :width="width" :height="height">
+  <GlassCardBase
+    :title="title"
+    :icon="icon"
+    :variant="variant"
+    :size="size"
+    :hoverable="hoverable"
+    :show-decoration="showDecoration"
+    :extra-classes="extraClasses"
+    :width="width"
+    :height="height"
+  >
     <!-- 头部操作区域 -->
     <template v-if="$slots.actions" #headerActions>
       <slot name="actions"></slot>
@@ -22,61 +31,62 @@ import GlassCardBase from './GlassCardBase.vue'
 export default {
   name: 'GlassCard',
   components: {
-    GlassCardBase
+    GlassCardBase,
   },
   props: {
     // 卡片标题
     title: {
       type: String,
-      required: true
+      required: true,
     },
     // 卡片图标
     icon: {
       type: String,
-      default: '🔧'
+      default: '🔧',
     },
     // 卡片类型（影响头部颜色主题）- 兼容旧API
     type: {
       type: String,
       default: 'default',
-      validator: value => ['default', 'primary', 'success', 'warning', 'danger', 'info'].includes(value)
+      validator: (value) =>
+        ['default', 'primary', 'success', 'warning', 'danger', 'info'].includes(value),
     },
     // 新的变体系统
     variant: {
       type: String,
       default: 'base',
-      validator: value => ['base', 'display', 'content', 'enhanced', 'minimal'].includes(value)
+      validator: (value) => ['base', 'display', 'content', 'enhanced', 'minimal'].includes(value),
     },
     // 尺寸
     size: {
       type: String,
       default: 'medium',
-      validator: value => ['small', 'medium', 'large'].includes(value)
+      validator: (value) => ['small', 'medium', 'large'].includes(value),
     },
     // 是否可悬浮
     hoverable: {
       type: Boolean,
-      default: true
+      default: true,
     },
     // 是否显示装饰线
     showDecoration: {
       type: Boolean,
-      default: true
+      default: true,
     },
     // 额外的CSS类
     extraClasses: {
       type: String,
-      default: ''
+      default: '',
     },
     // 自定义尺寸
     width: {
       type: String,
-      default: ''
+      default: '',
     },
     height: {
       type: String,
-      default: ''
-    }
-  }
+      default: '',
+    },
+  },
 }
 </script>

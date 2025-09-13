@@ -3,7 +3,14 @@
     <!-- 页面头部 -->
     <div class="page-header">
       <h2>校区管理</h2>
-      <el-button type="primary" @click="showAddDialog" :icon="Plus"> 新增校区 </el-button>
+      <PrimaryButton @click="showAddDialog">
+        <template #icon-left>
+          <el-icon>
+            <Plus />
+          </el-icon>
+        </template>
+        新增校区
+      </PrimaryButton>
     </div>
 
     <!-- 校区列表 -->
@@ -51,12 +58,7 @@
         </el-form-item>
 
         <el-form-item label="地址" prop="address">
-          <el-input
-            v-model="campusForm.address"
-            type="textarea"
-            :rows="2"
-            placeholder="请输入详细地址"
-          />
+          <el-input v-model="campusForm.address" type="textarea" :rows="2" placeholder="请输入详细地址" />
         </el-form-item>
 
         <el-form-item label="联系人" prop="contact">
@@ -72,21 +74,16 @@
         </el-form-item>
 
         <el-form-item label="状态" prop="status">
-          <el-switch
-            v-model="campusForm.status"
-            active-value="active"
-            inactive-value="inactive"
-            active-text="运营中"
-            inactive-text="已停用"
-          />
+          <el-switch v-model="campusForm.status" active-value="active" inactive-value="inactive" active-text="运营中"
+            inactive-text="已停用" />
         </el-form-item>
       </el-form>
 
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="saveCampus" :loading="saving">
+        <OutlineButton @click="dialogVisible = false">取消</OutlineButton>
+        <PrimaryButton @click="saveCampus" :loading="saving">
           {{ isEdit ? '更新' : '创建' }}
-        </el-button>
+        </PrimaryButton>
       </template>
     </el-dialog>
 
@@ -114,18 +111,9 @@
           </el-form-item>
 
           <el-form-item v-if="adminForm.type === 'existing'" label="选择用户">
-            <el-select
-              v-model="adminForm.userId"
-              placeholder="请选择用户"
-              filterable
-              style="width: 100%"
-            >
-              <el-option
-                v-for="user in availableUsers"
-                :key="user.id"
-                :label="`${user.name} (${user.username})`"
-                :value="user.id"
-              />
+            <el-select v-model="adminForm.userId" placeholder="请选择用户" filterable style="width: 100%">
+              <el-option v-for="user in availableUsers" :key="user.id" :label="`${user.name} (${user.username})`"
+                :value="user.id" />
             </el-select>
           </el-form-item>
 
@@ -147,8 +135,8 @@
       </div>
 
       <template #footer>
-        <el-button @click="adminDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="saveAdmin" :loading="saving"> 设置管理员 </el-button>
+        <OutlineButton @click="adminDialogVisible = false">取消</OutlineButton>
+        <PrimaryButton @click="saveAdmin" :loading="saving">设置管理员</PrimaryButton>
       </template>
     </el-dialog>
   </div>
@@ -158,6 +146,8 @@
 import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import api from '@/utils/api'
+import PrimaryButton from '@/components/buttons/PrimaryButton.vue'
+import OutlineButton from '@/components/buttons/OutlineButton.vue'
 
 // 数据列表
 const campusList = ref([])

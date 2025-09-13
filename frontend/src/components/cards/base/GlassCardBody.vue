@@ -12,77 +12,78 @@ export default {
     type: {
       type: String,
       default: 'default',
-      validator: value => ['default', 'grid', 'form', 'actions', 'flex', 'status'].includes(value)
+      validator: (value) =>
+        ['default', 'grid', 'form', 'actions', 'flex', 'status'].includes(value),
     },
     // 方向（仅在 flex 类型下有效）
     direction: {
       type: String,
       default: 'column', // row, column
-      validator: value => ['row', 'column'].includes(value)
+      validator: (value) => ['row', 'column'].includes(value),
     },
     // 对齐方式
     align: {
       type: String,
       default: 'stretch', // stretch, start, center, end, baseline
-      validator: value => ['stretch', 'start', 'center', 'end', 'baseline'].includes(value)
+      validator: (value) => ['stretch', 'start', 'center', 'end', 'baseline'].includes(value),
     },
     // 内容间距
     gap: {
       type: String,
-      default: 'var(--spacing-md)'
+      default: 'var(--spacing-md)',
     },
     // 网格列数（仅在 grid 类型下有效）
     columns: {
       type: Number,
-      default: 1
+      default: 1,
     },
     // 最小列宽（仅在 actions 类型下有效）
     minColumnWidth: {
       type: String,
-      default: '120px'
+      default: '120px',
     },
     // 额外的CSS类
     extraClasses: {
       type: String,
-      default: ''
-    }
+      default: '',
+    },
   },
   computed: {
     contentClasses() {
-      const classes = ['glass-card-body'];
+      const classes = ['glass-card-body']
 
       if (this.type !== 'default') {
-        classes.push(`glass-card-body--${this.type}`);
+        classes.push(`glass-card-body--${this.type}`)
       }
 
       if (this.type === 'flex' && this.direction !== 'column') {
-        classes.push(`glass-card-body--${this.direction}`);
+        classes.push(`glass-card-body--${this.direction}`)
       }
 
       if (this.align !== 'stretch') {
-        classes.push(`glass-card-body--align-${this.align}`);
+        classes.push(`glass-card-body--align-${this.align}`)
       }
 
       if (this.extraClasses) {
-        classes.push(this.extraClasses);
+        classes.push(this.extraClasses)
       }
 
-      return classes.join(' ');
+      return classes.join(' ')
     },
     contentStyles() {
-      const styles = {};
+      const styles = {}
 
       if (this.type === 'grid' && this.columns > 1) {
-        styles.gridTemplateColumns = `repeat(${this.columns}, 1fr)`;
+        styles.gridTemplateColumns = `repeat(${this.columns}, 1fr)`
       }
 
       if (this.type === 'actions') {
-        styles.gridTemplateColumns = `repeat(auto-fit, minmax(${this.minColumnWidth}, 1fr))`;
+        styles.gridTemplateColumns = `repeat(auto-fit, minmax(${this.minColumnWidth}, 1fr))`
       }
 
-      return styles;
-    }
-  }
+      return styles
+    },
+  },
 }
 </script>
 

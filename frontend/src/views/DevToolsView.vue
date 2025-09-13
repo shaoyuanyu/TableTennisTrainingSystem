@@ -62,13 +62,27 @@
               </div>
               <div class="storage-item">
                 <label>Token值:</label>
-                <el-input v-model="token" size="small" placeholder="Token内容" type="textarea" :rows="3" readonly
-                  class="enhanced-textarea" />
+                <el-input
+                  v-model="token"
+                  size="small"
+                  placeholder="Token内容"
+                  type="textarea"
+                  :rows="3"
+                  readonly
+                  class="enhanced-textarea"
+                />
               </div>
               <div class="storage-item">
                 <label>用户信息:</label>
-                <el-input v-model="userInfoDisplay" size="small" placeholder="用户信息JSON" type="textarea" :rows="6"
-                  readonly class="enhanced-textarea" />
+                <el-input
+                  v-model="userInfoDisplay"
+                  size="small"
+                  placeholder="用户信息JSON"
+                  type="textarea"
+                  :rows="6"
+                  readonly
+                  class="enhanced-textarea"
+                />
               </div>
             </div>
           </GlassHeaderCard>
@@ -180,17 +194,29 @@
               <div class="role-details">
                 <h3>{{ currentRoleInfo.name }}</h3>
                 <p>{{ currentRoleInfo.description }}</p>
-                <el-alert title="注意" description="角色切换仅影响测试工具，不会改变您的实际登录状态" type="warning" :closable="false" show-icon
-                  size="small" />
+                <el-alert
+                  title="注意"
+                  description="角色切换仅影响测试工具，不会改变您的实际登录状态"
+                  type="warning"
+                  :closable="false"
+                  show-icon
+                  size="small"
+                />
               </div>
             </div>
 
             <div class="role-switcher">
               <h4>切换测试角色</h4>
               <div class="role-buttons">
-                <el-button v-for="role in availableRoles" :key="role.value"
-                  :type="currentRole === role.value ? 'primary' : 'default'" :disabled="currentRole === role.value"
-                  size="small" class="role-btn" @click="switchToTestRole(role.value)">
+                <el-button
+                  v-for="role in availableRoles"
+                  :key="role.value"
+                  :type="currentRole === role.value ? 'primary' : 'default'"
+                  :disabled="currentRole === role.value"
+                  size="small"
+                  class="role-btn"
+                  @click="switchToTestRole(role.value)"
+                >
                   {{ role.icon }} {{ role.label }}
                 </el-button>
               </div>
@@ -234,7 +260,7 @@
         </div>
 
         <!-- 测试统计和管理 -->
-        <GlassHeaderCard icon="📊" title="测试管理" style="margin-bottom: 20px;">
+        <GlassHeaderCard icon="📊" title="测试管理" style="margin-bottom: 20px">
           <div class="test-stats">
             <div class="stats-grid">
               <div class="stat-item">
@@ -290,26 +316,51 @@
             <h3 class="category-title">
               <span class="category-icon">{{ category.icon }}</span>
               {{ category.name }}
-              <el-tag :type="category.tagType" size="small">{{ category.pages.length }}个页面</el-tag>
+              <el-tag :type="category.tagType" size="small"
+                >{{ category.pages.length }}个页面</el-tag
+              >
             </h3>
             <div class="page-grid">
-              <div v-for="page in category.pages" :key="page.path" class="page-card" @click="navigateToPage(page)"
-                @contextmenu.prevent="showPageMenu(page)">
+              <div
+                v-for="page in category.pages"
+                :key="page.path"
+                class="page-card"
+                @click="navigateToPage(page)"
+                @contextmenu.prevent="showPageMenu(page)"
+              >
                 <!-- 悬浮操作按钮组 -->
                 <div class="page-actions-overlay">
-                  <el-button v-if="!page.tested" type="success" size="small" circle @click.stop="markPageTested(page)"
-                    title="标记已测试">
+                  <el-button
+                    v-if="!page.tested"
+                    type="success"
+                    size="small"
+                    circle
+                    @click.stop="markPageTested(page)"
+                    title="标记已测试"
+                  >
                     <el-icon>
                       <Check />
                     </el-icon>
                   </el-button>
-                  <el-button v-if="page.tested" type="warning" size="small" circle @click.stop="resetPageStatus(page)"
-                    title="重置状态">
+                  <el-button
+                    v-if="page.tested"
+                    type="warning"
+                    size="small"
+                    circle
+                    @click.stop="resetPageStatus(page)"
+                    title="重置状态"
+                  >
                     <el-icon>
                       <Refresh />
                     </el-icon>
                   </el-button>
-                  <el-button type="primary" size="small" circle @click.stop="navigateToPage(page)" title="访问页面">
+                  <el-button
+                    type="primary"
+                    size="small"
+                    circle
+                    @click.stop="navigateToPage(page)"
+                    title="访问页面"
+                  >
                     <el-icon>
                       <View />
                     </el-icon>
@@ -353,7 +404,7 @@
         </div>
 
         <div class="welcome-content">
-          <GlassHeaderCard icon="🛠️" title="开发工具集合" style="max-width: 700px; margin: 0 auto;">
+          <GlassHeaderCard icon="🛠️" title="开发工具集合" style="max-width: 700px; margin: 0 auto">
             <div class="welcome-info">
               <p>为开发和测试提供便捷的工具集合</p>
               <el-divider />
@@ -469,9 +520,7 @@ const isCoach = computed(() => userStore.isCoach)
 
 // 存储数据
 const token = computed(() => userStore.token)
-const userInfoDisplay = computed(() =>
-  JSON.stringify(userStore.userInfo, null, 2)
-)
+const userInfoDisplay = computed(() => JSON.stringify(userStore.userInfo, null, 2))
 
 // 角色测试相关
 const currentRole = ref('guest')
@@ -865,11 +914,7 @@ const clearRoleData = () => {
 
 // 显示角色权限
 const showRolePermissions = () => {
-  const permissions = [
-    '查看登录页面',
-    '查看注册页面',
-    '查看开发工具'
-  ]
+  const permissions = ['查看登录页面', '查看注册页面', '查看开发工具']
   ElMessageBox.alert(
     `${currentRoleInfo.value.name}的权限包括：\n\n${permissions.join('、')}`,
     '角色权限说明',
@@ -904,12 +949,12 @@ const navigateToPage = (page) => {
 // 刷新测试统计数据
 const refreshTestStats = () => {
   // 强制触发响应式更新 - 深度克隆数据
-  pageCategories.value = pageCategories.value.map(category => ({
+  pageCategories.value = pageCategories.value.map((category) => ({
     ...category,
-    pages: category.pages.map(page => ({
+    pages: category.pages.map((page) => ({
       ...page,
-      tested: getTestStatus(page.path) // 从 localStorage 重新读取最新状态
-    }))
+      tested: getTestStatus(page.path), // 从 localStorage 重新读取最新状态
+    })),
   }))
 }
 
@@ -932,34 +977,28 @@ const resetPageStatus = (page) => {
 // 显示页面右键菜单
 const showPageMenu = (page) => {
   // 简单的右键菜单实现
-  const actions = [
-    page.tested ? '重置状态' : '标记已测试',
-    '在新窗口打开',
-    '复制路径'
-  ]
+  const actions = [page.tested ? '重置状态' : '标记已测试', '在新窗口打开', '复制路径']
 
-  ElMessageBox.confirm(
-    `选择对 "${page.title}" 的操作`,
-    '页面操作',
-    {
-      distinguishCancelAndClose: true,
-      confirmButtonText: actions[0],
-      cancelButtonText: actions[1],
-      type: 'info',
-    }
-  ).then(() => {
-    // 主要操作：切换测试状态
-    if (page.tested) {
-      resetPageStatus(page)
-    } else {
-      markPageTested(page)
-    }
-  }).catch((action) => {
-    if (action === 'cancel') {
-      // 在新窗口打开
-      navigateToPage(page)
-    }
+  ElMessageBox.confirm(`选择对 "${page.title}" 的操作`, '页面操作', {
+    distinguishCancelAndClose: true,
+    confirmButtonText: actions[0],
+    cancelButtonText: actions[1],
+    type: 'info',
   })
+    .then(() => {
+      // 主要操作：切换测试状态
+      if (page.tested) {
+        resetPageStatus(page)
+      } else {
+        markPageTested(page)
+      }
+    })
+    .catch((action) => {
+      if (action === 'cancel') {
+        // 在新窗口打开
+        navigateToPage(page)
+      }
+    })
 }
 
 // 优化：缓存所有页面的结果，避免重复flatMap计算
@@ -980,21 +1019,23 @@ const debugTestStatus = () => {
   const allPages = getAllPages()
   const localStorage_status = JSON.parse(localStorage.getItem('pageTestStatus') || '{}')
 
-  const debugInfo = allPages.map(page => ({
+  const debugInfo = allPages.map((page) => ({
     path: page.path,
     title: page.title,
     currentTested: page.tested,
     localStorageTested: localStorage_status[page.path] || false,
-    consistent: page.tested === (localStorage_status[page.path] || false)
+    consistent: page.tested === (localStorage_status[page.path] || false),
   }))
 
   console.table(debugInfo)
 
-  const inconsistent = debugInfo.filter(item => !item.consistent)
+  const inconsistent = debugInfo.filter((item) => !item.consistent)
   if (inconsistent.length > 0) {
     ElMessage.warning(`发现 ${inconsistent.length} 个状态不一致的页面，请查看控制台`)
   } else {
-    ElMessage.success(`所有页面状态一致！总计 ${allPages.length} 个页面，${allPages.filter(p => p.tested).length} 个已测试`)
+    ElMessage.success(
+      `所有页面状态一致！总计 ${allPages.length} 个页面，${allPages.filter((p) => p.tested).length} 个已测试`,
+    )
   }
 }
 
@@ -1009,7 +1050,7 @@ const openAllPages = () => {
       confirmButtonText: '开始批量测试',
       cancelButtonText: '取消',
       type: 'warning',
-    }
+    },
   ).then(() => {
     let openedCount = 0
     allPages.forEach((page, index) => {
@@ -1034,8 +1075,8 @@ const openAllPages = () => {
 }
 // 标记所有页面为已测试
 const markAllTested = () => {
-  pageCategories.value.forEach(category => {
-    category.pages.forEach(page => {
+  pageCategories.value.forEach((category) => {
+    category.pages.forEach((page) => {
       page.tested = true
       setTestStatus(page.path, true)
     })
@@ -1051,8 +1092,8 @@ const resetTestStatus = () => {
     cancelButtonText: '取消',
     type: 'warning',
   }).then(() => {
-    pageCategories.value.forEach(category => {
-      category.pages.forEach(page => {
+    pageCategories.value.forEach((category) => {
+      category.pages.forEach((page) => {
         page.tested = false
         setTestStatus(page.path, false)
       })
@@ -1064,9 +1105,9 @@ const resetTestStatus = () => {
 
 // 导出测试报告
 const exportTestReport = () => {
-  const allPages = pageCategories.value.flatMap(category => category.pages)
+  const allPages = pageCategories.value.flatMap((category) => category.pages)
   const totalPages = allPages.length
-  const testedPages = allPages.filter(page => page.tested).length
+  const testedPages = allPages.filter((page) => page.tested).length
   const passRate = totalPages > 0 ? Math.round((testedPages / totalPages) * 100) : 0
 
   const report = {
@@ -1074,9 +1115,9 @@ const exportTestReport = () => {
     totalPages,
     testedPages,
     passRate,
-    categories: pageCategories.value.map(category => ({
+    categories: pageCategories.value.map((category) => ({
       name: category.name,
-      pages: category.pages.map(page => ({
+      pages: category.pages.map((page) => ({
         path: page.path,
         title: page.title,
         tested: page.tested,
@@ -1133,9 +1174,13 @@ onMounted(() => {
 })
 
 // 监听路由变化
-watch(() => route.query.tool, () => {
-  // 路由变化时可以做一些初始化工作
-}, { immediate: true })
+watch(
+  () => route.query.tool,
+  () => {
+    // 路由变化时可以做一些初始化工作
+  },
+  { immediate: true },
+)
 </script>
 
 <style scoped>
@@ -1395,7 +1440,7 @@ watch(() => route.query.tool, () => {
   box-sizing: border-box !important;
 }
 
-.el-button[size="large"] {
+.el-button[size='large'] {
   padding: 12px 20px !important;
   font-size: 14px !important;
   min-width: 100px;
@@ -1529,7 +1574,6 @@ watch(() => route.query.tool, () => {
 
 /* 响应式按钮布局 */
 @media (max-width: 1200px) {
-
   .action-buttons,
   .role-actions,
   .test-actions {
@@ -1543,7 +1587,6 @@ watch(() => route.query.tool, () => {
 }
 
 @media (max-width: 768px) {
-
   .action-buttons,
   .role-actions,
   .role-buttons,
@@ -1559,7 +1602,7 @@ watch(() => route.query.tool, () => {
     height: 32px !important;
   }
 
-  .el-button[size="small"] {
+  .el-button[size='small'] {
     padding: 6px 10px !important;
     font-size: 10px !important;
     height: 28px !important;
@@ -1567,7 +1610,6 @@ watch(() => route.query.tool, () => {
 }
 
 @media (max-width: 480px) {
-
   .action-buttons,
   .role-actions,
   .role-buttons,
@@ -1721,10 +1763,12 @@ watch(() => route.query.tool, () => {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg,
-      transparent 0%,
-      rgba(255, 255, 255, 0.2) 50%,
-      transparent 100%);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.2) 50%,
+    transparent 100%
+  );
   transition: left 0.6s ease;
   z-index: 1;
   pointer-events: none;
@@ -1768,10 +1812,12 @@ watch(() => route.query.tool, () => {
   gap: 12px;
   margin-bottom: 4px;
   padding: 12px;
-  background: linear-gradient(135deg,
-      rgba(255, 255, 255, 0.1) 0%,
-      rgba(255, 255, 255, 0.05) 50%,
-      rgba(255, 255, 255, 0.08) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.05) 50%,
+    rgba(255, 255, 255, 0.08) 100%
+  );
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(10px);
@@ -1790,10 +1836,7 @@ watch(() => route.query.tool, () => {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg,
-      transparent,
-      rgba(255, 255, 255, 0.1),
-      transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
   transition: left 0.6s ease;
 }
 
@@ -1802,10 +1845,12 @@ watch(() => route.query.tool, () => {
 }
 
 .page-card:hover .page-header {
-  background: linear-gradient(135deg,
-      rgba(255, 255, 255, 0.15) 0%,
-      rgba(255, 255, 255, 0.08) 50%,
-      rgba(255, 255, 255, 0.12) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.15) 0%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.12) 100%
+  );
   border-color: rgba(255, 255, 255, 0.25);
   transform: translateY(-1px);
   box-shadow:
@@ -1821,9 +1866,7 @@ watch(() => route.query.tool, () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg,
-      rgba(102, 126, 234, 0.2) 0%,
-      rgba(118, 75, 162, 0.2) 100%);
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(8px);
@@ -1843,10 +1886,7 @@ watch(() => route.query.tool, () => {
   left: -50%;
   width: 200%;
   height: 200%;
-  background: linear-gradient(45deg,
-      transparent,
-      rgba(255, 255, 255, 0.1),
-      transparent);
+  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
   transform: rotate(45deg);
   transition: all 0.6s ease;
   opacity: 0;
@@ -1859,9 +1899,7 @@ watch(() => route.query.tool, () => {
 
 .page-card:hover .page-icon {
   transform: scale(1.05);
-  background: linear-gradient(135deg,
-      rgba(102, 126, 234, 0.3) 0%,
-      rgba(118, 75, 162, 0.3) 100%);
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%);
   border-color: rgba(255, 255, 255, 0.3);
   box-shadow:
     0 4px 12px rgba(102, 126, 234, 0.3),
@@ -2121,7 +2159,6 @@ watch(() => route.query.tool, () => {
 }
 
 @media (max-width: 768px) {
-
   .debug-cards,
   .page-grid,
   .stats-grid {
@@ -2262,9 +2299,11 @@ watch(() => route.query.tool, () => {
 }
 
 .el-tag--success {
-  background: linear-gradient(135deg,
-      rgba(16, 185, 129, 0.9) 0%,
-      rgba(5, 150, 105, 0.9) 100%) !important;
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.9) 0%,
+    rgba(5, 150, 105, 0.9) 100%
+  ) !important;
   color: #ffffff !important;
   border: 1px solid rgba(16, 185, 129, 0.8) !important;
   box-shadow:
@@ -2274,9 +2313,11 @@ watch(() => route.query.tool, () => {
 }
 
 .el-tag--warning {
-  background: linear-gradient(135deg,
-      rgba(239, 68, 68, 0.9) 0%,
-      rgba(220, 38, 127, 0.9) 100%) !important;
+  background: linear-gradient(
+    135deg,
+    rgba(239, 68, 68, 0.9) 0%,
+    rgba(220, 38, 127, 0.9) 100%
+  ) !important;
   color: #ffffff !important;
   border: 1px solid rgba(239, 68, 68, 0.8) !important;
   box-shadow:
@@ -2287,8 +2328,7 @@ watch(() => route.query.tool, () => {
 
 .el-tag:hover {
   transform: translateY(-1px) scale(1.05);
-  box-shadow:
-    0 6px 16px rgba(0, 0, 0, 0.2) !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2) !important;
 }
 
 .el-tag--success:hover {
@@ -2310,10 +2350,12 @@ watch(() => route.query.tool, () => {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg,
-      transparent 0%,
-      rgba(255, 255, 255, 0.3) 50%,
-      transparent 100%);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    transparent 100%
+  );
   transition: left 0.5s ease;
 }
 

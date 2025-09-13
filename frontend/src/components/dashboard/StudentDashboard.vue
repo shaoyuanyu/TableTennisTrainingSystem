@@ -6,7 +6,7 @@
         <div class="welcome-content">
           <h1 class="welcome-title">{{ getWelcomeMessage() }}，{{ userStore.userName }}！</h1>
           <p class="welcome-subtitle">今天也要加油训练哦！🏓</p>
-          
+
           <!-- 今日概览 -->
           <div class="today-overview">
             <div class="overview-item">
@@ -32,7 +32,7 @@
             </div>
           </div>
         </div>
-        
+
         <div class="avatar-container">
           <el-avatar :size="80" :src="userStore.userInfo.avatar" class="user-avatar">
             <el-icon size="40">
@@ -45,7 +45,7 @@
           <div class="avatar-decoration">✨</div>
         </div>
       </div>
-      
+
       <!-- 学习统计数据 -->
       <div class="stats-overview">
         <h3 class="stats-title">
@@ -92,10 +92,12 @@
                 <p>今天的训练安排</p>
               </div>
             </div>
-            <el-button type="primary" size="small" @click="goToSchedule" class="modern-button">
-              <el-icon><View /></el-icon>
+            <PrimaryButton size="sm" to="/student/schedule">
+              <el-icon>
+                <View />
+              </el-icon>
               查看完整课表
-            </el-button>
+            </PrimaryButton>
           </div>
 
           <div v-if="todaySchedule.length > 0" class="schedule-timeline">
@@ -111,9 +113,7 @@
                 </div>
               </div>
               <div class="timeline-status">
-                <el-button v-if="item.status === 'upcoming'" size="small" type="primary">
-                  开始训练
-                </el-button>
+                <PrimaryButton v-if="item.status === 'upcoming'" size="sm">开始训练</PrimaryButton>
                 <el-tag v-else :type="getStatusType(item.status)" size="small">
                   {{ getStatusText(item.status) }}
                 </el-tag>
@@ -126,10 +126,12 @@
               <div class="empty-icon">📚</div>
               <h4>今天没有课程安排</h4>
               <p>快去预约您感兴趣的课程吧！</p>
-              <el-button type="primary" @click="goToBooking" class="modern-button">
-                <el-icon><Plus /></el-icon>
+              <PrimaryButton to="/student/book-training">
+                <el-icon>
+                  <Plus />
+                </el-icon>
                 预约课程
-              </el-button>
+              </PrimaryButton>
             </div>
           </div>
         </div>
@@ -150,19 +152,13 @@
             </div>
           </div>
           <div class="quick-actions">
-            <el-button
-              v-for="action in quickActions"
-              :key="action.key"
-              :type="action.type"
-              @click="action.handler"
-              class="action-button"
-              size="large"
-            >
-              <template #icon>
+            <OutlineButton v-for="action in quickActions" :key="action.key" :color="action.color"
+              @click="action.handler" class="action-button" size="lg">
+              <el-icon style="margin-right:8px">
                 <component :is="action.icon" />
-              </template>
+              </el-icon>
               {{ action.label }}
-            </el-button>
+            </OutlineButton>
           </div>
         </div>
 
@@ -189,14 +185,18 @@
               </el-tag>
             </div>
             <div class="balance-actions">
-              <el-button type="primary" @click="goToRecharge" class="modern-button">
-                <el-icon><CreditCard /></el-icon>
+              <PrimaryButton to="/student/account-recharge">
+                <el-icon>
+                  <CreditCard />
+                </el-icon>
                 立即充值
-              </el-button>
-              <el-button @click="viewTransactions" class="modern-button">
-                <el-icon><List /></el-icon>
+              </PrimaryButton>
+              <OutlineButton to="/student/transactions">
+                <el-icon>
+                  <List />
+                </el-icon>
                 消费记录
-              </el-button>
+              </OutlineButton>
             </div>
           </div>
         </div>
@@ -228,13 +228,8 @@
                 <div class="progress-percentage">{{ progress.percentage }}%</div>
               </div>
               <div class="progress-bar-container">
-                <el-progress
-                  :percentage="progress.percentage"
-                  :color="progress.color"
-                  :stroke-width="12"
-                  :show-text="false"
-                  class="enhanced-progress"
-                />
+                <el-progress :percentage="progress.percentage" :color="progress.color" :stroke-width="12"
+                  :show-text="false" class="enhanced-progress" />
               </div>
             </div>
           </div>
@@ -254,12 +249,16 @@
                 <p>专属教练团队 ({{ myCoaches.length }}/2)</p>
               </div>
             </div>
-            <el-button v-if="myCoaches.length < 2" type="primary" size="small" @click="goToFindCoach" class="modern-button">
-              <el-icon><Plus /></el-icon>
+            <PrimaryButton v-if="myCoaches.length < 2" size="sm" to="/student/find-coach">
+              <el-icon>
+                <Plus />
+              </el-icon>
               寻找教练
-            </el-button>
+            </PrimaryButton>
             <el-link v-else type="primary" @click="goToCoaches" class="modern-link">
-              <el-icon><ArrowRight /></el-icon>
+              <el-icon>
+                <ArrowRight />
+              </el-icon>
               管理教练
             </el-link>
           </div>
@@ -283,14 +282,18 @@
                 </div>
               </div>
               <div class="coach-actions">
-                <el-button size="small" type="primary" @click="contactCoach(coach)" class="modern-button">
-                  <el-icon><ChatDotRound /></el-icon>
+                <PrimaryButton size="sm" @click="contactCoach(coach)">
+                  <el-icon>
+                    <ChatDotRound />
+                  </el-icon>
                   联系
-                </el-button>
-                <el-button size="small" @click="viewCoachProfile(coach)" class="modern-button">
-                  <el-icon><View /></el-icon>
+                </PrimaryButton>
+                <OutlineButton size="sm" @click="viewCoachProfile(coach)">
+                  <el-icon>
+                    <View />
+                  </el-icon>
                   详情
-                </el-button>
+                </OutlineButton>
               </div>
             </div>
           </div>
@@ -301,10 +304,12 @@
               <div class="empty-icon">👨‍🏫</div>
               <h4>还没有专属教练</h4>
               <p>找到适合的教练，开始您的训练之旅！</p>
-              <el-button type="primary" @click="goToFindCoach" class="modern-button">
-                <el-icon><Plus /></el-icon>
+              <PrimaryButton @click="goToFindCoach">
+                <el-icon>
+                  <Plus />
+                </el-icon>
                 寻找教练
-              </el-button>
+              </PrimaryButton>
             </div>
           </div>
         </div>
@@ -318,6 +323,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import dayjs from 'dayjs'
+import { PrimaryButton, OutlineButton } from '@/components/buttons'
 import {
   User,
   Calendar,
@@ -444,28 +450,28 @@ const quickActions = ref([
   {
     key: 'booking',
     label: '预约课程',
-    type: 'primary',
+    color: 'primary',
     icon: Calendar,
     handler: () => router.push('/student/book-training'),
   },
   {
     key: 'coaches',
     label: '找教练',
-    type: 'success',
+    color: 'success',
     icon: UserFilled,
     handler: () => router.push('/student/find-coach'),
   },
   {
     key: 'recharge',
     label: '账户充值',
-    type: 'warning',
+    color: 'warning',
     icon: Wallet,
     handler: () => router.push('/student/account-recharge'),
   },
   {
     key: 'evaluation',
     label: '课程评价',
-    type: 'info',
+    color: 'info',
     icon: Star,
     handler: () => router.push('/student/training-evaluation'),
   },
@@ -519,26 +525,6 @@ const getStatusText = (status) => {
 }
 
 // 导航方法
-const goToSchedule = () => {
-  router.push('/student/schedule')
-}
-
-const goToBooking = () => {
-  router.push('/student/book-training')
-}
-
-const goToCoaches = () => {
-  router.push('/student/my-coaches')
-}
-
-const goToRecharge = () => {
-  router.push('/student/account-recharge')
-}
-
-const viewTransactions = () => {
-  router.push('/student/transactions')
-}
-
 const contactCoach = (coach) => {
   router.push(`/student/coach-profile?id=${coach.id}`)
 }
@@ -547,19 +533,15 @@ const viewCoachProfile = (coach) => {
   router.push(`/student/coach-profile?id=${coach.id}`)
 }
 
-const goToFindCoach = () => {
-  router.push('/student/find-coach')
-}
-
 // 处理统计卡片点击
 const handleStatClick = (stat) => {
   const routeMap = {
     courses: '/student/schedule',
-    hours: '/student/training-history', 
+    hours: '/student/training-history',
     coaches: '/student/my-coaches',
-    level: '/student/skill-assessment'
+    level: '/student/skill-assessment',
   }
-  
+
   const route = routeMap[stat.key]
   if (route) {
     router.push(route)
@@ -713,9 +695,12 @@ onMounted(() => {
 
 /* 动画效果 */
 @keyframes float {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0px) rotate(0deg);
   }
+
   50% {
     transform: translateY(-20px) rotate(180deg);
   }
@@ -725,16 +710,20 @@ onMounted(() => {
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
 }
 
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: scale(1);
     opacity: 0.3;
   }
+
   50% {
     transform: scale(1.2);
     opacity: 0.5;
@@ -742,12 +731,16 @@ onMounted(() => {
 }
 
 @keyframes wiggle {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: rotate(0deg);
   }
+
   25% {
     transform: rotate(5deg);
   }
+
   75% {
     transform: rotate(-5deg);
   }
@@ -899,7 +892,7 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: 
+  box-shadow:
     0 3px 8px rgba(0, 0, 0, 0.15),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
@@ -975,7 +968,7 @@ onMounted(() => {
 
 .user-avatar {
   border: 4px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 
+  box-shadow:
     0 8px 24px rgba(0, 0, 0, 0.2),
     inset 0 2px 0 rgba(255, 255, 255, 0.3);
   transition: all 0.3s ease;
@@ -983,7 +976,7 @@ onMounted(() => {
 
 .user-avatar:hover {
   transform: scale(1.05);
-  box-shadow: 
+  box-shadow:
     0 12px 32px rgba(0, 0, 0, 0.25),
     inset 0 2px 0 rgba(255, 255, 255, 0.4);
 }
@@ -1123,55 +1116,7 @@ onMounted(() => {
   color: var(--white-alpha-80);
 }
 
-/* 统一的按钮和标签样式 */
-/* 主按钮样式 */
-.el-button--primary.modern-button {
-  background: linear-gradient(135deg, rgba(64, 158, 255, 0.8), rgba(100, 181, 246, 0.6)) !important;
-  border: 1px solid rgba(64, 158, 255, 0.3) !important;
-  color: white !important;
-  backdrop-filter: blur(10px) !important;
-  border-radius: 12px !important;
-  font-weight: 600 !important;
-  padding: 8px 16px !important;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  position: relative !important;
-  overflow: hidden !important;
-  box-shadow: 0 4px 16px rgba(64, 158, 255, 0.2) !important;
-}
-
-.el-button--primary.modern-button:hover {
-  background: linear-gradient(135deg, rgba(64, 158, 255, 0.9), rgba(100, 181, 246, 0.7)) !important;
-  border-color: rgba(64, 158, 255, 0.5) !important;
-  transform: translateY(-2px) !important;
-  box-shadow: 0 6px 20px rgba(64, 158, 255, 0.3) !important;
-}
-
-/* 次要按钮样式 */
-.el-button.modern-button:not(.el-button--primary) {
-  background: rgba(255, 255, 255, 0.1) !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
-  color: rgba(255, 255, 255, 0.9) !important;
-  backdrop-filter: blur(10px) !important;
-  border-radius: 12px !important;
-  font-weight: 500 !important;
-  padding: 8px 16px !important;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
-}
-
-.el-button.modern-button:not(.el-button--primary):hover {
-  background: rgba(255, 255, 255, 0.2) !important;
-  border-color: rgba(255, 255, 255, 0.3) !important;
-  transform: translateY(-2px) !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-}
-
-/* 小尺寸按钮 */
-.el-button--small.modern-button {
-  padding: 6px 12px !important;
-  font-size: 13px !important;
-  border-radius: 10px !important;
-}
+/* 统一的按钮和标签样式（迁移到新按钮体系） */
 
 /* 标签样式统一 */
 .el-tag {
@@ -1211,7 +1156,9 @@ onMounted(() => {
 }
 
 .el-tag--info {
-  background: linear-gradient(135deg, rgba(144, 147, 153, 0.3), rgba(158, 158, 158, 0.2)) !important;
+  background: linear-gradient(135deg,
+      rgba(144, 147, 153, 0.3),
+      rgba(158, 158, 158, 0.2)) !important;
   border-color: rgba(144, 147, 153, 0.4) !important;
   color: rgba(255, 255, 255, 0.95) !important;
 }
@@ -1235,7 +1182,8 @@ onMounted(() => {
   max-height: 400px;
   overflow-y: auto;
   overflow-x: hidden;
-  padding-right: 4px; /* 为滚动条留出空间 */
+  padding-right: 4px;
+  /* 为滚动条留出空间 */
 }
 
 .timeline-item {
@@ -1244,7 +1192,8 @@ onMounted(() => {
   gap: 16px;
   padding: 20px;
   margin-bottom: 16px;
-  margin-right: 4px; /* 防止悬停时溢出 */
+  margin-right: 4px;
+  /* 防止悬停时溢出 */
   background: rgba(255, 255, 255, 0.1);
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.15);
@@ -1306,7 +1255,7 @@ onMounted(() => {
 }
 
 /* 时间轴按钮样式 */
-.timeline-status .el-button {
+.timeline-status .btn-modern {
   background: linear-gradient(135deg, rgba(64, 158, 255, 0.8), rgba(100, 181, 246, 0.6)) !important;
   border: 1px solid rgba(64, 158, 255, 0.3) !important;
   color: white !important;
@@ -1318,7 +1267,7 @@ onMounted(() => {
   transition: all 0.3s ease !important;
 }
 
-.timeline-status .el-button:hover {
+.timeline-status .btn-modern:hover {
   background: linear-gradient(135deg, rgba(64, 158, 255, 0.9), rgba(100, 181, 246, 0.7)) !important;
   transform: translateY(-1px) !important;
   box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3) !important;
@@ -1474,7 +1423,7 @@ onMounted(() => {
   flex-shrink: 0;
 }
 
-.coach-actions .modern-button {
+.coach-actions .btn-modern {
   font-size: 12px;
   padding: 6px 12px;
   height: auto;
@@ -1688,34 +1637,39 @@ onMounted(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(45deg, 
-    rgba(255, 255, 255, 0.02) 25%, 
-    transparent 25%, 
-    transparent 50%, 
-    rgba(255, 255, 255, 0.02) 50%, 
-    rgba(255, 255, 255, 0.02) 75%, 
-    transparent 75%, 
-    transparent);
+  background: linear-gradient(45deg,
+      rgba(255, 255, 255, 0.02) 25%,
+      transparent 25%,
+      transparent 50%,
+      rgba(255, 255, 255, 0.02) 50%,
+      rgba(255, 255, 255, 0.02) 75%,
+      transparent 75%,
+      transparent);
   background-size: 8px 8px;
   animation: progressStripes 1s linear infinite;
 }
 
 @keyframes progressStripes {
-  0% { background-position: 0 0; }
-  100% { background-position: 8px 0; }
+  0% {
+    background-position: 0 0;
+  }
+
+  100% {
+    background-position: 8px 0;
+  }
 }
 
 .enhanced-progress .el-progress-bar__inner {
   border-radius: 12px !important;
   position: relative !important;
   overflow: hidden !important;
-  box-shadow: 
+  box-shadow:
     0 2px 8px rgba(0, 0, 0, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
-  background: linear-gradient(135deg, 
-    var(--el-color-primary) 0%, 
-    var(--el-color-primary-light-3) 50%, 
-    var(--el-color-primary) 100%) !important;
+  background: linear-gradient(135deg,
+      var(--el-color-primary) 0%,
+      var(--el-color-primary-light-3) 50%,
+      var(--el-color-primary) 100%) !important;
   transition: all 0.3s ease !important;
 }
 
@@ -1726,23 +1680,38 @@ onMounted(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(90deg, 
-    rgba(255, 255, 255, 0.0) 0%, 
-    rgba(255, 255, 255, 0.3) 50%, 
-    rgba(255, 255, 255, 0.0) 100%);
+  background: linear-gradient(90deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.3) 50%,
+      rgba(255, 255, 255, 0) 100%);
   transform: translateX(-100%);
   animation: progressShine 2s ease-in-out infinite;
 }
 
 @keyframes progressShine {
-  0% { transform: translateX(-100%); }
-  50% { transform: translateX(100%); }
-  100% { transform: translateX(100%); }
+  0% {
+    transform: translateX(-100%);
+  }
+
+  50% {
+    transform: translateX(100%);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 @keyframes progressPulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.8; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.8;
+  }
 }
 
 /* 为高进度值添加脉冲效果 */
@@ -1764,12 +1733,12 @@ onMounted(() => {
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, 
-    transparent 0%, 
-    rgba(255, 255, 255, 0.2) 20%, 
-    rgba(255, 255, 255, 0.4) 50%, 
-    rgba(255, 255, 255, 0.2) 80%, 
-    transparent 100%);
+  background: linear-gradient(90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.2) 20%,
+      rgba(255, 255, 255, 0.4) 50%,
+      rgba(255, 255, 255, 0.2) 80%,
+      transparent 100%);
   transform: translateY(-50%);
   opacity: 0.3;
   z-index: -1;
@@ -1782,15 +1751,13 @@ onMounted(() => {
   left: 0;
   right: 0;
   height: 50%;
-  background: linear-gradient(to bottom, 
-    rgba(255, 255, 255, 0.4), 
-    transparent);
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.4), transparent);
   border-radius: 12px 12px 0 0;
 }
 
 /* 悬停时的进度条增强效果 */
 .progress-item:hover .enhanced-progress .el-progress-bar__inner {
-  box-shadow: 
+  box-shadow:
     0 4px 16px rgba(0, 0, 0, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.4),
     0 0 20px var(--el-color-primary-light-5) !important;
@@ -1803,7 +1770,7 @@ onMounted(() => {
 }
 
 .progress-item:nth-child(1):hover .enhanced-progress .el-progress-bar__inner {
-  box-shadow: 
+  box-shadow:
     0 4px 16px rgba(0, 0, 0, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.4),
     0 0 20px rgba(103, 194, 58, 0.5) !important;
@@ -1814,7 +1781,7 @@ onMounted(() => {
 }
 
 .progress-item:nth-child(2):hover .enhanced-progress .el-progress-bar__inner {
-  box-shadow: 
+  box-shadow:
     0 4px 16px rgba(0, 0, 0, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.4),
     0 0 20px rgba(64, 158, 255, 0.5) !important;
@@ -1825,7 +1792,7 @@ onMounted(() => {
 }
 
 .progress-item:nth-child(3):hover .enhanced-progress .el-progress-bar__inner {
-  box-shadow: 
+  box-shadow:
     0 4px 16px rgba(0, 0, 0, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.4),
     0 0 20px rgba(230, 162, 60, 0.5) !important;
@@ -1836,7 +1803,7 @@ onMounted(() => {
 }
 
 .progress-item:nth-child(4):hover .enhanced-progress .el-progress-bar__inner {
-  box-shadow: 
+  box-shadow:
     0 4px 16px rgba(0, 0, 0, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.4),
     0 0 20px rgba(245, 108, 108, 0.5) !important;
@@ -2068,6 +2035,7 @@ onMounted(() => {
   0% {
     transform: translateX(-100%) translateY(-100%) rotate(45deg);
   }
+
   100% {
     transform: translateX(100%) translateY(100%) rotate(45deg);
   }

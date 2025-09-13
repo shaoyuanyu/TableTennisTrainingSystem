@@ -45,14 +45,14 @@
         </div>
 
         <div class="action-buttons">
-          <el-button type="primary" size="large" @click="goToLogin"> 立即登录 </el-button>
+          <PrimaryButton size="lg" @click="goToLogin">立即登录</PrimaryButton>
           <el-dropdown @command="handleRegisterCommand">
-            <el-button size="large">
+            <OutlineButton size="lg">
               注册账号
               <el-icon class="el-icon--right">
                 <ArrowDown />
               </el-icon>
-            </el-button>
+            </OutlineButton>
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item command="student">
@@ -79,6 +79,7 @@
 <script setup>
 import { useRouter } from 'vue-router'
 import { ArrowDown, User, UserFilled } from '@element-plus/icons-vue'
+import { PrimaryButton, OutlineButton } from '@/components/buttons'
 
 const router = useRouter()
 
@@ -206,6 +207,7 @@ const handleRegisterCommand = (command) => {
 
 /* 动画 */
 @keyframes float {
+
   0%,
   100% {
     transform: translateY(0px);

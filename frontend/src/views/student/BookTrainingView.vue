@@ -47,26 +47,15 @@
 
         <!-- 教练列表 -->
         <div class="coaches-grid">
-          <div
-            v-for="coach in availableCoaches"
-            :key="coach.id"
-            class="coach-item"
-            :class="{ selected: selectedCoach?.id === coach.id }"
-            @click="selectCoach(coach)"
-          >
+          <div v-for="coach in availableCoaches" :key="coach.id" class="coach-item"
+            :class="{ selected: selectedCoach?.id === coach.id }" @click="selectCoach(coach)">
             <el-avatar :size="60" :src="coach.avatar">
               {{ coach.name.charAt(0) }}
             </el-avatar>
             <h4>{{ coach.name }}</h4>
             <p>{{ getLevelText(coach.level) }}</p>
             <div class="coach-rating">
-              <el-rate
-                v-model="coach.rating"
-                disabled
-                show-score
-                text-color="#ff9900"
-                score-template="{value}"
-              />
+              <el-rate v-model="coach.rating" disabled show-score text-color="#ff9900" score-template="{value}" />
             </div>
             <div class="coach-price">¥{{ coach.hourlyRate }}/小时</div>
           </div>
@@ -82,14 +71,10 @@
             <h4>选择日期</h4>
             <el-calendar v-model="selectedDate" @panel-change="loadCoachSchedule">
               <template #date-cell="{ data }">
-                <div
-                  class="calendar-cell"
-                  :class="{
-                    available: hasAvailableSlots(data.day),
-                    selected: selectedDate === data.day,
-                  }"
-                  @click="selectDate(data.day)"
-                >
+                <div class="calendar-cell" :class="{
+                  available: hasAvailableSlots(data.day),
+                  selected: selectedDate === data.day,
+                }" @click="selectDate(data.day)">
                   <span class="date-text">{{ data.day.split('-').slice(2).join('') }}</span>
                   <div v-if="hasAvailableSlots(data.day)" class="available-indicator">
                     {{ getAvailableSlots(data.day).length }}个时段
@@ -102,13 +87,8 @@
           <el-col :span="12">
             <h4>选择时间段</h4>
             <div v-if="selectedDate" class="time-slots">
-              <div
-                v-for="slot in getAvailableSlots(selectedDate)"
-                :key="slot.id"
-                class="time-slot"
-                :class="{ selected: selectedTimeSlot?.id === slot.id }"
-                @click="selectTimeSlot(slot)"
-              >
+              <div v-for="slot in getAvailableSlots(selectedDate)" :key="slot.id" class="time-slot"
+                :class="{ selected: selectedTimeSlot?.id === slot.id }" @click="selectTimeSlot(slot)">
                 <div class="slot-time">{{ slot.startTime }} - {{ slot.endTime }}</div>
                 <div class="slot-info">{{ slot.duration }}分钟</div>
               </div>
@@ -153,12 +133,7 @@
           </el-form-item>
 
           <el-form-item label="特殊要求">
-            <el-input
-              v-model="courseForm.requirements"
-              type="textarea"
-              :rows="3"
-              placeholder="请描述您的特殊要求或需要重点练习的内容"
-            />
+            <el-input v-model="courseForm.requirements" type="textarea" :rows="3" placeholder="请描述您的特殊要求或需要重点练习的内容" />
           </el-form-item>
         </el-form>
       </div>
@@ -198,12 +173,7 @@
           </el-descriptions-item>
 
           <el-descriptions-item label="课程目标" :span="2">
-            <el-tag
-              v-for="goal in courseForm.goals"
-              :key="goal"
-              size="small"
-              style="margin-right: 8px"
-            >
+            <el-tag v-for="goal in courseForm.goals" :key="goal" size="small" style="margin-right: 8px">
               {{ getGoalText(goal) }}
             </el-tag>
           </el-descriptions-item>
@@ -235,27 +205,32 @@
 
     <!-- 操作按钮 -->
     <div class="step-actions">
-      <el-button v-if="currentStep > 0" @click="prevStep" :icon="ArrowLeft"> 上一步 </el-button>
+      <OutlineButton v-if="currentStep > 0" @click="prevStep">
+        <template #icon-left>
+          <el-icon>
+            <ArrowLeft />
+          </el-icon>
+        </template>
+        上一步
+      </OutlineButton>
 
-      <el-button
-        v-if="currentStep < 3"
-        type="primary"
-        @click="nextStep"
-        :disabled="!canProceed()"
-        :icon="ArrowRight"
-      >
+      <PrimaryButton v-if="currentStep < 3" @click="nextStep" :disabled="!canProceed()">
         下一步
-      </el-button>
+        <template #icon-right>
+          <el-icon>
+            <ArrowRight />
+          </el-icon>
+        </template>
+      </PrimaryButton>
 
-      <el-button
-        v-if="currentStep === 3"
-        type="primary"
-        @click="confirmBooking"
-        :loading="submitting"
-        :icon="Check"
-      >
+      <PrimaryButton v-if="currentStep === 3" @click="confirmBooking" :loading="submitting">
+        <template #icon-left>
+          <el-icon>
+            <Check />
+          </el-icon>
+        </template>
         确认预约
-      </el-button>
+      </PrimaryButton>
     </div>
   </div>
 </template>
@@ -267,6 +242,8 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { ArrowLeft, ArrowRight, Check } from '@element-plus/icons-vue'
 import dayjs from 'dayjs'
 import api from '@/utils/api'
+import PrimaryButton from '@/components/buttons/PrimaryButton.vue'
+import OutlineButton from '@/components/buttons/OutlineButton.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -701,7 +678,7 @@ onMounted(() => {
   padding: 20px 0;
 }
 
-.step-actions .el-button {
+.step-actions .btn-modern {
   margin: 0 8px;
   min-width: 120px;
 }

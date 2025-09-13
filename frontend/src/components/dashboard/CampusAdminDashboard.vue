@@ -116,7 +116,7 @@
                 </el-icon>
                 <span>教练团队</span>
               </div>
-              <el-button type="primary" size="small" @click="manageCoaches">管理教练</el-button>
+              <PrimaryButton size="sm" @click="manageCoaches">管理教练</PrimaryButton>
             </div>
           </template>
           <div class="coaches-grid">
@@ -270,11 +270,7 @@
             </div>
           </template>
           <div class="notifications-list">
-            <div
-              v-for="notification in notifications"
-              :key="notification.id"
-              class="notification-item"
-            >
+            <div v-for="notification in notifications" :key="notification.id" class="notification-item">
               <div class="notification-icon" :class="notification.type">
                 <el-icon>
                   <component :is="getNotificationIcon(notification.type)" />
@@ -285,9 +281,7 @@
                 <div class="notification-time">{{ formatTime(notification.time) }}</div>
               </div>
               <div class="notification-action">
-                <el-button size="small" type="primary" @click="handleNotification(notification)">
-                  处理
-                </el-button>
+                <PrimaryButton size="sm" @click="handleNotification(notification)">处理</PrimaryButton>
               </div>
             </div>
           </div>
@@ -335,19 +329,13 @@
             </div>
           </template>
           <div class="quick-actions">
-            <el-button
-              v-for="action in quickActions"
-              :key="action.key"
-              :type="action.type"
-              @click="action.handler"
-              class="action-button"
-              size="large"
-            >
-              <template #icon>
+            <OutlineButton v-for="action in quickActions" :key="action.key" :color="action.color"
+              @click="action.handler" class="action-button" size="lg">
+              <el-icon style="margin-right:8px">
                 <component :is="action.icon" />
-              </template>
+              </el-icon>
               {{ action.label }}
-            </el-button>
+            </OutlineButton>
           </div>
         </el-card>
       </el-col>
@@ -360,6 +348,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import dayjs from 'dayjs'
+import { PrimaryButton, OutlineButton } from '@/components/buttons'
 import {
   User,
   UserFilled,
@@ -551,28 +540,28 @@ const quickActions = ref([
   {
     key: 'coaches',
     label: '教练管理',
-    type: 'primary',
+    color: 'primary',
     icon: UserFilled,
     handler: () => router.push('/campus/coaches'),
   },
   {
     key: 'students',
     label: '学员管理',
-    type: 'success',
+    color: 'success',
     icon: Avatar,
     handler: () => router.push('/campus/students'),
   },
   {
     key: 'finance',
     label: '财务报表',
-    type: 'warning',
+    color: 'warning',
     icon: Money,
     handler: () => router.push('/campus/finance'),
   },
   {
     key: 'schedule',
     label: '课程安排',
-    type: 'info',
+    color: 'info',
     icon: Calendar,
     handler: () => router.push('/campus/schedule'),
   },

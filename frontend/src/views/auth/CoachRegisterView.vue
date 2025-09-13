@@ -198,8 +198,7 @@ const registerForm = reactive({
 // 校验函数（沿用学生注册）
 const validatePassword = (rule, value, callback) => {
   if (!value) callback(new Error('请输入密码'))
-  else if (value.length < 8 || value.length > 16)
-    callback(new Error('密码长度在 8 到 16 个字符'))
+  else if (value.length < 8 || value.length > 16) callback(new Error('密码长度在 8 到 16 个字符'))
   else if (!/^(?=.*[a-zA-Z])(?=.*\d)(?=.*[\W_]).{8,16}$/.test(value))
     callback(new Error('密码必须包含字母、数字和特殊字符'))
   else callback()
@@ -230,7 +229,7 @@ const registerRules = {
   campusId: [{ required: true, message: '请选择校区', trigger: 'change' }],
   email: [
     { required: true, message: '请输入邮箱地址', trigger: 'blur' },
-    { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' }
+    { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' },
   ],
   hourlyRate: [{ required: true, message: '请输入课时费', trigger: 'blur' }],
   maxStudents: [{ required: true, message: '请输入最大带学生数', trigger: 'blur' }],
@@ -281,8 +280,8 @@ const handleRegister = async () => {
         maxStudents: parseInt(registerForm.maxStudents),
         currentStudents: 0,
         isApproved: false,
-        approvedBy: -1
-      }
+        approvedBy: -1,
+      },
     }
 
     console.log('发送到后端的教练注册数据:', JSON.stringify(registerData, null, 2))

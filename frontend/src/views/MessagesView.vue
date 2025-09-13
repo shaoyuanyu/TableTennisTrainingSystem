@@ -4,17 +4,25 @@
     <div class="background-3d">
       <div class="particle-network"></div>
       <div class="floating-icons">
-        <div class="floating-icon" style="top: 15%; left: 10%; animation-delay: 0s;">
-          <el-icon><Message /></el-icon>
+        <div class="floating-icon" style="top: 15%; left: 10%; animation-delay: 0s">
+          <el-icon>
+            <Message />
+          </el-icon>
         </div>
-        <div class="floating-icon" style="top: 25%; right: 12%; animation-delay: 1s;">
-          <el-icon><Bell /></el-icon>
+        <div class="floating-icon" style="top: 25%; right: 12%; animation-delay: 1s">
+          <el-icon>
+            <Bell />
+          </el-icon>
         </div>
-        <div class="floating-icon" style="bottom: 20%; left: 15%; animation-delay: 2s;">
-          <el-icon><ChatDotRound /></el-icon>
+        <div class="floating-icon" style="bottom: 20%; left: 15%; animation-delay: 2s">
+          <el-icon>
+            <ChatDotRound />
+          </el-icon>
         </div>
-        <div class="floating-icon" style="bottom: 30%; right: 10%; animation-delay: 3s;">
-          <el-icon><Postcard /></el-icon>
+        <div class="floating-icon" style="bottom: 30%; right: 10%; animation-delay: 3s">
+          <el-icon>
+            <Postcard />
+          </el-icon>
         </div>
       </div>
     </div>
@@ -32,12 +40,12 @@
           </div>
           <div class="header-actions">
             <el-dropdown trigger="click">
-              <el-button type="primary" :disabled="!hasUnread">
+              <PrimaryButton :disabled="!hasUnread">
                 <span>标为已读</span>
                 <el-icon class="el-icon--right">
                   <ArrowDown />
                 </el-icon>
-              </el-button>
+              </PrimaryButton>
               <template #dropdown>
                 <el-dropdown-menu>
                   <el-dropdown-item @click="messageStore.markAllRead">全部标为已读</el-dropdown-item>
@@ -45,7 +53,7 @@
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
-            <el-button @click="messageStore.clearAll" type="danger" plain>清空消息</el-button>
+            <OutlineButton color="danger" @click="messageStore.clearAll">清空消息</OutlineButton>
           </div>
         </div>
       </template>
@@ -63,16 +71,12 @@
         </el-radio-group>
 
         <div class="filter-right">
-          <el-input
-            v-model="searchQuery"
-            placeholder="搜索消息内容"
-            clearable
-            style="width: 250px; margin-left: 16px;"
-            @clear="clearSearch"
-            @keyup.enter="searchMessages"
-          >
+          <el-input v-model="searchQuery" placeholder="搜索消息内容" clearable style="width: 250px; margin-left: 16px"
+            @clear="clearSearch" @keyup.enter="searchMessages">
             <template #prefix>
-              <el-icon><Search /></el-icon>
+              <el-icon>
+                <Search />
+              </el-icon>
             </template>
           </el-input>
         </div>
@@ -80,13 +84,8 @@
 
       <!-- 消息列表 -->
       <div class="message-list">
-        <div
-          v-for="message in paginatedMessages"
-          :key="message.id"
-          class="message-item"
-          :class="{ unread: !message.read }"
-          @click="handleMessageClick(message)"
-        >
+        <div v-for="message in paginatedMessages" :key="message.id" class="message-item"
+          :class="{ unread: !message.read }" @click="handleMessageClick(message)">
           <div class="message-icon">
             <el-avatar :size="40" :src="message.avatar">
               <component :is="getMessageIcon(message.type)" />
@@ -108,14 +107,9 @@
           </div>
 
           <div class="message-actions">
-            <el-button
-              size="small"
-              type="danger"
-              plain
-              @click.stop="messageStore.deleteMessage(message.id)"
-            >
+            <OutlineButton size="sm" color="danger" @click.stop="messageStore.deleteMessage(message.id)">
               删除
-            </el-button>
+            </OutlineButton>
           </div>
         </div>
 
@@ -124,24 +118,14 @@
 
       <!-- 分页控制 -->
       <div class="pagination-control">
-        <el-pagination
-          v-model:current-page="currentPage"
-          v-model:page-size="pageSize"
-          :total="totalMessages"
-          :page-size="5"
-          layout="total, prev, pager, next, jumper"
-          @size-change="handleSizeChange"
-          @current-change="handlePageChange"
-        />
+        <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :total="totalMessages"
+          :page-size="5" layout="total, prev, pager, next, jumper" @size-change="handleSizeChange"
+          @current-change="handlePageChange" />
       </div>
     </el-card>
 
     <!-- 消息详情对话框 -->
-    <el-dialog
-      v-model="detailDialogVisible"
-      :title="selectedMessage?.title"
-      width="600px"
-    >
+    <el-dialog v-model="detailDialogVisible" :title="selectedMessage?.title" width="600px">
       <div v-if="selectedMessage" class="message-detail">
         <div class="detail-meta">
           <span class="detail-from">发送者: {{ selectedMessage.from || '系统' }}</span>
@@ -151,14 +135,10 @@
       </div>
 
       <template #footer>
-        <el-button @click="detailDialogVisible = false">关闭</el-button>
-        <el-button
-          v-if="!selectedMessage?.read"
-          type="primary"
-          @click="messageStore.markAsRead(selectedMessage.id)"
-        >
+        <OutlineButton @click="detailDialogVisible = false">关闭</OutlineButton>
+        <PrimaryButton v-if="!selectedMessage?.read" @click="messageStore.markAsRead(selectedMessage.id)">
           标为已读
-        </el-button>
+        </PrimaryButton>
       </template>
     </el-dialog>
 
@@ -166,21 +146,27 @@
     <div class="floating-action-buttons">
       <transition-group name="fab-item">
         <el-tooltip v-if="fabMenuOpen" content="全部标为已读" placement="left">
-          <el-button class="fab-item" type="success" circle @click="messageStore.markAllRead">
-            <el-icon><Check /></el-icon>
-          </el-button>
+          <IconButton class="fab-item" color="success" @click="messageStore.markAllRead">
+            <el-icon>
+              <Check />
+            </el-icon>
+          </IconButton>
         </el-tooltip>
 
         <el-tooltip v-if="fabMenuOpen" content="清空消息" placement="left">
-          <el-button class="fab-item" type="danger" circle @click="messageStore.clearAll">
-            <el-icon><Delete /></el-icon>
-          </el-button>
+          <IconButton class="fab-item" color="danger" @click="messageStore.clearAll">
+            <el-icon>
+              <Delete />
+            </el-icon>
+          </IconButton>
         </el-tooltip>
 
         <el-tooltip content="快捷操作" placement="left">
-          <el-button class="fab-main" type="primary" circle @click="toggleFabMenu">
-            <el-icon><More /></el-icon>
-          </el-button>
+          <IconButton class="fab-main" @click="toggleFabMenu">
+            <el-icon>
+              <More />
+            </el-icon>
+          </IconButton>
         </el-tooltip>
       </transition-group>
     </div>
@@ -192,9 +178,22 @@ import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useMessageStore } from '@/stores/messageStore'
 import { storeToRefs } from 'pinia'
+import { PrimaryButton, OutlineButton, IconButton } from '@/components/buttons'
 import {
-  Message, Bell, ChatDotRound, Postcard, ArrowDown, Search, Check, Delete, More,
-  Setting, Calendar, Star, User, Trophy
+  Message,
+  Bell,
+  ChatDotRound,
+  Postcard,
+  ArrowDown,
+  Search,
+  Check,
+  Delete,
+  More,
+  Setting,
+  Calendar,
+  Star,
+  User,
+  Trophy,
 } from '@element-plus/icons-vue'
 
 const messageStore = useMessageStore()
@@ -222,7 +221,7 @@ const getMessageIcon = (type) => {
     evaluation: Star,
     user: User,
     event: Trophy,
-    reminder: Bell
+    reminder: Bell,
   }
   return iconMap[type] || Bell
 }
@@ -234,7 +233,7 @@ const getMessageTypeColor = (type) => {
     evaluation: 'success',
     user: 'primary',
     event: 'danger',
-    reminder: 'info'
+    reminder: 'info',
   }
   return colorMap[type] || 'info'
 }
@@ -296,12 +295,12 @@ const markPageRead = async () => {
     await ElMessageBox.confirm('确定要将本页消息标为已读吗？', '确认操作', {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
-      type: 'warning'
+      type: 'warning',
     })
 
     paginatedMessages.value
-      .filter(msg => !msg.read)
-      .forEach(msg => messageStore.markAsRead(msg.id))
+      .filter((msg) => !msg.read)
+      .forEach((msg) => messageStore.markAsRead(msg.id))
     ElMessage.success('本页消息已标为已读')
   } catch {
     // 用户取消
@@ -360,7 +359,6 @@ onMounted(() => {
   height: 100%;
   z-index: 0;
   overflow: hidden;
-
 }
 
 .background-3d .particle-network {
@@ -369,7 +367,7 @@ onMounted(() => {
   left: 0;
   width: 100%;
   height: 100%;
-  background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, transparent 70%);
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
 }
 
 .background-3d .floating-icons {
@@ -396,11 +394,10 @@ onMounted(() => {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
   border: none;
   overflow: hidden;
-
 }
 
 .main-card :deep(.el-card__header) {
-  background: linear-gradient(to right, #409EFF, #64b5ff);
+  background: linear-gradient(to right, #409eff, #64b5ff);
   color: white;
   padding: 16px 24px;
   border-bottom: none;
@@ -435,12 +432,12 @@ onMounted(() => {
   gap: 12px;
 }
 
-.header-actions .el-dropdown .el-button {
+.header-actions .el-dropdown .btn-modern {
   min-width: 100px;
   padding: 0 15px;
 }
 
-.header-actions .el-dropdown .el-button span {
+.header-actions .el-dropdown .btn-modern span {
   display: inline-block;
   width: 100%;
   text-align: center;
@@ -456,7 +453,6 @@ onMounted(() => {
   border-radius: 12px;
   margin: 16px 24px;
   border: 1px solid rgba(255, 255, 255, 0.3);
-
 }
 
 .message-filters .filter-right {
@@ -483,7 +479,6 @@ onMounted(() => {
   border-radius: 12px;
   margin-bottom: 12px;
   border: 1px solid rgba(255, 255, 255, 0.2);
-
 }
 
 .message-item:hover {
@@ -508,7 +503,6 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 8px;
-
 }
 
 .message-header .message-title {
@@ -539,7 +533,6 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 12px;
-
 }
 
 .message-meta .message-from {
@@ -564,7 +557,6 @@ onMounted(() => {
 
 .message-detail {
   line-height: 1.6;
-
 }
 
 .message-detail .detail-meta {
@@ -594,7 +586,6 @@ onMounted(() => {
   align-items: center;
   gap: 16px;
   z-index: 100;
-
 }
 
 .floating-action-buttons .fab-main {
@@ -619,9 +610,12 @@ onMounted(() => {
 }
 
 @keyframes float {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0px) rotate(0deg);
   }
+
   50% {
     transform: translateY(-12px) rotate(2deg);
   }
@@ -643,7 +637,6 @@ onMounted(() => {
   .messages-view {
     padding: 16px;
   }
-
 }
 
 @media (max-width: 768px) {

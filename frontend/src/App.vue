@@ -11,7 +11,7 @@ onMounted(() => {
     console.log('应用启动，当前认证状态:', {
       isLoggedIn: userStore.isLoggedIn,
       userRole: userStore.userRole,
-      hasUserInfo: !!userStore.userInfo.id
+      hasUserInfo: !!userStore.userInfo.id,
     })
   }
 })

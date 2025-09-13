@@ -13,18 +13,18 @@ export const getErrorMessage = (data, fallback = '操作失败') => {
   if (typeof data === 'string' && data.trim()) {
     return data.trim()
   }
-  
+
   // 尝试从对象中提取错误消息，支持多种常见字段名
   if (data && typeof data === 'object') {
     // 优先级：message > error > msg > details > description
     const errorFields = ['message', 'error', 'msg', 'details', 'description']
-    
+
     for (const field of errorFields) {
       if (data[field] && typeof data[field] === 'string' && data[field].trim()) {
         return data[field].trim()
       }
     }
-    
+
     // 如果有errors数组，取第一个错误
     if (Array.isArray(data.errors) && data.errors.length > 0) {
       const firstError = data.errors[0]
@@ -36,7 +36,7 @@ export const getErrorMessage = (data, fallback = '操作失败') => {
       }
     }
   }
-  
+
   return fallback
 }
 
@@ -58,9 +58,9 @@ export const getStatusErrorMessage = (status, data) => {
     500: '服务器内部错误',
     502: '网关错误',
     503: '服务不可用',
-    504: '网关超时'
+    504: '网关超时',
   }
-  
+
   const fallback = statusMessages[status] || `请求失败 (${status})`
   return getErrorMessage(data, fallback)
 }
@@ -74,15 +74,15 @@ export const getNetworkErrorMessage = (error) => {
   if (error.code === 'NETWORK_ERROR' || error.message === 'Network Error') {
     return '网络连接失败，请检查网络状态'
   }
-  
+
   if (error.code === 'ECONNABORTED') {
     return '请求超时，请稍后重试'
   }
-  
+
   if (error.code === 'ERR_NETWORK') {
     return '网络错误，请检查网络连接'
   }
-  
+
   return '网络错误，请稍后重试'
 }
 
@@ -93,7 +93,7 @@ export const getNetworkErrorMessage = (error) => {
  */
 export const handleError = (error) => {
   console.error('错误详情:', error)
-  
+
   if (error.response) {
     // HTTP错误响应
     const { status, data } = error.response

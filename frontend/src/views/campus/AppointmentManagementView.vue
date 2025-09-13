@@ -4,8 +4,22 @@
     <div class="page-header">
       <h2>预约管理</h2>
       <div class="header-actions">
-        <el-button @click="exportData" :icon="Download"> 导出数据 </el-button>
-        <el-button type="primary" @click="showAddDialog" :icon="Plus"> 新增预约 </el-button>
+        <OutlineButton @click="exportData">
+          <template #icon-left>
+            <el-icon>
+              <Download />
+            </el-icon>
+          </template>
+          导出数据
+        </OutlineButton>
+        <PrimaryButton @click="showAddDialog">
+          <template #icon-left>
+            <el-icon>
+              <Plus />
+            </el-icon>
+          </template>
+          新增预约
+        </PrimaryButton>
       </div>
     </div>
 
@@ -24,34 +38,18 @@
 
         <el-form-item label="教练">
           <el-select v-model="filters.coachId" placeholder="全部教练" clearable filterable>
-            <el-option
-              v-for="coach in coachList"
-              :key="coach.id"
-              :label="coach.name"
-              :value="coach.id"
-            />
+            <el-option v-for="coach in coachList" :key="coach.id" :label="coach.name" :value="coach.id" />
           </el-select>
         </el-form-item>
 
         <el-form-item label="预约日期">
-          <el-date-picker
-            v-model="filters.dateRange"
-            type="daterange"
-            range-separator="至"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期"
-            format="YYYY-MM-DD"
-            value-format="YYYY-MM-DD"
-          />
+          <el-date-picker v-model="filters.dateRange" type="daterange" range-separator="至" start-placeholder="开始日期"
+            end-placeholder="结束日期" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
         </el-form-item>
 
         <el-form-item label="搜索">
-          <el-input
-            v-model="filters.keyword"
-            placeholder="学员姓名/手机号"
-            style="width: 200px"
-            @keyup.enter="fetchAppointments"
-          />
+          <el-input v-model="filters.keyword" placeholder="学员姓名/手机号" style="width: 200px"
+            @keyup.enter="fetchAppointments" />
         </el-form-item>
 
         <el-form-item>
@@ -138,12 +136,7 @@
       </template>
 
       <el-timeline>
-        <el-timeline-item
-          v-for="item in todaySchedule"
-          :key="item.id"
-          :timestamp="item.time"
-          placement="top"
-        >
+        <el-timeline-item v-for="item in todaySchedule" :key="item.id" :timestamp="item.time" placement="top">
           <el-card class="schedule-item">
             <div class="schedule-content">
               <div class="schedule-info">
@@ -232,37 +225,17 @@
 
         <el-table-column label="操作" width="200" fixed="right">
           <template #default="{ row }">
-            <el-button
-              v-if="row.status === 'pending'"
-              size="small"
-              type="success"
-              @click="confirmAppointment(row)"
-            >
+            <el-button v-if="row.status === 'pending'" size="small" type="success" @click="confirmAppointment(row)">
               确认
             </el-button>
-            <el-button
-              v-if="row.status === 'confirmed'"
-              size="small"
-              type="primary"
-              @click="startClass(row)"
-            >
+            <el-button v-if="row.status === 'confirmed'" size="small" type="primary" @click="startClass(row)">
               开始上课
             </el-button>
-            <el-button
-              v-if="row.status === 'ongoing'"
-              size="small"
-              type="warning"
-              @click="completeClass(row)"
-            >
+            <el-button v-if="row.status === 'ongoing'" size="small" type="warning" @click="completeClass(row)">
               结束课程
             </el-button>
             <el-button size="small" @click="showDetailDialog(row)"> 详情 </el-button>
-            <el-button
-              v-if="canCancel(row)"
-              size="small"
-              type="danger"
-              @click="cancelAppointment(row)"
-            >
+            <el-button v-if="canCancel(row)" size="small" type="danger" @click="cancelAppointment(row)">
               取消
             </el-button>
           </template>
@@ -270,15 +243,9 @@
       </el-table>
 
       <div class="pagination-wrapper">
-        <el-pagination
-          v-model:current-page="pagination.page"
-          v-model:page-size="pagination.size"
-          :total="pagination.total"
-          :page-sizes="[10, 20, 50, 100]"
-          layout="total, sizes, prev, pager, next, jumper"
-          @size-change="fetchAppointments"
-          @current-change="fetchAppointments"
-        />
+        <el-pagination v-model:current-page="pagination.page" v-model:page-size="pagination.size"
+          :total="pagination.total" :page-sizes="[10, 20, 50, 100]" layout="total, sizes, prev, pager, next, jumper"
+          @size-change="fetchAppointments" @current-change="fetchAppointments" />
       </div>
     </el-card>
 
@@ -286,61 +253,29 @@
     <el-dialog v-model="dialogVisible" title="新增预约" width="600px" @close="resetForm">
       <el-form ref="formRef" :model="appointmentForm" :rules="formRules" label-width="100px">
         <el-form-item label="选择学员" prop="studentId">
-          <el-select
-            v-model="appointmentForm.studentId"
-            placeholder="选择学员"
-            filterable
-            style="width: 100%"
-          >
-            <el-option
-              v-for="student in studentList"
-              :key="student.id"
-              :label="`${student.name} (${student.phone})`"
-              :value="student.id"
-            />
+          <el-select v-model="appointmentForm.studentId" placeholder="选择学员" filterable style="width: 100%">
+            <el-option v-for="student in studentList" :key="student.id" :label="`${student.name} (${student.phone})`"
+              :value="student.id" />
           </el-select>
         </el-form-item>
 
         <el-form-item label="选择教练" prop="coachId">
-          <el-select
-            v-model="appointmentForm.coachId"
-            placeholder="选择教练"
-            @change="loadCoachSchedule"
-            style="width: 100%"
-          >
-            <el-option
-              v-for="coach in availableCoaches"
-              :key="coach.id"
-              :label="`${coach.name} (${coach.level})`"
-              :value="coach.id"
-            />
+          <el-select v-model="appointmentForm.coachId" placeholder="选择教练" @change="loadCoachSchedule"
+            style="width: 100%">
+            <el-option v-for="coach in availableCoaches" :key="coach.id" :label="`${coach.name} (${coach.level})`"
+              :value="coach.id" />
           </el-select>
         </el-form-item>
 
         <el-form-item label="预约日期" prop="appointmentDate">
-          <el-date-picker
-            v-model="appointmentForm.appointmentDate"
-            type="date"
-            placeholder="选择日期"
-            :disabled-date="disabledDate"
-            @change="loadAvailableSlots"
-            style="width: 100%"
-          />
+          <el-date-picker v-model="appointmentForm.appointmentDate" type="date" placeholder="选择日期"
+            :disabled-date="disabledDate" @change="loadAvailableSlots" style="width: 100%" />
         </el-form-item>
 
         <el-form-item label="时间段" prop="timeSlot">
-          <el-select
-            v-model="appointmentForm.timeSlot"
-            placeholder="选择时间段"
-            style="width: 100%"
-          >
-            <el-option
-              v-for="slot in availableSlots"
-              :key="slot.value"
-              :label="slot.label"
-              :value="slot.value"
-              :disabled="!slot.available"
-            />
+          <el-select v-model="appointmentForm.timeSlot" placeholder="选择时间段" style="width: 100%">
+            <el-option v-for="slot in availableSlots" :key="slot.value" :label="slot.label" :value="slot.value"
+              :disabled="!slot.available" />
           </el-select>
         </el-form-item>
 
@@ -362,18 +297,13 @@
         </el-form-item>
 
         <el-form-item label="备注">
-          <el-input
-            v-model="appointmentForm.notes"
-            type="textarea"
-            :rows="3"
-            placeholder="课程要求或备注信息"
-          />
+          <el-input v-model="appointmentForm.notes" type="textarea" :rows="3" placeholder="课程要求或备注信息" />
         </el-form-item>
       </el-form>
 
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="saveAppointment" :loading="saving"> 创建预约 </el-button>
+        <OutlineButton @click="dialogVisible = false">取消</OutlineButton>
+        <PrimaryButton @click="saveAppointment" :loading="saving"> 创建预约 </PrimaryButton>
       </template>
     </el-dialog>
 
@@ -436,12 +366,8 @@
               {{ selectedAppointment.classRecord.content }}
             </el-descriptions-item>
             <el-descriptions-item label="学员评价">
-              <el-rate
-                v-model="selectedAppointment.classRecord.studentRating"
-                disabled
-                show-score
-                text-color="#ff9900"
-              />
+              <el-rate v-model="selectedAppointment.classRecord.studentRating" disabled show-score
+                text-color="#ff9900" />
             </el-descriptions-item>
             <el-descriptions-item label="教练评价">
               {{ selectedAppointment.classRecord.coachFeedback }}
@@ -468,6 +394,8 @@ import {
 } from '@element-plus/icons-vue'
 import dayjs from 'dayjs'
 import api from '@/utils/api'
+import PrimaryButton from '@/components/buttons/PrimaryButton.vue'
+import OutlineButton from '@/components/buttons/OutlineButton.vue'
 
 // 数据列表
 const appointmentList = ref([])

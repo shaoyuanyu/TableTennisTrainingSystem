@@ -3,7 +3,11 @@
     <!-- 顶部导航栏 -->
     <el-header class="header">
       <div class="header-left">
-        <el-button :icon="Expand" @click="toggleSidebar" circle text class="sidebar-toggle" />
+        <IconButton @click="toggleSidebar" variant="glass" size="sm" class="sidebar-toggle">
+          <el-icon>
+            <Expand />
+          </el-icon>
+        </IconButton>
         <h1 class="app-title">乒乓球培训管理系统</h1>
       </div>
 
@@ -11,7 +15,13 @@
         <!-- 消息通知 -->
         <el-tooltip content="消息中心" placement="bottom" v-if="userStore.isLoggedIn">
           <el-badge :value="unreadCount" :hidden="unreadCount === 0" class="notification-badge">
-            <el-button :icon="Bell" @click="goToMessages" circle text class="header-button" />
+            <IconButton :color="'secondary'" variant="glass" size="sm" square to="/messages" class="header-button">
+              <template #default>
+                <el-icon>
+                  <Bell />
+                </el-icon>
+              </template>
+            </IconButton>
           </el-badge>
         </el-tooltip>
 
@@ -54,14 +64,14 @@
 
         <!-- 游客登录按钮 -->
         <div class="guest-actions" v-else>
-          <el-button type="primary" @click="goToLogin">登录</el-button>
+          <PrimaryButton to="/login">登录</PrimaryButton>
           <el-dropdown @command="handleRegisterCommand">
-            <el-button>
+            <OutlineButton>
               注册
               <el-icon class="el-icon--right">
                 <ArrowDown />
               </el-icon>
-            </el-button>
+            </OutlineButton>
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item command="student">
@@ -107,6 +117,7 @@ import AppSidebarNew from '@/components/AppSidebarNew.vue'
 import { useMessageStore } from '@/stores/messageStore'
 import { storeToRefs } from 'pinia'
 import { initializeAuth } from '@/utils/auth'
+import { PrimaryButton, OutlineButton, IconButton } from '@/components/buttons'
 
 // 使用 Pinia Store
 const messageStore = useMessageStore()
@@ -133,15 +144,7 @@ const toggleSidebar = () => {
   sidebarCollapsed.value = !sidebarCollapsed.value
 }
 
-// 前往消息页面
-const goToMessages = () => {
-  router.push('/messages')
-}
-
-// 前往登录页面
-const goToLogin = () => {
-  router.push('/login')
-}
+// 按钮已使用 `to` 属性进行导航，无需显式方法
 
 // 处理注册命令
 const handleRegisterCommand = (command) => {
@@ -191,7 +194,7 @@ const handleUserCommand = async (command) => {
   align-items: center;
   justify-content: space-between;
   padding: 0 20px;
-  box-shadow: 
+  box-shadow:
     0 2px 8px rgba(0, 0, 0, 0.1),
     0 1px 3px rgba(0, 0, 0, 0.08),
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
@@ -205,14 +208,14 @@ const handleUserCommand = async (command) => {
   gap: 16px;
 }
 
-.sidebar-toggle {
+.sidebar-toggle.btn-modern {
   color: rgba(255, 255, 255, 0.9);
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   transition: all 0.3s ease;
 }
 
-.sidebar-toggle:hover {
+.sidebar-toggle.btn-modern:hover {
   color: #ffffff;
   background: rgba(255, 255, 255, 0.2);
   border-color: rgba(255, 255, 255, 0.3);
@@ -225,7 +228,7 @@ const handleUserCommand = async (command) => {
   font-weight: 700;
   color: #ffffff;
   margin: 0;
-  text-shadow: 
+  text-shadow:
     0 2px 4px rgba(0, 0, 0, 0.4),
     0 1px 2px rgba(0, 0, 0, 0.3);
   letter-spacing: 0.3px;
@@ -286,7 +289,7 @@ const handleUserCommand = async (command) => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  text-shadow: 
+  text-shadow:
     0 1px 3px rgba(0, 0, 0, 0.4),
     0 1px 2px rgba(0, 0, 0, 0.3);
 }
@@ -303,7 +306,7 @@ const handleUserCommand = async (command) => {
   gap: 12px;
 }
 
-.guest-actions .el-button {
+.guest-actions .btn-modern {
   background: rgba(255, 255, 255, 0.15);
   border: 1px solid rgba(255, 255, 255, 0.25);
   color: #ffffff;
@@ -312,45 +315,25 @@ const handleUserCommand = async (command) => {
   transition: all 0.3s ease;
 }
 
-.guest-actions .el-button:hover {
+.guest-actions .btn-modern:hover {
   background: rgba(255, 255, 255, 0.25);
   border-color: rgba(255, 255, 255, 0.4);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.guest-actions .el-button--primary {
-  background: linear-gradient(135deg, rgba(24, 144, 255, 0.8), rgba(64, 169, 255, 0.8));
-  border-color: rgba(24, 144, 255, 0.6);
-}
-
-.guest-actions .el-button--primary:hover {
-  background: linear-gradient(135deg, rgba(24, 144, 255, 0.9), rgba(64, 169, 255, 0.9));
-  border-color: rgba(24, 144, 255, 0.8);
-}
-
-.guest-actions .el-button {
+.guest-actions .btn-modern {
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.3);
   color: #ffffff;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-.guest-actions .el-button--primary {
-  background: rgba(24, 144, 255, 0.8);
-  border-color: rgba(24, 144, 255, 0.8);
-}
-
-.guest-actions .el-button--primary:hover {
-  background: rgba(24, 144, 255, 0.9);
-  border-color: rgba(24, 144, 255, 0.9);
-}
-
-.guest-actions .el-button:not(.el-button--primary) {
+.guest-actions .btn-modern:not(.btn-primary) {
   background: rgba(255, 255, 255, 0.1);
 }
 
-.guest-actions .el-button:not(.el-button--primary):hover {
+.guest-actions .btn-modern:not(.btn-primary):hover {
   background: rgba(255, 255, 255, 0.2);
 }
 
@@ -367,7 +350,8 @@ const handleUserCommand = async (command) => {
   padding: 0;
   background: transparent;
   overflow-y: auto;
-  height: calc(100vh - 60px); /* 减去header高度 */
+  height: calc(100vh - 60px);
+  /* 减去header高度 */
 }
 
 /* Element Plus的el-main样式调整 */
