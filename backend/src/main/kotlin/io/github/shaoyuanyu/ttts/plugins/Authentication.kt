@@ -67,7 +67,7 @@ fun Application.configureAuthentication(userService: UserService) {
         // session 验证（campus admin）
         session<UserSession>("auth-session-campus-admin") {
             validate { session ->
-                if (session.userRole == UserRole.CAMPUS_ADMIN) {
+                if (session.userRole == UserRole.CAMPUS_ADMIN|| session.userRole == UserRole.SUPER_ADMIN) {
                     session
                 } else {
                     throw UnauthorizedException("需要校区管理员权限")

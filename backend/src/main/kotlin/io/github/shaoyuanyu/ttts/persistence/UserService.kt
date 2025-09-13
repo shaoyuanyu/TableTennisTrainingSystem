@@ -195,7 +195,7 @@ class UserService(
                         this.maxStudents = 20
                         this.currentStudents = 0
                         this.isApproved = false
-                        this.approvedBy = -1
+                        this.approvedBy = ""
                     }
                 }
                 

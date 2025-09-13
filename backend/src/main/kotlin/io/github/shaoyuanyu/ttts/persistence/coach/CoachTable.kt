@@ -27,5 +27,5 @@ object CoachTable : IdTable<UUID>("coach") {
 
     val is_approved: Column<Boolean> = bool("is_approved").default(false)
 
-    val approved_by: Column<Int> = integer("approved_by")
+    val approved_by: Column<String> = varchar("approved_by", 64)
 }
