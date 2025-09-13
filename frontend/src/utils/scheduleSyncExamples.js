@@ -13,6 +13,10 @@ export function useScheduleSync() {
    * @param {string} filename - 文件名
    */
   const exportSchedule = (schedules, filename = 'schedule.ics') => {
+    if (!Array.isArray(schedules)) {
+      ElMessage.error('课表数据无效，无法导出。');
+      return false;
+    }
     try {
       // 生成 iCal 格式内容
       let icalContent = 'BEGIN:VCALENDAR\n'
