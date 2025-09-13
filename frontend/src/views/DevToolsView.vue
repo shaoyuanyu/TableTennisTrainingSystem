@@ -24,13 +24,7 @@
 
         <div class="debug-cards">
           <!-- 用户状态卡片 -->
-          <el-card class="debug-card" shadow="hover">
-            <template #header>
-              <div class="card-header">
-                <span class="card-icon">👤</span>
-                <span>用户状态</span>
-              </div>
-            </template>
+          <GlassHeaderCard icon="👤" title="用户状态">
             <div class="status-grid">
               <div class="status-item">
                 <label>登录状态:</label>
@@ -55,16 +49,10 @@
                 <span>{{ campusId || '无' }}</span>
               </div>
             </div>
-          </el-card>
+          </GlassHeaderCard>
 
           <!-- 本地存储卡片 -->
-          <el-card class="debug-card" shadow="hover">
-            <template #header>
-              <div class="card-header">
-                <span class="card-icon">💾</span>
-                <span>本地存储</span>
-              </div>
-            </template>
+          <GlassHeaderCard icon="💾" title="本地存储">
             <div class="storage-info">
               <div class="storage-item">
                 <label>Token存储:</label>
@@ -74,39 +62,19 @@
               </div>
               <div class="storage-item">
                 <label>Token值:</label>
-                <el-input
-                  v-model="token"
-                  size="small"
-                  placeholder="Token内容"
-                  type="textarea"
-                  :rows="3"
-                  readonly
-                  class="enhanced-textarea"
-                />
+                <el-input v-model="token" size="small" placeholder="Token内容" type="textarea" :rows="3" readonly
+                  class="enhanced-textarea" />
               </div>
               <div class="storage-item">
                 <label>用户信息:</label>
-                <el-input
-                  v-model="userInfoDisplay"
-                  size="small"
-                  placeholder="用户信息JSON"
-                  type="textarea"
-                  :rows="6"
-                  readonly
-                  class="enhanced-textarea"
-                />
+                <el-input v-model="userInfoDisplay" size="small" placeholder="用户信息JSON" type="textarea" :rows="6"
+                  readonly class="enhanced-textarea" />
               </div>
             </div>
-          </el-card>
+          </GlassHeaderCard>
 
           <!-- 权限测试卡片 -->
-          <el-card class="debug-card" shadow="hover">
-            <template #header>
-              <div class="card-header">
-                <span class="card-icon">🔐</span>
-                <span>权限测试</span>
-              </div>
-            </template>
+          <GlassHeaderCard icon="🔐" title="权限测试">
             <div class="permission-tests">
               <div class="test-item">
                 <label>超级管理员权限:</label>
@@ -133,43 +101,39 @@
                 </el-tag>
               </div>
             </div>
-          </el-card>
+          </GlassHeaderCard>
 
-          <el-card class="debug-card" shadow="hover">
-            <template #header>
-              <div class="card-header">
-                <span class="card-icon">⚡</span>
-                <span>操作工具</span>
-              </div>
-            </template>
+          <GlassHeaderCard icon="⚡" title="操作工具">
             <div class="action-buttons">
               <el-button type="primary" size="small" @click="refreshData">
-                <el-icon><Refresh /></el-icon>
+                <el-icon>
+                  <Refresh />
+                </el-icon>
                 刷新数据
               </el-button>
-                            <el-button type="warning" size="small" @click="resetTestStatus">
-                <el-icon><Refresh /></el-icon>
+              <el-button type="warning" size="small" @click="resetTestStatus">
+                <el-icon>
+                  <Refresh />
+                </el-icon>
                 重置全部
               </el-button>
               <el-button type="info" size="small" @click="exportTestReport">
-                <el-icon><Download /></el-icon>
+                <el-icon>
+                  <Download />
+                </el-icon>
                 导出结果
               </el-button>
               <el-button type="primary" size="small" @click="openAllPages">
-                <el-icon><FolderOpened /></el-icon>
+                <el-icon>
+                  <FolderOpened />
+                </el-icon>
                 批量打开
               </el-button>
             </div>
-          </el-card>
+          </GlassHeaderCard>
 
           <!-- 环境信息卡片 -->
-          <el-card class="debug-card" shadow="hover">
-            <template #header>
-              <div class="card-header">
-                <span class="card-icon">💻</span>
-                <span>环境信息</span>
-              </div>
-            </template>
+          <GlassHeaderCard icon="💻" title="环境信息">
             <div class="status-grid">
               <div class="status-item">
                 <label>浏览器:</label>
@@ -192,7 +156,7 @@
                 </el-tag>
               </div>
             </div>
-          </el-card>
+          </GlassHeaderCard>
         </div>
       </div>
 
@@ -204,15 +168,11 @@
         </div>
 
         <div class="role-tester">
-          <el-card class="role-card" shadow="hover">
-            <template #header>
-              <div class="card-header">
-                <span class="card-icon">🎭</span>
-                <span>角色控制台</span>
-                <el-tag :type="currentRoleTag.type" size="small">
-                  {{ currentRoleTag.label }}
-                </el-tag>
-              </div>
+          <GlassHeaderCard icon="🎭" title="角色控制台">
+            <template #extra>
+              <el-tag :type="currentRoleTag.type" size="small">
+                {{ currentRoleTag.label }}
+              </el-tag>
             </template>
 
             <div class="current-role-display">
@@ -220,29 +180,17 @@
               <div class="role-details">
                 <h3>{{ currentRoleInfo.name }}</h3>
                 <p>{{ currentRoleInfo.description }}</p>
-                <el-alert
-                  title="注意"
-                  description="角色切换仅影响测试工具，不会改变您的实际登录状态"
-                  type="warning"
-                  :closable="false"
-                  show-icon
-                  size="small"
-                />
+                <el-alert title="注意" description="角色切换仅影响测试工具，不会改变您的实际登录状态" type="warning" :closable="false" show-icon
+                  size="small" />
               </div>
             </div>
 
             <div class="role-switcher">
               <h4>切换测试角色</h4>
               <div class="role-buttons">
-                <el-button
-                  v-for="role in availableRoles"
-                  :key="role.value"
-                  :type="currentRole === role.value ? 'primary' : 'default'"
-                  :disabled="currentRole === role.value"
-                  size="small"
-                  class="role-btn"
-                  @click="switchToTestRole(role.value)"
-                >
+                <el-button v-for="role in availableRoles" :key="role.value"
+                  :type="currentRole === role.value ? 'primary' : 'default'" :disabled="currentRole === role.value"
+                  size="small" class="role-btn" @click="switchToTestRole(role.value)">
                   {{ role.icon }} {{ role.label }}
                 </el-button>
               </div>
@@ -250,23 +198,31 @@
 
             <div class="role-actions">
               <el-button type="success" size="small" @click="testCurrentRole">
-                <el-icon><View /></el-icon>
+                <el-icon>
+                  <View />
+                </el-icon>
                 测试当前角色
               </el-button>
               <el-button type="warning" size="small" @click="clearRoleData">
-                <el-icon><Delete /></el-icon>
+                <el-icon>
+                  <Delete />
+                </el-icon>
                 重置测试状态
               </el-button>
               <el-button type="info" size="small" @click="showRolePermissions">
-                <el-icon><InfoFilled /></el-icon>
+                <el-icon>
+                  <InfoFilled />
+                </el-icon>
                 权限说明
               </el-button>
               <el-button type="primary" size="small" @click="resetToActualRole">
-                <el-icon><Refresh /></el-icon>
+                <el-icon>
+                  <Refresh />
+                </el-icon>
                 恢复实际角色
               </el-button>
             </div>
-          </el-card>
+          </GlassHeaderCard>
         </div>
       </div>
 
@@ -278,13 +234,7 @@
         </div>
 
         <!-- 测试统计和管理 -->
-        <el-card class="test-management-card" shadow="hover" style="margin-bottom: 20px;">
-          <template #header>
-            <div class="card-header">
-              <span class="card-icon">📊</span>
-              <span>测试管理</span>
-            </div>
-          </template>
+        <GlassHeaderCard icon="📊" title="测试管理" style="margin-bottom: 20px;">
           <div class="test-stats">
             <div class="stats-grid">
               <div class="stat-item">
@@ -302,28 +252,38 @@
             </div>
             <div class="test-actions">
               <el-button type="success" size="small" @click="markAllTested">
-                <el-icon><Check /></el-icon>
+                <el-icon>
+                  <Check />
+                </el-icon>
                 全部标记已测试
               </el-button>
               <el-button type="warning" size="small" @click="resetTestStatus">
-                <el-icon><Refresh /></el-icon>
+                <el-icon>
+                  <Refresh />
+                </el-icon>
                 重置测试状态
               </el-button>
               <el-button type="primary" size="small" @click="exportTestReport">
-                <el-icon><Download /></el-icon>
+                <el-icon>
+                  <Download />
+                </el-icon>
                 导出测试报告
               </el-button>
               <el-button type="info" size="small" @click="openAllPages">
-                <el-icon><FolderOpened /></el-icon>
+                <el-icon>
+                  <FolderOpened />
+                </el-icon>
                 批量打开页面
               </el-button>
               <el-button type="default" size="small" @click="debugTestStatus">
-                <el-icon><InfoFilled /></el-icon>
+                <el-icon>
+                  <InfoFilled />
+                </el-icon>
                 调试状态
               </el-button>
             </div>
           </div>
-        </el-card>
+        </GlassHeaderCard>
 
         <div class="page-categories">
           <div v-for="category in pageCategories" :key="category.name" class="category-section">
@@ -333,43 +293,26 @@
               <el-tag :type="category.tagType" size="small">{{ category.pages.length }}个页面</el-tag>
             </h3>
             <div class="page-grid">
-              <div
-                v-for="page in category.pages"
-                :key="page.path"
-                class="page-card"
-                @click="navigateToPage(page)"
-                @contextmenu.prevent="showPageMenu(page)"
-              >
+              <div v-for="page in category.pages" :key="page.path" class="page-card" @click="navigateToPage(page)"
+                @contextmenu.prevent="showPageMenu(page)">
                 <!-- 悬浮操作按钮组 -->
                 <div class="page-actions-overlay">
-                  <el-button 
-                    v-if="!page.tested"
-                    type="success" 
-                    size="small" 
-                    circle
-                    @click.stop="markPageTested(page)"
-                    title="标记已测试"
-                  >
-                    <el-icon><Check /></el-icon>
+                  <el-button v-if="!page.tested" type="success" size="small" circle @click.stop="markPageTested(page)"
+                    title="标记已测试">
+                    <el-icon>
+                      <Check />
+                    </el-icon>
                   </el-button>
-                  <el-button 
-                    v-if="page.tested"
-                    type="warning" 
-                    size="small" 
-                    circle
-                    @click.stop="resetPageStatus(page)"
-                    title="重置状态"
-                  >
-                    <el-icon><Refresh /></el-icon>
+                  <el-button v-if="page.tested" type="warning" size="small" circle @click.stop="resetPageStatus(page)"
+                    title="重置状态">
+                    <el-icon>
+                      <Refresh />
+                    </el-icon>
                   </el-button>
-                  <el-button 
-                    type="primary" 
-                    size="small" 
-                    circle
-                    @click.stop="navigateToPage(page)"
-                    title="访问页面"
-                  >
-                    <el-icon><View /></el-icon>
+                  <el-button type="primary" size="small" circle @click.stop="navigateToPage(page)" title="访问页面">
+                    <el-icon>
+                      <View />
+                    </el-icon>
                   </el-button>
                 </div>
 
@@ -384,7 +327,9 @@
                     <div class="page-path-container">
                       <div class="page-path">{{ page.path }}</div>
                       <div class="path-copy-btn" @click.stop="copyPath(page.path)" title="复制路径">
-                        <el-icon><DocumentCopy /></el-icon>
+                        <el-icon>
+                          <DocumentCopy />
+                        </el-icon>
                       </div>
                     </div>
                     <div class="page-status">
@@ -408,10 +353,8 @@
         </div>
 
         <div class="welcome-content">
-          <el-card class="welcome-card" shadow="hover">
+          <GlassHeaderCard icon="🛠️" title="开发工具集合" style="max-width: 700px; margin: 0 auto;">
             <div class="welcome-info">
-              <span class="welcome-icon">🛠️</span>
-              <h3>开发工具集合</h3>
               <p>为开发和测试提供便捷的工具集合</p>
               <el-divider />
               <div class="tool-list">
@@ -433,7 +376,7 @@
                 </div>
               </div>
             </div>
-          </el-card>
+          </GlassHeaderCard>
         </div>
       </div>
     </div>
@@ -455,6 +398,7 @@ import {
   DocumentCopy,
 } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
+import GlassHeaderCard from '@/components/cards/specialized/GlassHeaderCard.vue'
 
 const route = useRoute()
 const userStore = useUserStore()
@@ -502,12 +446,12 @@ const cookieEnabled = ref(navigator.cookieEnabled)
 const initEnvInfo = () => {
   const userAgent = navigator.userAgent
   let browser = 'Unknown'
-  
+
   if (userAgent.includes('Chrome')) browser = 'Chrome'
   else if (userAgent.includes('Firefox')) browser = 'Firefox'
   else if (userAgent.includes('Safari')) browser = 'Safari'
   else if (userAgent.includes('Edge')) browser = 'Edge'
-  
+
   browserInfo.value = `${browser} ${navigator.appVersion.split(' ')[0]}`
   viewportSize.value = `${window.innerWidth} × ${window.innerHeight}`
 }
@@ -525,7 +469,7 @@ const isCoach = computed(() => userStore.isCoach)
 
 // 存储数据
 const token = computed(() => userStore.token)
-const userInfoDisplay = computed(() => 
+const userInfoDisplay = computed(() =>
   JSON.stringify(userStore.userInfo, null, 2)
 )
 
@@ -923,7 +867,7 @@ const clearRoleData = () => {
 const showRolePermissions = () => {
   const permissions = [
     '查看登录页面',
-    '查看注册页面', 
+    '查看注册页面',
     '查看开发工具'
   ]
   ElMessageBox.alert(
@@ -943,12 +887,12 @@ const navigateToPage = (page) => {
     // 标记为已测试
     page.tested = true
     setTestStatus(page.path, true)
-    
+
     // 打开页面
     const url = window.location.origin + page.path
     window.open(url, '_blank')
     ElMessage.success(`已在新标签页打开: ${page.title}`)
-    
+
     // 自动刷新统计数据
     refreshTestStats()
   } catch (error) {
@@ -993,7 +937,7 @@ const showPageMenu = (page) => {
     '在新窗口打开',
     '复制路径'
   ]
-  
+
   ElMessageBox.confirm(
     `选择对 "${page.title}" 的操作`,
     '页面操作',
@@ -1035,7 +979,7 @@ const getAllPages = () => {
 const debugTestStatus = () => {
   const allPages = getAllPages()
   const localStorage_status = JSON.parse(localStorage.getItem('pageTestStatus') || '{}')
-  
+
   const debugInfo = allPages.map(page => ({
     path: page.path,
     title: page.title,
@@ -1043,9 +987,9 @@ const debugTestStatus = () => {
     localStorageTested: localStorage_status[page.path] || false,
     consistent: page.tested === (localStorage_status[page.path] || false)
   }))
-  
+
   console.table(debugInfo)
-  
+
   const inconsistent = debugInfo.filter(item => !item.consistent)
   if (inconsistent.length > 0) {
     ElMessage.warning(`发现 ${inconsistent.length} 个状态不一致的页面，请查看控制台`)
@@ -1057,7 +1001,7 @@ const debugTestStatus = () => {
 // 批量打开所有页面进行测试
 const openAllPages = () => {
   const allPages = getAllPages()
-  
+
   ElMessageBox.confirm(
     `将在新标签页中打开 ${allPages.length} 个页面进行批量测试，这可能会占用较多系统资源。`,
     '批量测试确认',
@@ -1076,7 +1020,7 @@ const openAllPages = () => {
           page.tested = true
           setTestStatus(page.path, true)
           openedCount++
-          
+
           if (openedCount === allPages.length) {
             refreshTestStats()
             ElMessage.success(`批量测试完成，已打开 ${openedCount} 个页面`)
@@ -1312,38 +1256,7 @@ watch(() => route.query.tool, () => {
   gap: var(--spacing-2xl);
 }
 
-.debug-card {
-  background: var(--white-alpha-15);
-  backdrop-filter: var(--blur-xl);
-  border: 1px solid var(--white-alpha-20);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-lg);
-  transition: var(--transition-slow);
-  overflow: hidden;
-  position: relative;
-}
-
-.debug-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, #667eea, #764ba2, #f093fb);
-  opacity: 0.8;
-  z-index: 1;
-  pointer-events: none;
-}
-
-.debug-card:hover {
-  transform: translateY(-8px) scale(1.02);
-  box-shadow: 
-    0 20px 50px rgba(0, 0, 0, 0.15),
-    0 8px 16px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.5);
-  border-color: rgba(255, 255, 255, 0.3);
-}
+/* 移除旧的debug-card样式，现在使用GlassHeaderCard */
 
 .card-header {
   display: flex;
@@ -1474,7 +1387,8 @@ watch(() => route.query.tool, () => {
   font-size: 13px !important;
   min-width: 80px;
   white-space: nowrap;
-  height: 36px !important;  /* 统一按钮高度 */
+  height: 36px !important;
+  /* 统一按钮高度 */
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -1485,7 +1399,8 @@ watch(() => route.query.tool, () => {
   padding: 12px 20px !important;
   font-size: 14px !important;
   min-width: 100px;
-  height: 40px !important;  /* 统一大按钮高度 */
+  height: 40px !important;
+  /* 统一大按钮高度 */
 }
 
 .el-button .el-icon {
@@ -1603,7 +1518,8 @@ watch(() => route.query.tool, () => {
   grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
   gap: 12px;
   margin-top: 16px;
-  align-items: stretch;  /* 确保所有按钮高度一致 */
+  align-items: stretch;
+  /* 确保所有按钮高度一致 */
 }
 
 .role-buttons {
@@ -1613,19 +1529,21 @@ watch(() => route.query.tool, () => {
 
 /* 响应式按钮布局 */
 @media (max-width: 1200px) {
+
   .action-buttons,
   .role-actions,
   .test-actions {
     grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
     gap: 10px;
   }
-  
+
   .role-buttons {
     grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
   }
 }
 
 @media (max-width: 768px) {
+
   .action-buttons,
   .role-actions,
   .role-buttons,
@@ -1633,14 +1551,14 @@ watch(() => route.query.tool, () => {
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;
   }
-  
+
   .el-button {
     min-width: unset;
     padding: 8px 12px !important;
     font-size: 11px !important;
     height: 32px !important;
   }
-  
+
   .el-button[size="small"] {
     padding: 6px 10px !important;
     font-size: 10px !important;
@@ -1649,6 +1567,7 @@ watch(() => route.query.tool, () => {
 }
 
 @media (max-width: 480px) {
+
   .action-buttons,
   .role-actions,
   .role-buttons,
@@ -1662,17 +1581,6 @@ watch(() => route.query.tool, () => {
 .role-tester {
   max-width: 900px;
   margin: 0 auto;
-}
-
-.role-card {
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 24px;
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.1),
-    0 2px 6px rgba(0, 0, 0, 0.05),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 .current-role-display {
@@ -1695,7 +1603,7 @@ watch(() => route.query.tool, () => {
   justify-content: center;
   background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
   border-radius: 50%;
-  box-shadow: 
+  box-shadow:
     0 8px 24px rgba(0, 0, 0, 0.2),
     inset 0 2px 0 rgba(255, 255, 255, 0.3);
   position: relative;
@@ -1715,8 +1623,13 @@ watch(() => route.query.tool, () => {
 }
 
 @keyframes shimmer {
-  0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
-  100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+  0% {
+    transform: translateX(-100%) translateY(-100%) rotate(45deg);
+  }
+
+  100% {
+    transform: translateX(100%) translateY(100%) rotate(45deg);
+  }
 }
 
 .role-details h3 {
@@ -1753,7 +1666,7 @@ watch(() => route.query.tool, () => {
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 20px;
   padding: 24px;
-  box-shadow: 
+  box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.1),
     0 2px 6px rgba(0, 0, 0, 0.05),
     inset 0 1px 0 rgba(255, 255, 255, 0.4);
@@ -1795,7 +1708,7 @@ watch(() => route.query.tool, () => {
   position: relative;
   overflow: hidden;
   min-height: 120px;
-  box-shadow: 
+  box-shadow:
     0 4px 16px rgba(0, 0, 0, 0.05),
     0 2px 8px rgba(0, 0, 0, 0.03),
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
@@ -1808,12 +1721,10 @@ watch(() => route.query.tool, () => {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.2) 50%,
-    transparent 100%
-  );
+  background: linear-gradient(90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.2) 50%,
+      transparent 100%);
   transition: left 0.6s ease;
   z-index: 1;
   pointer-events: none;
@@ -1857,14 +1768,14 @@ watch(() => route.query.tool, () => {
   gap: 12px;
   margin-bottom: 4px;
   padding: 12px;
-  background: linear-gradient(135deg, 
-    rgba(255, 255, 255, 0.1) 0%, 
-    rgba(255, 255, 255, 0.05) 50%, 
-    rgba(255, 255, 255, 0.08) 100%);
+  background: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(255, 255, 255, 0.05) 50%,
+      rgba(255, 255, 255, 0.08) 100%);
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(10px);
-  box-shadow: 
+  box-shadow:
     0 2px 8px rgba(0, 0, 0, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
   transition: all 0.3s ease;
@@ -1879,10 +1790,10 @@ watch(() => route.query.tool, () => {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, 
-    transparent, 
-    rgba(255, 255, 255, 0.1), 
-    transparent);
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(255, 255, 255, 0.1),
+      transparent);
   transition: left 0.6s ease;
 }
 
@@ -1891,13 +1802,13 @@ watch(() => route.query.tool, () => {
 }
 
 .page-card:hover .page-header {
-  background: linear-gradient(135deg, 
-    rgba(255, 255, 255, 0.15) 0%, 
-    rgba(255, 255, 255, 0.08) 50%, 
-    rgba(255, 255, 255, 0.12) 100%);
+  background: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.15) 0%,
+      rgba(255, 255, 255, 0.08) 50%,
+      rgba(255, 255, 255, 0.12) 100%);
   border-color: rgba(255, 255, 255, 0.25);
   transform: translateY(-1px);
-  box-shadow: 
+  box-shadow:
     0 4px 12px rgba(0, 0, 0, 0.15),
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
@@ -1910,13 +1821,13 @@ watch(() => route.query.tool, () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, 
-    rgba(102, 126, 234, 0.2) 0%, 
-    rgba(118, 75, 162, 0.2) 100%);
+  background: linear-gradient(135deg,
+      rgba(102, 126, 234, 0.2) 0%,
+      rgba(118, 75, 162, 0.2) 100%);
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(8px);
-  box-shadow: 
+  box-shadow:
     0 2px 8px rgba(102, 126, 234, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
   transition: all 0.3s ease;
@@ -1932,10 +1843,10 @@ watch(() => route.query.tool, () => {
   left: -50%;
   width: 200%;
   height: 200%;
-  background: linear-gradient(45deg, 
-    transparent, 
-    rgba(255, 255, 255, 0.1), 
-    transparent);
+  background: linear-gradient(45deg,
+      transparent,
+      rgba(255, 255, 255, 0.1),
+      transparent);
   transform: rotate(45deg);
   transition: all 0.6s ease;
   opacity: 0;
@@ -1948,11 +1859,11 @@ watch(() => route.query.tool, () => {
 
 .page-card:hover .page-icon {
   transform: scale(1.05);
-  background: linear-gradient(135deg, 
-    rgba(102, 126, 234, 0.3) 0%, 
-    rgba(118, 75, 162, 0.3) 100%);
+  background: linear-gradient(135deg,
+      rgba(102, 126, 234, 0.3) 0%,
+      rgba(118, 75, 162, 0.3) 100%);
   border-color: rgba(255, 255, 255, 0.3);
-  box-shadow: 
+  box-shadow:
     0 4px 12px rgba(102, 126, 234, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
@@ -2075,7 +1986,7 @@ watch(() => route.query.tool, () => {
 .page-card:hover {
   background: rgba(255, 255, 255, 0.25);
   transform: translateY(-3px);
-  box-shadow: 
+  box-shadow:
     0 12px 40px rgba(0, 0, 0, 0.08),
     0 6px 20px rgba(0, 0, 0, 0.05),
     inset 0 1px 0 rgba(255, 255, 255, 0.4);
@@ -2107,18 +2018,7 @@ watch(() => route.query.tool, () => {
   flex-shrink: 0;
 }
 
-/* 测试管理卡片 */
-.test-management-card {
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 20px;
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.1),
-    0 2px 6px rgba(0, 0, 0, 0.05),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4);
-}
-
+/* 测试管理样式简化 */
 .test-stats {
   padding: 20px;
 }
@@ -2163,7 +2063,7 @@ watch(() => route.query.tool, () => {
   gap: 12px;
 }
 
-/* 欢迎页面样式 - 重新设计 */
+/* 欢迎页面样式 - 简化版 */
 .welcome-content {
   display: flex;
   justify-content: center;
@@ -2171,39 +2071,9 @@ watch(() => route.query.tool, () => {
   min-height: 500px;
 }
 
-.welcome-card {
-  max-width: 700px;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 24px;
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.1),
-    0 2px 6px rgba(0, 0, 0, 0.05),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4);
-}
-
 .welcome-info {
   text-align: center;
   padding: 48px;
-}
-
-.welcome-icon {
-  font-size: 80px;
-  margin-bottom: 24px;
-  display: block;
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
-}
-
-.welcome-info h3 {
-  margin: 0 0 16px 0;
-  font-size: 28px;
-  color: #1a202c;
-  font-weight: 800;
 }
 
 .welcome-info p {
@@ -2251,6 +2121,7 @@ watch(() => route.query.tool, () => {
 }
 
 @media (max-width: 768px) {
+
   .debug-cards,
   .page-grid,
   .stats-grid {
@@ -2293,7 +2164,7 @@ watch(() => route.query.tool, () => {
 
   .page-card:hover {
     transform: translateY(-1px);
-    box-shadow: 
+    box-shadow:
       0 8px 24px rgba(0, 0, 0, 0.06),
       0 4px 12px rgba(0, 0, 0, 0.04),
       inset 0 1px 0 rgba(255, 255, 255, 0.35);
@@ -2391,24 +2262,24 @@ watch(() => route.query.tool, () => {
 }
 
 .el-tag--success {
-  background: linear-gradient(135deg, 
-    rgba(16, 185, 129, 0.9) 0%, 
-    rgba(5, 150, 105, 0.9) 100%) !important;
+  background: linear-gradient(135deg,
+      rgba(16, 185, 129, 0.9) 0%,
+      rgba(5, 150, 105, 0.9) 100%) !important;
   color: #ffffff !important;
   border: 1px solid rgba(16, 185, 129, 0.8) !important;
-  box-shadow: 
+  box-shadow:
     0 4px 12px rgba(16, 185, 129, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
   font-weight: 700 !important;
 }
 
 .el-tag--warning {
-  background: linear-gradient(135deg, 
-    rgba(239, 68, 68, 0.9) 0%, 
-    rgba(220, 38, 127, 0.9) 100%) !important;
+  background: linear-gradient(135deg,
+      rgba(239, 68, 68, 0.9) 0%,
+      rgba(220, 38, 127, 0.9) 100%) !important;
   color: #ffffff !important;
   border: 1px solid rgba(239, 68, 68, 0.8) !important;
-  box-shadow: 
+  box-shadow:
     0 4px 12px rgba(239, 68, 68, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
   font-weight: 700 !important;
@@ -2416,18 +2287,18 @@ watch(() => route.query.tool, () => {
 
 .el-tag:hover {
   transform: translateY(-1px) scale(1.05);
-  box-shadow: 
+  box-shadow:
     0 6px 16px rgba(0, 0, 0, 0.2) !important;
 }
 
 .el-tag--success:hover {
-  box-shadow: 
+  box-shadow:
     0 6px 20px rgba(16, 185, 129, 0.4),
     inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
 }
 
 .el-tag--warning:hover {
-  box-shadow: 
+  box-shadow:
     0 6px 20px rgba(239, 68, 68, 0.4),
     inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
 }
@@ -2439,12 +2310,10 @@ watch(() => route.query.tool, () => {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.3) 50%,
-    transparent 100%
-  );
+  background: linear-gradient(90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.3) 50%,
+      transparent 100%);
   transition: left 0.5s ease;
 }
 
@@ -2490,7 +2359,7 @@ watch(() => route.query.tool, () => {
   background: rgba(255, 255, 255, 0.25) !important;
   border: 1px solid rgba(255, 255, 255, 0.3) !important;
   color: #4a5568 !important;
-  box-shadow: 
+  box-shadow:
     0 4px 12px rgba(0, 0, 0, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
@@ -2505,7 +2374,7 @@ watch(() => route.query.tool, () => {
   background: rgba(255, 255, 255, 0.35) !important;
   border-color: rgba(255, 255, 255, 0.4) !important;
   transform: translateY(-1px) scale(1.05) !important;
-  box-shadow: 
+  box-shadow:
     0 6px 16px rgba(0, 0, 0, 0.12),
     inset 0 1px 0 rgba(255, 255, 255, 0.5) !important;
   color: #2d3748 !important;
@@ -2513,7 +2382,7 @@ watch(() => route.query.tool, () => {
 
 .page-actions-overlay .el-button:active {
   transform: translateY(0) scale(1.02) !important;
-  box-shadow: 
+  box-shadow:
     0 2px 8px rgba(0, 0, 0, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
 }
