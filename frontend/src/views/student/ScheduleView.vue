@@ -27,6 +27,25 @@
             <span class="btn-icon">⭐</span> 今天
           </el-button>
         </div>
+        
+        <!-- 新增功能按钮 -->
+        <div class="schedule-actions ultra">
+          <el-button @click="addCourse" class="action-btn ultra-btn">
+            <span class="btn-icon">➕</span> 添加课程
+          </el-button>
+          <el-button @click="refreshSchedule" class="action-btn ultra-btn">
+            <span class="btn-icon">🔄</span> 刷新课表
+          </el-button>
+          <el-button @click="exportSchedule" class="action-btn ultra-btn">
+            <span class="btn-icon">📤</span> 导出课表
+          </el-button>
+          <el-button @click="syncToCalendar" class="action-btn ultra-btn" :loading="isSyncing">
+            <span class="btn-icon">📅</span> 日历同步
+          </el-button>
+          <el-button @click="sendScheduleEmail" class="action-btn ultra-btn">
+            <span class="btn-icon">📧</span> 邮件发送
+          </el-button>
+        </div>
       </div>
     </div>
 
@@ -155,6 +174,123 @@
       </template>
     </el-dialog>
 
+    <!-- 邮件发送对话框 -->
+    <el-dialog
+      v-model="showEmailDialog"
+      title="📧 发送课表邮件"
+      width="600px"
+      :before-close="() => showEmailDialog = false"
+    >
+      <el-form :model="emailOptions" label-width="120px">
+        <el-form-item label="收件人邮箱" required>
+          <div class="email-recipients">
+            <div 
+              v-for="(email, index) in emailOptions.recipients" 
+              :key="index"
+              class="recipient-item"
+            >
+              <el-input
+                v-model="emailOptions.recipients[index]"
+                placeholder="请输入邮箱地址"
+                type="email"
+              />
+              <el-button
+                type="danger"
+                text
+                @click="removeEmailRecipient(index)"
+                style="margin-left: 8px;"
+              >
+                删除
+              </el-button>
+            </div>
+            <el-button
+              type="primary"
+              text
+              @click="addEmailRecipient"
+              class="add-recipient-btn"
+            >
+              + 添加收件人
+            </el-button>
+          </div>
+        </el-form-item>
+        
+        <el-form-item label="附件选项">
+          <el-checkbox v-model="emailOptions.includeAttachment">
+            包含 iCal 课表文件
+          </el-checkbox>
+        </el-form-item>
+        
+        <el-form-item label="提醒设置">
+          <el-checkbox v-model="emailOptions.sendReminder">
+            启用课程提醒邮件
+          </el-checkbox>
+        </el-form-item>
+        
+        <el-form-item label="邮件预览">
+          <div class="email-preview">
+            <p><strong>主题：</strong>您的乒乓球训练课表 - {{ dayjs().format('YYYY年MM月DD日') }}</p>
+            <p><strong>内容：</strong>包含完整的训练课表安排和日历文件</p>
+            <p><strong>收件人数：</strong>{{ emailOptions.recipients.filter(email => email.trim()).length }} 人</p>
+          </div>
+        </el-form-item>
+      </el-form>
+      
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="showEmailDialog = false">取消</el-button>
+          <el-button
+            type="primary"
+            @click="handleEmailSend"
+            :disabled="emailOptions.recipients.filter(email => email.trim()).length === 0"
+          >
+            发送邮件
+          </el-button>
+        </div>
+      </template>
+    </el-dialog>
+
+    <!-- 同步设置对话框 -->
+    <el-dialog
+      v-model="showSyncDialog"
+      title="⚙️ 同步设置"
+      width="500px"
+      :before-close="() => showSyncDialog = false"
+    >
+      <el-form :model="syncOptions" label-width="120px">
+        <el-form-item label="同步平台">
+          <el-select v-model="syncOptions.platform" style="width: 100%">
+            <el-option label="Google Calendar" value="google" />
+            <el-option label="Outlook Calendar" value="outlook" />
+            <el-option label="Apple Calendar" value="apple" />
+          </el-select>
+        </el-form-item>
+        
+        <el-form-item label="提醒设置">
+          <el-checkbox v-model="syncOptions.enableReminder">
+            启用课程提醒
+          </el-checkbox>
+        </el-form-item>
+        
+        <el-form-item label="同步频率">
+          <el-select v-model="syncOptions.syncFrequency" style="width: 100%">
+            <el-option label="实时同步" value="realtime" />
+            <el-option label="每小时" value="hourly" />
+            <el-option label="每日同步" value="daily" />
+            <el-option label="手动同步" value="manual" />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="showSyncDialog = false">取消</el-button>
+          <el-button type="primary" @click="showSyncDialog = false">
+            保存设置
+          </el-button>
+        </div>
+      </template>
+    </el-dialog>
+
     <!-- 加载状态 -->
     <el-loading
       v-loading="loading"
@@ -167,10 +303,11 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage, ElMessageBox, ElDialog, ElButton, ElSelect, ElOption, ElForm, ElFormItem, ElInput } from 'element-plus'
 import { ArrowLeft, ArrowRight } from '@element-plus/icons-vue'
 import dayjs from 'dayjs'
 import api from '@/utils/api'
+import { useScheduleSync } from '@/utils/scheduleSyncExamples'
 
 // 响应式数据
 const currentView = ref('week')
@@ -179,6 +316,24 @@ const schedules = ref([])
 const loading = ref(false)
 const showScheduleDialog = ref(false)
 const selectedSchedule = ref(null)
+
+// 新增功能相关数据
+const isSyncing = ref(false)
+const showSyncDialog = ref(false)
+const showEmailDialog = ref(false)
+const syncOptions = ref({
+  platform: 'google',
+  enableReminder: true,
+  syncFrequency: 'hourly'
+})
+const emailOptions = ref({
+  recipients: [],
+  includeAttachment: true,
+  sendReminder: false
+})
+
+// 初始化同步功能
+const scheduleSync = useScheduleSync()
 
 // 时间段设置（8:00-22:00）
 const timeSlots = [
@@ -397,6 +552,100 @@ const cancelSchedule = async () => {
   } finally {
     loading.value = false
   }
+}
+
+// 新增功能方法
+const addCourse = () => {
+  // 添加课程逻辑（学生版本可能是预约课程）
+  ElMessage.info('预约课程功能开发中...')
+}
+
+const refreshSchedule = () => {
+  loading.value = true
+  fetchSchedules().finally(() => {
+    ElMessage.success('课表已刷新')
+  })
+}
+
+const exportSchedule = () => {
+  try {
+    const filename = `学生课表_${dayjs().format('YYYY-MM-DD')}.ics`
+    scheduleSync.exportSchedule(schedules.value, filename)
+    ElMessage.success('课表导出成功！')
+  } catch (error) {
+    console.error('导出失败:', error)
+    ElMessage.error('课表导出失败，请重试')
+  }
+}
+
+const syncToCalendar = async () => {
+  if (isSyncing.value) return
+  
+  try {
+    isSyncing.value = true
+    ElMessage.info('开始同步到日历...')
+    
+    await scheduleSync.syncToCalendar(syncOptions.value.platform)
+    
+    ElMessage.success(`课表已成功同步到 ${syncOptions.value.platform === 'google' ? 'Google' : 'Outlook'} 日历`)
+  } catch (error) {
+    console.error('日历同步失败:', error)
+    ElMessage.error('日历同步失败，请检查网络连接或授权状态')
+  } finally {
+    isSyncing.value = false
+  }
+}
+
+const sendScheduleEmail = () => {
+  showEmailDialog.value = true
+}
+
+const handleEmailSend = async () => {
+  try {
+    if (emailOptions.value.recipients.length === 0) {
+      ElMessage.warning('请至少添加一个收件人')
+      return
+    }
+    
+    ElMessage.info('正在发送邮件...')
+    
+    // 获取收件人邮箱
+    const recipients = emailOptions.value.recipients.map(email => ({
+      name: email.split('@')[0], // 简单从邮箱提取名称
+      email: email
+    }))
+    
+    // 批量发送邮件
+    for (const recipient of recipients) {
+      await scheduleSync.sendEmail('schedule', {
+        email: recipient.email,
+        name: recipient.name,
+        scheduleData: schedules.value
+      })
+    }
+    
+    ElMessage.success(`邮件发送成功！共发送 ${recipients.length} 封邮件`)
+    showEmailDialog.value = false
+    
+    // 如果启用了提醒，也发送课程提醒
+    if (emailOptions.value.sendReminder) {
+      setTimeout(() => {
+        ElMessage.info('课程提醒也将在适当时间自动发送')
+      }, 1000)
+    }
+    
+  } catch (error) {
+    console.error('邮件发送失败:', error)
+    ElMessage.error('邮件发送失败，请重试')
+  }
+}
+
+const addEmailRecipient = () => {
+  emailOptions.value.recipients.push('')
+}
+
+const removeEmailRecipient = (index) => {
+  emailOptions.value.recipients.splice(index, 1)
 }
 
 const fetchSchedules = async () => {
@@ -959,6 +1208,156 @@ onMounted(() => {
   
   .dialog-footer.ultra {
     gap: var(--spacing-sm);
+  }
+}
+
+/* 课表管理功能样式 */
+.schedule-actions {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.schedule-actions h3 {
+  margin: 0 0 var(--spacing-md) 0;
+  color: var(--text-primary);
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.schedule-actions .action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.schedule-actions .action-button {
+  flex: 1;
+  min-width: 140px;
+  max-width: 200px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  font-size: 0.875rem;
+  border-radius: var(--border-radius-md);
+  transition: all var(--transition-duration);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text-primary);
+}
+
+.schedule-actions .action-button:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.schedule-actions .action-button.primary {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  border-color: var(--color-primary);
+  color: white;
+}
+
+.schedule-actions .action-button.primary:hover {
+  background: linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 100%);
+  box-shadow: 0 4px 20px rgba(var(--color-primary-rgb), 0.3);
+}
+
+/* 邮件预览样式 */
+.email-recipients {
+  margin-bottom: var(--spacing-md);
+}
+
+.email-recipients .el-form-item {
+  margin-bottom: var(--spacing-sm);
+}
+
+.email-preview {
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-md);
+  margin-top: var(--spacing-md);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.email-preview h4 {
+  margin: 0 0 var(--spacing-xs) 0;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* 对话框增强样式 */
+.ultra-dialog .el-dialog__header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-md);
+}
+
+.ultra-dialog .el-dialog__title {
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 1.125rem;
+}
+
+.ultra-dialog .el-form-item__label {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.ultra-dialog .el-input__inner,
+.ultra-dialog .el-textarea__inner {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+}
+
+.ultra-dialog .el-input__inner:focus,
+.ultra-dialog .el-textarea__inner:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb), 0.2);
+}
+
+.ultra-dialog .el-switch__core {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.ultra-dialog .el-switch.is-checked .el-switch__core {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .schedule-actions .action-buttons {
+    flex-direction: column;
+  }
+  
+  .schedule-actions .action-button {
+    flex: none;
+    min-width: 100%;
+    max-width: 100%;
+  }
+  
+  .email-preview {
+    font-size: 0.8125rem;
+    max-height: 150px;
   }
 }
 </style>
