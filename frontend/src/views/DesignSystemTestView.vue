@@ -98,24 +98,14 @@
     </div>
 
     <!-- 玻璃卡片组件系列展示（重构版） -->
-    <CardShowcase
-      id="glass-cards"
-      title="🎴 玻璃卡片组件系列"
-      description="按层次展示已封装好的卡片组件：基础 Base、布局 Layout、专用 Specialized、展示 Showcase。示例最小可行，便于对照与复用。"
-      layout="fixed-3"
-    >
+    <CardShowcase id="glass-cards" title="🎴 玻璃卡片组件系列"
+      description="按层次展示已封装好的卡片组件：基础 Base、布局 Layout、专用 Specialized、展示 Showcase。示例最小可行，便于对照与复用。" layout="fixed-3">
       <!-- Base 基础层 -->
-      <GlassDisplayCard
-        title="GlassCardBase"
-        subtitle="base/GlassCardBase.vue"
-        icon="🏗️"
-        variant="base"
-        description="统一的玻璃态卡片基础：标题/副标题/图标/描述/标签/插槽 与 5 种变体样式。"
-        :tags="[
+      <GlassDisplayCard title="GlassCardBase" subtitle="base/GlassCardBase.vue" icon="🏗️" variant="base"
+        description="统一的玻璃态卡片基础：标题/副标题/图标/描述/标签/插槽 与 5 种变体样式。" :tags="[
           { text: 'Base', type: 'primary' },
           { text: '5变体', type: 'info' },
-        ]"
-      >
+        ]">
         <div class="variant-grid">
           <div class="mini-card variant-base">base</div>
           <div class="mini-card variant-display">display</div>
@@ -125,13 +115,8 @@
         </div>
       </GlassDisplayCard>
 
-      <GlassDisplayCard
-        title="GlassCard"
-        subtitle="base/GlassCard.vue"
-        icon="🎴"
-        variant="display"
-        description="标准功能卡片：头部 actions 与底部 footer 插槽，满足通用信息容器场景。"
-      >
+      <GlassDisplayCard title="GlassCard" subtitle="base/GlassCard.vue" icon="🎴" variant="display"
+        description="标准功能卡片：头部 actions 与底部 footer 插槽，满足通用信息容器场景。">
         <div class="card-preview">
           <div class="card-header-demo">
             <span class="demo-icon">🔧</span><span class="demo-title">标准卡片</span>
@@ -141,13 +126,8 @@
         </div>
       </GlassDisplayCard>
 
-      <GlassDisplayCard
-        title="GlassCardWithHeader"
-        subtitle="base/GlassCardWithHeader.vue"
-        icon="🎯"
-        variant="content"
-        description="带独立头部结构的卡片，向后兼容，适合需要明显头部区块的场景。"
-      >
+      <GlassDisplayCard title="GlassCardWithHeader" subtitle="base/GlassCardWithHeader.vue" icon="🎯" variant="content"
+        description="带独立头部结构的卡片，向后兼容，适合需要明显头部区块的场景。">
         <div class="api-compatibility">
           <div class="compat-item">✅ 向后兼容</div>
           <div class="compat-item">🔄 API 统一</div>
@@ -155,13 +135,8 @@
         </div>
       </GlassDisplayCard>
 
-      <GlassDisplayCard
-        title="GlassCardBody"
-        subtitle="base/GlassCardBody.vue"
-        icon="📄"
-        variant="minimal"
-        description="独立的卡片内容容器，支持 grid/form/actions/flex/status 等布局。"
-      >
+      <GlassDisplayCard title="GlassCardBody" subtitle="base/GlassCardBody.vue" icon="📄" variant="minimal"
+        description="独立的卡片内容容器，支持 grid/form/actions/flex/status 等布局。">
         <div class="layout-grid">
           <div class="layout-item">grid</div>
           <div class="layout-item">form</div>
@@ -172,16 +147,11 @@
       </GlassDisplayCard>
 
       <!-- Layout 布局层 -->
-      <GlassDisplayCard
-        title="GlassCardsGrid"
-        subtitle="layout/GlassCardsGrid.vue"
-        icon="📐"
-        variant="enhanced"
-        description="卡片网格系统：auto 自适应 / fixed 固定列。"
-      >
+      <GlassDisplayCard title="GlassCardsGrid" subtitle="layout/GlassCardsGrid.vue" icon="📐" variant="enhanced"
+        description="卡片网格系统：auto 自适应 / fixed 固定列。">
         <div class="grid-demo-container">
           <div class="grid-demo">
-            <div class="grid-label">auto 自适应</div>
+            <div class="grid-label section-title--sm">auto 自适应</div>
             <div class="mini-grid auto-grid">
               <div class="mini-item"></div>
               <div class="mini-item"></div>
@@ -189,7 +159,7 @@
             </div>
           </div>
           <div class="grid-demo">
-            <div class="grid-label">fixed-3 固定列</div>
+            <div class="grid-label section-title--sm">fixed-3 固定列</div>
             <div class="mini-grid fixed-grid">
               <div class="mini-item"></div>
               <div class="mini-item"></div>
@@ -200,13 +170,8 @@
       </GlassDisplayCard>
 
       <!-- Specialized 专用层 -->
-      <GlassDisplayCard
-        title="GlassDisplayCard"
-        subtitle="specialized/GlassDisplayCard.vue"
-        icon="🎨"
-        variant="display"
-        description="用于内容介绍与特性说明的展示卡片，完整信息结构与标签支持。"
-      >
+      <GlassDisplayCard title="GlassDisplayCard" subtitle="specialized/GlassDisplayCard.vue" icon="🎨" variant="display"
+        description="用于内容介绍与特性说明的展示卡片，完整信息结构与标签支持。">
         <div class="feature-list simple">
           <div class="feature-item">✨ 标题/副标题/图标</div>
           <div class="feature-item">📝 描述与标签</div>
@@ -231,16 +196,11 @@
       </GlassHeaderCard>
 
       <!-- Showcase 展示层 -->
-      <GlassDisplayCard
-        title="CardShowcase"
-        subtitle="showcase/CardShowcase.vue"
-        icon="🎪"
-        variant="minimal"
-        description="文档/设计系统中的展示容器，与网格组合统一排版。"
-      >
+      <GlassDisplayCard title="CardShowcase" subtitle="showcase/CardShowcase.vue" icon="🎪" variant="minimal"
+        description="文档/设计系统中的展示容器，与网格组合统一排版。">
         <div class="showcase-demo">
           <div class="showcase-header">
-            <div class="demo-title">示例标题</div>
+            <div class="demo-title section-title--sm">示例标题</div>
             <div class="demo-desc">示例描述</div>
           </div>
           <div class="showcase-grid">
@@ -253,24 +213,13 @@
     </CardShowcase>
 
     <!-- 按钮组件系列展示 -->
-    <CardShowcase
-      id="buttons"
-      title="🔘 现代按钮组件系列"
-      description="完整的按钮组件系统，支持多种类型、尺寸、状态和交互效果，确保一致的用户体验"
-      layout="fixed-2"
-    >
+    <CardShowcase id="buttons" title="🔘 现代按钮组件系列" description="完整的按钮组件系统，支持多种类型、尺寸、状态和交互效果，确保一致的用户体验" layout="fixed-2">
       <!-- 语义化按钮 -->
-      <GlassDisplayCard
-        title="语义化按钮系统"
-        subtitle="Semantic Button Types"
-        icon="🎨"
-        variant="display"
-        description="基于语义的按钮类型系统，通过颜色和样式传达不同的操作意图。"
-        :tags="[
+      <GlassDisplayCard title="语义化按钮系统" subtitle="Semantic Button Types" icon="🎨" variant="display"
+        description="基于语义的按钮类型系统，通过颜色和样式传达不同的操作意图。" :tags="[
           { text: '语义化', type: 'primary' },
           { text: '一致性', type: 'success' },
-        ]"
-      >
+        ]">
         <div class="button-showcase">
           <div class="button-row">
             <ModernButton text="主要" type="primary" size="small" />
@@ -291,20 +240,14 @@
       </GlassDisplayCard>
 
       <!-- 尺寸和状态 -->
-      <GlassDisplayCard
-        title="尺寸与状态系统"
-        subtitle="Size & State Management"
-        icon="📐"
-        variant="enhanced"
-        description="完整的按钮尺寸和状态管理系统，适应不同场景下的使用需求。"
-        :tags="[
+      <GlassDisplayCard title="尺寸与状态系统" subtitle="Size & State Management" icon="📐" variant="enhanced"
+        description="完整的按钮尺寸和状态管理系统，适应不同场景下的使用需求。" :tags="[
           { text: '多尺寸', type: 'info' },
           { text: '状态管理', type: 'warning' },
-        ]"
-      >
+        ]">
         <div class="size-states-demo">
           <div class="size-group">
-            <h5 style="color: white; margin: 0 0 8px 0; font-size: 12px">尺寸系统</h5>
+            <h5 class="section-title--sm">尺寸系统</h5>
             <div class="button-row">
               <ModernButton text="小" type="primary" size="small" />
               <ModernButton text="中" type="primary" size="medium" />
@@ -312,7 +255,7 @@
             </div>
           </div>
           <div class="state-group">
-            <h5 style="color: white; margin: 12px 0 8px 0; font-size: 12px">状态系统</h5>
+            <h5 class="section-title--sm" style="margin-top: 12px">状态系统</h5>
             <div class="button-row">
               <ModernButton text="正常" type="primary" size="small" />
               <ModernButton text="禁用" type="primary" size="small" :disabled="true" />
@@ -323,17 +266,11 @@
       </GlassDisplayCard>
 
       <!-- 图标按钮 -->
-      <GlassDisplayCard
-        title="图标与交互增强"
-        subtitle="Icon & Interaction Enhancement"
-        icon="⚡"
-        variant="content"
-        description="支持图标的按钮组件，提供更丰富的视觉信息和更好的用户体验。"
-        :tags="[
+      <GlassDisplayCard title="图标与交互增强" subtitle="Icon & Interaction Enhancement" icon="⚡" variant="content"
+        description="支持图标的按钮组件，提供更丰富的视觉信息和更好的用户体验。" :tags="[
           { text: '图标支持', type: 'secondary' },
           { text: '交互增强', type: 'primary' },
-        ]"
-      >
+        ]">
         <div class="icon-buttons-demo">
           <div class="button-row">
             <ModernButton text="添加" type="primary" icon-left="➕" size="small" />
@@ -349,17 +286,11 @@
       </GlassDisplayCard>
 
       <!-- 按钮应用场景 -->
-      <GlassDisplayCard
-        title="应用场景与最佳实践"
-        subtitle="Use Cases & Best Practices"
-        icon="💡"
-        variant="minimal"
-        description="不同场景下的按钮应用指南和最佳实践建议。"
-        :tags="[
+      <GlassDisplayCard title="应用场景与最佳实践" subtitle="Use Cases & Best Practices" icon="💡" variant="minimal"
+        description="不同场景下的按钮应用指南和最佳实践建议。" :tags="[
           { text: '最佳实践', type: 'info' },
           { text: '应用指南', type: 'success' },
-        ]"
-      >
+        ]">
         <div class="use-cases">
           <div class="case-item">
             <div class="case-label">表单提交</div>
@@ -382,106 +313,51 @@
     </CardShowcase>
 
     <!-- 表单输入组件系列展示 -->
-    <CardShowcase
-      id="forms"
-      title="📝 表单输入组件系列"
-      description="完整的表单输入组件系统，提供优雅的用户输入体验和强大的验证功能"
-      layout="fixed-2"
-    >
+    <CardShowcase id="forms" title="📝 表单输入组件系列" description="完整的表单输入组件系统，提供优雅的用户输入体验和强大的验证功能" layout="fixed-2">
       <!-- 基础输入组件 -->
-      <GlassDisplayCard
-        title="基础输入组件"
-        subtitle="Form Input Basics"
-        icon="✏️"
-        variant="display"
-        description="支持多种输入类型的基础表单组件，提供统一的样式和交互体验。"
-        :tags="[
+      <GlassDisplayCard title="基础输入组件" subtitle="Form Input Basics" icon="✏️" variant="display"
+        description="支持多种输入类型的基础表单组件，提供统一的样式和交互体验。" :tags="[
           { text: '基础组件', type: 'primary' },
           { text: '多类型', type: 'info' },
-        ]"
-      >
+        ]">
         <div class="form-showcase">
           <FormInput v-model="formData.username" label="用户名" placeholder="请输入用户名" />
-          <FormInput
-            v-model="formData.email"
-            label="邮箱地址"
-            type="email"
-            placeholder="请输入邮箱地址"
-          />
-          <FormInput
-            v-model="formData.password"
-            label="密码"
-            type="password"
-            placeholder="请输入密码"
-          />
+          <FormInput v-model="formData.email" label="邮箱地址" type="email" placeholder="请输入邮箱地址" />
+          <FormInput v-model="formData.password" label="密码" type="password" placeholder="请输入密码" />
         </div>
       </GlassDisplayCard>
 
       <!-- 输入状态管理 -->
-      <GlassDisplayCard
-        title="状态与验证系统"
-        subtitle="State & Validation"
-        icon="🔍"
-        variant="enhanced"
-        description="完善的输入状态管理和验证反馈系统，提供即时的用户反馈。"
-        :tags="[
+      <GlassDisplayCard title="状态与验证系统" subtitle="State & Validation" icon="🔍" variant="enhanced"
+        description="完善的输入状态管理和验证反馈系统，提供即时的用户反馈。" :tags="[
           { text: '状态管理', type: 'warning' },
           { text: '验证反馈', type: 'success' },
-        ]"
-      >
+        ]">
         <div class="form-showcase">
-          <FormInput
-            v-model="formData.success"
-            label="成功状态"
-            placeholder="验证成功"
-            status="success"
-          />
-          <FormInput
-            v-model="formData.error"
-            label="错误状态"
-            placeholder="验证失败"
-            status="error"
-            error="用户名已存在"
-          />
+          <FormInput v-model="formData.success" label="成功状态" placeholder="验证成功" status="success" />
+          <FormInput v-model="formData.error" label="错误状态" placeholder="验证失败" status="error" error="用户名已存在" />
           <FormInput v-model="formData.disabled" label="禁用状态" placeholder="不可编辑" disabled />
         </div>
       </GlassDisplayCard>
     </CardShowcase>
 
     <!-- 状态与反馈组件系列展示 -->
-    <CardShowcase
-      id="feedback"
-      title="💬 状态与反馈组件系列"
-      description="丰富的状态展示和用户反馈组件，提供清晰的信息传达和良好的用户体验"
-      layout="fixed-2"
-    >
+    <CardShowcase id="feedback" title="💬 状态与反馈组件系列" description="丰富的状态展示和用户反馈组件，提供清晰的信息传达和良好的用户体验" layout="fixed-2">
       <!-- 状态展示组件 -->
-      <GlassDisplayCard
-        title="状态网格展示"
-        subtitle="Status Grid System"
-        icon="📊"
-        variant="display"
-        description="系统化的状态展示组件，支持多种状态类型和实时数据更新。"
-        :tags="[
+      <GlassDisplayCard title="状态网格展示" subtitle="Status Grid System" icon="📊" variant="display"
+        description="系统化的状态展示组件，支持多种状态类型和实时数据更新。" :tags="[
           { text: '状态展示', type: 'info' },
           { text: '实时更新', type: 'success' },
-        ]"
-      >
+        ]">
         <StatusGrid :status="systemStatus" />
       </GlassDisplayCard>
 
       <!-- 标签徽章系统 -->
-      <GlassDisplayCard
-        title="标签徽章系统"
-        subtitle="Tag Badge Components"
-        icon="🏷️"
-        variant="enhanced"
-        description="灵活的标签徽章组件，支持多种样式和状态，适用于分类、状态标记等场景。"
-        :tags="[
+      <GlassDisplayCard title="标签徽章系统" subtitle="Tag Badge Components" icon="🏷️" variant="enhanced"
+        description="灵活的标签徽章组件，支持多种样式和状态，适用于分类、状态标记等场景。" :tags="[
           { text: '标签系统', type: 'secondary' },
           { text: '多样式', type: 'primary' },
-        ]"
-      >
+        ]">
         <div class="badge-showcase">
           <div class="badge-row">
             <TagBadge variant="primary">主要标签</TagBadge>
@@ -498,58 +374,133 @@
     </CardShowcase>
 
     <!-- 工具与辅助组件系列展示 -->
-    <CardShowcase
-      id="utilities"
-      title="🔧 工具与辅助组件系列"
-      description="实用的工具和辅助组件，提供完整的开发和用户体验支持"
-      layout="fixed-2"
-    >
+    <CardShowcase id="utilities" title="🔧 工具与辅助组件系列" description="实用的工具和辅助组件，提供完整的开发和用户体验支持" layout="fixed-2">
       <!-- 存储信息组件 -->
-      <GlassDisplayCard
-        title="存储信息管理"
-        subtitle="Storage Management"
-        icon="💾"
-        variant="display"
-        description="本地存储管理组件，提供Token、用户信息等重要数据的可视化管理。"
-        :tags="[
+      <GlassDisplayCard title="存储信息管理" subtitle="Storage Management" icon="💾" variant="display"
+        description="本地存储管理组件，提供Token、用户信息等重要数据的可视化管理。" :tags="[
           { text: '存储管理', type: 'info' },
           { text: '数据可视化', type: 'success' },
-        ]"
-      >
+        ]">
         <StorageInfo :storage-items="storageItems" />
       </GlassDisplayCard>
 
       <!-- 操作按钮组件 -->
-      <GlassDisplayCard
-        title="操作按钮组合"
-        subtitle="Action Button Groups"
-        icon="⚡"
-        variant="enhanced"
-        description="预定义的操作按钮组合，支持调试、清理、导出等常用操作。"
-        :tags="[
+      <GlassDisplayCard title="操作按钮组合" subtitle="Action Button Groups" icon="⚡" variant="enhanced"
+        description="预定义的操作按钮组合，支持调试、清理、导出等常用操作。" :tags="[
           { text: '操作组合', type: 'warning' },
           { text: '快捷功能', type: 'primary' },
-        ]"
-      >
+        ]">
         <ActionButtons :actions="debugActions" />
       </GlassDisplayCard>
     </CardShowcase>
 
-    <!-- 使用说明 -->
-    <div class="usage-note">
-      <h3>🚀 设计系统使用指南</h3>
-      <p>本设计系统采用现代化的Glassmorphism风格，为乒乓球训练系统提供统一、优雅的用户界面。</p>
-      <ul>
-        <li>
-          <strong>统一的卡片系统：</strong>基于GlassCardBase的统一卡片组件，支持多种变体和样式
-        </li>
-        <li><strong>现代按钮组件：</strong>支持多种类型、尺寸和状态的按钮系统</li>
-        <li><strong>完整的表单组件：</strong>包含输入框、状态管理和验证反馈</li>
-        <li><strong>丰富的反馈组件：</strong>状态展示、标签徽章等用户反馈组件</li>
-        <li><strong>实用的工具组件：</strong>存储管理、操作按钮等开发辅助工具</li>
-        <li><strong>响应式设计：</strong>完全适配桌面端、平板端和移动端设备</li>
-      </ul>
-    </div>
+    <!-- 🧪 系统化演示：Toast / Modal / Tooltip / BaseField / GlassTable / Tokens -->
+    <CardShowcase id="playground" title="🧪 系统化演示" description="快速预览核心封装的真实交互与状态" layout="fixed-2">
+      <!-- Toast 演示 -->
+      <GlassDisplayCard title="Toast 演示" subtitle="useToast()" icon="💬" variant="display"
+        description="通过封装的 Toast 系统输出一致的反馈语义">
+        <div class="button-row">
+          <PrimaryButton size="sm" @click="toastSuccess">成功</PrimaryButton>
+          <OutlineButton size="sm" color="info" @click="toastInfo">信息</OutlineButton>
+          <OutlineButton size="sm" color="warning" @click="toastWarning">警告</OutlineButton>
+          <OutlineButton size="sm" color="danger" @click="toastError">错误</OutlineButton>
+        </div>
+      </GlassDisplayCard>
+
+      <!-- Modal / Tooltip 演示 -->
+      <GlassDisplayCard title="Modal & Tooltip" subtitle="GlassModal / GlassTooltip" icon="🪟" variant="enhanced"
+        description="统一的玻璃态弹窗与提示气泡样式">
+        <div class="button-row">
+          <PrimaryButton size="sm" @click="showDemoModal = true">打开弹窗</PrimaryButton>
+          <GlassTooltip content="这是一段提示">
+            <OutlineButton size="sm">悬停查看 Tooltip</OutlineButton>
+          </GlassTooltip>
+        </div>
+      </GlassDisplayCard>
+
+      <!-- BaseField 表单示例 -->
+      <GlassDisplayCard title="BaseField 表单示例" subtitle="/components/form/BaseField.vue" icon="📝" variant="content"
+        description="表单外壳统一标签/提示/错误/密度，内部可放 Element Plus 输入控件">
+        <div class="form-showcase">
+          <BaseField label="姓名" :required="true" :error="formDemo.errors.name">
+            <el-input v-model="formDemo.name" placeholder="请输入姓名" class="input-glass" />
+          </BaseField>
+          <BaseField label="级别" hint="选择一个级别" :error="formDemo.errors.level">
+            <el-select v-model="formDemo.level" placeholder="请选择" style="width: 100%">
+              <el-option label="初学者" value="beginner" />
+              <el-option label="中级" value="intermediate" />
+              <el-option label="高级" value="advanced" />
+            </el-select>
+          </BaseField>
+          <div class="button-row">
+            <PrimaryButton size="sm" @click="submitFormDemo">提交</PrimaryButton>
+            <OutlineButton size="sm" @click="resetFormDemo">重置</OutlineButton>
+          </div>
+        </div>
+      </GlassDisplayCard>
+
+      <!-- GlassTable 表格示例 -->
+      <GlassDisplayCard title="GlassTable 表格" subtitle="/components/data/Table.vue" icon="📊" variant="display"
+        description="统一的玻璃态表格，内置加载与空状态">
+        <div class="button-row" style="margin-bottom: 8px">
+          <OutlineButton size="sm" @click="setTableLoading(true)">显示加载</OutlineButton>
+          <OutlineButton size="sm" @click="setTableEmpty()">显示空态</OutlineButton>
+          <PrimaryButton size="sm" @click="setTableData()">显示数据</PrimaryButton>
+        </div>
+        <GlassTable :data="tableDemo.data" :loading="tableDemo.loading" density="sm" :stripe="true">
+          <el-table-column prop="id" label="编号" width="80" />
+          <el-table-column prop="name" label="名称" />
+          <el-table-column prop="status" label="状态" width="120">
+            <template #default="{ row }">
+              <TagBadge :text="row.status ? '启用' : '停用'" :type="row.status ? 'success' : 'danger'" size="small" />
+            </template>
+          </el-table-column>
+        </GlassTable>
+      </GlassDisplayCard>
+
+      <!-- 设计令牌预览 -->
+      <GlassDisplayCard title="设计令牌预览" subtitle="/styles/design-system.css & utils/tokens.js" icon="🎨"
+        variant="minimal" description="查看关键色彩与间距变量当前取值，确保设计/实现一致">
+        <div class="tokens-grid">
+          <div v-for="t in tokenPreview" :key="t.key" class="token-item">
+            <div class="swatch" :style="{ background: t.preview }"></div>
+            <div class="token-meta">
+              <div class="token-name">{{ t.label }}</div>
+              <div class="token-value">{{ t.value }}</div>
+            </div>
+          </div>
+        </div>
+      </GlassDisplayCard>
+    </CardShowcase>
+
+    <!-- Demo Modal 实例 -->
+    <GlassModal v-model="showDemoModal" title="演示弹窗">
+      <p>这是一个使用统一玻璃风格的弹窗。</p>
+      <template #footer>
+        <OutlineButton @click="showDemoModal = false">关闭</OutlineButton>
+        <PrimaryButton @click="toastSuccess">确定</PrimaryButton>
+      </template>
+    </GlassModal>
+
+    <!-- 使用说明（以 CardShowcase 统一宽度与排版） -->
+    <CardShowcase id="usage-guide" title="🚀 设计系统使用指南" layout="auto"
+      description="采用 Glassmorphism 风格，为系统提供统一、优雅、易复用的 UI 基础。">
+      <GlassDisplayCard title="快速上手" subtitle="Guidelines" icon="🚀" variant="display">
+        <div class="usage-content">
+          <p>本设计系统采用现代化的 Glassmorphism 风格，为乒乓球训练系统提供统一、优雅的用户界面。</p>
+          <ul>
+            <li>
+              <strong>统一的卡片系统：</strong>基于 GlassCardBase 的统一卡片组件，支持多种变体和样式
+            </li>
+            <li><strong>现代按钮组件：</strong>支持多种类型、尺寸和状态的按钮系统</li>
+            <li><strong>完整的表单组件：</strong>包含输入框、状态管理和验证反馈</li>
+            <li><strong>丰富的反馈组件：</strong>状态展示、标签徽章等用户反馈组件</li>
+            <li><strong>实用的工具组件：</strong>存储管理、操作按钮等开发辅助工具</li>
+            <li><strong>响应式设计：</strong>完全适配桌面端、平板端和移动端设备</li>
+          </ul>
+        </div>
+      </GlassDisplayCard>
+    </CardShowcase>
   </div>
 </template>
 
@@ -563,6 +514,13 @@ import StorageInfo from '@/components/StorageInfo.vue'
 import ActionButtons from '@/components/ActionButtons.vue'
 // 新按钮体系（示例导入，不强制使用）
 import { PrimaryButton, OutlineButton } from '@/components/buttons'
+// 新增：封装组件演示
+import GlassTable from '@/components/data/Table.vue'
+import GlassModal from '@/components/Modal.vue'
+import GlassTooltip from '@/components/Tooltip.vue'
+import BaseField from '@/components/form/BaseField.vue'
+import { useToast } from '@/composables/useToast'
+import { tokens } from '@/utils/tokens'
 
 export default {
   name: 'DesignLanguageShowcase',
@@ -578,9 +536,14 @@ export default {
     ActionButtons,
     PrimaryButton,
     OutlineButton,
+    GlassTable,
+    GlassModal,
+    GlassTooltip,
+    BaseField,
   },
   data() {
     return {
+      showDemoModal: false,
       // 表单数据
       formData: {
         username: '',
@@ -589,6 +552,19 @@ export default {
         success: '验证成功的输入',
         error: '错误的输入',
         disabled: '这是禁用的输入',
+      },
+
+      // BaseField 演示数据
+      formDemo: {
+        name: '',
+        level: '',
+        errors: { name: '', level: '' },
+      },
+
+      // 表格演示数据
+      tableDemo: {
+        loading: false,
+        data: [],
       },
 
       // 系统状态数据
@@ -753,7 +729,75 @@ export default {
       ],
     }
   },
+  computed: {
+    tokenPreview() {
+      // 汇总若干核心令牌，取当前计算值
+      const list = [
+        { key: 'primary', label: 'Primary', value: tokens.primary(), preview: tokens.primary() },
+        { key: 'success', label: 'Success', value: tokens.success(), preview: tokens.success() },
+        { key: 'warning', label: 'Warning', value: tokens.warning(), preview: tokens.warning() },
+        { key: 'danger', label: 'Danger', value: tokens.danger(), preview: tokens.danger() },
+        { key: 'info', label: 'Info', value: tokens.info(), preview: tokens.info() },
+        { key: 'gray-200', label: 'Gray-200', value: tokens.gray(200), preview: tokens.gray(200) },
+        { key: 'gray-500', label: 'Gray-500', value: tokens.gray(500), preview: tokens.gray(500) },
+        { key: 'spacing-md', label: 'Spacing md', value: tokens.spacing('md'), preview: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)' },
+        { key: 'radius-lg', label: 'Radius lg', value: tokens.radius('lg'), preview: 'transparent' },
+      ]
+      return list
+    },
+  },
   methods: {
+    // Toast 演示方法
+    toastSuccess() {
+      const t = useToast()
+      t.success('操作成功')
+    },
+    toastInfo() {
+      const t = useToast()
+      t.info('这是一条信息提示')
+    },
+    toastWarning() {
+      const t = useToast()
+      t.warning('请注意该操作的影响')
+    },
+    toastError() {
+      const t = useToast()
+      t.error('操作失败，请重试')
+    },
+
+    // BaseField 演示：简单校验
+    submitFormDemo() {
+      this.formDemo.errors = { name: '', level: '' }
+      if (!this.formDemo.name) this.formDemo.errors.name = '请输入姓名'
+      if (!this.formDemo.level) this.formDemo.errors.level = '请选择级别'
+      if (!this.formDemo.errors.name && !this.formDemo.errors.level) {
+        this.toastSuccess()
+      }
+    },
+    resetFormDemo() {
+      this.formDemo.name = ''
+      this.formDemo.level = ''
+      this.formDemo.errors = { name: '', level: '' }
+    },
+
+    // 表格演示：状态切换
+    setTableLoading(v) {
+      this.tableDemo.loading = v
+      if (v) {
+        // 模拟加载结束
+        setTimeout(() => (this.tableDemo.loading = false), 1200)
+      }
+    },
+    setTableEmpty() {
+      this.tableDemo.data = []
+    },
+    setTableData() {
+      this.tableDemo.data = [
+        { id: 1, name: '示例 A', status: true },
+        { id: 2, name: '示例 B', status: false },
+        { id: 3, name: '示例 C', status: true },
+      ]
+    },
     handleDebugAction({ action }) {
       console.log('调试操作:', action.action, action.text)
       // 这里可以添加具体的调试操作逻辑
@@ -885,20 +929,17 @@ export default {
 
 /* Hero区域样式 */
 .design-language-hero {
-  background: linear-gradient(
-    135deg,
-    rgba(102, 126, 234, 0.15) 0%,
-    rgba(118, 75, 162, 0.15) 50%,
-    rgba(240, 147, 251, 0.15) 100%
-  );
+  background: linear-gradient(135deg,
+      rgba(102, 126, 234, 0.15) 0%,
+      rgba(118, 75, 162, 0.15) 50%,
+      rgba(240, 147, 251, 0.15) 100%);
   backdrop-filter: var(--blur-xl);
   border-bottom: 1px solid var(--white-alpha-20);
-  padding: var(--spacing-5xl) 0 var(--spacing-4xl) 0;
+  padding: var(--spacing-5xl) 0 var(--spacing-3xl) 0;
   text-align: center;
   position: relative;
   overflow: hidden;
-  margin: calc(-1 * var(--spacing-2xl)) calc(-1 * var(--spacing-2xl)) var(--spacing-2xl)
-    calc(-1 * var(--spacing-2xl));
+  margin: calc(-1 * var(--spacing-2xl)) calc(-1 * var(--spacing-2xl)) var(--spacing-2xl) calc(-1 * var(--spacing-2xl));
 }
 
 .design-language-hero::before {
@@ -914,11 +955,11 @@ export default {
 }
 
 .hero-content {
-  max-width: 800px;
+  max-width: 960px;
   margin: 0 auto;
   position: relative;
   z-index: 1;
-  padding: 0 var(--spacing-2xl);
+  padding: 0 var(--spacing-xl);
 }
 
 .hero-badge {
@@ -928,8 +969,8 @@ export default {
   background: var(--white-alpha-25);
   border: 1px solid var(--white-alpha-40);
   border-radius: var(--radius-full);
-  padding: var(--spacing-md) var(--spacing-xl);
-  margin-bottom: var(--spacing-2xl);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
   backdrop-filter: var(--blur-lg);
   color: white;
   font-size: var(--font-size-sm);
@@ -953,39 +994,41 @@ export default {
   font-size: var(--font-size-5xl);
   font-weight: var(--font-weight-extrabold);
   color: white;
-  margin: 0 0 var(--spacing-2xl) 0;
+  margin: 0 0 var(--spacing-xl) 0;
   text-shadow: 0 2px 4px var(--black-alpha-30);
   line-height: 1.2;
+  letter-spacing: 0.2px;
 }
 
 .hero-description {
   font-size: var(--font-size-lg);
   color: var(--white-alpha-90);
-  line-height: 1.6;
-  margin: 0 0 var(--spacing-4xl) 0;
+  line-height: 1.75;
+  margin: 0 0 var(--spacing-3xl) 0;
   text-shadow: 0 1px 2px var(--black-alpha-20);
-  max-width: 600px;
+  max-width: 720px;
   margin-left: auto;
   margin-right: auto;
+  letter-spacing: 0.1px;
 }
 
 .hero-stats {
   display: flex;
   justify-content: center;
-  gap: var(--spacing-4xl);
+  gap: var(--spacing-2xl);
   flex-wrap: wrap;
-  margin-top: var(--spacing-2xl);
+  margin-top: var(--spacing-xl);
 }
 
 .stat-item {
   text-align: center;
-  padding: var(--spacing-lg);
+  padding: var(--spacing-md);
   background: var(--white-alpha-10);
   border-radius: var(--radius-lg);
   border: 1px solid var(--white-alpha-20);
   backdrop-filter: var(--blur-md);
   transition: var(--transition-normal);
-  min-width: 120px;
+  min-width: 110px;
 }
 
 .stat-item:hover {
@@ -1018,14 +1061,6 @@ export default {
   text-align: center;
   max-width: 1200px;
   margin: 0 auto var(--spacing-2xl) auto;
-}
-
-.design-principles h2 {
-  color: white;
-  font-size: var(--font-size-3xl);
-  font-weight: var(--font-weight-bold);
-  margin: 0 0 var(--spacing-xl) 0;
-  text-shadow: 0 2px 4px var(--black-alpha-30);
 }
 
 .principles-grid {
@@ -1081,21 +1116,35 @@ export default {
   margin: 0 calc(-1 * var(--spacing-2xl)) var(--spacing-2xl) calc(-1 * var(--spacing-2xl));
 }
 
-.component-navigation h2 {
-  color: white;
-  font-size: var(--font-size-3xl);
-  font-weight: var(--font-weight-bold);
-  margin: 0 0 var(--spacing-xl) 0;
-  text-shadow: 0 2px 4px var(--black-alpha-30);
-}
-
 .nav-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  /* 固定列数，避免出现 5+1 的不均匀换行 */
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--spacing-xl);
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 var(--spacing-2xl);
+}
+
+/* 桌面大屏：6 列（六张卡片单行显示） */
+@media (min-width: 1440px) {
+  .nav-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
+/* 平板：2 列 */
+@media (max-width: 1024px) {
+  .nav-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* 手机：1 列 */
+@media (max-width: 640px) {
+  .nav-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .nav-card {
@@ -1152,17 +1201,17 @@ export default {
 
   .hero-description {
     font-size: var(--font-size-md);
-    margin-bottom: var(--spacing-3xl);
+    margin-bottom: var(--spacing-2xl);
   }
 
   .hero-stats {
-    gap: var(--spacing-2xl);
-    margin-top: var(--spacing-xl);
+    gap: var(--spacing-xl);
+    margin-top: var(--spacing-lg);
   }
 
   .stat-item {
-    min-width: 100px;
-    padding: var(--spacing-md);
+    min-width: 96px;
+    padding: var(--spacing-sm);
   }
 
   .stat-number {
@@ -1170,11 +1219,11 @@ export default {
   }
 
   .design-language-hero {
-    padding: var(--spacing-4xl) 0 var(--spacing-3xl) 0;
+    padding: var(--spacing-3xl) 0 var(--spacing-2xl) 0;
   }
 
   .hero-content {
-    padding: 0 var(--spacing-lg);
+    padding: 0 var(--spacing-md);
   }
 
   .design-system-test {
@@ -1270,37 +1319,21 @@ export default {
   backdrop-filter: var(--blur-sm);
 }
 
-/* 使用说明样式 */
-.usage-note {
-  margin-top: var(--spacing-3xl);
-  padding: var(--spacing-2xl);
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-xl);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  backdrop-filter: var(--blur-md);
-}
-
-.usage-note h3 {
-  margin: 0 0 var(--spacing-lg) 0;
-  color: white;
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-bold);
-}
-
-.usage-note p {
+/* 使用指南内容样式（嵌于 GlassDisplayCard 内） */
+.usage-content p {
   color: var(--white-alpha-85);
   font-size: var(--font-size-md);
   line-height: 1.6;
-  margin-bottom: var(--spacing-lg);
+  margin: 0 0 var(--spacing-lg) 0;
 }
 
-.usage-note ul {
+.usage-content ul {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-.usage-note li {
+.usage-content li {
   color: var(--white-alpha-85);
   font-size: var(--font-size-md);
   line-height: 1.6;
@@ -1309,7 +1342,7 @@ export default {
   position: relative;
 }
 
-.usage-note li::before {
+.usage-content li::before {
   content: '•';
   color: #667eea;
   font-weight: bold;
@@ -1318,24 +1351,15 @@ export default {
   top: 0;
 }
 
-.usage-note strong {
+.usage-content strong {
   color: white;
   font-weight: var(--font-weight-bold);
 }
 
-/* 使用说明响应式调整 */
 @media (max-width: 768px) {
-  .usage-note {
-    padding: var(--spacing-xl);
-    margin-top: var(--spacing-2xl);
-  }
 
-  .usage-note h3 {
-    font-size: var(--font-size-lg);
-  }
-
-  .usage-note p,
-  .usage-note li {
+  .usage-content p,
+  .usage-content li {
     font-size: var(--font-size-sm);
   }
 }
@@ -1777,12 +1801,7 @@ export default {
   text-align: center;
 }
 
-.demo-title {
-  font-weight: var(--font-weight-semibold);
-  color: white;
-  font-size: var(--font-size-sm);
-  margin-bottom: var(--spacing-xs);
-}
+/* 移除 .demo-title 的本地样式，使用 .section-title--sm 统一视觉 */
 
 .demo-desc {
   font-size: var(--font-size-xs);
@@ -1803,5 +1822,47 @@ export default {
   font-size: var(--font-size-xs);
   color: var(--white-alpha-85);
   border: 1px solid var(--white-alpha-10);
+}
+
+/* Token 预览样式 */
+.tokens-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.token-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  background: var(--white-alpha-10);
+  border: 1px solid var(--white-alpha-15);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+}
+
+.token-item .swatch {
+  width: 40px;
+  height: 24px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--white-alpha-20);
+  box-shadow: var(--shadow-sm);
+}
+
+.token-item .token-meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.token-item .token-name {
+  color: var(--white-alpha-90);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-sm);
+}
+
+.token-item .token-value {
+  color: var(--white-alpha-80);
+  font-size: var(--font-size-xs);
+  font-family: 'Courier New', monospace;
 }
 </style>

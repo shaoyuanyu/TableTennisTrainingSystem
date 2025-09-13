@@ -7,6 +7,18 @@
 
 /* ==================== 根变量定义 ==================== */
 :root {
+  /* ===== 灰阶系统（文本/边框/表面基础） ===== */
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-800: #1f2937;
+  --gray-900: #111827;
+
   /* 主题色彩 */
   /* 主色切换为登录页类似的紫色梯度（667eea-764ba2） */
   --primary-color: #6b5cff; /* 中和紫 */
@@ -23,6 +35,8 @@
   --white-alpha-20: rgba(255, 255, 255, 0.2);
   --white-alpha-25: rgba(255, 255, 255, 0.25);
   --white-alpha-30: rgba(255, 255, 255, 0.3);
+  --white-alpha-60: rgba(255, 255, 255, 0.6);
+  --white-alpha-70: rgba(255, 255, 255, 0.7);
   --white-alpha-80: rgba(255, 255, 255, 0.8);
   --white-alpha-85: rgba(255, 255, 255, 0.85);
   --white-alpha-90: rgba(255, 255, 255, 0.9);
@@ -83,6 +97,50 @@
   --font-weight-semibold: 600;
   --font-weight-bold: 700;
   --font-weight-extrabold: 800;
+
+  /* ===== 边框/描边令牌 ===== */
+  --border-color: var(--white-alpha-20);
+  --border-color-strong: var(--white-alpha-30);
+  --border-color-muted: var(--white-alpha-15);
+  --border-width-sm: 1px;
+  --border-width-md: 1.5px;
+  --border-width-lg: 2px;
+
+  /* ===== 焦点可视化 ===== */
+  --focus-color: rgba(102, 126, 234, 0.6); /* 对应 #667eea */
+  --focus-ring-width: 3px;
+  --focus-ring-offset: 0;
+
+  /* ===== 表面层级（Glass 表层） ===== */
+  --surface-1: rgba(255, 255, 255, 0.1);
+  --surface-2: rgba(255, 255, 255, 0.15);
+  --surface-3: rgba(255, 255, 255, 0.2);
+  --surface-4: rgba(255, 255, 255, 0.25);
+  --surface-5: rgba(255, 255, 255, 0.3);
+
+  /* ===== 海拔与 z-index ===== */
+  --elevation-1: var(--shadow-sm);
+  --elevation-2: var(--shadow-md);
+  --elevation-3: var(--shadow-lg);
+  --elevation-4: var(--shadow-xl);
+  --z-base: 1;
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+
+  /* ===== 断点与容器 ===== */
+  --bp-sm: 640px;
+  --bp-md: 768px;
+  --bp-lg: 1024px;
+  --bp-xl: 1280px;
+  --container-sm: 640px;
+  --container-md: 768px;
+  --container-lg: 1024px;
+  --container-xl: 1280px;
 }
 
 /* ==================== 页面容器系统 ==================== */
@@ -682,7 +740,7 @@
   outline: none;
   border-color: var(--primary-color);
   background: var(--white-alpha-15);
-  box-shadow: 0 0 0 3px rgba(64, 158, 255, 0.1);
+  box-shadow: 0 0 0 var(--focus-ring-width) var(--focus-color);
 }
 
 .input-glass::placeholder {
@@ -724,13 +782,13 @@
 /* ==================== 页面布局组件 ==================== */
 
 .page-header {
-  background: var(--white-alpha-15);
+  background: var(--surface-2);
   border: 1px solid var(--white-alpha-20);
   backdrop-filter: var(--blur-lg);
   border-radius: var(--radius-xl);
   padding: var(--spacing-2xl);
   margin-bottom: var(--spacing-2xl);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--elevation-2);
 }
 
 .page-title {
@@ -760,6 +818,26 @@
   100% {
     transform: translateX(100%);
   }
+}
+
+/* 全局分节标题（统一样式，避免 emoji 被背景裁剪） */
+.section-title {
+  color: white;
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-extrabold);
+  margin: 0 0 var(--spacing-xl) 0;
+  text-shadow: 0 2px 4px var(--black-alpha-30);
+  text-align: center;
+}
+
+/* 小号分节标题：继承视觉语言，缩小字号与间距 */
+.section-title--sm {
+  color: white;
+  font-weight: var(--font-weight-extrabold);
+  text-shadow: 0 2px 4px var(--black-alpha-30);
+  font-size: var(--font-size-lg);
+  margin: 0 0 var(--spacing-md) 0;
+  text-align: center;
 }
 
 .shimmer-effect::before {
@@ -1072,9 +1150,9 @@
   justify-content: space-between;
   align-items: center;
   padding: var(--spacing-md) var(--spacing-lg);
-  background: var(--white-alpha-20);
+  background: var(--surface-3);
   border-radius: var(--radius-lg);
-  border: 1px solid var(--white-alpha-10);
+  border: var(--border-width-sm) solid var(--border-color);
   transition: var(--transition-normal);
 }
 
@@ -1102,6 +1180,47 @@
   color: var(--white-alpha-90);
 }
 
+/* ===== 容器工具 ===== */
+.container {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--spacing-xl);
+  padding-right: var(--spacing-xl);
+}
+@media (min-width: 640px) {
+  .container {
+    max-width: var(--container-sm);
+  }
+}
+@media (min-width: 768px) {
+  .container {
+    max-width: var(--container-md);
+  }
+}
+@media (min-width: 1024px) {
+  .container {
+    max-width: var(--container-lg);
+  }
+}
+@media (min-width: 1280px) {
+  .container {
+    max-width: var(--container-xl);
+  }
+}
+
+/* ===== 无动画偏好支持 ===== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* 间距工具 */
 .m-0 {
   margin: 0;
@@ -1125,6 +1244,32 @@
   margin-bottom: var(--spacing-lg);
 }
 
+/* 轴向间距工具 */
+.mx-sm {
+  margin-left: var(--spacing-sm);
+  margin-right: var(--spacing-sm);
+}
+.mx-md {
+  margin-left: var(--spacing-md);
+  margin-right: var(--spacing-md);
+}
+.mx-lg {
+  margin-left: var(--spacing-lg);
+  margin-right: var(--spacing-lg);
+}
+.my-sm {
+  margin-top: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+}
+.my-md {
+  margin-top: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+.my-lg {
+  margin-top: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+}
+
 .p-sm {
   padding: var(--spacing-sm);
 }
@@ -1133,6 +1278,30 @@
 }
 .p-lg {
   padding: var(--spacing-lg);
+}
+.px-sm {
+  padding-left: var(--spacing-sm);
+  padding-right: var(--spacing-sm);
+}
+.px-md {
+  padding-left: var(--spacing-md);
+  padding-right: var(--spacing-md);
+}
+.px-lg {
+  padding-left: var(--spacing-lg);
+  padding-right: var(--spacing-lg);
+}
+.py-sm {
+  padding-top: var(--spacing-sm);
+  padding-bottom: var(--spacing-sm);
+}
+.py-md {
+  padding-top: var(--spacing-md);
+  padding-bottom: var(--spacing-md);
+}
+.py-lg {
+  padding-top: var(--spacing-lg);
+  padding-bottom: var(--spacing-lg);
 }
 
 /* 显示工具 */
@@ -1154,6 +1323,31 @@
 }
 .flex-1 {
   flex: 1;
+}
+
+/* Stack/Cluster 布局辅助 */
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+.stack-sm {
+  gap: var(--spacing-sm);
+}
+.stack-lg {
+  gap: var(--spacing-lg);
+}
+.cluster {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+.cluster-sm {
+  gap: var(--spacing-sm);
+}
+.cluster-lg {
+  gap: var(--spacing-lg);
 }
 
 /* 圆角工具 */

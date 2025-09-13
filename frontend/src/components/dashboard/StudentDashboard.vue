@@ -1005,17 +1005,7 @@ onMounted(() => {
   margin-bottom: 32px;
 }
 
-.section-title {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  font-size: 28px;
-  font-weight: 700;
-  color: white;
-  margin: 0 0 12px 0;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
+/* 统一使用全局 .section-title 样式，此处不再重复定义 */
 
 .title-icon {
   font-size: 28px;
