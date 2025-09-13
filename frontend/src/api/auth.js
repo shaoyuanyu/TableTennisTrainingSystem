@@ -14,7 +14,14 @@ export const registerUser = async (userData) => {
 export const getCampusList = async () => {
   try {
     const response = await api.get('/campus/names')
-    return response.data.campuses || []
+    const campuses = response.data.first || []
+    
+    // 将API返回的数据格式转换为前端需要的格式
+    // API返回: { id, campusName } -> 前端需要: { id, name }
+    return campuses.map(campus => ({
+      id: campus.id,
+      name: campus.campusName
+    }))
   } catch (error) {
     throw error
   }
