@@ -190,6 +190,18 @@ export function useScheduleSync() {
    * @returns {Array} 冲突的课程列表
    */
   const checkScheduleConflicts = (schedules, newSchedule) => {
+    // 参数校验
+    if (
+      !Array.isArray(schedules) ||
+      typeof newSchedule !== 'object' ||
+      newSchedule === null ||
+      typeof newSchedule.date !== 'string' ||
+      typeof newSchedule.startTime !== 'string' ||
+      typeof newSchedule.endTime !== 'string'
+    ) {
+      // 可以选择抛出错误或返回空数组，这里返回空数组
+      return []
+    }
     const conflicts = []
     const newStart = dayjs(`${newSchedule.date} ${newSchedule.startTime}`)
     const newEnd = dayjs(`${newSchedule.date} ${newSchedule.endTime}`)
