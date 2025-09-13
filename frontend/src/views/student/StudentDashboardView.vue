@@ -18,7 +18,7 @@
     <!-- 快捷操作 -->
     <el-row :gutter="20" class="quick-actions">
       <el-col :span="6">
-        <el-card class="action-card" @click="navigateTo('/student/find-coach')">
+        <el-card class="action-card">
           <div class="action-content">
             <div class="action-icon">
               <el-icon>
@@ -28,13 +28,14 @@
             <div class="action-text">
               <h3>选择教练</h3>
               <p>浏览教练信息，选择合适的教练</p>
+              <PrimaryButton size="sm" to="/student/find-coach">前往</PrimaryButton>
             </div>
           </div>
         </el-card>
       </el-col>
 
       <el-col :span="6">
-        <el-card class="action-card" @click="navigateTo('/student/book-training')">
+        <el-card class="action-card">
           <div class="action-content">
             <div class="action-icon">
               <el-icon>
@@ -44,13 +45,14 @@
             <div class="action-text">
               <h3>预约课程</h3>
               <p>预约你喜欢的课程时间</p>
+              <PrimaryButton size="sm" to="/student/book-training">前往</PrimaryButton>
             </div>
           </div>
         </el-card>
       </el-col>
 
       <el-col :span="6">
-        <el-card class="action-card" @click="navigateTo('/student/account-recharge')">
+        <el-card class="action-card">
           <div class="action-content">
             <div class="action-icon">
               <el-icon>
@@ -60,13 +62,14 @@
             <div class="action-text">
               <h3>账户充值</h3>
               <p>为你的账户充值余额</p>
+              <PrimaryButton size="sm" to="/student/account-recharge">前往</PrimaryButton>
             </div>
           </div>
         </el-card>
       </el-col>
 
       <el-col :span="6">
-        <el-card class="action-card" @click="navigateTo('/student/tournament-registration')">
+        <el-card class="action-card">
           <div class="action-content">
             <div class="action-icon">
               <el-icon>
@@ -76,6 +79,7 @@
             <div class="action-text">
               <h3>赛事报名</h3>
               <p>参加各种乒乓球比赛</p>
+              <PrimaryButton size="sm" to="/student/tournament-registration">前往</PrimaryButton>
             </div>
           </div>
         </el-card>
@@ -147,13 +151,7 @@
           <template #header>
             <div class="balance-header">
               <span>账户余额</span>
-              <el-button
-                type="primary"
-                size="small"
-                @click="navigateTo('/student/account-recharge')"
-              >
-                充值
-              </el-button>
+              <PrimaryButton size="sm" to="/student/account-recharge">充值</PrimaryButton>
             </div>
           </template>
 
@@ -181,18 +179,12 @@
 
           <div v-if="todayClasses.length === 0" class="empty-state">
             <el-empty description="今天没有课程安排" />
-            <el-button type="primary" @click="navigateTo('/student/book-training')">
-              立即预约
-            </el-button>
+            <PrimaryButton to="/student/book-training">立即预约</PrimaryButton>
           </div>
 
           <el-timeline v-else>
-            <el-timeline-item
-              v-for="classItem in todayClasses"
-              :key="classItem.id"
-              :timestamp="classItem.time"
-              placement="top"
-            >
+            <el-timeline-item v-for="classItem in todayClasses" :key="classItem.id" :timestamp="classItem.time"
+              placement="top">
               <el-card class="class-item">
                 <div class="class-content">
                   <div class="class-info">
@@ -219,13 +211,8 @@
           </template>
 
           <el-timeline>
-            <el-timeline-item
-              v-for="activity in recentActivities"
-              :key="activity.id"
-              :timestamp="formatDateTime(activity.time)"
-              :type="getActivityType(activity.type)"
-              size="small"
-            >
+            <el-timeline-item v-for="activity in recentActivities" :key="activity.id"
+              :timestamp="formatDateTime(activity.time)" :type="getActivityType(activity.type)" size="small">
               <div class="activity-content">
                 <span class="activity-title">{{ activity.title }}</span>
                 <p class="activity-desc">{{ activity.description }}</p>
@@ -241,7 +228,7 @@
       <template #header>
         <div class="card-header">
           <span>推荐教练</span>
-          <el-button type="text" @click="navigateTo('/student/find-coach')"> 查看更多 </el-button>
+          <OutlineButton size="sm" variant="glass" to="/student/find-coach">查看更多</OutlineButton>
         </div>
       </template>
 
@@ -255,13 +242,7 @@
               <h4>{{ coach.name }}</h4>
               <p>{{ getLevelText(coach.level) }}</p>
               <div class="coach-rating">
-                <el-rate
-                  v-model="coach.rating"
-                  disabled
-                  show-score
-                  text-color="#ff9900"
-                  score-template="{value}"
-                />
+                <el-rate v-model="coach.rating" disabled show-score text-color="#ff9900" score-template="{value}" />
               </div>
               <div class="coach-price">¥{{ coach.hourlyRate }}/小时</div>
             </div>
@@ -277,12 +258,8 @@
       </template>
 
       <div class="achievement-grid">
-        <div
-          v-for="achievement in achievements"
-          :key="achievement.id"
-          class="achievement-item"
-          :class="{ achieved: achievement.achieved }"
-        >
+        <div v-for="achievement in achievements" :key="achievement.id" class="achievement-item"
+          :class="{ achieved: achievement.achieved }">
           <div class="achievement-icon">
             <el-icon>
               <component :is="achievement.icon" />
@@ -320,6 +297,8 @@ import {
 } from '@element-plus/icons-vue'
 import dayjs from 'dayjs'
 import api from '@/utils/api'
+import PrimaryButton from '@/components/buttons/PrimaryButton.vue'
+import OutlineButton from '@/components/buttons/OutlineButton.vue'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -464,10 +443,6 @@ const fetchDashboardData = async () => {
   }
 }
 
-// 导航到指定页面
-const navigateTo = (path) => {
-  router.push(path)
-}
 
 // 查看教练详情
 const viewCoachDetail = (coach) => {

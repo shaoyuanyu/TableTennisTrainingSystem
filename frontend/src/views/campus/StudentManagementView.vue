@@ -4,8 +4,22 @@
     <div class="page-header">
       <h2>学员管理</h2>
       <div class="header-actions">
-        <el-button @click="showBatchDialog" :icon="Operation"> 批量操作 </el-button>
-        <el-button type="primary" @click="showAddDialog" :icon="Plus"> 新增学员 </el-button>
+        <OutlineButton @click="showBatchDialog">
+          <template #icon-left>
+            <el-icon>
+              <Operation />
+            </el-icon>
+          </template>
+          批量操作
+        </OutlineButton>
+        <PrimaryButton @click="showAddDialog">
+          <template #icon-left>
+            <el-icon>
+              <Plus />
+            </el-icon>
+          </template>
+          新增学员
+        </PrimaryButton>
       </div>
     </div>
 
@@ -31,24 +45,13 @@
         </el-form-item>
 
         <el-form-item label="注册时间">
-          <el-date-picker
-            v-model="filters.dateRange"
-            type="daterange"
-            range-separator="至"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期"
-            format="YYYY-MM-DD"
-            value-format="YYYY-MM-DD"
-          />
+          <el-date-picker v-model="filters.dateRange" type="daterange" range-separator="至" start-placeholder="开始日期"
+            end-placeholder="结束日期" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
         </el-form-item>
 
         <el-form-item label="搜索">
-          <el-input
-            v-model="filters.keyword"
-            placeholder="姓名/手机号/学号"
-            style="width: 200px"
-            @keyup.enter="fetchStudents"
-          />
+          <el-input v-model="filters.keyword" placeholder="姓名/手机号/学号" style="width: 200px"
+            @keyup.enter="fetchStudents" />
         </el-form-item>
 
         <el-form-item>
@@ -127,12 +130,7 @@
 
     <!-- 学员列表 -->
     <el-card>
-      <el-table
-        :data="studentList"
-        v-loading="loading"
-        stripe
-        @selection-change="handleSelectionChange"
-      >
+      <el-table :data="studentList" v-loading="loading" stripe @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" />
 
         <el-table-column prop="avatar" label="头像" width="80">
@@ -211,15 +209,9 @@
       </el-table>
 
       <div class="pagination-wrapper">
-        <el-pagination
-          v-model:current-page="pagination.page"
-          v-model:page-size="pagination.size"
-          :total="pagination.total"
-          :page-sizes="[10, 20, 50, 100]"
-          layout="total, sizes, prev, pager, next, jumper"
-          @size-change="fetchStudents"
-          @current-change="fetchStudents"
-        />
+        <el-pagination v-model:current-page="pagination.page" v-model:page-size="pagination.size"
+          :total="pagination.total" :page-sizes="[10, 20, 50, 100]" layout="total, sizes, prev, pager, next, jumper"
+          @size-change="fetchStudents" @current-change="fetchStudents" />
       </div>
     </el-card>
 
@@ -250,12 +242,7 @@
           </el-col>
           <el-col :span="12">
             <el-form-item label="出生日期" prop="birthDate">
-              <el-date-picker
-                v-model="studentForm.birthDate"
-                type="date"
-                placeholder="选择出生日期"
-                style="width: 100%"
-              />
+              <el-date-picker v-model="studentForm.birthDate" type="date" placeholder="选择出生日期" style="width: 100%" />
             </el-form-item>
           </el-col>
         </el-row>
@@ -287,10 +274,10 @@
       </el-form>
 
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="saveStudent" :loading="saving">
+        <OutlineButton @click="dialogVisible = false">取消</OutlineButton>
+        <PrimaryButton @click="saveStudent" :loading="saving">
           {{ isEdit ? '更新' : '创建' }}
-        </el-button>
+        </PrimaryButton>
       </template>
     </el-dialog>
 
@@ -379,8 +366,8 @@
       </el-form>
 
       <template #footer>
-        <el-button @click="batchDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="executeBatchOperation"> 执行操作 </el-button>
+        <OutlineButton @click="batchDialogVisible = false">取消</OutlineButton>
+        <PrimaryButton @click="executeBatchOperation"> 执行操作 </PrimaryButton>
       </template>
     </el-dialog>
   </div>
@@ -402,6 +389,8 @@ import {
 } from '@element-plus/icons-vue'
 import dayjs from 'dayjs'
 import api from '@/utils/api'
+import PrimaryButton from '@/components/buttons/PrimaryButton.vue'
+import OutlineButton from '@/components/buttons/OutlineButton.vue'
 
 // 数据列表
 const studentList = ref([])

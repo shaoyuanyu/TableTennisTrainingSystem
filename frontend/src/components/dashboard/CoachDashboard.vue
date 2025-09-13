@@ -73,7 +73,7 @@
                 </el-icon>
                 <span>今日课程安排</span>
               </div>
-              <el-button type="primary" size="small" @click="goToSchedule">完整课表</el-button>
+              <PrimaryButton size="sm" to="/coach/schedule">完整课表</PrimaryButton>
             </div>
           </template>
 
@@ -90,9 +90,7 @@
                 </div>
               </div>
               <div class="timeline-status">
-                <el-button v-if="item.status === 'upcoming'" size="small" type="primary">
-                  开始授课
-                </el-button>
+                <PrimaryButton v-if="item.status === 'upcoming'" size="sm">开始授课</PrimaryButton>
                 <el-tag v-else :type="getStatusType(item.status)" size="small">
                   {{ getStatusText(item.status) }}
                 </el-tag>
@@ -105,7 +103,7 @@
               <template #image>
                 <div class="empty-icon">📚</div>
               </template>
-              <el-button type="primary" @click="goToScheduleManagement">安排课程</el-button>
+              <PrimaryButton to="/coach/schedule-management">安排课程</PrimaryButton>
             </el-empty>
           </div>
         </el-card>
@@ -157,7 +155,7 @@
                 </div>
               </div>
               <div class="student-action">
-                <el-button size="small" @click="viewStudentDetail(student)">查看详情</el-button>
+                <OutlineButton size="sm" @click="viewStudentDetail(student)">查看详情</OutlineButton>
               </div>
             </div>
           </div>
@@ -231,11 +229,7 @@
             </div>
             <div class="recent-evaluations">
               <div class="evaluation-title">最新评价</div>
-              <div
-                v-for="evaluation in recentEvaluations"
-                :key="evaluation.id"
-                class="evaluation-item"
-              >
+              <div v-for="evaluation in recentEvaluations" :key="evaluation.id" class="evaluation-item">
                 <div class="evaluation-header">
                   <span class="student-name">{{ evaluation.studentName }}</span>
                   <el-rate :model-value="evaluation.rating" disabled size="small" />
@@ -259,11 +253,7 @@
             </div>
           </template>
           <div class="applications-list">
-            <div
-              v-for="application in pendingApplications"
-              :key="application.id"
-              class="application-item"
-            >
+            <div v-for="application in pendingApplications" :key="application.id" class="application-item">
               <div class="application-info">
                 <div class="student-name">{{ application.studentName }}</div>
                 <div class="application-details">
@@ -272,12 +262,8 @@
                 </div>
               </div>
               <div class="application-actions">
-                <el-button size="small" type="success" @click="approveApplication(application)">
-                  同意
-                </el-button>
-                <el-button size="small" type="danger" @click="rejectApplication(application)">
-                  拒绝
-                </el-button>
+                <OutlineButton size="sm" color="success" @click="approveApplication(application)">同意</OutlineButton>
+                <OutlineButton size="sm" color="danger" @click="rejectApplication(application)">拒绝</OutlineButton>
               </div>
             </div>
           </div>
@@ -301,19 +287,13 @@
             </div>
           </template>
           <div class="quick-actions">
-            <el-button
-              v-for="action in quickActions"
-              :key="action.key"
-              :type="action.type"
-              @click="action.handler"
-              class="action-button"
-              size="large"
-            >
-              <template #icon>
+            <OutlineButton v-for="action in quickActions" :key="action.key" :color="action.color"
+              @click="action.handler" class="action-button" size="lg">
+              <el-icon style="margin-right:8px">
                 <component :is="action.icon" />
-              </template>
+              </el-icon>
               {{ action.label }}
-            </el-button>
+            </OutlineButton>
           </div>
         </el-card>
 
@@ -349,6 +329,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import dayjs from 'dayjs'
+import { PrimaryButton, OutlineButton } from '@/components/buttons'
 import {
   User,
   Calendar,
@@ -541,28 +522,28 @@ const quickActions = ref([
   {
     key: 'schedule',
     label: '查看课表',
-    type: 'primary',
+    color: 'primary',
     icon: Calendar,
     handler: () => router.push('/coach/schedule'),
   },
   {
     key: 'students',
     label: '学员管理',
-    type: 'success',
+    color: 'success',
     icon: UserFilled,
     handler: () => router.push('/coach/students'),
   },
   {
     key: 'applications',
     label: '申请审批',
-    type: 'warning',
+    color: 'warning',
     icon: Bell,
     handler: () => router.push('/coach/applications'),
   },
   {
     key: 'feedback',
     label: '学员反馈',
-    type: 'info',
+    color: 'info',
     icon: Star,
     handler: () => router.push('/coach/feedback'),
   },
@@ -627,14 +608,6 @@ const formatTime = (date) => {
 }
 
 // 导航方法
-const goToSchedule = () => {
-  router.push('/coach/schedule')
-}
-
-const goToScheduleManagement = () => {
-  router.push('/coach/schedule-management')
-}
-
 const goToStudents = () => {
   router.push('/coach/students')
 }

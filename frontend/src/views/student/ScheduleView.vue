@@ -3,29 +3,31 @@
     <div class="schedule-header ultra">
       <h2><span class="schedule-icon">🏓</span> 我的课表</h2>
       <div class="schedule-controls ultra">
-        <el-button-group>
-          <el-button
-            :type="currentView === 'week' ? 'primary' : 'default'"
-            @click="setView('week')"
-            class="header-btn ultra-btn"
-          >
+        <div class="view-switch-group">
+          <component :is="currentView === 'week' ? 'PrimaryButton' : 'OutlineButton'" @click="setView('week')"
+            class="header-btn ultra-btn" size="md">
             <span class="btn-icon">📅</span> 周视图
-          </el-button>
-          <el-button
-            :type="currentView === 'month' ? 'primary' : 'default'"
-            @click="setView('month')"
-            class="header-btn ultra-btn"
-          >
+          </component>
+          <component :is="currentView === 'month' ? 'PrimaryButton' : 'OutlineButton'" @click="setView('month')"
+            class="header-btn ultra-btn" size="md">
             <span class="btn-icon">🗓️</span> 月视图
-          </el-button>
-        </el-button-group>
+          </component>
+        </div>
         <div class="date-navigation ultra">
-          <el-button :icon="ArrowLeft" @click="previousPeriod" circle class="nav-btn ultra-btn" />
+          <IconButton @click="previousPeriod" variant="glass" class="nav-btn ultra-btn">
+            <el-icon>
+              <ArrowLeft />
+            </el-icon>
+          </IconButton>
           <span class="current-period ultra">{{ currentPeriodText }}</span>
-          <el-button :icon="ArrowRight" @click="nextPeriod" circle class="nav-btn ultra-btn" />
-          <el-button @click="goToToday" class="today-btn ultra-btn">
+          <IconButton @click="nextPeriod" variant="glass" class="nav-btn ultra-btn">
+            <el-icon>
+              <ArrowRight />
+            </el-icon>
+          </IconButton>
+          <PrimaryButton @click="goToToday" class="today-btn ultra-btn">
             <span class="btn-icon">⭐</span> 今天
-          </el-button>
+          </PrimaryButton>
         </div>
         
         <!-- 新增功能按钮 -->
@@ -50,12 +52,7 @@
     <div v-if="currentView === 'week'" class="week-view ultra">
       <div class="week-header ultra">
         <div class="time-column">时间</div>
-        <div
-          v-for="day in weekDays"
-          :key="day.date"
-          class="day-header"
-          :class="{ 'is-today': day.isToday }"
-        >
+        <div v-for="day in weekDays" :key="day.date" class="day-header" :class="{ 'is-today': day.isToday }">
           <div class="day-name">{{ day.name }}</div>
           <div class="day-date">{{ day.date }}</div>
         </div>
@@ -63,22 +60,18 @@
       <div class="week-body">
         <div v-for="hour in timeSlots" :key="hour" class="time-row">
           <div class="time-column">{{ hour }}</div>
-          <div
-            v-for="day in weekDays"
-            :key="`${day.date}-${hour}`"
-            class="day-cell"
-            @click="handleCellClick(day.date, hour)"
-          >
-            <div
-              v-for="schedule in getSchedulesForDayAndHour(day.date, hour)"
-              :key="schedule.id"
-              class="schedule-item ultra"
-              :class="getScheduleClass(schedule)"
-              @click.stop="handleScheduleClick(schedule)"
-            >
+          <div v-for="day in weekDays" :key="`${day.date}-${hour}`" class="day-cell"
+            @click="handleCellClick(day.date, hour)">
+            <div v-for="schedule in getSchedulesForDayAndHour(day.date, hour)" :key="schedule.id"
+              class="schedule-item ultra" :class="getScheduleClass(schedule)"
+              @click.stop="handleScheduleClick(schedule)">
               <div class="schedule-title">{{ schedule.title }}</div>
-              <div class="schedule-coach"><span class="field-icon">🧑‍🏫</span>{{ schedule.coach }}</div>
-              <div class="schedule-location"><span class="field-icon">📍</span>{{ schedule.location }}</div>
+              <div class="schedule-coach">
+                <span class="field-icon">🧑‍🏫</span>{{ schedule.coach }}
+              </div>
+              <div class="schedule-location">
+                <span class="field-icon">📍</span>{{ schedule.location }}
+              </div>
             </div>
           </div>
         </div>
@@ -94,27 +87,16 @@
       </div>
       <div class="month-body">
         <div v-for="week in monthWeeks" :key="week[0]?.date || Math.random()" class="month-week">
-          <div
-            v-for="day in week"
-            :key="day?.date || Math.random()"
-            class="month-day"
-            :class="{
-              'is-today': day?.isToday,
-              'is-other-month': day?.isOtherMonth,
-              'has-schedules': day && getSchedulesForDay(day.date).length > 0,
-            }"
-            @click="handleDayClick(day)"
-          >
+          <div v-for="day in week" :key="day?.date || Math.random()" class="month-day" :class="{
+            'is-today': day?.isToday,
+            'is-other-month': day?.isOtherMonth,
+            'has-schedules': day && getSchedulesForDay(day.date).length > 0,
+          }" @click="handleDayClick(day)">
             <div v-if="day" class="day-number ultra">{{ day.dayNumber }}</div>
             <div v-if="day" class="day-schedules ultra">
-              <div
-                v-for="schedule in getSchedulesForDay(day.date).slice(0, 3)"
-                :key="schedule.id"
-                class="month-schedule-item ultra"
-                :class="getScheduleClass(schedule)"
-                @click.stop="handleScheduleClick(schedule)"
-                :title="schedule.title"
-              >
+              <div v-for="schedule in getSchedulesForDay(day.date).slice(0, 3)" :key="schedule.id"
+                class="month-schedule-item ultra" :class="getScheduleClass(schedule)"
+                @click.stop="handleScheduleClick(schedule)" :title="schedule.title">
                 <span class="dot-icon">●</span> {{ schedule.title }}
               </div>
               <div v-if="getSchedulesForDay(day.date).length > 3" class="more-schedules ultra">
@@ -159,14 +141,11 @@
       </div>
       <template #footer>
         <span class="dialog-footer ultra">
-          <el-button @click="showScheduleDialog = false">关闭</el-button>
-          <el-button
-            v-if="selectedSchedule?.status === 'confirmed' && canCancelSchedule(selectedSchedule)"
-            type="danger"
-            @click="cancelSchedule"
-          >
+          <OutlineButton @click="showScheduleDialog = false">关闭</OutlineButton>
+          <DangerButton v-if="selectedSchedule?.status === 'confirmed' && canCancelSchedule(selectedSchedule)"
+            @click="cancelSchedule">
             <span class="field-icon">❌</span> 取消课程
-          </el-button>
+          </DangerButton>
         </span>
       </template>
     </el-dialog>
@@ -539,12 +518,8 @@
     </el-dialog>
 
     <!-- 加载状态 -->
-    <el-loading
-      v-loading="loading"
-      element-loading-text="加载课表数据..."
-      element-loading-spinner="el-icon-loading"
-      class="ultra-loading"
-    />
+    <el-loading v-loading="loading" element-loading-text="加载课表数据..." element-loading-spinner="el-icon-loading"
+      class="ultra-loading" />
   </div>
 </template>
 
@@ -552,6 +527,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ArrowLeft, ArrowRight } from '@element-plus/icons-vue'
+import { PrimaryButton, OutlineButton, IconButton, DangerButton } from '@/components/buttons'
 import dayjs from 'dayjs'
 import api from '@/utils/api'
 import { useScheduleSync } from '@/utils/scheduleSyncExamples'
@@ -1269,6 +1245,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
 }
+
 .schedule-icon {
   font-size: 1.8rem;
   margin-right: var(--spacing-sm);
@@ -1279,6 +1256,11 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: var(--spacing-lg);
+}
+
+.view-switch-group {
+  display: inline-flex;
+  gap: var(--spacing-sm);
 }
 
 .header-btn.ultra-btn {
@@ -1294,9 +1276,11 @@ onMounted(() => {
   align-items: center;
   gap: var(--spacing-xs);
 }
+
 .header-btn.ultra-btn .btn-icon {
   font-size: 1.2em;
 }
+
 .today-btn.ultra-btn {
   background: var(--gradient-primary);
   color: var(--text-white) !important;
@@ -1309,6 +1293,7 @@ onMounted(() => {
   align-items: center;
   gap: var(--spacing-xs);
 }
+
 .today-btn.ultra-btn .btn-icon {
   font-size: 1.2em;
 }
@@ -1353,7 +1338,8 @@ onMounted(() => {
   box-shadow: var(--shadow-sm);
 }
 
-.week-view.ultra, .month-view.ultra {
+.week-view.ultra,
+.month-view.ultra {
   background: var(--white-alpha-10);
   backdrop-filter: blur(20px);
   border: 1px solid var(--white-alpha-20);
@@ -1445,16 +1431,19 @@ onMounted(() => {
   position: relative;
   align-items: flex-start;
 }
+
 .schedule-item.ultra .field-icon {
   font-size: 1em;
   margin-right: var(--spacing-xs);
   vertical-align: middle;
 }
+
 .schedule-item.ultra .schedule-title {
   font-weight: 600;
   margin-bottom: var(--spacing-xs);
   font-size: 0.875rem;
 }
+
 .schedule-item.ultra .schedule-coach,
 .schedule-item.ultra .schedule-location {
   font-size: 0.75rem;
@@ -1462,22 +1451,28 @@ onMounted(() => {
   margin-top: 2px;
   font-weight: 400;
 }
+
 .schedule-item.ultra.schedule-individual {
   background: var(--gradient-primary);
 }
+
 .schedule-item.ultra.schedule-group {
   background: var(--gradient-success);
 }
+
 .schedule-item.ultra.schedule-match {
   background: var(--gradient-warning);
 }
+
 .schedule-item.ultra.schedule-tournament {
   background: var(--gradient-danger);
 }
+
 .schedule-item.ultra.status-pending {
   opacity: 0.7;
   border: 1px dashed var(--white-alpha-50);
 }
+
 .schedule-item.ultra.status-cancelled {
   background: var(--color-gray-500);
   text-decoration: line-through;
@@ -1574,19 +1569,24 @@ onMounted(() => {
   align-items: center;
   gap: var(--spacing-xs);
 }
+
 .month-schedule-item.ultra .dot-icon {
   color: var(--text-white);
   font-size: 1.2em;
 }
+
 .month-schedule-item.ultra.schedule-group {
   background: var(--gradient-success);
 }
+
 .month-schedule-item.ultra.schedule-match {
   background: var(--gradient-warning);
 }
+
 .month-schedule-item.ultra.schedule-tournament {
   background: var(--gradient-danger);
 }
+
 .more-schedules.ultra {
   font-size: 0.75rem;
   color: var(--text-white-80);
@@ -1607,6 +1607,7 @@ onMounted(() => {
   border: 1px solid var(--white-alpha-20);
   border-radius: var(--radius-lg);
 }
+
 .schedule-detail.ultra .field-icon {
   font-size: 1.1em;
   margin-right: var(--spacing-xs);
@@ -1636,7 +1637,7 @@ onMounted(() => {
   .schedule-view.ultra {
     padding: var(--spacing-lg);
   }
-  
+
   .schedule-header.ultra {
     flex-direction: column;
     gap: var(--spacing-md);
@@ -1699,15 +1700,15 @@ onMounted(() => {
     font-size: 0.6875rem;
     padding: 2px var(--spacing-xs);
   }
-  
+
   .schedule-detail.ultra {
     padding: var(--spacing-sm) 2px 0 2px;
   }
-  
+
   .ultra-dialog ::deep(.el-dialog__body) {
     padding: var(--spacing-md);
   }
-  
+
   .dialog-footer.ultra {
     gap: var(--spacing-sm);
   }

@@ -4,8 +4,22 @@
     <div class="page-header">
       <h2>教练管理</h2>
       <div class="header-actions">
-        <el-button @click="showScheduleDialog" :icon="Calendar"> 排班管理 </el-button>
-        <el-button type="primary" @click="showAddDialog" :icon="Plus"> 新增教练 </el-button>
+        <OutlineButton @click="showScheduleDialog">
+          <template #icon-left>
+            <el-icon>
+              <Calendar />
+            </el-icon>
+          </template>
+          排班管理
+        </OutlineButton>
+        <PrimaryButton @click="showAddDialog">
+          <template #icon-left>
+            <el-icon>
+              <Plus />
+            </el-icon>
+          </template>
+          新增教练
+        </PrimaryButton>
       </div>
     </div>
 
@@ -30,24 +44,13 @@
         </el-form-item>
 
         <el-form-item label="入职时间">
-          <el-date-picker
-            v-model="filters.dateRange"
-            type="daterange"
-            range-separator="至"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期"
-            format="YYYY-MM-DD"
-            value-format="YYYY-MM-DD"
-          />
+          <el-date-picker v-model="filters.dateRange" type="daterange" range-separator="至" start-placeholder="开始日期"
+            end-placeholder="结束日期" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
         </el-form-item>
 
         <el-form-item label="搜索">
-          <el-input
-            v-model="filters.keyword"
-            placeholder="姓名/手机号/工号"
-            style="width: 200px"
-            @keyup.enter="fetchCoaches"
-          />
+          <el-input v-model="filters.keyword" placeholder="姓名/手机号/工号" style="width: 200px"
+            @keyup.enter="fetchCoaches" />
         </el-form-item>
 
         <el-form-item>
@@ -151,12 +154,7 @@
 
         <el-table-column prop="specialties" label="专长" width="150">
           <template #default="{ row }">
-            <el-tag
-              v-for="specialty in row.specialties"
-              :key="specialty"
-              size="small"
-              class="specialty-tag"
-            >
+            <el-tag v-for="specialty in row.specialties" :key="specialty" size="small" class="specialty-tag">
               {{ specialty }}
             </el-tag>
           </template>
@@ -210,15 +208,9 @@
       </el-table>
 
       <div class="pagination-wrapper">
-        <el-pagination
-          v-model:current-page="pagination.page"
-          v-model:page-size="pagination.size"
-          :total="pagination.total"
-          :page-sizes="[10, 20, 50, 100]"
-          layout="total, sizes, prev, pager, next, jumper"
-          @size-change="fetchCoaches"
-          @current-change="fetchCoaches"
-        />
+        <el-pagination v-model:current-page="pagination.page" v-model:page-size="pagination.size"
+          :total="pagination.total" :page-sizes="[10, 20, 50, 100]" layout="total, sizes, prev, pager, next, jumper"
+          @size-change="fetchCoaches" @current-change="fetchCoaches" />
       </div>
     </el-card>
 
@@ -249,12 +241,7 @@
           </el-col>
           <el-col :span="12">
             <el-form-item label="出生日期" prop="birthDate">
-              <el-date-picker
-                v-model="coachForm.birthDate"
-                type="date"
-                placeholder="选择出生日期"
-                style="width: 100%"
-              />
+              <el-date-picker v-model="coachForm.birthDate" type="date" placeholder="选择出生日期" style="width: 100%" />
             </el-form-item>
           </el-col>
         </el-row>
@@ -273,12 +260,7 @@
         </el-form-item>
 
         <el-form-item label="专业特长" prop="specialties">
-          <el-select
-            v-model="coachForm.specialties"
-            multiple
-            placeholder="选择专业特长"
-            style="width: 100%"
-          >
+          <el-select v-model="coachForm.specialties" multiple placeholder="选择专业特长" style="width: 100%">
             <el-option label="基础技术" value="基础技术" />
             <el-option label="进攻技术" value="进攻技术" />
             <el-option label="防守技术" value="防守技术" />
@@ -289,30 +271,20 @@
         </el-form-item>
 
         <el-form-item label="教学经验" prop="experience">
-          <el-input
-            v-model="coachForm.experience"
-            type="textarea"
-            :rows="3"
-            placeholder="教学经验和成就"
-          />
+          <el-input v-model="coachForm.experience" type="textarea" :rows="3" placeholder="教学经验和成就" />
         </el-form-item>
 
         <el-form-item label="薪资标准" prop="hourlyRate">
-          <el-input-number
-            v-model="coachForm.hourlyRate"
-            :min="0"
-            :precision="2"
-            placeholder="时薪"
-            style="width: 100%"
-          />
+          <el-input-number v-model="coachForm.hourlyRate" :min="0" :precision="2" placeholder="时薪"
+            style="width: 100%" />
         </el-form-item>
       </el-form>
 
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="saveCoach" :loading="saving">
+        <OutlineButton @click="dialogVisible = false">取消</OutlineButton>
+        <PrimaryButton @click="saveCoach" :loading="saving">
           {{ isEdit ? '更新' : '创建' }}
-        </el-button>
+        </PrimaryButton>
       </template>
     </el-dialog>
 
@@ -343,12 +315,8 @@
                 </el-tag>
               </el-descriptions-item>
               <el-descriptions-item label="专业特长" :span="2">
-                <el-tag
-                  v-for="specialty in selectedCoach.specialties"
-                  :key="specialty"
-                  size="small"
-                  style="margin-right: 8px"
-                >
+                <el-tag v-for="specialty in selectedCoach.specialties" :key="specialty" size="small"
+                  style="margin-right: 8px">
                   {{ specialty }}
                 </el-tag>
               </el-descriptions-item>
@@ -372,12 +340,7 @@
                 <el-statistic title="月度收入" :value="selectedCoach.monthlyRevenue" prefix="¥" />
               </el-col>
               <el-col :span="8">
-                <el-statistic
-                  title="教学评分"
-                  :value="selectedCoach.rating"
-                  :precision="1"
-                  suffix="分"
-                />
+                <el-statistic title="教学评分" :value="selectedCoach.rating" :precision="1" suffix="分" />
               </el-col>
             </el-row>
 
@@ -418,35 +381,18 @@
       <el-form label-width="100px">
         <el-form-item label="选择教练">
           <el-select v-model="scheduleForm.coachId" placeholder="选择教练">
-            <el-option
-              v-for="coach in coachList"
-              :key="coach.id"
-              :label="coach.name"
-              :value="coach.id"
-            />
+            <el-option v-for="coach in coachList" :key="coach.id" :label="coach.name" :value="coach.id" />
           </el-select>
         </el-form-item>
 
         <el-form-item label="排班日期">
-          <el-date-picker
-            v-model="scheduleForm.dateRange"
-            type="daterange"
-            range-separator="至"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期"
-          />
+          <el-date-picker v-model="scheduleForm.dateRange" type="daterange" range-separator="至" start-placeholder="开始日期"
+            end-placeholder="结束日期" />
         </el-form-item>
 
         <el-form-item label="工作时间">
-          <el-time-picker
-            v-model="scheduleForm.workTime"
-            is-range
-            range-separator="至"
-            start-placeholder="开始时间"
-            end-placeholder="结束时间"
-            format="HH:mm"
-            value-format="HH:mm"
-          />
+          <el-time-picker v-model="scheduleForm.workTime" is-range range-separator="至" start-placeholder="开始时间"
+            end-placeholder="结束时间" format="HH:mm" value-format="HH:mm" />
         </el-form-item>
 
         <el-form-item label="休息日">
@@ -463,8 +409,8 @@
       </el-form>
 
       <template #footer>
-        <el-button @click="scheduleDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="saveSchedule"> 保存排班 </el-button>
+        <OutlineButton @click="scheduleDialogVisible = false">取消</OutlineButton>
+        <PrimaryButton @click="saveSchedule"> 保存排班 </PrimaryButton>
       </template>
     </el-dialog>
   </div>
@@ -486,6 +432,8 @@ import {
 } from '@element-plus/icons-vue'
 import dayjs from 'dayjs'
 import api from '@/utils/api'
+import PrimaryButton from '@/components/buttons/PrimaryButton.vue'
+import OutlineButton from '@/components/buttons/OutlineButton.vue'
 
 // 数据列表
 const coachList = ref([])

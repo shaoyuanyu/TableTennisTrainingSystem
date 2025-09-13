@@ -5,12 +5,12 @@
       {{ label }}
       <span v-if="required" class="required-star">*</span>
     </label>
-    
+
     <!-- 输入框容器 -->
     <div class="input-container">
       <!-- 左侧图标 -->
       <i v-if="iconLeft" :class="iconLeft" class="input-icon input-icon-left"></i>
-      
+
       <!-- 输入框 -->
       <input
         :id="inputId"
@@ -25,11 +25,11 @@
         @blur="handleBlur"
         @keyup.enter="handleEnter"
       />
-      
+
       <!-- 右侧图标 -->
       <i v-if="iconRight" :class="iconRight" class="input-icon input-icon-right"></i>
     </div>
-    
+
     <!-- 帮助文字或错误信息 -->
     <div v-if="helpText || errorMessage" class="form-help">
       <span v-if="errorMessage" class="error-message">{{ errorMessage }}</span>
@@ -45,106 +45,106 @@ export default {
     // v-model 绑定的值
     modelValue: {
       type: [String, Number],
-      default: ''
+      default: '',
     },
     // 输入框类型
     type: {
       type: String,
-      default: 'text'
+      default: 'text',
     },
     // 标签文字
     label: {
       type: String,
-      default: ''
+      default: '',
     },
     // 占位符
     placeholder: {
       type: String,
-      default: ''
+      default: '',
     },
     // 是否必填
     required: {
       type: Boolean,
-      default: false
+      default: false,
     },
     // 是否禁用
     disabled: {
       type: Boolean,
-      default: false
+      default: false,
     },
     // 是否只读
     readonly: {
       type: Boolean,
-      default: false
+      default: false,
     },
     // 左侧图标
     iconLeft: {
       type: String,
-      default: ''
+      default: '',
     },
     // 右侧图标
     iconRight: {
       type: String,
-      default: ''
+      default: '',
     },
     // 帮助文字
     helpText: {
       type: String,
-      default: ''
+      default: '',
     },
     // 错误信息
     errorMessage: {
       type: String,
-      default: ''
+      default: '',
     },
     // 输入框大小
     size: {
       type: String,
       default: 'medium',
-      validator: value => ['small', 'medium', 'large'].includes(value)
+      validator: (value) => ['small', 'medium', 'large'].includes(value),
     },
     // 额外的CSS类
     extraClasses: {
       type: String,
-      default: ''
-    }
+      default: '',
+    },
   },
   emits: ['update:modelValue', 'focus', 'blur', 'enter'],
   computed: {
     inputId() {
-      return `input-${Math.random().toString(36).substr(2, 9)}`;
+      return `input-${Math.random().toString(36).substr(2, 9)}`
     },
     inputClasses() {
-      const classes = ['input-glass'];
-      
-      if (this.size === 'small') classes.push('input-small');
-      if (this.size === 'large') classes.push('input-large');
-      
-      if (this.iconLeft) classes.push('input-with-icon-left');
-      if (this.iconRight) classes.push('input-with-icon-right');
-      
-      if (this.extraClasses) classes.push(this.extraClasses);
-      
-      return classes.join(' ');
+      const classes = ['input-glass']
+
+      if (this.size === 'small') classes.push('input-small')
+      if (this.size === 'large') classes.push('input-large')
+
+      if (this.iconLeft) classes.push('input-with-icon-left')
+      if (this.iconRight) classes.push('input-with-icon-right')
+
+      if (this.extraClasses) classes.push(this.extraClasses)
+
+      return classes.join(' ')
     },
     hasError() {
-      return !!this.errorMessage;
-    }
+      return !!this.errorMessage
+    },
   },
   methods: {
     handleInput(event) {
-      this.$emit('update:modelValue', event.target.value);
+      this.$emit('update:modelValue', event.target.value)
     },
     handleFocus(event) {
-      this.$emit('focus', event);
+      this.$emit('focus', event)
     },
     handleBlur(event) {
-      this.$emit('blur', event);
+      this.$emit('blur', event)
     },
     handleEnter(event) {
-      this.$emit('enter', event);
-    }
-  }
+      this.$emit('enter', event)
+    },
+  },
 }
 </script>
 

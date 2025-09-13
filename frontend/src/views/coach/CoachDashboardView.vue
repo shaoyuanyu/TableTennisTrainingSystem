@@ -11,12 +11,7 @@
           <el-avatar :size="80" :src="userStore.userInfo.avatar">
             {{ userStore.userInfo.name?.charAt(0) || 'T' }}
           </el-avatar>
-          <el-tag
-            v-if="userStore.userInfo.isOnline"
-            type="success"
-            size="small"
-            class="online-status"
-          >
+          <el-tag v-if="userStore.userInfo.isOnline" type="success" size="small" class="online-status">
             在线
           </el-tag>
         </div>
@@ -26,7 +21,7 @@
     <!-- 快捷操作 -->
     <el-row :gutter="20" class="quick-actions">
       <el-col :span="6">
-        <el-card class="action-card" @click="navigateTo('/coach/schedule')">
+        <el-card class="action-card">
           <div class="action-content">
             <div class="action-icon schedule">
               <el-icon>
@@ -36,13 +31,14 @@
             <div class="action-text">
               <h3>课程安排</h3>
               <p>查看和管理课程时间</p>
+              <PrimaryButton size="sm" to="/coach/schedule">前往</PrimaryButton>
             </div>
           </div>
         </el-card>
       </el-col>
 
       <el-col :span="6">
-        <el-card class="action-card" @click="navigateTo('/coach/appointment-approval')">
+        <el-card class="action-card">
           <div class="action-content">
             <div class="action-icon approval">
               <el-icon>
@@ -52,13 +48,14 @@
             <div class="action-text">
               <h3>预约审批</h3>
               <p>{{ pendingAppointments }}个待处理</p>
+              <PrimaryButton size="sm" to="/coach/appointment-approval">前往</PrimaryButton>
             </div>
           </div>
         </el-card>
       </el-col>
 
       <el-col :span="6">
-        <el-card class="action-card" @click="navigateTo('/coach/student-feedback')">
+        <el-card class="action-card">
           <div class="action-content">
             <div class="action-icon feedback">
               <el-icon>
@@ -68,13 +65,14 @@
             <div class="action-text">
               <h3>学员反馈</h3>
               <p>查看学员评价和反馈</p>
+              <PrimaryButton size="sm" to="/coach/student-feedback">前往</PrimaryButton>
             </div>
           </div>
         </el-card>
       </el-col>
 
       <el-col :span="6">
-        <el-card class="action-card" @click="navigateTo('/coach/income-statistics')">
+        <el-card class="action-card">
           <div class="action-content">
             <div class="action-icon income">
               <el-icon>
@@ -84,6 +82,7 @@
             <div class="action-text">
               <h3>收入统计</h3>
               <p>查看收入和课时统计</p>
+              <PrimaryButton size="sm" to="/coach/income-statistics">前往</PrimaryButton>
             </div>
           </div>
         </el-card>
@@ -170,18 +169,12 @@
 
           <div v-if="todayClasses.length === 0" class="empty-state">
             <el-empty description="今天没有课程安排" />
-            <el-button type="primary" @click="navigateTo('/coach/schedule')">
-              查看课程表
-            </el-button>
+            <PrimaryButton to="/coach/schedule">查看课程表</PrimaryButton>
           </div>
 
           <el-timeline v-else>
-            <el-timeline-item
-              v-for="classItem in todayClasses"
-              :key="classItem.id"
-              :timestamp="classItem.time"
-              placement="top"
-            >
+            <el-timeline-item v-for="classItem in todayClasses" :key="classItem.id" :timestamp="classItem.time"
+              placement="top">
               <el-card class="class-item">
                 <div class="class-content">
                   <div class="class-info">
@@ -194,20 +187,12 @@
                     <el-tag :type="getClassStatusType(classItem.status)">
                       {{ getClassStatusText(classItem.status) }}
                     </el-tag>
-                    <el-button
-                      v-if="classItem.status === 'upcoming'"
-                      size="small"
-                      type="primary"
-                      @click="startClass(classItem)"
-                    >
+                    <el-button v-if="classItem.status === 'upcoming'" size="small" type="primary"
+                      @click="startClass(classItem)">
                       开始上课
                     </el-button>
-                    <el-button
-                      v-if="classItem.status === 'ongoing'"
-                      size="small"
-                      type="success"
-                      @click="completeClass(classItem)"
-                    >
+                    <el-button v-if="classItem.status === 'ongoing'" size="small" type="success"
+                      @click="completeClass(classItem)">
                       结束课程
                     </el-button>
                   </div>
@@ -255,9 +240,9 @@
       <template #header>
         <div class="card-header">
           <span>最新学员评价</span>
-          <el-button type="text" @click="navigateTo('/coach/student-feedback')">
+          <OutlineButton size="small" variant="glass" to="/coach/student-feedback">
             查看更多
-          </el-button>
+          </OutlineButton>
         </div>
       </template>
 
@@ -289,12 +274,7 @@
       <el-empty v-if="pendingTasks.length === 0" description="暂无待处理事项" />
 
       <div v-else class="tasks-list">
-        <div
-          v-for="task in pendingTasks"
-          :key="task.id"
-          class="task-item"
-          @click="handleTask(task)"
-        >
+        <div v-for="task in pendingTasks" :key="task.id" class="task-item" @click="handleTask(task)">
           <div class="task-icon">
             <el-icon>
               <component :is="getTaskIcon(task.type)" />
@@ -331,6 +311,8 @@ import {
 } from '@element-plus/icons-vue'
 import dayjs from 'dayjs'
 import api from '@/utils/api'
+import PrimaryButton from '@/components/buttons/PrimaryButton.vue'
+import OutlineButton from '@/components/buttons/OutlineButton.vue'
 
 const router = useRouter()
 const userStore = useUserStore()

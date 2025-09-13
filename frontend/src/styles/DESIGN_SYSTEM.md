@@ -14,6 +14,7 @@
 ## 核心特征
 
 ### 1. 颜色系统
+
 ```css
 /* 主题色彩 */
 --primary-color: #409eff;
@@ -28,23 +29,25 @@
 ```
 
 ### 2. 间距系统
+
 ```css
---spacing-xs: 4px;    /* 最小间距 */
---spacing-sm: 8px;    /* 小间距 */
---spacing-md: 12px;   /* 中等间距 */
---spacing-lg: 16px;   /* 大间距 */
---spacing-xl: 20px;   /* 超大间距 */
---spacing-2xl: 24px;  /* 更大间距 */
---spacing-3xl: 32px;  /* 最大间距 */
+--spacing-xs: 4px; /* 最小间距 */
+--spacing-sm: 8px; /* 小间距 */
+--spacing-md: 12px; /* 中等间距 */
+--spacing-lg: 16px; /* 大间距 */
+--spacing-xl: 20px; /* 超大间距 */
+--spacing-2xl: 24px; /* 更大间距 */
+--spacing-3xl: 32px; /* 最大间距 */
 ```
 
 ### 3. 圆角系统
+
 ```css
---radius-sm: 6px;     /* 小圆角 */
---radius-md: 8px;     /* 中等圆角 */
---radius-lg: 12px;    /* 大圆角 */
---radius-xl: 16px;    /* 超大圆角 */
---radius-2xl: 20px;   /* 最大圆角 */
+--radius-sm: 6px; /* 小圆角 */
+--radius-md: 8px; /* 中等圆角 */
+--radius-lg: 12px; /* 大圆角 */
+--radius-xl: 16px; /* 超大圆角 */
+--radius-2xl: 20px; /* 最大圆角 */
 ```
 
 ## 组件使用指南
@@ -52,6 +55,7 @@
 ### 1. 卡片组件
 
 #### 基础玻璃卡片
+
 ```html
 <div class="glass-card">
   <h3>基础卡片</h3>
@@ -60,6 +64,7 @@
 ```
 
 #### 增强版玻璃卡片（带动画效果）
+
 ```html
 <div class="glass-card-enhanced">
   <h3>增强版卡片</h3>
@@ -68,6 +73,7 @@
 ```
 
 #### 内容区域卡片
+
 ```html
 <div class="content-card">
   <h2>内容标题</h2>
@@ -76,6 +82,7 @@
 ```
 
 #### 侧边栏卡片
+
 ```html
 <div class="sidebar-card">
   <h3>侧边栏组件</h3>
@@ -86,6 +93,7 @@
 ### 2. 按钮组件
 
 #### 基础按钮
+
 ```html
 <button class="btn-modern btn-primary">主要按钮</button>
 <button class="btn-modern btn-secondary">次要按钮</button>
@@ -95,6 +103,7 @@
 ```
 
 #### 不同尺寸
+
 ```html
 <button class="btn-modern btn-primary btn-small">小按钮</button>
 <button class="btn-modern btn-primary">标准按钮</button>
@@ -102,6 +111,7 @@
 ```
 
 #### 带图标的按钮
+
 ```html
 <button class="btn-modern btn-primary">
   <el-icon><Plus /></el-icon>
@@ -121,11 +131,12 @@
 ### 4. 表单组件
 
 #### 玻璃形态表单容器
+
 ```html
 <div class="form-glass">
   <h2>登录表单</h2>
-  <input type="text" class="input-glass" placeholder="用户名">
-  <input type="password" class="input-glass" placeholder="密码">
+  <input type="text" class="input-glass" placeholder="用户名" />
+  <input type="password" class="input-glass" placeholder="密码" />
   <button class="btn-modern btn-primary">登录</button>
 </div>
 ```
@@ -141,6 +152,7 @@
 ### 6. 页面布局组件
 
 #### 页面头部
+
 ```html
 <div class="page-header">
   <h1 class="page-title">页面标题</h1>
@@ -153,12 +165,14 @@
 为了让 Element Plus 组件与设计系统保持一致，可以使用以下类名：
 
 ### 按钮适配
+
 ```html
 <!-- Element Plus 按钮 + 设计系统样式 -->
 <el-button type="primary" class="btn-modern">现代化按钮</el-button>
 ```
 
 ### 卡片适配
+
 ```html
 <!-- Element Plus 卡片 + 玻璃形态 -->
 <el-card class="glass-card-enhanced">
@@ -170,6 +184,7 @@
 ```
 
 ### 表单适配
+
 ```html
 <!-- Element Plus 输入框 + 玻璃样式 -->
 <el-input class="input-glass" placeholder="请输入内容" />
@@ -178,29 +193,27 @@
 ## 动画效果
 
 ### 光晕扫过效果
+
 ```html
-<div class="glass-card shimmer-effect">
-  具有光晕扫过动画的卡片
-</div>
+<div class="glass-card shimmer-effect">具有光晕扫过动画的卡片</div>
 ```
 
 ### 脉冲效果
+
 ```html
-<div class="glass-card pulse-effect">
-  具有脉冲动画的卡片
-</div>
+<div class="glass-card pulse-effect">具有脉冲动画的卡片</div>
 ```
 
 ### 悬浮效果
+
 ```html
-<div class="glass-card hover-lift">
-  鼠标悬浮时会上升的卡片
-</div>
+<div class="glass-card hover-lift">鼠标悬浮时会上升的卡片</div>
 ```
 
 ## 工具类
 
 ### 布局工具类
+
 ```html
 <div class="flex flex-between">
   <span>左侧内容</span>
@@ -213,25 +226,27 @@
 ```
 
 ### 间距工具类
+
 ```html
-<div class="mt-lg mb-md p-lg">
-  具有外边距和内边距的元素
-</div>
+<div class="mt-lg mb-md p-lg">具有外边距和内边距的元素</div>
 ```
 
 ### 文本工具类
+
 ```html
 <h1 class="text-white">白色文字</h1>
 <p class="text-white-80">80%透明度白色文字</p>
 ```
 
 ### 圆角工具类
+
 ```html
 <div class="rounded-lg">圆角元素</div>
 <div class="rounded-xl">更大圆角元素</div>
 ```
 
 ### 阴影工具类
+
 ```html
 <div class="shadow-md">中等阴影</div>
 <div class="shadow-lg">大阴影</div>
@@ -247,22 +262,26 @@
 ## 最佳实践
 
 ### 1. 层次结构
+
 - 使用不同的透明度级别来创建视觉层次
 - 重要内容使用 `--white-alpha-20` 以上的透明度
 - 次要内容使用 `--white-alpha-15` 及以下的透明度
 
 ### 2. 动画使用
+
 - 避免过度使用动画，保持微妙和优雅
 - 使用 `--transition-normal` (0.3s) 作为标准过渡时间
 - 重要操作可以使用 `hover-lift` 增强反馈
 
 ### 3. 颜色搭配
+
 - 主要操作使用 `btn-primary`
 - 成功状态使用 `btn-success`
 - 危险操作使用 `btn-danger`
 - 中性操作使用 `btn-secondary`
 
 ### 4. 间距规范
+
 - 卡片内部使用 `--spacing-xl` (20px)
 - 卡片之间使用 `--spacing-2xl` (24px)
 - 小组件内部使用 `--spacing-md` (12px)

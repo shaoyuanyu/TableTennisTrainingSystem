@@ -10,7 +10,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: true // session认证：所有请求自动携带cookie
+  withCredentials: true, // session认证：所有请求自动携带cookie
 })
 
 // 请求拦截器，确保所有请求都带 withCredentials（session认证）
@@ -18,16 +18,16 @@ api.interceptors.request.use(
   (config) => {
     // session认证模式，确保所有请求都携带cookie
     config.withCredentials = true
-    
+
     // session认证不需要Authorization头，注释掉JWT相关代码
     // const userStore = useUserStore()
     // if (userStore.token && userStore.token !== 'session-authenticated') {
     //   config.headers.Authorization = `Bearer ${userStore.token}`
     // }
-    
+
     // 添加请求时间戳，用于调试
     config.metadata = { startTime: new Date() }
-    
+
     return config
   },
   (error) => {
@@ -45,12 +45,12 @@ api.interceptors.response.use(
     if (duration > 5000) {
       console.warn(`慢请求警告: ${response.config.url} 耗时 ${duration}ms`)
     }
-    
+
     return response
   },
   async (error) => {
     const { response, config } = error
-    
+
     if (response) {
       const { status, data } = response
 
@@ -59,7 +59,7 @@ api.interceptors.response.use(
           // 防止无限循环：只有在非登录、非登出请求时才处理401错误
           const isLoginRequest = config.url?.includes('/user/login')
           const isLogoutRequest = config.url?.includes('/user/logout')
-          
+
           if (!isLoginRequest && !isLogoutRequest) {
             // 对于非登录请求的401，显示会话过期消息
             const errorMsg = getErrorMessage(data, '会话已过期，请重新登录')

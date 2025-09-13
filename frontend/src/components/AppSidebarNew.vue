@@ -163,12 +163,7 @@ defineProps({
 const route = useRoute()
 
 // 直接使用权限hooks，避免额外的computed包装
-const { 
-  isSuperAdmin, 
-  isCampusAdmin, 
-  isStudent, 
-  isCoach
-} = usePermissions()
+const { isSuperAdmin, isCampusAdmin, isStudent, isCoach } = usePermissions()
 
 // 当前激活的菜单项
 const activeMenu = computed(() => route.path)

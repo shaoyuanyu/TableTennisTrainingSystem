@@ -1,21 +1,17 @@
 <template>
   <div class="storage-info">
-    <div 
-      v-for="(item, index) in items" 
-      :key="index"
-      class="storage-item"
-    >
+    <div v-for="(item, index) in items" :key="index" class="storage-item">
       <label>{{ item.label }}:</label>
-      
+
       <!-- 状态标签类型 -->
-      <el-tag 
+      <el-tag
         v-if="item.type === 'status'"
-        :type="item.status ? 'success' : 'info'" 
+        :type="item.status ? 'success' : 'info'"
         :size="item.size || 'small'"
       >
-        {{ item.status ? (item.trueText || '已设置') : (item.falseText || '未设置') }}
+        {{ item.status ? item.trueText || '已设置' : item.falseText || '未设置' }}
       </el-tag>
-      
+
       <!-- 文本域类型 -->
       <el-input
         v-else-if="item.type === 'textarea'"
@@ -27,7 +23,7 @@
         readonly
         class="enhanced-textarea"
       />
-      
+
       <!-- 普通文本 -->
       <span v-else>{{ item.value || '无' }}</span>
     </div>
@@ -42,9 +38,9 @@ export default {
     // 格式: [{ label: '标签', value: '值', type: 'text|status|textarea', placeholder?: '提示', rows?: 行数 }]
     items: {
       type: Array,
-      default: () => []
-    }
-  }
+      default: () => [],
+    },
+  },
 }
 </script>
 
@@ -84,12 +80,10 @@ export default {
 /* 状态标签样式 */
 .storage-item :deep(.el-tag) {
   align-self: flex-start;
-  background: linear-gradient(135deg, 
-    rgba(64, 158, 255, 0.9) 0%, 
-    rgba(102, 126, 234, 0.9) 100%);
+  background: linear-gradient(135deg, rgba(64, 158, 255, 0.9) 0%, rgba(102, 126, 234, 0.9) 100%);
   color: #ffffff;
   border: 1px solid rgba(64, 158, 255, 0.8);
-  box-shadow: 
+  box-shadow:
     0 2px 8px rgba(64, 158, 255, 0.25),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
   font-weight: 600;
@@ -100,21 +94,17 @@ export default {
 }
 
 .storage-item :deep(.el-tag--success) {
-  background: linear-gradient(135deg, 
-    rgba(16, 185, 129, 0.9) 0%, 
-    rgba(5, 150, 105, 0.9) 100%);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.9) 0%, rgba(5, 150, 105, 0.9) 100%);
   border-color: rgba(16, 185, 129, 0.8);
-  box-shadow: 
+  box-shadow:
     0 2px 8px rgba(16, 185, 129, 0.25),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .storage-item :deep(.el-tag--info) {
-  background: linear-gradient(135deg, 
-    rgba(99, 102, 241, 0.9) 0%, 
-    rgba(79, 70, 229, 0.9) 100%);
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.9) 0%, rgba(79, 70, 229, 0.9) 100%);
   border-color: rgba(99, 102, 241, 0.8);
-  box-shadow: 
+  box-shadow:
     0 2px 8px rgba(99, 102, 241, 0.25),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
@@ -150,11 +140,11 @@ export default {
   .storage-item {
     padding: 14px;
   }
-  
+
   .storage-item label {
     font-size: 13px;
   }
-  
+
   .enhanced-textarea :deep(.el-textarea__inner) {
     font-size: 12px !important;
   }
@@ -164,7 +154,7 @@ export default {
   .storage-item {
     padding: 12px;
   }
-  
+
   .enhanced-textarea :deep(.el-textarea__inner) {
     font-size: 11px !important;
   }

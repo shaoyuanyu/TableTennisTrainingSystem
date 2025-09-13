@@ -27,24 +27,13 @@
         </el-form-item>
 
         <el-form-item label="预约日期">
-          <el-date-picker
-            v-model="filters.dateRange"
-            type="daterange"
-            range-separator="至"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期"
-            format="YYYY-MM-DD"
-            value-format="YYYY-MM-DD"
-          />
+          <el-date-picker v-model="filters.dateRange" type="daterange" range-separator="至" start-placeholder="开始日期"
+            end-placeholder="结束日期" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
         </el-form-item>
 
         <el-form-item label="学员搜索">
-          <el-input
-            v-model="filters.keyword"
-            placeholder="学员姓名或手机号"
-            style="width: 200px"
-            @keyup.enter="fetchAppointments"
-          />
+          <el-input v-model="filters.keyword" placeholder="学员姓名或手机号" style="width: 200px"
+            @keyup.enter="fetchAppointments" />
         </el-form-item>
 
         <el-form-item>
@@ -67,12 +56,7 @@
 
     <!-- 预约列表 -->
     <el-card>
-      <el-table
-        :data="appointmentList"
-        v-loading="loading"
-        @selection-change="handleSelectionChange"
-        stripe
-      >
+      <el-table :data="appointmentList" v-loading="loading" @selection-change="handleSelectionChange" stripe>
         <el-table-column type="selection" width="55" :selectable="isSelectable" />
 
         <el-table-column prop="id" label="预约编号" width="120" />
@@ -131,20 +115,10 @@
 
         <el-table-column label="操作" width="200" fixed="right">
           <template #default="{ row }">
-            <el-button
-              v-if="row.status === 'pending'"
-              size="small"
-              type="success"
-              @click="approveAppointment(row)"
-            >
+            <el-button v-if="row.status === 'pending'" size="small" type="success" @click="approveAppointment(row)">
               通过
             </el-button>
-            <el-button
-              v-if="row.status === 'pending'"
-              size="small"
-              type="danger"
-              @click="showRejectDialog(row)"
-            >
+            <el-button v-if="row.status === 'pending'" size="small" type="danger" @click="showRejectDialog(row)">
               拒绝
             </el-button>
             <el-button size="small" @click="showDetailDialog(row)"> 详情 </el-button>
@@ -153,25 +127,14 @@
       </el-table>
 
       <div class="pagination-wrapper">
-        <el-pagination
-          v-model:current-page="pagination.page"
-          v-model:page-size="pagination.size"
-          :total="pagination.total"
-          :page-sizes="[10, 20, 50, 100]"
-          layout="total, sizes, prev, pager, next, jumper"
-          @size-change="fetchAppointments"
-          @current-change="fetchAppointments"
-        />
+        <el-pagination v-model:current-page="pagination.page" v-model:page-size="pagination.size"
+          :total="pagination.total" :page-sizes="[10, 20, 50, 100]" layout="total, sizes, prev, pager, next, jumper"
+          @size-change="fetchAppointments" @current-change="fetchAppointments" />
       </div>
     </el-card>
 
     <!-- 拒绝原因对话框 -->
-    <el-dialog
-      v-model="rejectDialogVisible"
-      title="拒绝预约"
-      width="500px"
-      @close="resetRejectForm"
-    >
+    <el-dialog v-model="rejectDialogVisible" title="拒绝预约" width="500px" @close="resetRejectForm">
       <el-form ref="rejectFormRef" :model="rejectForm" :rules="rejectRules" label-width="100px">
         <el-form-item label="拒绝原因" prop="reason">
           <el-select v-model="rejectForm.reason" placeholder="选择拒绝原因">
@@ -184,12 +147,7 @@
         </el-form-item>
 
         <el-form-item label="详细说明">
-          <el-input
-            v-model="rejectForm.details"
-            type="textarea"
-            :rows="3"
-            placeholder="请详细说明拒绝原因，以便学员理解"
-          />
+          <el-input v-model="rejectForm.details" type="textarea" :rows="3" placeholder="请详细说明拒绝原因，以便学员理解" />
         </el-form-item>
 
         <el-form-item label="建议时间">
@@ -198,8 +156,8 @@
       </el-form>
 
       <template #footer>
-        <el-button @click="rejectDialogVisible = false">取消</el-button>
-        <el-button type="danger" @click="confirmReject" :loading="rejecting"> 确认拒绝 </el-button>
+        <OutlineButton @click="rejectDialogVisible = false">取消</OutlineButton>
+        <DangerButton @click="confirmReject" :loading="rejecting"> 确认拒绝 </DangerButton>
       </template>
     </el-dialog>
 
@@ -238,12 +196,7 @@
             {{ formatDateTime(selectedAppointment.createdAt) }}
           </el-descriptions-item>
           <el-descriptions-item label="课程目标" :span="2">
-            <el-tag
-              v-for="goal in selectedAppointment.goals"
-              :key="goal"
-              size="small"
-              style="margin-right: 8px"
-            >
+            <el-tag v-for="goal in selectedAppointment.goals" :key="goal" size="small" style="margin-right: 8px">
               {{ getGoalText(goal) }}
             </el-tag>
           </el-descriptions-item>
@@ -268,10 +221,7 @@
             <el-descriptions-item v-if="selectedAppointment.reviewRecord.details" label="详细说明">
               {{ selectedAppointment.reviewRecord.details }}
             </el-descriptions-item>
-            <el-descriptions-item
-              v-if="selectedAppointment.reviewRecord.suggestion"
-              label="建议时间"
-            >
+            <el-descriptions-item v-if="selectedAppointment.reviewRecord.suggestion" label="建议时间">
               {{ selectedAppointment.reviewRecord.suggestion }}
             </el-descriptions-item>
           </el-descriptions>
@@ -287,6 +237,8 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh } from '@element-plus/icons-vue'
 import dayjs from 'dayjs'
 import api from '@/utils/api'
+import OutlineButton from '@/components/buttons/OutlineButton.vue'
+import DangerButton from '@/components/buttons/DangerButton.vue'
 
 // 数据列表
 const appointmentList = ref([])

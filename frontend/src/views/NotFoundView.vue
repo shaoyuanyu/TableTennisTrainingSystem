@@ -9,8 +9,8 @@
       <h1 class="not-found-title">404</h1>
       <p class="not-found-subtitle">抱歉，您访问的页面不存在</p>
       <div class="not-found-actions">
-        <el-button type="primary" @click="goHome"> 返回首页 </el-button>
-        <el-button @click="goBack"> 返回上页 </el-button>
+        <PrimaryButton @click="goHome">返回首页</PrimaryButton>
+        <OutlineButton @click="goBack">返回上页</OutlineButton>
       </div>
     </div>
   </div>
@@ -18,6 +18,7 @@
 
 <script setup>
 import { useRouter } from 'vue-router'
+import { PrimaryButton, OutlineButton } from '@/components/buttons'
 // 原权限相关导入 - 暂时注释掉，权限管理将在后端实现
 // import { useUserStore } from '@/stores/user'
 // import { getDefaultHomePage } from '@/utils/permissions'

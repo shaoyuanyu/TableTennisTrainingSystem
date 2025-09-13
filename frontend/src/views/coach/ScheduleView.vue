@@ -914,6 +914,9 @@ import { ElMessage, ElMessageBox, ElDialog, ElButton, ElSelect, ElOption, ElForm
 import { ArrowLeft, ArrowRight } from '@element-plus/icons-vue'
 import dayjs from 'dayjs'
 import api from '@/utils/api'
+import PrimaryButton from '@/components/buttons/PrimaryButton.vue'
+import OutlineButton from '@/components/buttons/OutlineButton.vue'
+import DangerButton from '@/components/buttons/DangerButton.vue'
 import { useScheduleSync } from '@/utils/scheduleSyncExamples'
 
 // 响应式数据
@@ -1075,7 +1078,7 @@ const goToToday = () => {
 const studentNames = (students) => {
   if (!students || students.length === 0) return '无'
   // 假定 students 是数组 [{name: '张三'}, {name: '李四'}]
-  return students.map(s => s.name).join('，')
+  return students.map((s) => s.name).join('，')
 }
 
 const getSchedulesForDay = (date) => {
@@ -1373,7 +1376,11 @@ const generateMockCoachSchedules = () => {
   const mockSchedules = []
   const today = dayjs()
   const mockStudentPool = [
-    { name: '小明' }, { name: '小红' }, { name: '小强' }, { name: '小丽' }, { name: '小刚' }
+    { name: '小明' },
+    { name: '小红' },
+    { name: '小强' },
+    { name: '小丽' },
+    { name: '小刚' },
   ]
   // 生成两周示例课程
   for (let i = 0; i < 14; i++) {
@@ -3332,17 +3339,20 @@ onMounted(() => {
   position: relative;
   align-items: flex-start;
 }
+
 .schedule-item.ultra .field-icon {
   font-size: 1em;
   margin-right: 3px;
   vertical-align: middle;
 }
+
 .schedule-item.ultra .schedule-title {
   font-weight: 700;
   margin-bottom: 2px;
   font-size: 14px;
   letter-spacing: 1px;
 }
+
 .schedule-item.ultra .schedule-coach,
 .schedule-item.ultra .schedule-location {
   font-size: 12px;
@@ -3350,22 +3360,28 @@ onMounted(() => {
   margin-top: 1px;
   font-weight: 500;
 }
+
 .schedule-item.ultra.schedule-individual {
   background: linear-gradient(90deg, #2196f3 60%, #21cbf3 100%);
 }
+
 .schedule-item.ultra.schedule-group {
   background: linear-gradient(90deg, #4caf50 60%, #8bc34a 100%);
 }
+
 .schedule-item.ultra.schedule-match {
   background: linear-gradient(90deg, #ff9800 60%, #ffd54f 100%);
 }
+
 .schedule-item.ultra.schedule-tournament {
   background: linear-gradient(90deg, #f44336 60%, #ff8a65 100%);
 }
+
 .schedule-item.ultra.status-pending {
   opacity: 0.7;
   border: 2px dashed rgba(255, 255, 255, 0.7);
 }
+
 .schedule-item.ultra.status-cancelled {
   background: #bdbdbd;
   text-decoration: line-through;
@@ -3373,7 +3389,7 @@ onMounted(() => {
 }
 
 .month-view.ultra {
-  background: rgba(255,255,255,0.98);
+  background: rgba(255, 255, 255, 0.98);
   border-radius: 20px;
   overflow: hidden;
   box-shadow: 0 8px 40px rgba(0, 0, 0, 0.09);
@@ -3382,7 +3398,7 @@ onMounted(() => {
 .month-header.ultra {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  background: linear-gradient(90deg,#e8f1fc 0%, #f8f9fa 100%);
+  background: linear-gradient(90deg, #e8f1fc 0%, #f8f9fa 100%);
   border-bottom: 2px solid #e0e0e0;
 }
 
@@ -3425,7 +3441,7 @@ onMounted(() => {
 }
 
 .month-day.is-today {
-  background: linear-gradient(120deg,#e3f2fd 60%, #b9eaff 100%);
+  background: linear-gradient(120deg, #e3f2fd 60%, #b9eaff 100%);
   border: 3px solid #2196f3;
   box-shadow: 0 2px 16px #2196f344;
 }
@@ -3472,20 +3488,25 @@ onMounted(() => {
   align-items: center;
   gap: 6px;
 }
+
 .month-schedule-item.ultra .dot-icon {
   color: #1565c0;
   font-size: 1.2em;
   margin-right: 1px;
 }
+
 .month-schedule-item.ultra.schedule-group {
   background: linear-gradient(90deg, #4caf50 60%, #8bc34a 100%);
 }
+
 .month-schedule-item.ultra.schedule-match {
   background: linear-gradient(90deg, #ff9800 60%, #ffd54f 100%);
 }
+
 .month-schedule-item.ultra.schedule-tournament {
   background: linear-gradient(90deg, #f44336 60%, #ff8a65 100%);
 }
+
 .more-schedules.ultra {
   font-size: 12px;
   color: #666;
@@ -3501,9 +3522,10 @@ onMounted(() => {
 .schedule-detail.ultra {
   padding: 24px 0 6px 0;
   font-size: 1.17rem;
-  background: linear-gradient(110deg,#e3f2fd 80%, #f8f9fa 100%);
+  background: linear-gradient(110deg, #e3f2fd 80%, #f8f9fa 100%);
   border-radius: 12px;
 }
+
 .schedule-detail.ultra .field-icon {
   font-size: 1.1em;
   margin-right: 4px;
@@ -3511,7 +3533,7 @@ onMounted(() => {
 }
 
 .ultra-dialog ::deep(.el-dialog__body) {
-  background: linear-gradient(110deg,#e0eafc 80%, #ffffff 100%);
+  background: linear-gradient(110deg, #e0eafc 80%, #ffffff 100%);
   padding: 36px 28px 20px 28px;
   border-radius: 14px;
 }
@@ -3591,13 +3613,16 @@ onMounted(() => {
     font-size: 11px;
     padding: 2px 6px;
   }
+
   .schedule-detail.ultra {
     padding: 10px 2px 0 2px;
     font-size: 1rem;
   }
+
   .ultra-dialog ::deep(.el-dialog__body) {
     padding: 14px 8px 12px 8px;
   }
+
   .dialog-footer.ultra {
     gap: 9px;
   }

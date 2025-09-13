@@ -20,7 +20,7 @@ const app = createApp(App)
 app.use(ElementPlus, {
   locale: zhCn,
   size: 'default', // 添加全局尺寸配置
-  zIndex: 3000,   // 设置初始 z-index
+  zIndex: 3000, // 设置初始 z-index
 })
 
 // 批量注册图标（更优雅的方式）

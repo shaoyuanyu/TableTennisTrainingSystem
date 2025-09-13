@@ -3,19 +3,19 @@
     <!-- 页面头部 -->
     <div class="page-header">
       <h2>校区管理</h2>
-      <el-button type="primary" @click="showAddDialog" :icon="Plus"> 新增校区 </el-button>
+      <PrimaryButton @click="showAddDialog">
+        <template #icon-left>
+          <el-icon>
+            <Plus />
+          </el-icon>
+        </template>
+        新增校区
+      </PrimaryButton>
     </div>
 
     <!-- 校区列表 -->
     <el-card>
-      <el-table 
-        :data="campusList" 
-        v-loading="loading" 
-        stripe 
-        :lazy="true"
-        :height="400"
-        style="width: 100%"
-      >
+      <el-table :data="campusList" v-loading="loading" stripe :lazy="true" :height="400" style="width: 100%">
         <el-table-column prop="name" label="校区名称" width="180" />
         <el-table-column prop="address" label="地址" min-width="200" />
         <el-table-column prop="contact" label="联系人" width="120" />
@@ -39,13 +39,7 @@
     </el-card>
 
     <!-- 新增/编辑校区对话框 - 延迟加载 -->
-    <el-dialog 
-      v-model="dialogVisible" 
-      :title="dialogTitle" 
-      width="500px" 
-      @close="resetForm"
-      :destroy-on-close="true"
-    >
+    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="500px" @close="resetForm" :destroy-on-close="true">
       <el-form ref="formRef" :model="campusForm" :rules="formRules" label-width="80px">
         <el-form-item label="校区名称" prop="name">
           <el-input v-model="campusForm.name" placeholder="请输入校区名称" />
@@ -68,10 +62,10 @@
       </el-form>
 
       <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="saveCampus" :loading="saving">
+        <OutlineButton @click="dialogVisible = false">取消</OutlineButton>
+        <PrimaryButton @click="saveCampus" :loading="saving">
           {{ isEdit ? '保存' : '新增' }}
-        </el-button>
+        </PrimaryButton>
       </template>
     </el-dialog>
   </div>
@@ -82,6 +76,8 @@ import { ref, reactive, onMounted, computed, nextTick } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 import api from '@/utils/api'
+import PrimaryButton from '@/components/buttons/PrimaryButton.vue'
+import OutlineButton from '@/components/buttons/OutlineButton.vue'
 
 // 数据
 const campusList = ref([])
@@ -99,7 +95,7 @@ const campusForm = reactive({
   address: '',
   contact: '',
   phone: '',
-  status: 'active'
+  status: 'active',
 })
 
 // 表单引用
@@ -115,8 +111,8 @@ const formRules = {
   contact: [{ required: true, message: '请输入联系人', trigger: 'blur' }],
   phone: [
     { required: true, message: '请输入联系电话', trigger: 'blur' },
-    { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号码', trigger: 'blur' }
-  ]
+    { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号码', trigger: 'blur' },
+  ],
 }
 
 // 获取校区列表 - 优化：减少不必要的数据
@@ -155,9 +151,9 @@ const resetForm = () => {
     address: '',
     contact: '',
     phone: '',
-    status: 'active'
+    status: 'active',
   })
-  
+
   // 使用 nextTick 确保 DOM 更新后再清除验证
   nextTick(() => {
     if (formRef.value) {
@@ -199,7 +195,7 @@ const deleteCampus = async (campus) => {
     await ElMessageBox.confirm(`确定要删除校区"${campus.name}"吗？`, '确认删除', {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
-      type: 'warning'
+      type: 'warning',
     })
 
     await api.delete(`/admin/campuses/${campus.id}`)

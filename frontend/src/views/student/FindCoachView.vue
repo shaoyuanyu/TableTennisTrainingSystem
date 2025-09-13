@@ -46,17 +46,20 @@
         </el-form-item>
 
         <el-form-item label="搜索">
-          <el-input
-            v-model="filters.keyword"
-            placeholder="教练姓名"
-            style="width: 150px"
-            @keyup.enter="searchCoaches"
-          />
+          <el-input v-model="filters.keyword" placeholder="教练姓名" style="width: 150px" @keyup.enter="searchCoaches" />
         </el-form-item>
 
         <el-form-item>
-          <el-button type="primary" @click="searchCoaches" :icon="Search"> 搜索 </el-button>
-          <el-button @click="resetFilters" :icon="Refresh"> 重置 </el-button>
+          <PrimaryButton @click="searchCoaches" class="filter-btn">
+            <el-icon>
+              <Search />
+            </el-icon> 搜索
+          </PrimaryButton>
+          <OutlineButton @click="resetFilters" class="filter-btn">
+            <el-icon>
+              <Refresh />
+            </el-icon> 重置
+          </OutlineButton>
         </el-form-item>
       </el-form>
     </el-card>
@@ -74,12 +77,7 @@
 
     <!-- 教练列表 -->
     <div v-loading="loading" class="coaches-grid">
-      <el-card
-        v-for="coach in coachList"
-        :key="coach.id"
-        class="coach-card"
-        @click="viewCoachDetail(coach)"
-      >
+      <el-card v-for="coach in coachList" :key="coach.id" class="coach-card" @click="viewCoachDetail(coach)">
         <div class="coach-avatar">
           <el-avatar :size="80" :src="coach.avatar">
             {{ coach.name.charAt(0) }}
@@ -94,13 +92,7 @@
           <p class="coach-level">{{ getLevelText(coach.level) }}</p>
 
           <div class="coach-rating">
-            <el-rate
-              v-model="coach.rating"
-              disabled
-              show-score
-              text-color="#ff9900"
-              score-template="{value}分"
-            />
+            <el-rate v-model="coach.rating" disabled show-score text-color="#ff9900" score-template="{value}分" />
             <span class="rating-count">({{ coach.reviewCount }}条评价)</span>
           </div>
 
@@ -116,12 +108,7 @@
           </div>
 
           <div class="coach-specialty">
-            <el-tag
-              v-for="specialty in coach.specialties"
-              :key="specialty"
-              size="small"
-              type="info"
-            >
+            <el-tag v-for="specialty in coach.specialties" :key="specialty" size="small" type="info">
               {{ getSpecialtyText(specialty) }}
             </el-tag>
           </div>
@@ -132,10 +119,8 @@
           </div>
 
           <div class="coach-actions">
-            <el-button type="primary" size="small" @click.stop="selectCoach(coach)">
-              选择教练
-            </el-button>
-            <el-button size="small" @click.stop="viewCoachDetail(coach)"> 查看详情 </el-button>
+            <PrimaryButton size="sm" @click.stop="selectCoach(coach)">选择教练</PrimaryButton>
+            <OutlineButton size="sm" @click.stop="viewCoachDetail(coach)">查看详情</OutlineButton>
           </div>
         </div>
       </el-card>
@@ -144,30 +129,19 @@
     <!-- 空状态 -->
     <div v-if="!loading && coachList.length === 0" class="empty-state">
       <el-empty description="没有找到符合条件的教练">
-        <el-button type="primary" @click="resetFilters"> 重置筛选条件 </el-button>
+        <PrimaryButton @click="resetFilters">重置筛选条件</PrimaryButton>
       </el-empty>
     </div>
 
     <!-- 分页 -->
     <div v-if="coachList.length > 0" class="pagination-wrapper">
-      <el-pagination
-        v-model:current-page="pagination.page"
-        v-model:page-size="pagination.size"
-        :total="pagination.total"
-        :page-sizes="[12, 24, 48]"
-        layout="total, sizes, prev, pager, next, jumper"
-        @size-change="searchCoaches"
-        @current-change="searchCoaches"
-      />
+      <el-pagination v-model:current-page="pagination.page" v-model:page-size="pagination.size"
+        :total="pagination.total" :page-sizes="[12, 24, 48]" layout="total, sizes, prev, pager, next, jumper"
+        @size-change="searchCoaches" @current-change="searchCoaches" />
     </div>
 
     <!-- 教练详情对话框 -->
-    <el-dialog
-      v-model="detailDialogVisible"
-      title="教练详情"
-      width="800px"
-      @close="selectedCoach = null"
-    >
+    <el-dialog v-model="detailDialogVisible" title="教练详情" width="800px" @close="selectedCoach = null">
       <div v-if="selectedCoach" class="coach-detail">
         <div class="detail-header">
           <el-avatar :size="100" :src="selectedCoach.avatar">
@@ -177,13 +151,8 @@
             <h2>{{ selectedCoach.name }}</h2>
             <p>{{ getLevelText(selectedCoach.level) }}</p>
             <div class="rating-section">
-              <el-rate
-                v-model="selectedCoach.rating"
-                disabled
-                show-score
-                text-color="#ff9900"
-                score-template="{value}分"
-              />
+              <el-rate v-model="selectedCoach.rating" disabled show-score text-color="#ff9900"
+                score-template="{value}分" />
               <span>({{ selectedCoach.reviewCount }}条评价)</span>
             </div>
           </div>
@@ -213,13 +182,8 @@
                 ¥{{ selectedCoach.hourlyRate }}/小时
               </el-descriptions-item>
               <el-descriptions-item label="专业特长" :span="2">
-                <el-tag
-                  v-for="specialty in selectedCoach.specialties"
-                  :key="specialty"
-                  size="small"
-                  type="info"
-                  style="margin-right: 8px"
-                >
+                <el-tag v-for="specialty in selectedCoach.specialties" :key="specialty" size="small" type="info"
+                  style="margin-right: 8px">
                   {{ getSpecialtyText(specialty) }}
                 </el-tag>
               </el-descriptions-item>
@@ -266,10 +230,10 @@
         </el-tabs>
 
         <div class="detail-actions">
-          <el-button size="large" @click="detailDialogVisible = false"> 关闭 </el-button>
-          <el-button type="primary" size="large" @click="selectCoach(selectedCoach)">
+          <OutlineButton size="lg" @click="detailDialogVisible = false">关闭</OutlineButton>
+          <PrimaryButton size="lg" @click="selectCoach(selectedCoach)">
             选择这位教练
-          </el-button>
+          </PrimaryButton>
         </div>
       </div>
     </el-dialog>
@@ -282,6 +246,7 @@ import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { ElMessage } from 'element-plus'
 import { Search, Refresh, Calendar, User } from '@element-plus/icons-vue'
+import { PrimaryButton, OutlineButton } from '@/components/buttons'
 import dayjs from 'dayjs'
 import api from '@/utils/api'
 
@@ -427,15 +392,15 @@ const getSpecialtyText = (specialty) => {
 // 组件挂载
 onMounted(async () => {
   // 添加延迟，确保用户认证状态稳定
-  await new Promise(resolve => setTimeout(resolve, 200))
-  
+  await new Promise((resolve) => setTimeout(resolve, 200))
+
   // 检查用户是否已经正确登录
   const userStore = useUserStore()
   if (!userStore.isLoggedIn) {
     console.warn('用户未登录，暂不获取教练列表')
     return
   }
-  
+
   console.log('开始获取教练列表，用户角色:', userStore.userRole)
   searchCoaches()
 })
@@ -574,7 +539,7 @@ onMounted(async () => {
   gap: 8px;
 }
 
-.coach-actions .el-button {
+.coach-actions .btn-modern {
   flex: 1;
 }
 
@@ -716,7 +681,7 @@ onMounted(async () => {
   border-top: 1px solid #eee;
 }
 
-.detail-actions .el-button {
+.detail-actions .btn-modern {
   min-width: 120px;
   margin: 0 8px;
 }

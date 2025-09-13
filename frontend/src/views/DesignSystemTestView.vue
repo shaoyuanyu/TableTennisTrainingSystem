@@ -10,7 +10,7 @@
         <h1 class="hero-title">乒乓球训练系统设计语言样板间</h1>
         <p class="hero-description">
           基于 Glassmorphism 设计理念的现代化组件库展示空间，
-          <br>展示统一的视觉语言、交互模式和组件规范
+          <br />展示统一的视觉语言、交互模式和组件规范
         </p>
         <div class="hero-stats">
           <div class="stat-item">
@@ -97,888 +97,630 @@
       </div>
     </div>
 
-    <!-- 玻璃卡片组件展示 -->
-    <div class="component-showcase" id="glass-cards">
-      <h2 class="section-title">� 玻璃卡片组件系列</h2>
-      <p class="section-description">
-        基于 Glassmorphism 设计理念打造的卡片组件系列，提供不同场景下的最佳视觉效果
-      </p>
-      
-      <div class="showcase-grid">
-        <!-- GlassDisplayCard - 展示型卡片 -->
-        <GlassDisplayCard
-          title="GlassDisplayCard"
-          subtitle="展示型玻璃卡片"
-          icon="🎯"
-          description="适用于内容展示和信息呈现的基础玻璃卡片组件，具有良好的可读性和现代感。"
-          type="glass"
-          :tags="[
-            { text: '展示组件', type: 'primary' },
-            { text: '可复用', type: 'success' }
-          ]"
-        >
-          <div class="component-demo">
-            <p>这是 GlassDisplayCard 组件的内容展示区域，支持任意内容插入。</p>
-            <div class="demo-features">
-              <span class="feature-tag">✨ 玻璃形态</span>
-              <span class="feature-tag">📱 响应式</span>
-              <span class="feature-tag">🎨 可定制</span>
-            </div>
-          </div>
-        </GlassDisplayCard>
-        
-        <!-- GlassCardWithHeader - 带头部的卡片 -->
-        <GlassDisplayCard
-          title="GlassCardWithHeader"
-          subtitle="带头部的玻璃卡片"
-          icon="🎖️"
-          description="专为需要明确标题和操作区域的场景设计，提供结构化的内容组织方式。"
-          type="glass-enhanced"
-          :tags="[
-            { text: '结构化', type: 'warning' },
-            { text: '功能完整', type: 'info' }
-          ]"
-        >
-          <div class="component-demo">
-            <div class="demo-preview">
-              <GlassCardWithHeader 
-                title="示例卡片" 
-                icon="🔧" 
-                type="primary"
-              >
-                <div class="demo-content">
-                  <p>这是 GlassCardWithHeader 的预览示例</p>
-                  <div class="status-items">
-                    <div class="status-item">
-                      <span>状态:</span>
-                      <el-tag type="success" size="small">正常</el-tag>
-                    </div>
-                  </div>
-                </div>
-              </GlassCardWithHeader>
-            </div>
-          </div>
-        </GlassDisplayCard>
-        
-        <DemoCard
-          title="内容区域卡片"
-          subtitle="content-card"
-          icon="📄"
-          description="适用于主要内容区域，具有更高的透明度和更大的内边距。"
-          type="content"
-          :tags="[
-            { text: '主要', type: 'success' },
-            { text: '内容', type: 'primary' }
-          ]"
-        />
-        
-        <DemoCard
-          title="侧边栏卡片"
-          subtitle="sidebar-card"
-          icon="📋"
-          description="专为侧边栏设计的紧凑型卡片，空间利用更高效。"
-          type="content"
-          extra-classes="sidebar-card"
-          :tags="[
-            { text: '紧凑', type: 'danger' },
-            { text: '侧边栏', type: 'warning' }
-          ]"
-        />
-      </div>
-    </div>
+    <!-- 玻璃卡片组件系列展示（重构版） -->
+    <CardShowcase
+      id="glass-cards"
+      title="🎴 玻璃卡片组件系列"
+      description="按层次展示已封装好的卡片组件：基础 Base、布局 Layout、专用 Specialized、展示 Showcase。示例最小可行，便于对照与复用。"
+      layout="fixed-3"
+    >
+      <!-- Base 基础层 -->
+      <GlassDisplayCard
+        title="GlassCardBase"
+        subtitle="base/GlassCardBase.vue"
+        icon="🏗️"
+        variant="base"
+        description="统一的玻璃态卡片基础：标题/副标题/图标/描述/标签/插槽 与 5 种变体样式。"
+        :tags="[
+          { text: 'Base', type: 'primary' },
+          { text: '5变体', type: 'info' },
+        ]"
+      >
+        <div class="variant-grid">
+          <div class="mini-card variant-base">base</div>
+          <div class="mini-card variant-display">display</div>
+          <div class="mini-card variant-content">content</div>
+          <div class="mini-card variant-enhanced">enhanced</div>
+          <div class="mini-card variant-minimal">minimal</div>
+        </div>
+      </GlassDisplayCard>
 
-    <!-- 按钮测试 -->
-    <div class="test-section" id="buttons">
-      <h2 class="section-title">🔘 按钮系统测试</h2>
-      <div class="buttons-demo">
-        <div class="button-group">
-          <h4>语义化按钮</h4>
+      <GlassDisplayCard
+        title="GlassCard"
+        subtitle="base/GlassCard.vue"
+        icon="🎴"
+        variant="display"
+        description="标准功能卡片：头部 actions 与底部 footer 插槽，满足通用信息容器场景。"
+      >
+        <div class="card-preview">
+          <div class="card-header-demo">
+            <span class="demo-icon">🔧</span><span class="demo-title">标准卡片</span>
+          </div>
+          <div class="card-content-demo">主内容区域</div>
+          <div class="card-footer-demo"><button class="demo-btn">操作</button></div>
+        </div>
+      </GlassDisplayCard>
+
+      <GlassDisplayCard
+        title="GlassCardWithHeader"
+        subtitle="base/GlassCardWithHeader.vue"
+        icon="🎯"
+        variant="content"
+        description="带独立头部结构的卡片，向后兼容，适合需要明显头部区块的场景。"
+      >
+        <div class="api-compatibility">
+          <div class="compat-item">✅ 向后兼容</div>
+          <div class="compat-item">🔄 API 统一</div>
+          <div class="compat-item">📦 开箱即用</div>
+        </div>
+      </GlassDisplayCard>
+
+      <GlassDisplayCard
+        title="GlassCardBody"
+        subtitle="base/GlassCardBody.vue"
+        icon="📄"
+        variant="minimal"
+        description="独立的卡片内容容器，支持 grid/form/actions/flex/status 等布局。"
+      >
+        <div class="layout-grid">
+          <div class="layout-item">grid</div>
+          <div class="layout-item">form</div>
+          <div class="layout-item">actions</div>
+          <div class="layout-item">flex</div>
+          <div class="layout-item">status</div>
+        </div>
+      </GlassDisplayCard>
+
+      <!-- Layout 布局层 -->
+      <GlassDisplayCard
+        title="GlassCardsGrid"
+        subtitle="layout/GlassCardsGrid.vue"
+        icon="📐"
+        variant="enhanced"
+        description="卡片网格系统：auto 自适应 / fixed 固定列。"
+      >
+        <div class="grid-demo-container">
+          <div class="grid-demo">
+            <div class="grid-label">auto 自适应</div>
+            <div class="mini-grid auto-grid">
+              <div class="mini-item"></div>
+              <div class="mini-item"></div>
+              <div class="mini-item"></div>
+            </div>
+          </div>
+          <div class="grid-demo">
+            <div class="grid-label">fixed-3 固定列</div>
+            <div class="mini-grid fixed-grid">
+              <div class="mini-item"></div>
+              <div class="mini-item"></div>
+              <div class="mini-item"></div>
+            </div>
+          </div>
+        </div>
+      </GlassDisplayCard>
+
+      <!-- Specialized 专用层 -->
+      <GlassDisplayCard
+        title="GlassDisplayCard"
+        subtitle="specialized/GlassDisplayCard.vue"
+        icon="🎨"
+        variant="display"
+        description="用于内容介绍与特性说明的展示卡片，完整信息结构与标签支持。"
+      >
+        <div class="feature-list simple">
+          <div class="feature-item">✨ 标题/副标题/图标</div>
+          <div class="feature-item">📝 描述与标签</div>
+          <div class="feature-item">🎨 5种视觉变体</div>
+        </div>
+      </GlassDisplayCard>
+
+      <!-- 真实组件演示：GlassHeaderCard（替代旧说明卡片） -->
+      <GlassHeaderCard title="GlassHeaderCard" icon="💼">
+        <div class="feature-list simple">
+          <div class="feature-item">✅ 白色头部样式，信息层次清晰</div>
+          <div class="feature-item">🧩 headerActions 插槽：放置搜索、筛选、操作按钮</div>
+          <div class="feature-item">📦 与 Element Plus 卡片配合，适合面板/设置/项目页</div>
+          <div class="feature-item">📱 响应式：小屏头部纵向排列，内容区留白合理</div>
+        </div>
+        <div class="path-badge">
+          <span class="type-label">specialized/GlassHeaderCard.vue</span>
+        </div>
+        <template #headerActions>
+          <button class="demo-btn" style="font-size: 12px">操作</button>
+        </template>
+      </GlassHeaderCard>
+
+      <!-- Showcase 展示层 -->
+      <GlassDisplayCard
+        title="CardShowcase"
+        subtitle="showcase/CardShowcase.vue"
+        icon="🎪"
+        variant="minimal"
+        description="文档/设计系统中的展示容器，与网格组合统一排版。"
+      >
+        <div class="showcase-demo">
+          <div class="showcase-header">
+            <div class="demo-title">示例标题</div>
+            <div class="demo-desc">示例描述</div>
+          </div>
+          <div class="showcase-grid">
+            <div class="showcase-item">A</div>
+            <div class="showcase-item">B</div>
+            <div class="showcase-item">C</div>
+          </div>
+        </div>
+      </GlassDisplayCard>
+    </CardShowcase>
+
+    <!-- 按钮组件系列展示 -->
+    <CardShowcase
+      id="buttons"
+      title="🔘 现代按钮组件系列"
+      description="完整的按钮组件系统，支持多种类型、尺寸、状态和交互效果，确保一致的用户体验"
+      layout="fixed-2"
+    >
+      <!-- 语义化按钮 -->
+      <GlassDisplayCard
+        title="语义化按钮系统"
+        subtitle="Semantic Button Types"
+        icon="🎨"
+        variant="display"
+        description="基于语义的按钮类型系统，通过颜色和样式传达不同的操作意图。"
+        :tags="[
+          { text: '语义化', type: 'primary' },
+          { text: '一致性', type: 'success' },
+        ]"
+      >
+        <div class="button-showcase">
           <div class="button-row">
-            <ModernButton text="主要按钮" type="primary" />
-            <ModernButton text="次要按钮" type="secondary" />
-            <ModernButton text="成功按钮" type="success" />
-            <ModernButton text="警告按钮" type="warning" />
-            <ModernButton text="危险按钮" type="danger" />
+            <ModernButton text="主要" type="primary" size="small" />
+            <ModernButton text="次要" type="secondary" size="small" />
+            <ModernButton text="成功" type="success" size="small" />
+            <ModernButton text="警告" type="warning" size="small" />
+            <ModernButton text="危险" type="danger" size="small" />
+            <!-- 新体系按钮（示例） -->
+            <PrimaryButton label="新-主要" size="sm" />
+            <OutlineButton label="新-描边" color="info" size="sm" />
           </div>
         </div>
-        
-        <div class="button-group">
-          <h4>按钮尺寸</h4>
+        <div class="button-features">
+          <div class="feature-item">✅ 5种语义类型</div>
+          <div class="feature-item">🎯 明确的操作意图</div>
+          <div class="feature-item">🌈 统一的色彩语言</div>
+        </div>
+      </GlassDisplayCard>
+
+      <!-- 尺寸和状态 -->
+      <GlassDisplayCard
+        title="尺寸与状态系统"
+        subtitle="Size & State Management"
+        icon="📐"
+        variant="enhanced"
+        description="完整的按钮尺寸和状态管理系统，适应不同场景下的使用需求。"
+        :tags="[
+          { text: '多尺寸', type: 'info' },
+          { text: '状态管理', type: 'warning' },
+        ]"
+      >
+        <div class="size-states-demo">
+          <div class="size-group">
+            <h5 style="color: white; margin: 0 0 8px 0; font-size: 12px">尺寸系统</h5>
+            <div class="button-row">
+              <ModernButton text="小" type="primary" size="small" />
+              <ModernButton text="中" type="primary" size="medium" />
+              <ModernButton text="大" type="primary" size="large" />
+            </div>
+          </div>
+          <div class="state-group">
+            <h5 style="color: white; margin: 12px 0 8px 0; font-size: 12px">状态系统</h5>
+            <div class="button-row">
+              <ModernButton text="正常" type="primary" size="small" />
+              <ModernButton text="禁用" type="primary" size="small" :disabled="true" />
+              <ModernButton text="加载" type="primary" size="small" :loading="true" />
+            </div>
+          </div>
+        </div>
+      </GlassDisplayCard>
+
+      <!-- 图标按钮 -->
+      <GlassDisplayCard
+        title="图标与交互增强"
+        subtitle="Icon & Interaction Enhancement"
+        icon="⚡"
+        variant="content"
+        description="支持图标的按钮组件，提供更丰富的视觉信息和更好的用户体验。"
+        :tags="[
+          { text: '图标支持', type: 'secondary' },
+          { text: '交互增强', type: 'primary' },
+        ]"
+      >
+        <div class="icon-buttons-demo">
           <div class="button-row">
-            <ModernButton text="小按钮" type="primary" size="small" />
-            <ModernButton text="标准按钮" type="primary" size="medium" />
-            <ModernButton text="大按钮" type="primary" size="large" />
+            <ModernButton text="添加" type="primary" icon-left="➕" size="small" />
+            <ModernButton text="确认" type="success" icon-left="✅" size="small" />
+            <ModernButton text="删除" type="danger" icon-left="🗑️" size="small" />
+          </div>
+          <div class="interaction-features">
+            <div class="feature-item">🖱️ 悬浮效果</div>
+            <div class="feature-item">🎭 点击反馈</div>
+            <div class="feature-item">⌨️ 键盘支持</div>
           </div>
         </div>
+      </GlassDisplayCard>
 
-        <div class="button-group">
-          <h4>带图标按钮</h4>
-          <div class="button-row">
-            <ModernButton text="添加内容" type="primary" icon-left="➕" />
-            <ModernButton text="确认操作" type="success" icon-left="✅" />
-            <ModernButton text="删除" type="danger" icon-left="🗑️" />
+      <!-- 按钮应用场景 -->
+      <GlassDisplayCard
+        title="应用场景与最佳实践"
+        subtitle="Use Cases & Best Practices"
+        icon="💡"
+        variant="minimal"
+        description="不同场景下的按钮应用指南和最佳实践建议。"
+        :tags="[
+          { text: '最佳实践', type: 'info' },
+          { text: '应用指南', type: 'success' },
+        ]"
+      >
+        <div class="use-cases">
+          <div class="case-item">
+            <div class="case-label">表单提交</div>
+            <ModernButton text="提交" type="primary" size="small" />
+          </div>
+          <div class="case-item">
+            <div class="case-label">操作确认</div>
+            <ModernButton text="确认" type="success" size="small" />
+          </div>
+          <div class="case-item">
+            <div class="case-label">危险操作</div>
+            <ModernButton text="删除" type="danger" size="small" />
+          </div>
+          <div class="case-item">
+            <div class="case-label">次要操作</div>
+            <ModernButton text="取消" type="secondary" size="small" />
           </div>
         </div>
+      </GlassDisplayCard>
+    </CardShowcase>
 
-        <div class="button-group">
-          <h4>按钮状态</h4>
-          <div class="button-row">
-            <ModernButton text="正常状态" type="primary" />
-            <ModernButton text="禁用状态" type="primary" :disabled="true" />
-            <ModernButton text="加载中..." type="primary" :loading="true" />
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 仪表板组件测试 -->
-    <div class="test-section" id="dashboard">
-      <h2 class="section-title">📊 仪表板组件测试</h2>
-      
-      <!-- 欢迎横幅测试 -->
-      <div class="welcome-banner">
-        <div class="banner-main">
-          <div>
-            <h1 class="welcome-title">欢迎使用设计系统</h1>
-            <p class="welcome-subtitle">体验现代化的Glassmorphism风格界面</p>
-          </div>
-        </div>
-        <div class="today-overview">
-          <div class="overview-item">
-            <span class="overview-icon">📈</span>
-            <div>
-              <div class="overview-value">156</div>
-              <div class="overview-label">组件数量</div>
-            </div>
-          </div>
-          <div class="overview-item">
-            <span class="overview-icon">🎨</span>
-            <div>
-              <div class="overview-value">42</div>
-              <div class="overview-label">设计变量</div>
-            </div>
-          </div>
-          <div class="overview-item">
-            <span class="overview-icon">⚡</span>
-            <div>
-              <div class="overview-value">8</div>
-              <div class="overview-label">动画效果</div>
-            </div>
-          </div>
-          <div class="overview-item">
-            <span class="overview-icon">📱</span>
-            <div>
-              <div class="overview-value">100%</div>
-              <div class="overview-label">响应式</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 调试卡片测试 -->
-      <div class="debug-cards">
-        <div class="content-card debug-demo-card">
-          <div class="demo-card-header">
-            <div class="demo-header-left">
-              <div class="demo-icon-wrapper">
-                <i class="demo-icon">🔧</i>
-              </div>
-              <div class="demo-header-text">
-                <h3>系统状态</h3>
-                <p>实时监控组件运行状态</p>
-              </div>
-            </div>
-          </div>
-          <div class="demo-card-content">
-            <div class="status-grid">
-              <div class="status-item">
-                <label>设计系统版本</label>
-                <span class="tag-glass tag-success">v2.1.0</span>
-              </div>
-              <div class="status-item">
-                <label>组件库状态</label>
-                <span class="tag-glass tag-success">正常</span>
-              </div>
-              <div class="status-item">
-                <label>样式文件大小</label>
-                <span class="tag-glass tag-primary">15.8KB</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="content-card debug-demo-card">
-          <div class="demo-card-header">
-            <div class="demo-header-left">
-              <div class="demo-icon-wrapper">
-                <i class="demo-icon">📊</i>
-              </div>
-              <div class="demo-header-text">
-                <h3>性能指标</h3>
-                <p>设计系统性能监控</p>
-              </div>
-            </div>
-          </div>
-          <div class="demo-card-content">
-            <div class="performance-metrics">
-              <div class="metric-item">
-                <label>CSS变量数量</label>
-                <div class="progress-glass" style="height: 8px;">
-                  <div class="progress-bar" style="width: 85%;"></div>
-                </div>
-                <span class="metric-value">42/50</span>
-              </div>
-              <div class="metric-item">
-                <label>组件复用率</label>
-                <div class="progress-glass" style="height: 8px;">
-                  <div class="progress-bar" style="width: 92%;"></div>
-                </div>
-                <span class="metric-value">92%</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 表单组件测试 -->
-    <div class="test-section" id="forms">
-      <h2 class="section-title">📝 表单组件测试</h2>
-      <div class="forms-demo">
-        <div class="form-glass">
-          <h3>登录表单示例</h3>
+    <!-- 表单输入组件系列展示 -->
+    <CardShowcase
+      id="forms"
+      title="📝 表单输入组件系列"
+      description="完整的表单输入组件系统，提供优雅的用户输入体验和强大的验证功能"
+      layout="fixed-2"
+    >
+      <!-- 基础输入组件 -->
+      <GlassDisplayCard
+        title="基础输入组件"
+        subtitle="Form Input Basics"
+        icon="✏️"
+        variant="display"
+        description="支持多种输入类型的基础表单组件，提供统一的样式和交互体验。"
+        :tags="[
+          { text: '基础组件', type: 'primary' },
+          { text: '多类型', type: 'info' },
+        ]"
+      >
+        <div class="form-showcase">
+          <FormInput v-model="formData.username" label="用户名" placeholder="请输入用户名" />
           <FormInput
-            label="用户名"
-            placeholder="请输入用户名"
-            model-value="demo@example.com"
-            icon-left="👤"
+            v-model="formData.email"
+            label="邮箱地址"
+            type="email"
+            placeholder="请输入邮箱地址"
           />
           <FormInput
+            v-model="formData.password"
             label="密码"
             type="password"
             placeholder="请输入密码"
-            model-value="••••••••"
-            icon-left="🔒"
           />
-          <div class="form-field">
-            <div class="checkbox-group">
-              <input type="checkbox" id="remember" checked>
-              <label for="remember">7天内自动登录</label>
-            </div>
-          </div>
-          <div class="form-actions">
-            <ModernButton text="登录" type="primary" size="large" />
-            <ModernButton text="忘记密码" type="secondary" />
-          </div>
         </div>
+      </GlassDisplayCard>
 
-        <div class="form-glass">
-          <h3>注册表单示例</h3>
+      <!-- 输入状态管理 -->
+      <GlassDisplayCard
+        title="状态与验证系统"
+        subtitle="State & Validation"
+        icon="🔍"
+        variant="enhanced"
+        description="完善的输入状态管理和验证反馈系统，提供即时的用户反馈。"
+        :tags="[
+          { text: '状态管理', type: 'warning' },
+          { text: '验证反馈', type: 'success' },
+        ]"
+      >
+        <div class="form-showcase">
           <FormInput
-            label="邮箱地址"
-            type="email"
-            placeholder="example@domain.com"
-            icon-left="📧"
-            help-text="我们将向此邮箱发送验证信息"
+            v-model="formData.success"
+            label="成功状态"
+            placeholder="验证成功"
+            status="success"
           />
           <FormInput
-            label="手机号码"
-            type="tel"
-            placeholder="13800138000"
-            icon-left="📱"
-            :required="true"
+            v-model="formData.error"
+            label="错误状态"
+            placeholder="验证失败"
+            status="error"
+            error="用户名已存在"
           />
-          <div class="form-field">
-            <label>用户类型</label>
-            <select class="input-glass">
-              <option>学生</option>
-              <option>教练</option>
-              <option>管理员</option>
-            </select>
+          <FormInput v-model="formData.disabled" label="禁用状态" placeholder="不可编辑" disabled />
+        </div>
+      </GlassDisplayCard>
+    </CardShowcase>
+
+    <!-- 状态与反馈组件系列展示 -->
+    <CardShowcase
+      id="feedback"
+      title="💬 状态与反馈组件系列"
+      description="丰富的状态展示和用户反馈组件，提供清晰的信息传达和良好的用户体验"
+      layout="fixed-2"
+    >
+      <!-- 状态展示组件 -->
+      <GlassDisplayCard
+        title="状态网格展示"
+        subtitle="Status Grid System"
+        icon="📊"
+        variant="display"
+        description="系统化的状态展示组件，支持多种状态类型和实时数据更新。"
+        :tags="[
+          { text: '状态展示', type: 'info' },
+          { text: '实时更新', type: 'success' },
+        ]"
+      >
+        <StatusGrid :status="systemStatus" />
+      </GlassDisplayCard>
+
+      <!-- 标签徽章系统 -->
+      <GlassDisplayCard
+        title="标签徽章系统"
+        subtitle="Tag Badge Components"
+        icon="🏷️"
+        variant="enhanced"
+        description="灵活的标签徽章组件，支持多种样式和状态，适用于分类、状态标记等场景。"
+        :tags="[
+          { text: '标签系统', type: 'secondary' },
+          { text: '多样式', type: 'primary' },
+        ]"
+      >
+        <div class="badge-showcase">
+          <div class="badge-row">
+            <TagBadge variant="primary">主要标签</TagBadge>
+            <TagBadge variant="success">成功标签</TagBadge>
+            <TagBadge variant="warning">警告标签</TagBadge>
+            <TagBadge variant="danger">危险标签</TagBadge>
           </div>
-          <div class="form-field">
-            <label>个人简介</label>
-            <textarea class="input-glass" rows="3" placeholder="请简单介绍一下自己..."></textarea>
-          </div>
-          <div class="form-actions">
-            <ModernButton text="注册" type="success" size="large" />
-            <ModernButton text="清空" type="secondary" />
+          <div class="badge-row">
+            <TagBadge variant="info">信息标签</TagBadge>
+            <TagBadge variant="default">默认标签</TagBadge>
           </div>
         </div>
-      </div>
-    </div>
+      </GlassDisplayCard>
+    </CardShowcase>
 
-    <!-- 反馈组件测试 -->
-    <div class="test-section" id="feedback">
-      <h2 class="section-title">💬 反馈组件测试</h2>
-      
-      <!-- 标签测试 -->
-      <div class="feedback-demo">
-        <div class="content-card">
-          <h4>状态标签</h4>
-          <div class="tags-container">
-            <TagBadge text="主要" type="primary" />
-            <TagBadge text="成功" type="success" />
-            <TagBadge text="警告" type="warning" />
-            <TagBadge text="危险" type="danger" />
-            <TagBadge text="信息" type="info" />
-            <TagBadge text="次要" type="secondary" />
-          </div>
-        </div>
-        
-        <div class="content-card">
-          <h4>带图标标签</h4>
-          <div class="tags-container">
-            <TagBadge text="新功能" type="primary" icon-left="✨" />
-            <TagBadge text="已完成" type="success" icon-left="✅" />
-            <TagBadge text="待处理" type="warning" icon-left="⏳" />
-            <TagBadge text="可关闭" type="info" :closable="true" />
-          </div>
-        </div>
+    <!-- 工具与辅助组件系列展示 -->
+    <CardShowcase
+      id="utilities"
+      title="🔧 工具与辅助组件系列"
+      description="实用的工具和辅助组件，提供完整的开发和用户体验支持"
+      layout="fixed-2"
+    >
+      <!-- 存储信息组件 -->
+      <GlassDisplayCard
+        title="存储信息管理"
+        subtitle="Storage Management"
+        icon="💾"
+        variant="display"
+        description="本地存储管理组件，提供Token、用户信息等重要数据的可视化管理。"
+        :tags="[
+          { text: '存储管理', type: 'info' },
+          { text: '数据可视化', type: 'success' },
+        ]"
+      >
+        <StorageInfo :storage-items="storageItems" />
+      </GlassDisplayCard>
 
-        <div class="content-card">
-          <h4>进度条展示</h4>
-          <div class="progress-demo">
-            <div class="progress-item">
-              <div class="progress-header">
-                <label>项目进度</label>
-                <span class="progress-text">75%</span>
-              </div>
-              <div class="progress-glass" style="height: 12px;">
-                <div class="progress-bar" style="width: 75%;"></div>
-              </div>
-            </div>
-            
-            <div class="progress-item">
-              <div class="progress-header">
-                <label>设计完成度</label>
-                <span class="progress-text">90%</span>
-              </div>
-              <div class="progress-glass" style="height: 12px;">
-                <div class="progress-bar" style="width: 90%;"></div>
-              </div>
-            </div>
-            
-            <div class="progress-item">
-              <div class="progress-header">
-                <label>功能实现</label>
-                <span class="progress-text">60%</span>
-              </div>
-              <div class="progress-glass" style="height: 12px;">
-                <div class="progress-bar" style="width: 60%;"></div>
-              </div>
-            </div>
-          </div>
-        </div>
+      <!-- 操作按钮组件 -->
+      <GlassDisplayCard
+        title="操作按钮组合"
+        subtitle="Action Button Groups"
+        icon="⚡"
+        variant="enhanced"
+        description="预定义的操作按钮组合，支持调试、清理、导出等常用操作。"
+        :tags="[
+          { text: '操作组合', type: 'warning' },
+          { text: '快捷功能', type: 'primary' },
+        ]"
+      >
+        <ActionButtons :actions="debugActions" />
+      </GlassDisplayCard>
+    </CardShowcase>
 
-        <div class="content-card">
-          <h4>通知消息</h4>
-          <div class="notification-demo">
-            <div class="notification success">
-              <span class="notification-icon">✅</span>
-              <div class="notification-content">
-                <strong>操作成功</strong>
-                <p>设计系统组件已成功加载</p>
-              </div>
-            </div>
-            
-            <div class="notification warning">
-              <span class="notification-icon">⚠️</span>
-              <div class="notification-content">
-                <strong>注意事项</strong>
-                <p>某些旧版浏览器可能不支持backdrop-filter</p>
-              </div>
-            </div>
-            
-            <div class="notification info">
-              <span class="notification-icon">ℹ️</span>
-              <div class="notification-content">
-                <strong>信息提示</strong>
-                <p>建议使用Chrome、Firefox或Safari浏览器</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 通用玻璃卡片组件展示 -->
-    <div class="component-showcase" id="development">
-      <h2 class="section-title">🛠️ 通用玻璃卡片组件系列</h2>
-      <p class="section-description">
-        基于Glassmorphism设计的通用卡片组件，提供完整的布局和样式解决方案，适用于各种场景
-      </p>
-      
-      <GlassCardsGrid>
-        <!-- 用户状态展示卡片 -->
-        <GlassCardWithHeader 
-          title="用户状态信息" 
-          icon="👤" 
-          type="primary"
-        >
-          <StatusGrid :items="userStatusItems" />
-        </GlassCardWithHeader>
-
-        <!-- 系统环境信息卡片 -->
-        <GlassCardWithHeader 
-          title="系统环境信息" 
-          icon="💻" 
-          type="info"
-        >
-          <StatusGrid :items="systemEnvItems" />
-        </GlassCardWithHeader>
-
-        <!-- 本地存储信息卡片 -->
-        <GlassCardWithHeader 
-          title="本地存储信息" 
-          icon="💾" 
-          type="warning"
-        >
-          <GlassCardBody type="form">
-            <StorageInfo :items="storageItems" />
-          </GlassCardBody>
-        </GlassCardWithHeader>
-
-        <!-- 权限测试调试卡片 - 使用GlassCardWithHeader组件 -->
-        <GlassCardWithHeader 
-          title="权限测试 (GlassCardWithHeader)" 
-          icon="🔐"
-        >
-          <StatusGrid :items="permissionItems" />
-        </GlassCardWithHeader>
-
-        <!-- 权限测试调试卡片 - 原生结构对比 -->
-        <el-card class="glass-card-with-header" shadow="hover">
-          <template #header>
-            <div class="card-header">
-              <span class="card-icon">🔐</span>
-              <span>权限测试 (原生)</span>
-            </div>
-          </template>
-          <div class="permission-tests">
-            <div class="test-item">
-              <label>超级管理员权限:</label>
-              <el-tag type="info" size="small">无权限</el-tag>
-            </div>
-            <div class="test-item">
-              <label>校区管理员权限:</label>
-              <el-tag type="success" size="small">有权限</el-tag>
-            </div>
-            <div class="test-item">
-              <label>学员权限:</label>
-              <el-tag type="info" size="small">无权限</el-tag>
-            </div>
-            <div class="test-item">
-              <label>教练权限:</label>
-              <el-tag type="info" size="small">无权限</el-tag>
-            </div>
-          </div>
-        </el-card>
-
-        <!-- 操作工具调试卡片 -->
-        <GlassCardWithHeader 
-          title="开发工具" 
-          icon="⚡" 
-          type="success"
-        >
-          <ActionButtons 
-            :actions="debugActions" 
-            layout="grid" 
-            :columns="2"
-            @actionClick="handleDebugAction"
-          />
-        </GlassCardWithHeader>
-
-        <!-- 高级功能展示卡片 -->
-        <GlassCardWithHeader 
-          title="高级功能展示" 
-          icon="🔬" 
-          type="default"
-        >
-          <GlassCardBody type="grid">
-            <StatusGrid :items="advancedDebugItems" />
-            <div style="margin-top: 16px;">
-              <ActionButtons 
-                :actions="advancedActions" 
-                layout="horizontal"
-                @actionClick="handleAdvancedAction"
-              />
-            </div>
-          </GlassCardBody>
-        </GlassCardWithHeader>
-
-        <!-- 带操作区域的展示卡片 -->
-        <GlassCardWithHeader 
-          title="角色信息展示" 
-          icon="🎭" 
-          type="primary"
-        >
-          <template #actions>
-            <el-tag type="success" size="small">
-              展示模式
-            </el-tag>
-          </template>
-          <StatusGrid :items="roleStatusItems" />
-        </GlassCardWithHeader>
-      </GlassCardsGrid>
-      
-      <!-- 使用说明 -->
-      <div class="usage-note">
-        <h3>💡 使用说明</h3>
-        <p>这些玻璃卡片组件提供了完整的Glassmorphism设计体验，可以在任何场景下使用：</p>
-        <ul>
-          <li><strong>GlassCard</strong>：通用玻璃卡片容器，支持不同类型的头部主题</li>
-          <li><strong>StatusGrid</strong>：状态信息网格，支持标签、状态、文本等类型</li>
-          <li><strong>StorageInfo</strong>：存储信息展示，支持文本域、状态标签等</li>
-          <li><strong>ActionButtons</strong>：操作按钮组，支持水平、垂直、网格布局</li>
-          <li><strong>GlassCardBody</strong>：卡片内容容器，提供统一的布局样式</li>
-        </ul>
-      </div>
-    </div>
-
-    <!-- 动画效果测试 -->
-    <div class="test-section" id="animations">
-      <h2 class="section-title">⚡ 动画效果测试</h2>
-      <div class="animations-grid">
-        <DemoCard
-          title="光晕扫过效果"
-          subtitle=".shimmer-effect"
-          icon="💫"
-          description="这个卡片具有光晕扫过的动画效果，创造动态的视觉吸引力。"
-          type="glass"
-          extra-classes="shimmer-effect"
-          :tags="[
-            { text: '动画', type: 'primary' },
-            { text: '视觉效果', type: 'secondary' }
-          ]"
-        />
-        
-        <DemoCard
-          title="脉冲效果"
-          subtitle=".pulse-effect"
-          icon="💓"
-          description="这个卡片具有脉冲动画效果，适合需要吸引注意力的内容。"
-          type="glass"
-          extra-classes="pulse-effect"
-          :tags="[
-            { text: '脉冲', type: 'warning' },
-            { text: '交互', type: 'primary' }
-          ]"
-        />
-        
-        <DemoCard
-          title="悬浮效果"
-          subtitle=".hover-lift"
-          icon="🚀"
-          description="鼠标悬浮时这个卡片会上升，提供直观的交互反馈。"
-          type="glass"
-          extra-classes="hover-lift"
-          :tags="[
-            { text: '悬浮', type: 'success' },
-            { text: '反馈', type: 'secondary' }
-          ]"
-        />
-
-        <DemoCard
-          title="淡入上升"
-          subtitle=".fade-in-up"
-          icon="📈"
-          description="页面加载时的淡入上升动画，创造优雅的入场效果。"
-          type="glass"
-          extra-classes="fade-in-up"
-          :tags="[
-            { text: '淡入', type: 'info' },
-            { text: '入场', type: 'primary' }
-          ]"
-        />
-
-        <DemoCard
-          title="延迟动画"
-          subtitle=".fade-in-delay-1"
-          icon="⏰"
-          description="带有延迟的动画效果，可以创造层次感的动画序列。"
-          type="glass-enhanced"
-          extra-classes="fade-in-delay-1"
-          :tags="[
-            { text: '延迟', type: 'warning' },
-            { text: '层次', type: 'secondary' }
-          ]"
-        />
-
-        <DemoCard
-          title="组合动画"
-          subtitle=".slide-in-up.fade-in-delay-2"
-          icon="🎬"
-          description="多种动画效果的组合使用，创造丰富的视觉体验。"
-          type="glass"
-          extra-classes="slide-in-up fade-in-delay-2"
-          :tags="[
-            { text: '组合', type: 'primary' },
-            { text: '多效果', type: 'success' }
-          ]"
-        />
-      </div>
-    </div>
-
-    <!-- 工具类测试 -->
-    <div class="test-section" id="utilities">
-      <h2 class="section-title">🛠️ 工具类测试</h2>
-      <div class="utilities-demo">
-        <div class="content-card">
-          <h4>布局工具类</h4>
-          <div class="utility-examples">
-            <div class="flex flex-between mb-lg p-md rounded-lg" style="background: var(--white-alpha-10);">
-              <span class="text-white">flex-between</span>
-              <span class="text-white-80">两端对齐</span>
-            </div>
-            
-            <div class="flex flex-center mb-lg p-md rounded-lg" style="background: var(--white-alpha-10);">
-              <span class="text-white">flex-center (居中对齐)</span>
-            </div>
-            
-            <div class="flex flex-col mb-lg p-md rounded-lg" style="background: var(--white-alpha-10);">
-              <span class="text-white mb-sm">flex-col</span>
-              <span class="text-white-80">垂直排列</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="content-card">
-          <h4>间距工具类</h4>
-          <div class="utility-examples">
-            <div class="mb-lg">
-              <div class="p-xs rounded-md" style="background: var(--white-alpha-15);">
-                <span class="text-white text-sm">p-xs (4px)</span>
-              </div>
-            </div>
-            <div class="mb-lg">
-              <div class="p-md rounded-md" style="background: var(--white-alpha-15);">
-                <span class="text-white text-sm">p-md (12px)</span>
-              </div>
-            </div>
-            <div class="mb-lg">
-              <div class="p-lg rounded-md" style="background: var(--white-alpha-15);">
-                <span class="text-white text-sm">p-lg (16px)</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="content-card">
-          <h4>文本工具类</h4>
-          <div class="utility-examples">
-            <p class="text-white text-xs mb-sm">text-white text-xs (12px)</p>
-            <p class="text-white text-sm mb-sm">text-white text-sm (13px)</p>
-            <p class="text-white text-md mb-sm">text-white text-md (14px)</p>
-            <p class="text-white text-lg mb-sm">text-white text-lg (16px)</p>
-            <p class="text-white text-xl mb-sm">text-white text-xl (18px)</p>
-            <p class="text-white-80 text-md mb-sm">text-white-80 (80% 透明度)</p>
-            <p class="text-white font-bold text-md">text-white font-bold</p>
-          </div>
-        </div>
-
-        <div class="content-card">
-          <h4>视觉效果工具类</h4>
-          <div class="utility-examples">
-            <div class="mb-lg">
-              <div class="p-md rounded-sm shadow-sm" style="background: var(--white-alpha-15);">
-                <span class="text-white text-sm">rounded-sm shadow-sm</span>
-              </div>
-            </div>
-            <div class="mb-lg">
-              <div class="p-md rounded-lg shadow-md" style="background: var(--white-alpha-15);">
-                <span class="text-white text-sm">rounded-lg shadow-md</span>
-              </div>
-            </div>
-            <div class="mb-lg">
-              <div class="p-md rounded-xl shadow-lg" style="background: var(--white-alpha-15);">
-                <span class="text-white text-sm">rounded-xl shadow-lg</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 实际应用示例 -->
-    <div class="test-section">
-      <h2 class="section-title">💼 实际应用示例</h2>
-      <div class="application-examples">
-        <DemoCard
-          title="学生仪表盘预览"
-          subtitle="真实应用场景展示"
-          icon="👨‍🎓"
-          type="content"
-        >
-          <template #actions>
-            <router-link to="/dashboard" class="btn-modern btn-primary btn-small">查看完整版</router-link>
-          </template>
-          
-          <div class="mini-dashboard">
-            <div class="mini-welcome-banner">
-              <h4 class="welcome-title" style="font-size: var(--font-size-xl);">欢迎回来，张同学</h4>
-              <div class="today-overview" style="gap: var(--spacing-lg);">
-                <div class="overview-item">
-                  <span class="overview-icon">📅</span>
-                  <div>
-                    <div class="overview-value">3</div>
-                    <div class="overview-label">今日课程</div>
-                  </div>
-                </div>
-                <div class="overview-item">
-                  <span class="overview-icon">⏰</span>
-                  <div>
-                    <div class="overview-value">2</div>
-                    <div class="overview-label">待完成</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </DemoCard>
-
-        <DemoCard
-          title="登录页面预览"
-          subtitle="认证界面应用示例"
-          icon="🔐"
-          type="content"
-        >
-          <template #actions>
-            <router-link to="/login" class="btn-modern btn-primary btn-small">查看完整版</router-link>
-          </template>
-          
-          <div class="mini-login">
-            <div class="form-glass" style="max-width: 300px; margin: 0 auto;">
-              <h4 style="color: white; text-align: center; margin-bottom: var(--spacing-lg);">系统登录</h4>
-              <FormInput
-                placeholder="用户名"
-                icon-left="👤"
-                style="margin-bottom: var(--spacing-md);"
-              />
-              <FormInput
-                type="password"
-                placeholder="密码"
-                icon-left="🔒"
-                style="margin-bottom: var(--spacing-lg);"
-              />
-              <ModernButton text="登录" type="primary" :block="true" />
-            </div>
-          </div>
-        </DemoCard>
-      </div>
-    </div>
-
-    <!-- 页面底部 -->
-    <div class="page-footer-section">
-      <div class="page-footer-text">
-        🎨 设计系统测试完成 - 基于 Glassmorphism 设计理念
-      </div>
-      <div class="page-footer-links">
-        <router-link to="/navigation-test">
-          <ModernButton text="返回导航" type="secondary" size="small" />
-        </router-link>
-        <router-link to="/dashboard">
-          <ModernButton text="查看仪表盘" type="primary" size="small" />
-        </router-link>
-      </div>
+    <!-- 使用说明 -->
+    <div class="usage-note">
+      <h3>🚀 设计系统使用指南</h3>
+      <p>本设计系统采用现代化的Glassmorphism风格，为乒乓球训练系统提供统一、优雅的用户界面。</p>
+      <ul>
+        <li>
+          <strong>统一的卡片系统：</strong>基于GlassCardBase的统一卡片组件，支持多种变体和样式
+        </li>
+        <li><strong>现代按钮组件：</strong>支持多种类型、尺寸和状态的按钮系统</li>
+        <li><strong>完整的表单组件：</strong>包含输入框、状态管理和验证反馈</li>
+        <li><strong>丰富的反馈组件：</strong>状态展示、标签徽章等用户反馈组件</li>
+        <li><strong>实用的工具组件：</strong>存储管理、操作按钮等开发辅助工具</li>
+        <li><strong>响应式设计：</strong>完全适配桌面端、平板端和移动端设备</li>
+      </ul>
     </div>
   </div>
 </template>
 
 <script>
-import GlassDisplayCard from '@/components/GlassDisplayCard.vue'
+import { GlassDisplayCard, CardShowcase, GlassHeaderCard } from '@/components/cards'
 import ModernButton from '@/components/ModernButton.vue'
 import FormInput from '@/components/FormInput.vue'
 import TagBadge from '@/components/TagBadge.vue'
-import GlassCardWithHeader from '@/components/GlassCardWithHeader.vue'
 import StatusGrid from '@/components/StatusGrid.vue'
 import StorageInfo from '@/components/StorageInfo.vue'
 import ActionButtons from '@/components/ActionButtons.vue'
-import GlassCard from '@/components/GlassCard.vue'
-import GlassCardsGrid from '@/components/GlassCardsGrid.vue'
-import GlassCardBody from '@/components/GlassCardBody.vue'
+// 新按钮体系（示例导入，不强制使用）
+import { PrimaryButton, OutlineButton } from '@/components/buttons'
 
 export default {
   name: 'DesignLanguageShowcase',
   components: {
     GlassDisplayCard,
-    DemoCard: GlassDisplayCard, // 使用别名支持旧的组件名
+    GlassHeaderCard,
+    CardShowcase,
     ModernButton,
     FormInput,
     TagBadge,
-    GlassCardWithHeader,
     StatusGrid,
     StorageInfo,
     ActionButtons,
-    GlassCard,
-    GlassCardsGrid,
-    GlassCardBody
+    PrimaryButton,
+    OutlineButton,
   },
   data() {
     return {
+      // 表单数据
+      formData: {
+        username: '',
+        email: '',
+        password: '',
+        success: '验证成功的输入',
+        error: '错误的输入',
+        disabled: '这是禁用的输入',
+      },
+
+      // 系统状态数据
+      systemStatus: [
+        {
+          label: '系统状态',
+          type: 'status',
+          status: true,
+          trueText: '运行中',
+          falseText: '已停止',
+        },
+        {
+          label: '数据库连接',
+          type: 'status',
+          status: true,
+          trueText: '已连接',
+          falseText: '连接失败',
+        },
+        {
+          label: 'API服务',
+          type: 'status',
+          status: true,
+          trueText: '正常',
+          falseText: '异常',
+        },
+        {
+          label: '缓存服务',
+          type: 'status',
+          status: false,
+          trueText: '可用',
+          falseText: '不可用',
+        },
+      ],
+
       // 用户状态测试数据
       userStatusItems: [
-        { label: '登录状态', type: 'status', status: true, trueText: '已登录', falseText: '未登录' },
+        {
+          label: '登录状态',
+          type: 'status',
+          status: true,
+          trueText: '已登录',
+          falseText: '未登录',
+        },
         { label: '用户角色', type: 'tag', value: '开发者', tagType: 'primary' },
         { label: '用户名', value: 'admin@example.com' },
         { label: '用户ID', value: '12345' },
-        { label: '校区ID', value: 'campus-001' }
+        { label: '校区ID', value: 'campus-001' },
       ],
-      
+
       // 系统环境测试数据
       systemEnvItems: [
         { label: '浏览器', type: 'tag', value: 'Chrome 119', tagType: 'info' },
         { label: '视口大小', value: '1920x1080' },
         { label: '在线状态', type: 'status', status: true, trueText: '在线', falseText: '离线' },
         { label: 'Cookie启用', type: 'status', status: true, trueText: '启用', falseText: '禁用' },
-        { label: '本地存储', type: 'status', status: true, trueText: '可用', falseText: '不可用' }
+        { label: '本地存储', type: 'status', status: true, trueText: '可用', falseText: '不可用' },
       ],
-      
+
       // 权限测试数据
       permissionItems: [
-        { label: '超级管理员', type: 'status', status: false, trueText: '有权限', falseText: '无权限' },
-        { label: '校区管理员', type: 'status', status: true, trueText: '有权限', falseText: '无权限' },
-        { label: '学员权限', type: 'status', status: false, trueText: '有权限', falseText: '无权限' },
-        { label: '教练权限', type: 'status', status: false, trueText: '有权限', falseText: '无权限' }
+        {
+          label: '超级管理员',
+          type: 'status',
+          status: false,
+          trueText: '有权限',
+          falseText: '无权限',
+        },
+        {
+          label: '校区管理员',
+          type: 'status',
+          status: true,
+          trueText: '有权限',
+          falseText: '无权限',
+        },
+        {
+          label: '学员权限',
+          type: 'status',
+          status: false,
+          trueText: '有权限',
+          falseText: '无权限',
+        },
+        {
+          label: '教练权限',
+          type: 'status',
+          status: false,
+          trueText: '有权限',
+          falseText: '无权限',
+        },
       ],
 
       // 本地存储数据
       storageItems: [
-        { 
-          label: 'Token存储', 
-          type: 'status', 
-          status: true, 
-          trueText: '已设置', 
-          falseText: '未设置' 
+        {
+          label: 'Token存储',
+          type: 'status',
+          status: true,
+          trueText: '已设置',
+          falseText: '未设置',
         },
-        { 
-          label: 'Token值', 
-          type: 'textarea', 
-          value: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
+        {
+          label: 'Token值',
+          type: 'textarea',
+          value:
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
           placeholder: 'Token内容',
-          rows: 3
+          rows: 3,
         },
-        { 
-          label: '用户信息', 
-          type: 'textarea', 
-          value: JSON.stringify({
-            id: 1,
-            username: 'demo_user',
-            role: 'student',
-            campus_id: 1,
-            email: 'demo@example.com'
-          }, null, 2),
+        {
+          label: '用户信息',
+          type: 'textarea',
+          value: JSON.stringify(
+            {
+              id: 1,
+              username: 'demo_user',
+              role: 'student',
+              campus_id: 1,
+              email: 'demo@example.com',
+            },
+            null,
+            2,
+          ),
           placeholder: '用户信息JSON',
-          rows: 6
-        }
+          rows: 6,
+        },
       ],
-      
+
       // 调试操作按钮
       debugActions: [
         { text: '刷新数据', type: 'primary', action: 'refresh' },
         { text: '重置状态', type: 'warning', action: 'reset' },
         { text: '导出报告', type: 'info', action: 'export' },
-        { text: '清理缓存', type: 'danger', action: 'clear' }
+        { text: '清理缓存', type: 'danger', action: 'clear' },
       ],
 
       // 高级调试数据
@@ -986,102 +728,151 @@ export default {
         { label: 'CPU使用率', value: '45%', type: 'tag', tagType: 'warning' },
         { label: '内存占用', value: '2.3GB', type: 'tag', tagType: 'info' },
         { label: '网络状态', type: 'status', status: true, trueText: '正常', falseText: '异常' },
-        { label: '缓存大小', value: '156MB', type: 'text' }
+        { label: '缓存大小', value: '156MB', type: 'text' },
       ],
 
       // 高级操作按钮
       advancedActions: [
         { text: '性能分析', type: 'info', action: 'performance' },
         { text: '内存检测', type: 'warning', action: 'memory' },
-        { text: '网络监控', type: 'success', action: 'network' }
+        { text: '网络监控', type: 'success', action: 'network' },
       ],
 
       // 角色状态数据
       roleStatusItems: [
         { label: '当前角色', value: '开发者', type: 'tag', tagType: 'primary' },
         { label: '权限级别', value: '超级管理员', type: 'tag', tagType: 'danger' },
-        { label: '登录状态', type: 'status', status: true, trueText: '已认证', falseText: '未认证' },
-        { label: '会话时长', value: '2小时30分', type: 'text' }
-      ]
+        {
+          label: '登录状态',
+          type: 'status',
+          status: true,
+          trueText: '已认证',
+          falseText: '未认证',
+        },
+        { label: '会话时长', value: '2小时30分', type: 'text' },
+      ],
     }
   },
   methods: {
     handleDebugAction({ action }) {
-      console.log('调试操作:', action.action, action.text);
+      console.log('调试操作:', action.action, action.text)
       // 这里可以添加具体的调试操作逻辑
       switch (action.action) {
         case 'refresh':
-          this.refreshDebugData();
-          break;
+          this.refreshDebugData()
+          break
         case 'reset':
-          this.resetDebugStatus();
-          break;
+          this.resetDebugStatus()
+          break
         case 'export':
-          this.exportDebugReport();
-          break;
+          this.exportDebugReport()
+          break
         case 'clear':
-          this.clearDebugCache();
-          break;
+          this.clearDebugCache()
+          break
       }
     },
-    
+
     refreshDebugData() {
       // 模拟刷新数据
-      console.log('刷新调试数据');
+      console.log('刷新调试数据')
     },
-    
+
     resetDebugStatus() {
       // 模拟重置状态
-      console.log('重置调试状态');
+      console.log('重置调试状态')
     },
-    
+
     exportDebugReport() {
       // 模拟导出报告
-      console.log('导出调试报告');
+      console.log('导出调试报告')
     },
-    
+
     clearDebugCache() {
       // 模拟清理缓存
-      console.log('清理调试缓存');
+      console.log('清理调试缓存')
     },
 
     handleAdvancedAction({ action }) {
-      console.log('高级调试操作:', action.action, action.text);
+      console.log('高级调试操作:', action.action, action.text)
       // 高级调试操作逻辑
       switch (action.action) {
         case 'performance':
-          this.performanceAnalysis();
-          break;
+          this.performanceAnalysis()
+          break
         case 'memory':
-          this.memoryDetection();
-          break;
+          this.memoryDetection()
+          break
         case 'network':
-          this.networkMonitoring();
-          break;
+          this.networkMonitoring()
+          break
         default:
-          console.log('未知高级操作:', action.action);
+          console.log('未知高级操作:', action.action)
       }
     },
 
     performanceAnalysis() {
-      console.log('开始性能分析...');
+      console.log('开始性能分析...')
       // 模拟性能分析逻辑
     },
 
     memoryDetection() {
-      console.log('检测内存使用情况...');
+      console.log('检测内存使用情况...')
       // 模拟内存检测逻辑
     },
 
     networkMonitoring() {
-      console.log('监控网络请求...');
+      console.log('监控网络请求...')
       // 模拟网络监控逻辑
-    }
-  }
+    },
+  },
 }
 </script>
 
 <style scoped>
+/* 卡片系列展示样式（保留在用的简单徽章/路径） */
+.type-label {
+  background: var(--white-alpha-15);
+  color: white;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-family: 'Courier New', monospace;
+}
+
+.path-badge {
+  margin-top: var(--spacing-xs);
+}
+
+/* 按钮展示样式 */
+.button-showcase,
+.size-states-demo,
+.icon-buttons-demo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.button-row {
+  display: flex;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.button-features,
+.interaction-features {
+  margin-top: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+/* 通用特性列表条目（统一定义见文件靠后处）保留后面的定义，这里删除重复项 */
+
+/* 响应式调整：按钮行等在后文已有更细致规则，这里去除过期项 */
+
+/* 原有样式 */
 /* 设计语言样板间主体样式 */
 .design-language-showcase {
   min-height: 100vh;
@@ -1094,17 +885,20 @@ export default {
 
 /* Hero区域样式 */
 .design-language-hero {
-  background: linear-gradient(135deg, 
-    rgba(102, 126, 234, 0.15) 0%, 
-    rgba(118, 75, 162, 0.15) 50%, 
-    rgba(240, 147, 251, 0.15) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(102, 126, 234, 0.15) 0%,
+    rgba(118, 75, 162, 0.15) 50%,
+    rgba(240, 147, 251, 0.15) 100%
+  );
   backdrop-filter: var(--blur-xl);
   border-bottom: 1px solid var(--white-alpha-20);
   padding: var(--spacing-5xl) 0 var(--spacing-4xl) 0;
   text-align: center;
   position: relative;
   overflow: hidden;
-  margin: calc(-1 * var(--spacing-2xl)) calc(-1 * var(--spacing-2xl)) var(--spacing-2xl) calc(-1 * var(--spacing-2xl));
+  margin: calc(-1 * var(--spacing-2xl)) calc(-1 * var(--spacing-2xl)) var(--spacing-2xl)
+    calc(-1 * var(--spacing-2xl));
 }
 
 .design-language-hero::before {
@@ -1343,545 +1137,11 @@ export default {
   font-family: 'Courier New', monospace;
 }
 
-/* 组件展示区域 */
-.component-showcase {
-  padding: var(--spacing-3xl) var(--spacing-2xl);
-  max-width: 1400px;
-  margin: 0 auto;
-  text-align: center;
-}
+/* 组件展示区域（旧版）样式已移除 */
 
-.component-showcase h2 {
-  color: white;
-  font-size: var(--font-size-3xl);
-  font-weight: var(--font-weight-bold);
-  margin: 0 0 var(--spacing-xl) 0;
-  text-shadow: 0 2px 4px var(--black-alpha-30);
-}
+/* 旧 demo 类（demo-features/feature-tag/demo-preview/demo-content/status-items/status-item）已移除 */
 
-.showcase-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  gap: var(--spacing-2xl);
-  margin-top: var(--spacing-2xl);
-  padding: 0 var(--spacing-2xl);
-}
-
-.component-demo {
-  background: var(--white-alpha-10);
-  border-radius: var(--radius-md);
-  padding: var(--spacing-lg);
-  border: 1px solid var(--white-alpha-15);
-}
-
-.demo-features {
-  display: flex;
-  gap: var(--spacing-sm);
-  flex-wrap: wrap;
-  margin-top: var(--spacing-md);
-}
-
-.feature-tag {
-  background: var(--white-alpha-20);
-  color: white;
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: var(--radius-sm);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-}
-
-.demo-preview {
-  background: var(--white-alpha-05);
-  border-radius: var(--radius-md);
-  padding: var(--spacing-lg);
-  border: 1px dashed var(--white-alpha-20);
-}
-
-.demo-content {
-  color: var(--white-alpha-85);
-}
-
-.status-items {
-  margin-top: var(--spacing-md);
-}
-
-.status-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--spacing-sm);
-  background: var(--white-alpha-10);
-  border-radius: var(--radius-sm);
-}
-
-/* 原有样式清理 - 移除旧的测试部分 */
-.design-system-test {
-  display: none; /* 隐藏旧的测试内容 */
-}
-
-.test-section {
-  margin-bottom: var(--spacing-3xl);
-  scroll-margin-top: var(--spacing-2xl);
-}
-
-.section-title {
-  color: white;
-  margin-bottom: var(--spacing-xl);
-  font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-bold);
-  text-shadow: 0 2px 4px var(--black-alpha-30);
-  padding: 0 var(--spacing-2xl);
-}
-
-.section-description {
-  color: var(--white-alpha-80);
-  font-size: var(--font-size-md);
-  line-height: 1.6;
-  margin-bottom: var(--spacing-2xl);
-  text-align: center;
-  max-width: 800px;
-  margin-left: auto;
-  margin-right: auto;
-  padding: 0 var(--spacing-2xl);
-}
-
-/* 快速导航 */
-.quick-nav {
-  display: flex;
-  gap: var(--spacing-md);
-  flex-wrap: wrap;
-  margin-bottom: var(--spacing-xl);
-  padding: 0 var(--spacing-2xl);
-}
-
-.nav-link {
-  text-decoration: none;
-  transition: var(--transition-normal);
-}
-
-.nav-link:hover {
-  transform: translateY(-2px);
-}
-
-/* 卡片网格 */
-.cards-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: var(--spacing-xl);
-  margin-bottom: var(--spacing-2xl);
-  padding: 0 var(--spacing-2xl);
-}
-
-/* 卡片演示专用样式 */
-.card-demo {
-  padding: var(--spacing-xl) !important;
-}
-
-.demo-card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: var(--spacing-lg);
-  padding-bottom: var(--spacing-md);
-  border-bottom: 1px solid var(--white-alpha-15);
-}
-
-.demo-header-left {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-md);
-}
-
-.demo-icon-wrapper {
-  width: 40px;
-  height: 40px;
-  background: linear-gradient(135deg, var(--white-alpha-25), var(--white-alpha-10));
-  border-radius: var(--radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--white-alpha-20);
-  backdrop-filter: var(--blur-md);
-  box-shadow: var(--shadow-sm);
-}
-
-.demo-icon {
-  color: white;
-  font-size: var(--font-size-lg);
-}
-
-.demo-header-text h3 {
-  margin: 0 0 var(--spacing-xs) 0;
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-bold);
-  color: white;
-  text-shadow: 0 1px 2px var(--black-alpha-30);
-}
-
-.demo-header-text p {
-  margin: 0;
-  font-size: var(--font-size-sm);
-  color: var(--white-alpha-80);
-  font-family: 'Courier New', monospace;
-  background: var(--white-alpha-15);
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: var(--radius-sm);
-  display: inline-block;
-}
-
-.demo-card-content {
-  margin-top: var(--spacing-lg);
-}
-
-.demo-card-content p {
-  color: var(--white-alpha-85);
-  font-size: var(--font-size-md);
-  line-height: 1.5;
-  margin-bottom: var(--spacing-lg);
-}
-
-.demo-tags {
-  display: flex;
-  gap: var(--spacing-sm);
-  flex-wrap: wrap;
-}
-
-/* 调试卡片演示样式 */
-.debug-demo-card {
-  position: relative;
-}
-
-.debug-demo-card::before {
-  display: none !important; /* 移除顶部渐变线条 */
-}
-
-.debug-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: var(--spacing-xl);
-}
-
-/* 按钮演示 */
-.buttons-demo {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: var(--spacing-xl);
-  padding: 0 var(--spacing-2xl);
-}
-
-.button-group {
-  background: var(--white-alpha-10);
-  padding: var(--spacing-xl);
-  border-radius: var(--radius-lg);
-  backdrop-filter: var(--blur-md);
-  border: 1px solid var(--white-alpha-15);
-}
-
-.button-group h4 {
-  color: white;
-  margin-bottom: var(--spacing-lg);
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-}
-
-.button-row {
-  display: flex;
-  gap: var(--spacing-md);
-  flex-wrap: wrap;
-}
-
-/* 按钮状态样式 */
-.loading-btn {
-  position: relative;
-}
-
-.loading-spinner {
-  display: inline-block;
-  width: 12px;
-  height: 12px;
-  border: 2px solid transparent;
-  border-top: 2px solid currentColor;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-right: var(--spacing-sm);
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* 表单演示 */
-.forms-demo {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  gap: var(--spacing-2xl);
-}
-
-.form-field {
-  margin-bottom: var(--spacing-lg);
-}
-
-.form-field label {
-  display: block;
-  color: white;
-  margin-bottom: var(--spacing-sm);
-  font-weight: var(--font-weight-medium);
-  font-size: var(--font-size-sm);
-}
-
-.checkbox-group {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-}
-
-.checkbox-group input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-}
-
-.checkbox-group label {
-  margin: 0;
-  color: var(--white-alpha-85);
-  font-size: var(--font-size-sm);
-}
-
-.form-actions {
-  display: flex;
-  gap: var(--spacing-md);
-  margin-top: var(--spacing-xl);
-}
-
-/* 反馈组件演示 */
-.feedback-demo {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: var(--spacing-xl);
-}
-
-.tags-container {
-  display: flex;
-  gap: var(--spacing-md);
-  flex-wrap: wrap;
-}
-
-/* 进度条演示 */
-.progress-demo {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-lg);
-}
-
-.progress-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--spacing-sm);
-}
-
-.progress-header label {
-  color: white;
-  font-weight: var(--font-weight-medium);
-  font-size: var(--font-size-sm);
-}
-
-.progress-text {
-  color: var(--white-alpha-80);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-}
-
-/* 通知消息演示 */
-.notification-demo {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-md);
-}
-
-.notification {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--spacing-md);
-  padding: var(--spacing-md);
-  border-radius: var(--radius-lg);
-  background: var(--white-alpha-10);
-  border: 1px solid var(--white-alpha-15);
-  backdrop-filter: var(--blur-sm);
-}
-
-.notification.success {
-  border-color: rgba(103, 194, 58, 0.3);
-  background: linear-gradient(135deg, rgba(103, 194, 58, 0.15), var(--white-alpha-10));
-}
-
-.notification.warning {
-  border-color: rgba(230, 162, 60, 0.3);
-  background: linear-gradient(135deg, rgba(230, 162, 60, 0.15), var(--white-alpha-10));
-}
-
-.notification.info {
-  border-color: rgba(64, 158, 255, 0.3);
-  background: linear-gradient(135deg, rgba(64, 158, 255, 0.15), var(--white-alpha-10));
-}
-
-.notification-icon {
-  font-size: var(--font-size-lg);
-  line-height: 1;
-}
-
-.notification-content {
-  flex: 1;
-}
-
-.notification-content strong {
-  color: white;
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-  display: block;
-  margin-bottom: var(--spacing-xs);
-}
-
-.notification-content p {
-  color: var(--white-alpha-80);
-  font-size: var(--font-size-xs);
-  margin: 0;
-  line-height: 1.4;
-}
-
-/* 性能指标 */
-.performance-metrics {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-lg);
-}
-
-.metric-item {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-sm);
-}
-
-.metric-item label {
-  color: white;
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-}
-
-.metric-value {
-  color: var(--white-alpha-80);
-  font-size: var(--font-size-xs);
-  text-align: right;
-  margin-top: var(--spacing-xs);
-}
-
-/* 动画网格 */
-.animations-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: var(--spacing-xl);
-}
-
-/* 动画演示专用样式 */
-.animation-demo-card {
-  min-height: 280px;
-  display: flex;
-  flex-direction: column;
-}
-
-.animation-demo-card .demo-card-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-lg);
-}
-
-.animation-demos {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: var(--spacing-lg);
-}
-
-.animation-item {
-  text-align: center;
-  padding: var(--spacing-lg);
-  border-radius: var(--radius-md);
-  background: var(--white-alpha-10);
-  border: 1px solid var(--white-alpha-20);
-  transition: all var(--transition-smooth);
-}
-
-.animation-item:hover {
-  transform: translateY(-2px);
-  background: var(--white-alpha-15);
-  box-shadow: var(--shadow-lg);
-}
-
-.animation-item p {
-  margin: var(--spacing-sm) 0 0 0 !important;
-  font-size: var(--font-size-sm) !important;
-  color: var(--white-alpha-70) !important;
-}
-
-.animations-grid .glass-card h4 {
-  color: white;
-  margin-bottom: var(--spacing-md);
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-}
-
-.animations-grid .glass-card p {
-  color: var(--white-alpha-80);
-  margin-bottom: var(--spacing-md);
-  font-size: var(--font-size-sm);
-  line-height: 1.5;
-}
-
-.animations-grid .glass-card code {
-  display: inline-block;
-  background: var(--white-alpha-20);
-  color: #64ffda;
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: var(--radius-sm);
-  font-size: var(--font-size-xs);
-  font-family: 'Courier New', monospace;
-}
-
-/* 工具类演示 */
-.utilities-demo {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: var(--spacing-xl);
-}
-
-.utility-examples {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-md);
-}
-
-/* 应用示例 */
-.application-examples {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  gap: var(--spacing-xl);
-}
-
-.mini-dashboard {
-  margin-top: var(--spacing-lg);
-}
-
-.mini-welcome-banner {
-  background: var(--white-alpha-10);
-  border: 1px solid var(--white-alpha-15);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-lg);
-  backdrop-filter: var(--blur-md);
-}
-
-.mini-login {
-  margin-top: var(--spacing-lg);
-}
+/* 旧演示/调试/动画/工具/应用样式已移除 */
 
 /* 响应式设计 */
 @media (max-width: 768px) {
@@ -1889,74 +1149,44 @@ export default {
     font-size: var(--font-size-4xl);
     line-height: 1.3;
   }
-  
+
   .hero-description {
     font-size: var(--font-size-md);
     margin-bottom: var(--spacing-3xl);
   }
-  
+
   .hero-stats {
     gap: var(--spacing-2xl);
     margin-top: var(--spacing-xl);
   }
-  
+
   .stat-item {
     min-width: 100px;
     padding: var(--spacing-md);
   }
-  
+
   .stat-number {
     font-size: var(--font-size-2xl);
   }
-  
+
   .design-language-hero {
     padding: var(--spacing-4xl) 0 var(--spacing-3xl) 0;
   }
-  
+
   .hero-content {
     padding: 0 var(--spacing-lg);
   }
-  
+
   .design-system-test {
     padding: var(--spacing-lg);
   }
-  
-  .cards-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .buttons-demo {
-    grid-template-columns: 1fr;
-  }
-  
-  .forms-demo {
-    grid-template-columns: 1fr;
-  }
-  
-  .feedback-demo {
-    grid-template-columns: 1fr;
-  }
-  
-  .utilities-demo {
-    grid-template-columns: 1fr;
-  }
-  
-  .application-examples {
-    grid-template-columns: 1fr;
-  }
-  
-  .animations-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .quick-nav {
-    justify-content: center;
-  }
-  
+
+  /* 删除旧演示布局的移动端覆盖 */
+
   .button-row {
     justify-content: center;
   }
-  
+
   .form-actions {
     justify-content: center;
   }
@@ -1967,15 +1197,77 @@ export default {
     flex-direction: column;
     align-items: center;
   }
-  
+
   .form-actions {
     flex-direction: column;
   }
-  
+
   .quick-nav {
     flex-direction: column;
     align-items: center;
   }
+}
+
+/* 新增样式 - 表单和反馈组件展示 */
+.form-showcase {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.badge-showcase {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  align-items: center;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .form-showcase {
+    gap: var(--spacing-md);
+  }
+
+  .badge-row {
+    justify-content: center;
+  }
+}
+
+/* 状态卡片样式 */
+
+.status-content .status-tag.success {
+  background: linear-gradient(135deg, #48bb78, #38a169);
+}
+
+.status-content .status-tag.primary {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+.status-content .status-tag.warning {
+  background: linear-gradient(135deg, #ed8936, #dd6b20);
+}
+
+.status-features {
+  display: flex;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+  margin-top: var(--spacing-lg);
+}
+
+.status-features .feature-item {
+  background: var(--white-alpha-15);
+  color: var(--white-alpha-90);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xs);
+  border: 1px solid var(--white-alpha-20);
+  backdrop-filter: var(--blur-sm);
 }
 
 /* 使用说明样式 */
@@ -2037,11 +1329,11 @@ export default {
     padding: var(--spacing-xl);
     margin-top: var(--spacing-2xl);
   }
-  
+
   .usage-note h3 {
     font-size: var(--font-size-lg);
   }
-  
+
   .usage-note p,
   .usage-note li {
     font-size: var(--font-size-sm);
@@ -2078,7 +1370,7 @@ export default {
 .debug-card.el-card:hover,
 .glass-card-with-header.el-card:hover {
   transform: translateY(-8px) scale(1.02) !important;
-  box-shadow: 
+  box-shadow:
     0 20px 50px rgba(0, 0, 0, 0.15),
     0 8px 16px rgba(0, 0, 0, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.5) !important;
@@ -2177,7 +1469,7 @@ export default {
 
 .glass-card-with-header:hover {
   transform: translateY(-8px) scale(1.02);
-  box-shadow: 
+  box-shadow:
     0 20px 50px rgba(0, 0, 0, 0.15),
     0 8px 16px rgba(0, 0, 0, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.5);
@@ -2209,5 +1501,307 @@ export default {
 
 .el-card :deep(.el-card__body) {
   padding: 20px;
+}
+
+/* 新的演示内容样式 */
+.demo-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.progress-item {
+  background: rgba(255, 255, 255, 0.1);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-sm);
+}
+
+.task-name {
+  font-weight: var(--font-weight-semibold);
+  color: white;
+  font-size: var(--font-size-sm);
+}
+
+.progress-percent {
+  font-size: var(--font-size-sm);
+  color: var(--white-alpha-80);
+  font-family: 'Courier New', monospace;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.demo-features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.demo-features .feature-item {
+  font-size: var(--font-size-sm);
+  color: var(--white-alpha-85);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+/* 新的卡片展示样式 */
+.variant-examples {
+  margin-top: var(--spacing-md);
+}
+
+.variant-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+}
+
+.mini-card {
+  background: var(--white-alpha-15);
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  text-align: center;
+  font-size: var(--font-size-xs);
+  color: var(--white-alpha-85);
+  border: 1px solid var(--white-alpha-10);
+  transition: all 0.2s ease;
+}
+
+.mini-card:hover {
+  background: var(--white-alpha-20);
+  transform: translateY(-2px);
+}
+
+.variant-base {
+  background: var(--white-alpha-15);
+}
+
+.variant-display {
+  background: var(--white-alpha-18);
+}
+
+.variant-content {
+  background: var(--white-alpha-20);
+}
+
+.variant-enhanced {
+  background: var(--white-alpha-25);
+}
+
+.variant-minimal {
+  background: var(--white-alpha-10);
+}
+
+.feature-note {
+  text-align: center;
+  font-size: var(--font-size-xs);
+  color: var(--white-alpha-70);
+  font-style: italic;
+}
+
+.card-preview {
+  background: var(--white-alpha-10);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--white-alpha-15);
+}
+
+.card-header-demo {
+  background: rgba(255, 255, 255, 0.1);
+  padding: var(--spacing-sm) var(--spacing-md);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  border-bottom: 1px solid var(--white-alpha-15);
+}
+
+.demo-icon {
+  font-size: var(--font-size-md);
+}
+
+/* 统一在下方的 .demo-title 定义，这里删除重复 */
+
+.card-content-demo {
+  padding: var(--spacing-md);
+  color: var(--white-alpha-85);
+  font-size: var(--font-size-sm);
+}
+
+.card-footer-demo {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: rgba(255, 255, 255, 0.05);
+  border-top: 1px solid var(--white-alpha-15);
+}
+
+.demo-btn {
+  background: var(--white-alpha-20);
+  border: 1px solid var(--white-alpha-30);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.api-compatibility {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.compat-item {
+  font-size: var(--font-size-sm);
+  color: var(--white-alpha-85);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--white-alpha-10);
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--white-alpha-30);
+}
+
+.layout-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-sm);
+}
+
+.layout-item {
+  background: var(--white-alpha-15);
+  padding: var(--spacing-xs);
+  border-radius: var(--radius-sm);
+  text-align: center;
+  font-size: var(--font-size-xs);
+  color: var(--white-alpha-85);
+  border: 1px solid var(--white-alpha-10);
+}
+
+.layout-note {
+  text-align: center;
+  font-size: var(--font-size-xs);
+  color: var(--white-alpha-70);
+  font-style: italic;
+}
+
+.grid-demo-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.grid-demo {
+  background: var(--white-alpha-05);
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--white-alpha-10);
+}
+
+.grid-label {
+  font-size: var(--font-size-xs);
+  color: var(--white-alpha-70);
+  margin-bottom: var(--spacing-xs);
+  text-align: center;
+}
+
+.auto-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
+  gap: 4px;
+}
+
+.fixed-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+}
+
+.mini-item {
+  background: var(--white-alpha-20);
+  height: 16px;
+  border-radius: 3px;
+}
+
+.display-features {
+  margin-top: var(--spacing-md);
+}
+
+.feature-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+/* 统一的特性条目样式 */
+.feature-item {
+  font-size: var(--font-size-sm);
+  color: var(--white-alpha-85);
+  padding: var(--spacing-xs) 0;
+}
+
+/* 旧的 Header 临时演示样式已删除，使用真实 GlassHeaderCard 组件展示 */
+
+/* use-cases 的新样式定义保留在此处，无需重复旧规则 */
+
+.showcase-demo {
+  background: var(--white-alpha-05);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  border: 1px solid var(--white-alpha-10);
+}
+
+.showcase-header {
+  margin-bottom: var(--spacing-md);
+  text-align: center;
+}
+
+.demo-title {
+  font-weight: var(--font-weight-semibold);
+  color: white;
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--spacing-xs);
+}
+
+.demo-desc {
+  font-size: var(--font-size-xs);
+  color: var(--white-alpha-70);
+}
+
+.showcase-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-xs);
+}
+
+.showcase-item {
+  background: var(--white-alpha-15);
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  text-align: center;
+  font-size: var(--font-size-xs);
+  color: var(--white-alpha-85);
+  border: 1px solid var(--white-alpha-10);
 }
 </style>

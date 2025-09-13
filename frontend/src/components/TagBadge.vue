@@ -2,12 +2,12 @@
   <span :class="tagClasses" @click="handleClick">
     <!-- 左侧图标 -->
     <i v-if="iconLeft" :class="iconLeft" class="tag-icon tag-icon-left"></i>
-    
+
     <!-- 标签文字 -->
     <span class="tag-text">
       <slot>{{ text }}</slot>
     </span>
-    
+
     <!-- 右侧图标或关闭按钮 -->
     <i v-if="iconRight" :class="iconRight" class="tag-icon tag-icon-right"></i>
     <i v-else-if="closable" class="tag-close" @click.stop="handleClose">×</i>
@@ -21,87 +21,88 @@ export default {
     // 标签文字
     text: {
       type: String,
-      default: ''
+      default: '',
     },
     // 标签类型
     type: {
       type: String,
       default: 'primary',
-      validator: value => ['primary', 'secondary', 'success', 'warning', 'danger', 'info'].includes(value)
+      validator: (value) =>
+        ['primary', 'secondary', 'success', 'warning', 'danger', 'info'].includes(value),
     },
     // 标签大小
     size: {
       type: String,
       default: 'medium',
-      validator: value => ['small', 'medium', 'large'].includes(value)
+      validator: (value) => ['small', 'medium', 'large'].includes(value),
     },
     // 标签变体
     variant: {
       type: String,
       default: 'glass',
-      validator: value => ['solid', 'outline', 'glass'].includes(value)
+      validator: (value) => ['solid', 'outline', 'glass'].includes(value),
     },
     // 左侧图标
     iconLeft: {
       type: String,
-      default: ''
+      default: '',
     },
     // 右侧图标
     iconRight: {
       type: String,
-      default: ''
+      default: '',
     },
     // 是否可关闭
     closable: {
       type: Boolean,
-      default: false
+      default: false,
     },
     // 是否可点击
     clickable: {
       type: Boolean,
-      default: false
+      default: false,
     },
     // 额外的CSS类
     extraClasses: {
       type: String,
-      default: ''
-    }
+      default: '',
+    },
   },
   emits: ['click', 'close'],
   computed: {
     tagClasses() {
-      const classes = ['tag-glass'];
-      
+      const classes = ['tag-glass']
+
       // 标签类型
-      classes.push(`tag-${this.type}`);
-      
+      classes.push(`tag-${this.type}`)
+
       // 标签大小
-      if (this.size === 'small') classes.push('tag-small');
-      if (this.size === 'large') classes.push('tag-large');
-      
+      if (this.size === 'small') classes.push('tag-small')
+      if (this.size === 'large') classes.push('tag-large')
+
       // 标签变体
-      if (this.variant === 'solid') classes.push('tag-solid');
-      if (this.variant === 'outline') classes.push('tag-outline');
-      
+      if (this.variant === 'solid') classes.push('tag-solid')
+      if (this.variant === 'outline') classes.push('tag-outline')
+
       // 可点击状态
-      if (this.clickable || this.closable) classes.push('tag-clickable');
-      
+      if (this.clickable || this.closable) classes.push('tag-clickable')
+
       // 额外类名
-      if (this.extraClasses) classes.push(this.extraClasses);
-      
-      return classes.join(' ');
-    }
+      if (this.extraClasses) classes.push(this.extraClasses)
+
+      return classes.join(' ')
+    },
   },
   methods: {
     handleClick(event) {
       if (this.clickable) {
-        this.$emit('click', event);
+        this.$emit('click', event)
       }
     },
     handleClose(event) {
-      this.$emit('close', event);
-    }
-  }
+      this.$emit('close', event)
+    },
+  },
 }
 </script>
 
