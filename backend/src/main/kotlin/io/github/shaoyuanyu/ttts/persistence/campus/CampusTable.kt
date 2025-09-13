@@ -9,7 +9,7 @@ import kotlin.time.Instant
 
 object CampusTable : IntIdTable("campus") {
 
-    val campus_name: Column<String> = varchar("campus_name", 64)
+    val campus_name: Column<String> = varchar("campus_name", 64).uniqueIndex()
 
     val address: Column<String> = varchar("address", 64)
 

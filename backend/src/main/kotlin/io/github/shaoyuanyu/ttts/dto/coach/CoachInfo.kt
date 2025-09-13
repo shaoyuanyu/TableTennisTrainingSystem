@@ -16,5 +16,37 @@ data class CoachInfo(
     val maxStudents: Int = 20,
     val currentStudents: Int = 0,
     val isApproved: Boolean = false,
-    val approvedBy: Int = -1
+    val approvedBy: String? =null
+)
+@Serializable
+data class CoachRecord(
+    var username: String,
+    var realName: String,
+    var gender: String,
+    var age : Int,
+    var photoUrl : String,
+    var achievements : String,
+    var level : String,
+    var hourlyRate : Float,
+    var currentStudents : Int,
+)
+@Serializable
+data class QueryCoachRequest(
+    val username: String
+)
+@Serializable
+data class CoachApproved(
+    val uuid: String,
+    val realName: String,
+    val gender: String,
+    val age: Int,
+    val phoneNumber: String,
+    val email: String,
+    val photoUrl: String? = null,
+    val achievements: String? = null,
+)
+@Serializable
+data class ApproveCoachRequest(
+    val coachId: String,
+    val level: String,
 )

@@ -4,7 +4,6 @@ package io.github.shaoyuanyu.ttts.persistence
 import io.github.shaoyuanyu.ttts.dto.campus.CampusCreateRequest
 import io.github.shaoyuanyu.ttts.dto.campus.CampusqueryRequest
 import io.github.shaoyuanyu.ttts.persistence.campus.CampusEntity
-import io.github.shaoyuanyu.ttts.persistence.campus.CampusTable
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import kotlin.time.Clock
@@ -36,12 +35,12 @@ class CampusService(
      */
     fun createCampus(newCampus: CampusCreateRequest) {
         transaction(database) {
-            // 检查校区名是否已存在
-            val existingCampus = CampusEntity.find { CampusTable.campus_name eq newCampus.campusName }.firstOrNull()
-
-            if (existingCampus != null) {
-                throw Exception("校区名 '${newCampus.campusName}' 已存在，创建失败")
-            }
+            // 检查校区名是否已存在::已改为数据库表实现
+//            val existingCampus = CampusEntity.find { CampusTable.campus_name eq newCampus.campusName }.firstOrNull()
+//
+//            if (existingCampus != null) {
+//                throw Exception("校区名 '${newCampus.campusName}' 已存在，创建失败")
+//            }
 
             CampusEntity.new {
                 campusName = newCampus.campusName
