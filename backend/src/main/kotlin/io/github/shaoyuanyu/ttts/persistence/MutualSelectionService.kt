@@ -311,4 +311,26 @@ class MutualSelectionService(
                 .toList()
                 .expose()
         }
+    
+    /**
+     * 获取学生当前已建立关系的教练列表
+     */
+    fun getStudentCurrentCoaches(
+        studentUUID: String
+    ): List<MutualSelection> =
+        transaction(database) {
+            val student = StudentEntity.findById(UUID.fromString(studentUUID))
+                ?: throw IllegalArgumentException("学生不存在")
+
+            // 查询学生所有已批准或活跃的关系
+            val query = MutualSelectionEntity.find {
+                (MutualSelectionTable.student_id eq student.id) and
+                        (MutualSelectionTable.status inList listOf(
+                            MutualSelectionStatus.APPROVED,
+                            MutualSelectionStatus.ACTIVE
+                        ))
+            }
+
+            query.toList().expose()
+        }
 }

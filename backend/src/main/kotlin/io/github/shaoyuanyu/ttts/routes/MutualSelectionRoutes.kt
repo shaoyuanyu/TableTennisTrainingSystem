@@ -3,7 +3,6 @@
 package io.github.shaoyuanyu.ttts.routes
 
 import io.github.shaoyuanyu.ttts.exceptions.BadRequestException
-import io.github.shaoyuanyu.ttts.exceptions.SecurityException
 import io.github.shaoyuanyu.ttts.persistence.MutualSelectionService
 import io.github.shaoyuanyu.ttts.utils.getUserIdFromCall
 import io.ktor.http.*
@@ -22,6 +21,7 @@ fun Application.mutualSelectionRoutes(mutualSelectionService: MutualSelectionSer
                 applyForCoach(mutualSelectionService)
                 getStudentApplications(mutualSelectionService)
                 withdrawApplication(mutualSelectionService)
+                getStudentCurrentCoaches(mutualSelectionService)
             }
 
             // 教练权限路由
@@ -54,18 +54,14 @@ fun Route.applyForCoach(mutualSelectionService: MutualSelectionService) {
 //        val expectedStartTime = expectedStartTimeStr.toLongOrNull()?.let {
 //            Instant.fromEpochMilliseconds(it)
 //        } ?: throw BadRequestException("时间格式错误")
-        
-        try {
-            val application = mutualSelectionService.applyForCoach(
-                studentId = userId,
-                coachId = coachId,
-                expectedStartTime = Clock.System.now() // TODO: 处理时间格式
-            )
-            
-            call.respond(HttpStatusCode.Created, application)
-        } catch (e: IllegalArgumentException) {
-            throw BadRequestException(e.message ?: "申请失败")
-        }
+
+        val application = mutualSelectionService.applyForCoach(
+            studentId = userId,
+            coachId = coachId,
+            expectedStartTime = Clock.System.now() // TODO: 处理时间格式
+        )
+
+        call.respond(HttpStatusCode.Created, application)
     }
 }
 
@@ -106,19 +102,13 @@ fun Route.withdrawApplication(mutualSelectionService: MutualSelectionService) {
         
         val params = call.receiveParameters()
         val relationId = params["relationId"] ?: throw BadRequestException("缺少关系ID参数")
-        
-        try {
-            val result = mutualSelectionService.withdrawApplication(
-                studentUUID = userId,
-                relationId = relationId
-            )
-            
-            call.respond(HttpStatusCode.OK, result)
-        } catch (e: IllegalArgumentException) {
-            throw BadRequestException(e.message ?: "撤回申请失败")
-        } catch (e: SecurityException) {
-            throw SecurityException(e.message ?: "无权限撤回该申请")
-        }
+
+        val result = mutualSelectionService.withdrawApplication(
+            studentUUID = userId,
+            relationId = relationId
+        )
+
+        call.respond(HttpStatusCode.OK, result)
     }
 }
 
@@ -140,19 +130,15 @@ fun Route.getCoachApplications(mutualSelectionService: MutualSelectionService) {
         if (size !in 1..100) {
             throw BadRequestException("每页大小必须在1-100之间")
         }
-        
-        try {
-            val applications = mutualSelectionService.getCoachApplications(
-                coachUUID = userId,
-                status = status,
-                page = page,
-                size = size
-            )
-            
-            call.respond(HttpStatusCode.OK, applications)
-        } catch (e: IllegalArgumentException) {
-            throw BadRequestException(e.message ?: "获取申请记录失败")
-        }
+
+        val applications = mutualSelectionService.getCoachApplications(
+            coachUUID = userId,
+            status = status,
+            page = page,
+            size = size
+        )
+
+        call.respond(HttpStatusCode.OK, applications)
     }
 }
 
@@ -167,20 +153,14 @@ fun Route.reviewApplication(mutualSelectionService: MutualSelectionService) {
         val relationId = params["selectionId"] ?: throw BadRequestException("缺少关系ID参数")
         val approveStr = params["approve"] ?: throw BadRequestException("缺少审核结果参数")
         val approve = approveStr.toBooleanStrictOrNull() ?: throw BadRequestException("审核结果参数格式错误")
-        
-        try {
-            val result = mutualSelectionService.reviewApplication(
-                coachUUID = userId,
-                relationId = relationId,
-                approve = approve
-            )
-            
-            call.respond(HttpStatusCode.OK, result)
-        } catch (e: IllegalArgumentException) {
-            throw BadRequestException(e.message ?: "审核申请失败")
-        } catch (e: SecurityException) {
-            throw SecurityException(e.message ?: "无权限审核该申请")
-        }
+
+        val result = mutualSelectionService.reviewApplication(
+            coachUUID = userId,
+            relationId = relationId,
+            approve = approve
+        )
+
+        call.respond(HttpStatusCode.OK, result)
     }
 }
 
@@ -192,17 +172,13 @@ fun Route.adminCreateRelation(mutualSelectionService: MutualSelectionService) {
         val params = call.receiveParameters()
         val studentId = params["studentId"] ?: throw BadRequestException("缺少学生ID参数")
         val coachId = params["coachId"] ?: throw BadRequestException("缺少教练ID参数")
-        
-        try {
-            val result = mutualSelectionService.adminCreateRelation(
-                studentUUID = studentId,
-                coachUUID = coachId
-            )
-            
-            call.respond(HttpStatusCode.Created, result)
-        } catch (e: IllegalArgumentException) {
-            throw BadRequestException(e.message ?: "创建关系失败")
-        }
+
+        val result = mutualSelectionService.adminCreateRelation(
+            studentUUID = studentId,
+            coachUUID = coachId
+        )
+
+        call.respond(HttpStatusCode.Created, result)
     }
 }
 
@@ -222,17 +198,26 @@ fun Route.getAllRelations(mutualSelectionService: MutualSelectionService) {
         if (size !in 1..100) {
             throw BadRequestException("每页大小必须在1-100之间")
         }
-        
-        try {
-            val relations = mutualSelectionService.getAllRelations(
-                status = status,
-                page = page,
-                size = size
-            )
-            
-            call.respond(HttpStatusCode.OK, relations)
-        } catch (e: IllegalArgumentException) {
-            throw BadRequestException(e.message ?: "获取关系记录失败")
-        }
+
+        val relations = mutualSelectionService.getAllRelations(
+            status = status,
+            page = page,
+            size = size
+        )
+
+        call.respond(HttpStatusCode.OK, relations)
+    }
+}
+
+/**
+ * 学生获取当前已建立关系的教练列表
+ */
+fun Route.getStudentCurrentCoaches(mutualSelectionService: MutualSelectionService) {
+    get("/current-coaches") {
+        val userId = getUserIdFromCall(call)
+
+        val coaches = mutualSelectionService.getStudentCurrentCoaches(studentUUID = userId)
+
+        call.respond(HttpStatusCode.OK, coaches)
     }
 }
