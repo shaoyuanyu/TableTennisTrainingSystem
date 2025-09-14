@@ -30,3 +30,8 @@ data class CompetitionInfo(
     val player1Username: String,   // 选手1用户名
     val player2Username: String    // 选手2用户名
 )
+@Serializable
+data class CompetitionResult(
+    val winnerName: String,    // 获胜者用户名
+    val loserName: String      // 失败者用户名
+)

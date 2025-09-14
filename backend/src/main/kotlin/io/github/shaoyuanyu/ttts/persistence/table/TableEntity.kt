@@ -1,13 +1,15 @@
 package io.github.shaoyuanyu.ttts.persistence.table
 
 import org.jetbrains.exposed.v1.core.dao.id.EntityID
-import org.jetbrains.exposed.v1.dao.IntEntity
-import org.jetbrains.exposed.v1.dao.IntEntityClass
+import org.jetbrains.exposed.v1.dao.Entity
+import org.jetbrains.exposed.v1.dao.EntityClass
+import java.util.UUID
 
-class TableEntity(id: EntityID<Int>) : IntEntity(id) {
-        companion object : IntEntityClass<TableEntity>(TableTable)
+class TableEntity(id: EntityID<UUID>) : Entity<UUID>(id) {
+    companion object : EntityClass<UUID, TableEntity>(TableTable)
+
     var status by TableTable.status
     var group by TableTable.group
+    var tableIndex by TableTable.index
     var campusId by TableTable.campusId
-
     }
