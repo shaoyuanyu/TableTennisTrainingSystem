@@ -5,20 +5,12 @@ package io.github.shaoyuanyu.ttts.persistence
 import io.github.shaoyuanyu.ttts.dto.recharge.RechargeRecord
 import io.github.shaoyuanyu.ttts.exceptions.NotFoundException
 import io.github.shaoyuanyu.ttts.persistence.campus.CampusEntity
-import io.github.shaoyuanyu.ttts.persistence.coach.CoachEntity
 import io.github.shaoyuanyu.ttts.persistence.competition.ComEntity
 import io.github.shaoyuanyu.ttts.persistence.competition.ComTable
 import io.github.shaoyuanyu.ttts.persistence.recharge.RechargeEntity
 import io.github.shaoyuanyu.ttts.persistence.recharge.RechargeTable
 import io.github.shaoyuanyu.ttts.persistence.recharge.expose
 import io.github.shaoyuanyu.ttts.persistence.student.StudentEntity
-import io.github.shaoyuanyu.ttts.persistence.student_coach.StudentCoachRelationEntity
-import io.github.shaoyuanyu.ttts.persistence.student_coach.StudentCoachRelationTable
-import org.jetbrains.exposed.v1.core.Op
-import org.jetbrains.exposed.v1.core.SqlExpressionBuilder
-import org.jetbrains.exposed.v1.core.SqlExpressionBuilder.inList
-import org.jetbrains.exposed.v1.core.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.v1.core.and
 import io.github.shaoyuanyu.ttts.persistence.table.TableEntity
 import io.github.shaoyuanyu.ttts.persistence.table.TableTable
 import io.github.shaoyuanyu.ttts.persistence.user.UserEntity
@@ -162,7 +154,7 @@ class StudentService(
      * @return Pair<充值记录列表, 总记录数>
      * @throws Exception 如果用户不存在
      */
-    fun getRechargeHistoryByusername(username:String, page: Int, size: Int): Pair<List<RechargeRecord>, Long> {
+    fun getRechargeHistoryByUsername(username:String, page: Int, size: Int): Pair<List<RechargeRecord>, Long> {
         val user = userService.queryUserByUsername(username)
         return getRechargeHistory(user.uuid.toString(), page, size)
     }
@@ -200,7 +192,7 @@ class StudentService(
             // 验证小组名称是否有效
             val validGroups = listOf("甲", "乙", "丙")
             if (group !in validGroups) {
-                return@transaction Result.failure<String>(IllegalStateException("无效的小组名称，必须是甲、乙或丙"))
+                return@transaction Result.failure(IllegalStateException("无效的小组名称，必须是甲、乙或丙"))
             }
 
             // 检查用户是否已经报名
@@ -209,7 +201,7 @@ class StudentService(
                 .singleOrNull()
 
             if (existingSignup != null) {
-                return@transaction Result.failure<String>(IllegalStateException("用户已经报名过比赛"))
+                return@transaction Result.failure(IllegalStateException("用户已经报名过比赛"))
             }
 
             // 获取用户信息
@@ -245,7 +237,7 @@ class StudentService(
                 }.toList()
 
                 if (availableTables.isEmpty()) {
-                    return@transaction Result.failure<String>(IllegalStateException("当前校区没有可用球台"))
+                    return@transaction Result.failure(IllegalStateException("当前校区没有可用球台"))
                 }
 
                 selectedTable = availableTables.random()
@@ -280,7 +272,7 @@ class StudentService(
     /**
      * 查询报名信息
      */
-    fun querysignup(userId: String)=
+    fun querySignup(userId: String)=
         transaction(database) {
 
     }
