@@ -1302,38 +1302,6 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /courses/my-schedule:
-    get:
-      tags: [course]
-      summary: 教练查看自己的课程安排
-      description: 教练获取自己的课程表
-      security:
-        - SessionAuth: [COACH]
-      parameters:
-        - name: dateFrom
-          in: query
-          schema:
-            type: string
-            format: date
-          description: 查询起始日期 (YYYY-MM-DD)
-        - name: dateTo
-          in: query
-          schema:
-            type: string
-            format: date
-          description: 查询结束日期 (YYYY-MM-DD)
-      responses:
-        '200':
-          description: 成功获取课程安排
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Course'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-
   /courses/confirm:
     post:
       tags: [course]
