@@ -188,7 +188,7 @@ fun Route.getRechargeRecordsByUserId(walletService: StudentService) {
             throw BadRequestException("每页大小必须在1-100之间")
         }
 
-        val records= walletService.getRechargeHistoryByusername(targetUsername, page, size)
+        val records= walletService.getRechargeHistoryByUsername(targetUsername, page, size)
 
         call.respond(HttpStatusCode.OK, records)
     }

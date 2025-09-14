@@ -15,7 +15,6 @@ import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.slf4j.LoggerFactory
 import java.util.*
 import kotlin.time.Clock
-import kotlin.time.Instant
 
 internal val MUTUAL_SELECTION_LOGGER = LoggerFactory.getLogger("io.github.shaoyuanyu.ttts.persistence.mutual_selection")
 
@@ -27,8 +26,7 @@ class MutualSelectionService(
      */
     fun applyForCoach(
         studentId: String,
-        coachId: String,
-        expectedStartTime: Instant
+        coachId: String
     ): MutualSelection =
         transaction(database) {
             val student = StudentEntity.findById(UUID.fromString(studentId))
@@ -67,7 +65,7 @@ class MutualSelectionService(
                 this.coachID = coach
                 this.status = MutualSelectionStatus.PENDING
                 this.applicationTime = Clock.System.now()
-                this.expectedStartTime = expectedStartTime
+                this.expectedStartTime = Clock.System.now() // 保留但不再使用
             }
 
             MUTUAL_SELECTION_LOGGER.info("学生申请教练成功")
@@ -170,7 +168,7 @@ class MutualSelectionService(
 
             // 如果批准了申请，更新学生和教练的计数
             if (approve) {
-                relation.actualStartTime = Clock.System.now()
+                relation.actualStartTime = Clock.System.now() // 保留但不再使用
                 relation.studentID.currentCoach += 1
                 relation.coachID.currentStudents += 1
             }
@@ -213,6 +211,43 @@ class MutualSelectionService(
         }
 
     /**
+     * 学生取消已批准的关系
+     */
+    fun cancelApprovedRelation(
+        studentUUID: String,
+        relationId: String
+    ): MutualSelection =
+        transaction(database) {
+            val student = StudentEntity.findById(UUID.fromString(studentUUID))
+                ?: throw IllegalArgumentException("学生不存在")
+
+            val relation = MutualSelectionEntity.findById(UUID.fromString(relationId))
+                ?: throw IllegalArgumentException("关系记录不存在")
+
+            // 验证该关系是否属于该学生
+            if (relation.studentID.id != student.id) {
+                throw SecurityException("无权限操作该关系")
+            }
+
+            // 验证关系状态是否为已批准或活跃状态
+            if (relation.status != MutualSelectionStatus.APPROVED && relation.status != MutualSelectionStatus.ACTIVE) {
+                throw IllegalArgumentException("该关系状态不为已批准或活跃状态，无法取消")
+            }
+
+            // 更新关系状态为非活跃
+            relation.status = MutualSelectionStatus.INACTIVE
+            relation.endTime = Clock.System.now() // 保留但不再使用
+
+            // 更新学生和教练的计数
+            relation.studentID.currentCoach -= 1
+            relation.coachID.currentStudents -= 1
+
+            MUTUAL_SELECTION_LOGGER.info("学生取消已批准的关系完成")
+
+            relation.expose()
+        }
+
+    /**
      * 获取教练待处理申请数量
      */
     fun getPendingApplicationCount(coachUUID: String): Int =
@@ -222,6 +257,20 @@ class MutualSelectionService(
 
             MutualSelectionEntity.find {
                 (MutualSelectionTable.coach_id eq coach.id) and
+                        (MutualSelectionTable.status eq MutualSelectionStatus.PENDING)
+            }.count().toInt()
+        }
+    
+    /**
+     * 获取学生待处理申请数量
+     */
+    fun getStudentPendingApplicationCount(studentUUID: String): Int =
+        transaction(database) {
+            val student = StudentEntity.findById(UUID.fromString(studentUUID))
+                ?: throw IllegalArgumentException("学生不存在")
+
+            MutualSelectionEntity.find {
+                (MutualSelectionTable.student_id eq student.id) and
                         (MutualSelectionTable.status eq MutualSelectionStatus.PENDING)
             }.count().toInt()
         }
@@ -270,8 +319,8 @@ class MutualSelectionService(
                 this.coachID = coach
                 this.status = MutualSelectionStatus.ACTIVE
                 this.applicationTime = Clock.System.now()
-                this.expectedStartTime = Clock.System.now()
-                this.actualStartTime = Clock.System.now()
+                this.expectedStartTime = Clock.System.now() // 保留但不再使用
+                this.actualStartTime = Clock.System.now() // 保留但不再使用
             }
 
             // 更新计数
@@ -310,5 +359,101 @@ class MutualSelectionService(
                 .take(size)
                 .toList()
                 .expose()
+        }
+    
+    /**
+     * 获取学生当前已建立关系的教练列表
+     */
+    fun getStudentCurrentCoaches(
+        studentUUID: String
+    ): List<MutualSelection> =
+        transaction(database) {
+            val student = StudentEntity.findById(UUID.fromString(studentUUID))
+                ?: throw IllegalArgumentException("学生不存在")
+
+            // 查询学生所有已批准或活跃的关系
+            val query = MutualSelectionEntity.find {
+                (MutualSelectionTable.student_id eq student.id) and
+                        (MutualSelectionTable.status inList listOf(
+                            MutualSelectionStatus.APPROVED,
+                            MutualSelectionStatus.ACTIVE
+                        ))
+            }
+
+            query.toList().expose()
+        }
+    
+    /**
+     * 获取教练当前已建立关系的学生列表
+     */
+    fun getCoachCurrentStudents(
+        coachUUID: String
+    ): List<MutualSelection> =
+        transaction(database) {
+            val coach = CoachEntity.findById(UUID.fromString(coachUUID))
+                ?: throw IllegalArgumentException("教练不存在")
+
+            // 查询教练所有已批准或活跃的关系
+            val query = MutualSelectionEntity.find {
+                (MutualSelectionTable.coach_id eq coach.id) and
+                        (MutualSelectionTable.status inList listOf(
+                            MutualSelectionStatus.APPROVED,
+                            MutualSelectionStatus.ACTIVE
+                        ))
+            }
+
+            query.toList().expose()
+        }
+    
+    /**
+     * 获取教练历史学生列表（包括已结束关系的学生）
+     */
+    fun getCoachHistoricalStudents(
+        coachUUID: String
+    ): List<MutualSelection> =
+        transaction(database) {
+            val coach = CoachEntity.findById(UUID.fromString(coachUUID))
+                ?: throw IllegalArgumentException("教练不存在")
+
+            // 查询教练所有已结束的关系（包括被拒绝和非活跃的）
+            val query = MutualSelectionEntity.find {
+                (MutualSelectionTable.coach_id eq coach.id) and
+                        (MutualSelectionTable.status inList listOf(
+                            MutualSelectionStatus.REJECTED,
+                            MutualSelectionStatus.INACTIVE
+                        ))
+            }
+
+            query.toList().expose()
+        }
+    
+    /**
+     * 管理员根据ID获取师生关系详细信息
+     */
+    fun getRelationById(
+        relationId: String
+    ): MutualSelection =
+        transaction(database) {
+            val relation = MutualSelectionEntity.findById(UUID.fromString(relationId))
+                ?: throw IllegalArgumentException("关系记录不存在")
+            
+            relation.expose()
+        }
+    
+    /**
+     * 管理员更新师生关系信息
+     */
+    fun updateRelation(
+        relationId: String,
+        status: MutualSelectionStatus? = null
+    ): MutualSelection =
+        transaction(database) {
+            val relation = MutualSelectionEntity.findById(UUID.fromString(relationId))
+                ?: throw IllegalArgumentException("关系记录不存在")
+
+            // 更新状态
+            status?.let { relation.status = it }
+
+            relation.expose()
         }
 }

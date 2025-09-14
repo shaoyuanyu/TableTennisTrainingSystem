@@ -155,7 +155,7 @@ class StudentService(
      * @return Pair<充值记录列表, 总记录数>
      * @throws Exception 如果用户不存在
      */
-    fun getRechargeHistoryByusername(username:String, page: Int, size: Int): Pair<List<RechargeRecord>, Long> {
+    fun getRechargeHistoryByUsername(username:String, page: Int, size: Int): Pair<List<RechargeRecord>, Long> {
         val user = userService.queryUserByUsername(username)
         return getRechargeHistory(user.uuid.toString(), page, size)
     }

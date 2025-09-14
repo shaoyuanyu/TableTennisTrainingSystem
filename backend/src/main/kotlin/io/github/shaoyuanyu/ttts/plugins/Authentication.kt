@@ -51,6 +51,10 @@ fun Application.configureAuthentication(userService: UserService) {
                     throw UnauthorizedException("需要学生权限")
                 }
             }
+
+            challenge {
+                throw UnauthorizedException("未登录")
+            }
         }
 
         // session 验证（coach）
@@ -62,16 +66,25 @@ fun Application.configureAuthentication(userService: UserService) {
                     throw UnauthorizedException("需要教练权限")
                 }
             }
+
+            challenge {
+                throw UnauthorizedException("未登录")
+            }
         }
 
         // session 验证（campus admin）
         session<UserSession>("auth-session-campus-admin") {
             validate { session ->
+                // TODO: 当前默认 SUPER_ADMIN 有 CAMPUS_ADMIN 的权限
                 if (session.userRole == UserRole.CAMPUS_ADMIN|| session.userRole == UserRole.SUPER_ADMIN) {
                     session
                 } else {
                     throw UnauthorizedException("需要校区管理员权限")
                 }
+            }
+
+            challenge {
+                throw UnauthorizedException("未登录")
             }
         }
 
@@ -83,6 +96,10 @@ fun Application.configureAuthentication(userService: UserService) {
                 } else {
                     throw UnauthorizedException("需要超级管理员权限")
                 }
+            }
+
+            challenge {
+                throw UnauthorizedException("未登录")
             }
         }
     }
