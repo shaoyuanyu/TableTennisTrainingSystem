@@ -30,6 +30,8 @@ tags:
     description: 钱包系统相关接口
   - name: competition
     description: 竞赛系统相关接口
+  - name: course
+    description: 课程管理相关接口
 
 security:
   - SessionAuth: []
@@ -1201,6 +1203,270 @@ paths:
                 items:
                   $ref: '#/components/schemas/CompetitionInfo'
 
+  # 课程管理接口
+  /courses/my-schedule:
+    get:
+      tags: [course]
+      summary: 学生查看自己的课程安排
+      description: 学生获取自己的课程表
+      security:
+        - SessionAuth: [STUDENT]
+      parameters:
+        - name: dateFrom
+          in: query
+          schema:
+            type: string
+            format: date
+          description: 查询起始日期 (YYYY-MM-DD)
+        - name: dateTo
+          in: query
+          schema:
+            type: string
+            format: date
+          description: 查询结束日期 (YYYY-MM-DD)
+      responses:
+        '200':
+          description: 成功获取课程安排
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Course'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /courses/coach-schedule/{coachId}:
+    get:
+      tags: [course]
+      summary: 学生查看指定教练的时间安排
+      description: 学生获取指定教练的课程表，用于预约课程
+      security:
+        - SessionAuth: [STUDENT]
+      parameters:
+        - name: coachId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: 教练ID
+        - name: dateFrom
+          in: query
+          schema:
+            type: string
+            format: date
+          description: 查询起始日期 (YYYY-MM-DD)
+        - name: dateTo
+          in: query
+          schema:
+            type: string
+            format: date
+          description: 查询结束日期 (YYYY-MM-DD)
+      responses:
+        '200':
+          description: 成功获取教练课程安排
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Course'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /courses/feedback:
+    post:
+      tags: [course]
+      summary: 学生提交课程反馈
+      description: 学生在课程结束后提交反馈和评分
+      security:
+        - SessionAuth: [STUDENT]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StudentFeedbackRequest'
+      responses:
+        '200':
+          description: 反馈提交成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /courses/my-schedule:
+    get:
+      tags: [course]
+      summary: 教练查看自己的课程安排
+      description: 教练获取自己的课程表
+      security:
+        - SessionAuth: [COACH]
+      parameters:
+        - name: dateFrom
+          in: query
+          schema:
+            type: string
+            format: date
+          description: 查询起始日期 (YYYY-MM-DD)
+        - name: dateTo
+          in: query
+          schema:
+            type: string
+            format: date
+          description: 查询结束日期 (YYYY-MM-DD)
+      responses:
+        '200':
+          description: 成功获取课程安排
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Course'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /courses/confirm:
+    post:
+      tags: [course]
+      summary: 教练确认/拒绝课程
+      description: 教练确认或拒绝学生预约的课程
+      security:
+        - SessionAuth: [COACH]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CourseConfirmRequest'
+      responses:
+        '200':
+          description: 操作成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /courses/{courseId}/status:
+    put:
+      tags: [course]
+      summary: 教练更新课程状态
+      description: 教练更新课程的状态
+      security:
+        - SessionAuth: [COACH]
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: 课程ID
+        - name: status
+          in: query
+          required: true
+          schema:
+            type: string
+          description: 课程状态 (PENDING, CONFIRMED, COMPLETED, CANCELLED)
+      responses:
+        '200':
+          description: 状态更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /courses/lesson-content:
+    post:
+      tags: [course]
+      summary: 教练填写课程内容
+      description: 教练在课程结束后填写课程内容
+      security:
+        - SessionAuth: [COACH]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LessonContentUpdateRequest'
+      responses:
+        '200':
+          description: 内容更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /courses/create:
+    post:
+      tags: [course]
+      summary: 管理员创建课程
+      description: 管理员代理创建课程
+      security:
+        - SessionAuth: [CAMPUS_ADMIN, SUPER_ADMIN]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CourseCreateRequest'
+      responses:
+        '201':
+          description: 课程创建成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /courses/query:
+    post:
+      tags: [course]
+      summary: 查询课程
+      description: 管理员查询课程列表
+      security:
+        - SessionAuth: [CAMPUS_ADMIN, SUPER_ADMIN]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueryCourseRequest'
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseScheduleResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
 components:
   securitySchemes:
     SessionAuth:
@@ -1582,6 +1848,241 @@ components:
           type: string
         player2Username:
           type: string
+
+    Course:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: 课程ID
+        title:
+          type: string
+          description: 课程标题
+        description:
+          type: string
+          description: 课程简介（可选)
+        date:
+          type: string
+          format: date
+          description: 课程日期 (YYYY-MM-DD)
+        startTime:
+          type: string
+          description: 开始时间 (HH:MM)
+        endTime:
+          type: string
+          description: 结束时间 (HH:MM)
+        duration:
+          type: integer
+          description: 课程时长（分钟)
+        location:
+          type: string
+          description: 上课地点
+        status:
+          type: string
+          description: 课程状态 (PENDING, CONFIRMED, COMPLETED, CANCELLED)
+        price:
+          type: integer
+          description: 课程价格（分)
+        coachId:
+          type: string
+          format: uuid
+          description: 教练ID
+        coachName:
+          type: string
+          description: 教练姓名
+        studentId:
+          type: string
+          format: uuid
+          description: 学员ID
+        studentName:
+          type: string
+          description: 学员姓名
+        campusId:
+          type: integer
+          description: 校区ID
+        campusName:
+          type: string
+          description: 校区名称
+        tableId:
+          type: string
+          format: uuid
+          description: 关联的球桌ID（可选)
+        tableIndex:
+          type: integer
+          description: 球桌在校区内的编号（可选)
+        lessonContent:
+          type: string
+          description: 教练课后填写的课程内容
+        paymentStatus:
+          type: string
+          description: 付款状态 (PENDING, PAID, REFUNDED)
+        attendanceStatus:
+          type: string
+          description: 出勤状态 (PRESENT, ABSENT, LATE)
+        studentFeedback:
+          type: string
+          description: 学生对课程的反馈
+        studentRating:
+          type: integer
+          description: 学生评分 (1-5)
+        createdAt:
+          type: string
+          format: date-time
+          description: 创建时间
+
+    CourseCreateRequest:
+      type: object
+      required:
+        - title
+        - date
+        - startTime
+        - endTime
+        - location
+        - price
+        - coachId
+        - studentId
+        - campusId
+      properties:
+        title:
+          type: string
+          description: 课程标题
+        description:
+          type: string
+          description: 课程简介（可选)
+        date:
+          type: string
+          format: date
+          description: 课程日期 (YYYY-MM-DD)
+        startTime:
+          type: string
+          description: 开始时间 (HH:MM)
+        endTime:
+          type: string
+          description: 结束时间 (HH:MM)
+        location:
+          type: string
+          description: 上课地点
+        price:
+          type: integer
+          description: 课程价格（分)
+        coachId:
+          type: string
+          format: uuid
+          description: 教练ID
+        studentId:
+          type: string
+          format: uuid
+          description: 学员ID
+        campusId:
+          type: integer
+          description: 校区ID
+        tableId:
+          type: string
+          format: uuid
+          description: 关联的球桌ID（可选)
+
+    CourseConfirmRequest:
+      type: object
+      required:
+        - courseId
+        - confirmed
+      properties:
+        courseId:
+          type: string
+          format: uuid
+          description: 课程ID
+        confirmed:
+          type: boolean
+          description: true=确认, false=拒绝
+        reason:
+          type: string
+          description: 拒绝原因（可选)
+
+    LessonContentUpdateRequest:
+      type: object
+      required:
+        - courseId
+        - lessonContent
+      properties:
+        courseId:
+          type: string
+          format: uuid
+          description: 课程ID
+        lessonContent:
+          type: string
+          description: 课程内容
+
+    StudentFeedbackRequest:
+      type: object
+      required:
+        - courseId
+        - attendanceStatus
+      properties:
+        courseId:
+          type: string
+          format: uuid
+          description: 课程ID
+        attendanceStatus:
+          type: string
+          description: 出勤状态 (PRESENT, ABSENT, LATE)
+        studentFeedback:
+          type: string
+          description: 学生对课程的反馈
+        studentRating:
+          type: integer
+          description: 学生评分 (1-5)
+
+    QueryCourseRequest:
+      type: object
+      properties:
+        status:
+          type: string
+          description: 课程状态 (PENDING, CONFIRMED, COMPLETED, CANCELLED)
+        studentId:
+          type: string
+          format: uuid
+          description: 学员ID
+        coachId:
+          type: string
+          format: uuid
+          description: 教练ID
+        campusId:
+          type: integer
+          description: 校区ID
+        dateFrom:
+          type: string
+          format: date
+          description: 查询起始日期 (YYYY-MM-DD)
+        dateTo:
+          type: string
+          format: date
+          description: 查询结束日期 (YYYY-MM-DD)
+        page:
+          type: integer
+          description: 页码（从1开始）
+          default: 1
+        size:
+          type: integer
+          description: 每页大小
+          default: 20
+
+    CourseScheduleResponse:
+      type: object
+      properties:
+        courses:
+          type: array
+          items:
+            $ref: '#/components/schemas/Course'
+        total:
+          type: integer
+          description: 总记录数
+        page:
+          type: integer
+          description: 当前页码
+        size:
+          type: integer
+          description: 每页大小
 
   responses:
     BadRequest:
