@@ -36,11 +36,11 @@ fun Application.competitionRoutes(studentService: StudentService) {
             }
             //管理员权限
             authenticate ("auth-session-campus-admin"){
-
+                getCampusCompetitions(studentService)
             }
             // 超级管理员权限
             authenticate("auth-session-super-admin") {
-
+                getAllCompetitions(studentService)
             }
         }
     }
@@ -80,6 +80,36 @@ fun Route.querysignup(studentService: StudentService) {
         call.respond(
             HttpStatusCode.OK,
             detail
+        )
+ }
+}
+/**
+ * 获取所有竞赛信息
+ */
+fun Route.getAllCompetitions(studentService: StudentService) {
+    get("/allcompetitions") {
+        val competitions = studentService.getAllCompetitions()
+        call.respond(
+            HttpStatusCode.OK,
+            competitions
+        )
+ }
+}
+/**
+ * 获取本校区所有竞赛信息
+ */
+fun Route.getCampusCompetitions(studentService: StudentService) {
+    get("/campuscompetitions") {
+        val userId=call.sessions.get<UserSession>().let {
+            if (it == null) {
+                throw UnauthorizedException("未登录")
+            }
+            it.userId
+        }
+        val competitions = studentService.getCampusCompetitions(userId)
+        call.respond(
+            HttpStatusCode.OK,
+            competitions
         )
  }
 }

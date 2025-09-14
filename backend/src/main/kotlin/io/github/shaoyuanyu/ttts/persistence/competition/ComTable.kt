@@ -13,6 +13,7 @@ object ComTable: IntIdTable("competition")   {
     val group:Column<String> = varchar("group",32)
     val tableId:Column<Int> = integer("table_id")
     val campusId:Column<Int> = integer("campus_id")
+    val status:Column<String> = varchar("status",32)
     val createdAt: Column<Instant> = timestamp("created_at")
 
 }

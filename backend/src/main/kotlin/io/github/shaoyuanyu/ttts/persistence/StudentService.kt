@@ -4,6 +4,7 @@ package io.github.shaoyuanyu.ttts.persistence
 
 import io.github.shaoyuanyu.ttts.dto.recharge.RechargeRecord
 import io.github.shaoyuanyu.ttts.dto.student.ComQueryRequest
+import io.github.shaoyuanyu.ttts.dto.student.CompetitionInfo
 import io.github.shaoyuanyu.ttts.exceptions.NotFoundException
 import io.github.shaoyuanyu.ttts.persistence.campus.CampusEntity
 import io.github.shaoyuanyu.ttts.persistence.competition.ComEntity
@@ -250,6 +251,7 @@ class StudentService(
                 this.group = group
                 this.tableId = tableId
                 campusId = userCampusId
+                status="ACTIVE"
                 createdAt = Clock.System.now()
             }
 
@@ -271,10 +273,13 @@ class StudentService(
     fun querySignup(userId: String): ComQueryRequest =
         transaction(database) {
                 // 1. 先查询自己的报名信息
-            val mySignup = ComEntity.find { ComTable.userId eq userId }
+            val mySignup = ComEntity.find {
+                (ComTable.userId eq userId)and
+                    (ComTable.status eq "ACTIVE")
+            }
                 .limit(1)
                 .singleOrNull()
-                ?: throw NotFoundException("您尚未报名比赛")
+                ?: throw NotFoundException("您没有未完成的比赛")
 
                 val myTableId = mySignup.tableId
                 val myGroup = mySignup.group
@@ -301,5 +306,96 @@ class StudentService(
             signupInfo
         }
 
+    /**
+     * 获取所有比赛信息
+     */
+    fun getAllCompetitions(): List<CompetitionInfo> =
+        transaction(database) {
+                // 1. 查询所有比赛记录
+            val allCompetitions = ComEntity.all()
+                .filter { it.status == "ACTIVE" }
+                .toList()
+            if(allCompetitions.isEmpty()) {
+                throw NotFoundException("当前没有任何比赛报名")
+            }
+                // 2. 按球桌分组，找出每个球桌的比赛双方
+            val competitionsByTable = allCompetitions.groupBy { it.tableId }
 
+                // 3. 构建比赛信息列表
+            competitionsByTable.mapNotNull { (tableId, signups) ->
+                    if (signups.size >= 2) {
+                        // 有至少两人报名，形成比赛
+                        val player1 = signups[0]
+                        val player2 = signups[1]
+
+                        CompetitionInfo(
+                            tableId = tableId,
+                            campusId = player1.campusId, // 同一球台的用户在同一校区
+                            group = player1.group,       // 同一球台的用户在同一小组
+                            player1Username = player1.username,
+                            player2Username = player2.username
+                        )
+                    } else if (signups.size == 1) {
+                        // 只有一人报名，显示等待对手
+                        val player = signups[0]
+                        CompetitionInfo(
+                            tableId = tableId,
+                            campusId = player.campusId,
+                            group = player.group,
+                            player1Username = player.username,
+                            player2Username = "等待对手"
+                        )
+                    } else {
+                        null // 空球台，跳过
+                    }
+                }
+            }
+
+    /**
+     * 获取管理员所在校区的比赛信息
+     */
+    fun getCampusCompetitions(userId: String): List<CompetitionInfo> =
+        transaction(database) {
+            // 获取用户信息
+            val userEntity = UserEntity.findById(UUID.fromString(userId))
+                ?: throw NotFoundException("用户不存在")
+            val campus=userEntity.campusId
+            val allCompetitions = ComEntity.all()
+                .filter { (it.campusId == campus)and(it.status == "ACTIVE") }
+                .toList()
+            if(allCompetitions.isEmpty()) {
+                throw NotFoundException("当前没有任何比赛报名")
+            }
+            // 2. 按球桌分组，找出每个球桌的比赛双方
+            val competitionsByTable = allCompetitions.groupBy { it.tableId }
+
+            // 3. 构建比赛信息列表
+            competitionsByTable.mapNotNull { (tableId, signups) ->
+                if (signups.size >= 2) {
+                    // 有至少两人报名，形成比赛
+                    val player1 = signups[0]
+                    val player2 = signups[1]
+
+                    CompetitionInfo(
+                        tableId = tableId,
+                        campusId = player1.campusId, // 同一球台的用户在同一校区
+                        group = player1.group,       // 同一球台的用户在同一小组
+                        player1Username = player1.username,
+                        player2Username = player2.username
+                    )
+                } else if (signups.size == 1) {
+                    // 只有一人报名，显示等待对手
+                    val player = signups[0]
+                    CompetitionInfo(
+                        tableId = tableId,
+                        campusId = player.campusId,
+                        group = player.group,
+                        player1Username = player.username,
+                        player2Username = "等待对手"
+                    )
+                } else {
+                    null // 空球台，跳过
+                }
+            }
+        }
 }

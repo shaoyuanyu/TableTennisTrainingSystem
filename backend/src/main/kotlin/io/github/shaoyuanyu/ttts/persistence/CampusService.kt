@@ -3,7 +3,11 @@ package io.github.shaoyuanyu.ttts.persistence
 
 import io.github.shaoyuanyu.ttts.dto.campus.CampusCreateRequest
 import io.github.shaoyuanyu.ttts.dto.campus.CampusqueryRequest
+import io.github.shaoyuanyu.ttts.dto.user.UserRole
 import io.github.shaoyuanyu.ttts.persistence.campus.CampusEntity
+import io.github.shaoyuanyu.ttts.persistence.user.UserEntity
+import io.github.shaoyuanyu.ttts.persistence.user.UserTable
+import io.github.shaoyuanyu.ttts.utils.encryptPasswd
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import kotlin.time.Clock
@@ -35,14 +39,14 @@ class CampusService(
      */
     fun createCampus(newCampus: CampusCreateRequest) {
         transaction(database) {
-            // 检查校区名是否已存在::已改为数据库表实现
-//            val existingCampus = CampusEntity.find { CampusTable.campus_name eq newCampus.campusName }.firstOrNull()
-//
-//            if (existingCampus != null) {
-//                throw Exception("校区名 '${newCampus.campusName}' 已存在，创建失败")
-//            }
+            // 检查是否已存在相同用户名的用户
+            val existingUser = UserEntity.find { UserTable.username eq newCampus.contactPerson }.firstOrNull()
+            if (existingUser != null) {
+                throw Exception("用户名 '${newCampus.contactPerson}' 已存在，无法创建校区管理员")
+            }
 
-            CampusEntity.new {
+            // 创建校区
+            val campusEntity = CampusEntity.new {
                 campusName = newCampus.campusName
                 address = newCampus.address
                 contactPerson = newCampus.contactPerson
@@ -53,8 +57,27 @@ class CampusService(
                 createdAt = Clock.System.now()
                 lastLoginAt = createdAt
             }
+
+            // 获取新创建的校区ID
+            val campusId = campusEntity.id.value
+
+            // 创建校区管理员用户
+            UserEntity.new {
+                username = newCampus.contactPerson
+                realName = newCampus.contactPerson
+                encryptedPassword = encryptPasswd("12345678") // 加密密码
+                gender = ""
+                age = 0
+                phoneNumber = newCampus.phone
+                email = newCampus.email
+                this.campusId = campusId // 关联校区ID
+                role = UserRole.CAMPUS_ADMIN
+                status = "ACTIVE"
+                this.createdAt = Clock.System.now()
+                this.lastLoginAt = this.createdAt
+            }
         }.also {
-            USER_LOGGER.info("创建校区成功，校区名：${newCampus.campusName}")
+            USER_LOGGER.info("创建校区成功，校区名：${newCampus.campusName}，管理员：${newCampus.contactPerson}")
         }
     }
     /**

@@ -14,5 +14,6 @@ class ComEntity(id: EntityID<Int>) : IntEntity(id) {
     var group by ComTable.group
     var tableId by ComTable.tableId
     var campusId by ComTable.campusId
+    var status by ComTable.status
     var createdAt by ComTable.createdAt
 }
