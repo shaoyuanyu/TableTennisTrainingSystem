@@ -2,6 +2,7 @@ package io.github.shaoyuanyu.ttts
 
 import io.github.shaoyuanyu.ttts.persistence.CampusService
 import io.github.shaoyuanyu.ttts.persistence.CoachService
+import io.github.shaoyuanyu.ttts.persistence.CourseService
 import io.github.shaoyuanyu.ttts.persistence.UserService
 import io.github.shaoyuanyu.ttts.persistence.MessageService
 import io.github.shaoyuanyu.ttts.persistence.MutualSelectionService
@@ -37,6 +38,7 @@ fun Application.module() {
     val campusService = CampusService(database)
     val coachService = CoachService(database, userService)
     val mutualSelectionService = MutualSelectionService(database)
+    val courseService = CourseService(database)
 
     // monitoring
     configureMonitoring()
@@ -61,6 +63,7 @@ fun Application.module() {
         studentService = studentService,
         campusService = campusService,
         coachService = coachService,
-        mutualSelectionService = mutualSelectionService
+        mutualSelectionService = mutualSelectionService,
+        courseService = courseService
     )
 }

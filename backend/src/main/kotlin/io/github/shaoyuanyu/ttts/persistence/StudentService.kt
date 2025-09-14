@@ -5,6 +5,8 @@ package io.github.shaoyuanyu.ttts.persistence
 import io.github.shaoyuanyu.ttts.dto.recharge.RechargeRecord
 import io.github.shaoyuanyu.ttts.dto.student.ComQueryRequest
 import io.github.shaoyuanyu.ttts.dto.student.CompetitionInfo
+import io.github.shaoyuanyu.ttts.dto.student.Status
+import io.github.shaoyuanyu.ttts.dto.student.Group
 import io.github.shaoyuanyu.ttts.exceptions.NotFoundException
 import io.github.shaoyuanyu.ttts.persistence.campus.CampusEntity
 import io.github.shaoyuanyu.ttts.persistence.competition.ComEntity
@@ -31,6 +33,16 @@ class StudentService(
     private val database: Database,
     private val userService: UserService
 ) {
+    companion object {
+        // 中文组名到枚举的映射
+        private fun mapGroupNameToEnum(groupName: String): Group = when (groupName) {
+            "甲" -> Group.A
+            "乙" -> Group.B  
+            "丙" -> Group.C
+            else -> throw IllegalArgumentException("无效的组名: $groupName")
+        }
+    }
+    
     /**
      * 查询余额
      */
@@ -213,25 +225,26 @@ class StudentService(
             val userCampusId = userEntity.campusId
 
             // 1. 首先查找已经有一个同组人占用的球台（优先分配）
+            val groupEnum = mapGroupNameToEnum(group)
             val partiallyOccupiedTables = TableEntity.find {
-                (TableTable.status eq "部分占用") and
+                (TableTable.status eq Status.partlyoccupy) and
                         (TableTable.campusId eq userCampusId) and
-                        (TableTable.group eq group)
+                        (TableTable.group eq groupEnum)
             }.toList()
 
             val selectedTable: TableEntity
-            val tableId: Int
-            val newTableStatus: String
+            val tableIndex: Int
+            val newTableStatus: Status
 
             if (partiallyOccupiedTables.isNotEmpty()) {
                 // 优先选择部分占用的球台
                 selectedTable = partiallyOccupiedTables.random()
-                tableId = selectedTable.id.value
-                newTableStatus = "已满" // 分配第二个人后，球台满员
+                tableIndex = selectedTable.indexInCampus
+                newTableStatus = Status.occupy // 分配第二个人后，球台满员
             } else {
                 // 如果没有部分占用的球台，选择空闲球台
                 val availableTables = TableEntity.find {
-                    (TableTable.status eq "空闲") and
+                    (TableTable.status eq Status.free) and
                             (TableTable.campusId eq userCampusId)
                 }.toList()
 
@@ -240,8 +253,8 @@ class StudentService(
                 }
 
                 selectedTable = availableTables.random()
-                tableId = selectedTable.id.value
-                newTableStatus = "部分占用" // 分配第一个人，部分占用
+                tableIndex = selectedTable.indexInCampus
+                newTableStatus = Status.partlyoccupy // 分配第一个人，部分占用
             }
 
             // 插入报名记录
@@ -249,22 +262,22 @@ class StudentService(
                 this.userId = userId
                 username = userEntity.username
                 this.group = group
-                this.tableId = tableId
+                this.tableId = tableIndex
                 campusId = userCampusId
-                status="ACTIVE"
+                status = "ACTIVE"
                 createdAt = Clock.System.now()
             }
 
             deduct(userId, 30.0f) // 报名费30元
 
             // 更新球台状态
-            val tableEntity = TableEntity.findById(tableId)
+            val tableEntity = TableEntity.findById(selectedTable.id.value)
                 ?: throw NotFoundException("球台不存在")
 
             tableEntity.status = newTableStatus
-            tableEntity.group = group
+            tableEntity.group = groupEnum
 
-            USER_LOGGER.info("报名成功！小组：$group，分配球台：$tableId")
+            USER_LOGGER.info("报名成功！小组：$group，分配球台：$tableIndex")
         }
     }
     /**

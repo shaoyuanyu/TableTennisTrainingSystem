@@ -1,6 +1,7 @@
 package io.github.shaoyuanyu.ttts.persistence.course
 
 import io.github.shaoyuanyu.ttts.dto.course.Course
+import io.github.shaoyuanyu.ttts.persistence.table.TableEntity
 import org.jetbrains.exposed.v1.core.dao.id.EntityID
 import org.jetbrains.exposed.v1.dao.UUIDEntity
 import org.jetbrains.exposed.v1.dao.UUIDEntityClass
@@ -11,44 +12,59 @@ class CourseEntity(uuid: EntityID<UUID>) : UUIDEntity(uuid) {
 
     var title by CourseTable.title
     var description by CourseTable.description
-    var type by CourseTable.type
-    var level by CourseTable.level
     var date by CourseTable.date
     var startTime by CourseTable.startTime
     var endTime by CourseTable.endTime
-    var duration by CourseTable.duration
     var location by CourseTable.location
     var status by CourseTable.status
-    var maxStudents by CourseTable.maxStudents
-    var currentStudents by CourseTable.currentStudents
     var price by CourseTable.price
     var coachId by CourseTable.coachId
     var coachName by CourseTable.coachName
+    var studentId by CourseTable.studentId
+    var studentName by CourseTable.studentName
     var campusId by CourseTable.campusId
     var campusName by CourseTable.campusName
+    var tableId by TableEntity referencedOn CourseTable.tableId
+    var lessonContent by CourseTable.lessonContent
+    var paymentStatus by CourseTable.paymentStatus
+    var attendanceStatus by CourseTable.attendanceStatus
+    var studentFeedback by CourseTable.studentFeedback
+    var studentRating by CourseTable.studentRating
     var createdAt by CourseTable.createdAt
-    var updatedAt by CourseTable.updatedAt
 }
 
 fun CourseEntity.expose() = Course(
-    id = this.id.value.toString(),
-    title = this.title,
-    description = this.description,
-    type = this.type,
-    level = this.level,
-    date = this.date.toString(),
-    startTime = this.startTime.toString(),
-    endTime = this.endTime.toString(),
-    duration = this.duration,
-    location = this.location,
-    status = this.status,
-    maxStudents = this.maxStudents,
-    currentStudents = this.currentStudents,
-    price = this.price,
-    coachId = this.coachId.toString(),
-    coachName = this.coachName,
-    campusId = this.campusId,
-    campusName = this.campusName,
-    createdAt = this.createdAt.toString(),
-    updatedAt = this.updatedAt.toString()
+    id = id.value.toString(),
+    title = title,
+    description = description,
+    date = date.toString(),
+    startTime = startTime.toString(),
+    endTime = endTime.toString(),
+    duration = calculateDuration(startTime, endTime), // 动态计算时长
+    location = location,
+    status = status.name,
+    price = price,
+    coachId = coachId.toString(),
+    coachName = coachName,
+    studentId = studentId.toString(),
+    studentName = studentName,
+    campusId = campusId,
+    campusName = campusName,
+    tableId = tableId.toString(),
+    tableIndex = tableId.indexInCampus,
+    lessonContent = lessonContent,
+    paymentStatus = paymentStatus,
+    attendanceStatus = attendanceStatus,
+    studentFeedback = studentFeedback,
+    studentRating = studentRating,
+    createdAt = createdAt.toString()
 )
+
+/**
+ * 计算课程时长（分钟）
+ */
+private fun calculateDuration(startTime: kotlinx.datetime.LocalTime, endTime: kotlinx.datetime.LocalTime): Int {
+    val startSeconds = startTime.toSecondOfDay()
+    val endSeconds = endTime.toSecondOfDay()
+    return (endSeconds - startSeconds) / 60
+}
