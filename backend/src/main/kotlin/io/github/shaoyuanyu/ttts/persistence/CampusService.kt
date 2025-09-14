@@ -54,7 +54,7 @@ class CampusService(
                 lastLoginAt = createdAt
             }
         }.also {
-            LOGGER.info("创建校区成功，校区名：${newCampus.campusName}")
+            USER_LOGGER.info("创建校区成功，校区名：${newCampus.campusName}")
         }
     }
     /**

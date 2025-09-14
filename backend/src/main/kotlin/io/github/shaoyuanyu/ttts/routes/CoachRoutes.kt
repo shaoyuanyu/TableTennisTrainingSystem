@@ -4,28 +4,25 @@ package io.github.shaoyuanyu.ttts.routes
 
 import io.github.shaoyuanyu.ttts.dto.coach.ApproveCoachRequest
 import io.github.shaoyuanyu.ttts.dto.coach.QueryCoachRequest
-import io.github.shaoyuanyu.ttts.dto.user.UserSession
 import io.github.shaoyuanyu.ttts.exceptions.BadRequestException
-import io.github.shaoyuanyu.ttts.exceptions.UnauthorizedException
 import io.github.shaoyuanyu.ttts.persistence.CoachService
+import io.github.shaoyuanyu.ttts.utils.getUserIdFromCall
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import io.ktor.server.sessions.*
 
 fun Application.coachRoutes(coachService: CoachService) {
     routing {
         route("/coach") {
             // 无权限限制
             run {
-
             }
+
             // 所有登录用户
             authenticate("auth-session-all") {
-
             }
 
             // 学生权限
@@ -33,12 +30,9 @@ fun Application.coachRoutes(coachService: CoachService) {
                 getAllCoach(coachService)
                 queryCoach(coachService)
             }
-            
+
             // 教练权限
             authenticate("auth-session-coach") {
-                reviewStudentApplication(coachService)
-                getCoachApplications(coachService)
-                getPendingApplicationCount(coachService)
             }
             
             //管理员权限
@@ -46,6 +40,7 @@ fun Application.coachRoutes(coachService: CoachService) {
                 getCampusCoachesNotApproved(coachService)
                 approveCoach(coachService)
             }
+
             // 超级管理员权限
             authenticate("auth-session-super-admin") {
                 getAllCoachesNotApproved(coachService)
@@ -60,7 +55,6 @@ fun Application.coachRoutes(coachService: CoachService) {
  */
 fun Route.getAllCoach(coachService: CoachService) {
     get("/coaches") {
-
         // 获取查询参数
         val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 1
         val size = call.request.queryParameters["size"]?.toIntOrNull() ?: 10
@@ -76,9 +70,7 @@ fun Route.getAllCoach(coachService: CoachService) {
 
         val coaches = coachService.getAllCoaches(page,size)
 
-        call.respond(HttpStatusCode.OK,
-            coaches
-        )
+        call.respond(HttpStatusCode.OK, coaches)
     }
 }
 
@@ -87,129 +79,20 @@ fun Route.getAllCoach(coachService: CoachService) {
  */
 fun Route.queryCoach(coachService: CoachService) {
     post("/queryCoach") {
+        val request = call.receive<QueryCoachRequest>()
+        val username = request.username
 
-            val request = call.receive<QueryCoachRequest>()
-            val username = request.username
-
-            if (username.isBlank()) {
-                call.respond(HttpStatusCode.BadRequest, mapOf("error" to "用户名不能为空"))
-                return@post
-            }
-
-            // 调用服务层函数
-            val coachRecord = coachService.queryCoachesByUsername(username)
-
-            // 返回成功响应
-            call.respond(HttpStatusCode.OK, coachRecord)
-
-        }
-    }
-
-/**
- * 教练审核学生申请
- */
-fun Route.reviewStudentApplication(coachService: CoachService) {
-    post("/review-application") {
-        // 从会话中获取教练ID
-        val coachId = call.sessions.get<UserSession>()?.userId
-            ?: throw UnauthorizedException("未登录")
-
-        // 接收请求参数
-        val params = call.receiveParameters()
-        val relationId = params["relationId"] ?: throw BadRequestException("关系ID不能为空")
-        val approveStr = params["approve"] ?: throw BadRequestException("批准状态不能为空")
-        val message = params["message"]
-        
-        val approve = approveStr.toBoolean()
-        
-        try {
-            // 调用服务层函数
-            val relation = coachService.reviewStudentApplication(coachId, relationId, approve, message)
-
-            // 返回成功响应
-            call.respond(HttpStatusCode.OK, mapOf(
-                "success" to true,
-                "data" to mapOf(
-                    "id" to relation.id.value.toString(),
-                    "status" to relation.status,
-                    "updatedAt" to relation.updatedAt.toString()
-                )
-            ))
-        } catch (e: Exception) {
-            call.respond(HttpStatusCode.BadRequest, mapOf("success" to false, "message" to e.message))
-        }
-    }
-}
-
-/**
- * 获取教练申请记录
- */
-fun Route.getCoachApplications(coachService: CoachService) {
-    get("/applications") {
-        // 从会话中获取教练ID
-        val coachId = call.sessions.get<UserSession>()?.userId
-            ?: throw UnauthorizedException("未登录")
-
-        // 获取查询参数
-        val status = call.request.queryParameters["status"]
-        val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 1
-        val size = call.request.queryParameters["size"]?.toIntOrNull() ?: 10
-
-        // 参数验证
-        if (page <= 0) {
-            throw BadRequestException("页码必须大于0")
+        if (username.isBlank()) {
+            call.respond(HttpStatusCode.BadRequest, mapOf("error" to "用户名不能为空"))
+            return@post
         }
 
-        if (size !in 1..100) {
-            throw BadRequestException("每页大小必须在1-100之间")
-        }
+        // 调用服务层函数
+        val coachRecord = coachService.queryCoachesByUsername(username)
 
-        try {
-            // 调用服务层函数
-            val applications = coachService.getCoachApplications(coachId, status, page, size)
+        // 返回成功响应
+        call.respond(HttpStatusCode.OK, coachRecord)
 
-            // 返回成功响应
-            call.respond(HttpStatusCode.OK, mapOf(
-                "success" to true,
-                "data" to applications.map { relation ->
-                    mapOf(
-                        "id" to relation.id.value.toString(),
-                        "studentName" to relation.studentID.userId.realName,
-                        "status" to relation.status,
-                        "applicationTime" to relation.applicationTime.toString(),
-                        "expectedStartTime" to relation.expectedStartTime.toString(),
-                        "studentMessage" to relation.studentMessage,
-                        "coachMessage" to relation.coachMessage
-                    )
-                }
-            ))
-        } catch (e: Exception) {
-            call.respond(HttpStatusCode.BadRequest, mapOf("success" to false, "message" to e.message))
-        }
-    }
-}
-
-/**
- * 获取教练待处理申请数量
- */
-fun Route.getPendingApplicationCount(coachService: CoachService) {
-    get("/pending-count") {
-        // 从会话中获取教练ID
-        val coachId = call.sessions.get<UserSession>()?.userId
-            ?: throw UnauthorizedException("未登录")
-
-        try {
-            // 调用服务层函数
-            val count = coachService.getPendingApplicationCount(coachId)
-
-            // 返回成功响应
-            call.respond(HttpStatusCode.OK, mapOf(
-                "success" to true,
-                "data" to mapOf("count" to count)
-            ))
-        } catch (e: Exception) {
-            call.respond(HttpStatusCode.BadRequest, mapOf("success" to false, "message" to e.message))
-        }
     }
 }
 
@@ -219,12 +102,8 @@ fun Route.getPendingApplicationCount(coachService: CoachService) {
 fun  Route.getCampusCoachesNotApproved(coachService: CoachService) {
     get("/coaches/campusNotApproved") {
         // 从会话中获取用户ID，如果未登录则抛出异常
-        val adminId=call.sessions.get<UserSession>().let {
-            if (it == null) {
-                throw UnauthorizedException("未登录")
-            }
-            it.userId
-        }
+        val adminId = getUserIdFromCall(call)
+
         // 获取查询参数
         val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 1
         val size = call.request.queryParameters["size"]?.toIntOrNull() ?: 10
@@ -252,7 +131,6 @@ fun  Route.getCampusCoachesNotApproved(coachService: CoachService) {
  */
 fun Route.getAllCoachesNotApproved(coachService: CoachService) {
     get("/coaches/allNotApproved") {
-
         // 获取查询参数
         val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 1
         val size = call.request.queryParameters["size"]?.toIntOrNull() ?: 10
@@ -281,12 +159,8 @@ fun Route.getAllCoachesNotApproved(coachService: CoachService) {
  */
 fun Route.approveCoach(coachService: CoachService) {
     post("/approve") {
-        val adminId=call.sessions.get<UserSession>().let {
-            if (it == null) {
-                throw UnauthorizedException("未登录")
-            }
-            it.userId
-        }
+        val adminId = getUserIdFromCall(call)
+
         val request = call.receive<ApproveCoachRequest>()
         val coachId = request.coachId
         val newlevel = request.level
