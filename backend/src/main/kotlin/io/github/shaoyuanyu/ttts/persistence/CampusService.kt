@@ -54,6 +54,7 @@ class CampusService(
                 email = newCampus.email
                 balance = 0.0f
                 isCentral = false
+                tableNumber=0
                 createdAt = Clock.System.now()
                 lastLoginAt = createdAt
             }

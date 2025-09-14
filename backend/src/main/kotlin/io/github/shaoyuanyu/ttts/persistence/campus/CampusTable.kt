@@ -24,6 +24,8 @@ object CampusTable : IntIdTable("campus") {
 
     val is_central: Column<Boolean> = bool("is_central").default(false)
 
+    val tableNumber: Column<Int> = integer("table_number")
+
     val created_at: Column<Instant> = timestamp("created_at")
 
     val last_login_at: Column<Instant> = timestamp("last_login_at")

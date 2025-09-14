@@ -17,6 +17,7 @@ class CampusEntity(id: EntityID<Int>) : IntEntity(id) {
     var email by CampusTable.email
     var balance by CampusTable.balance
     var isCentral by CampusTable.is_central
+    var tableNumber by CampusTable.tableNumber
     var createdAt by CampusTable.created_at
     var lastLoginAt by CampusTable.last_login_at
 }

@@ -43,7 +43,7 @@ class UserService(
                     age = 0
                     phoneNumber = ""
                     email = ""
-                    campusId = -1
+                    campusId = 1
                     role = UserRole.SUPER_ADMIN
                     status = ""
                     createdAt = Clock.System.now()
@@ -174,7 +174,8 @@ class UserService(
             // 根据用户角色创建相应的角色特定记录
             when (newUser.role) {
                 UserRole.STUDENT -> {
-                    val studentInfo = newUser.studentInfo!!
+                    //val studentInfo =
+                    newUser.studentInfo!!
                     StudentEntity.new(UUID.fromString(userId)) {
                         this.userId = userEntity
                         this.balance = 0.0f
