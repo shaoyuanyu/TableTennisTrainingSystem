@@ -10,6 +10,8 @@ import io.github.shaoyuanyu.ttts.persistence.mutual_selection.MutualSelectionTab
 import io.github.shaoyuanyu.ttts.persistence.recharge.RechargeTable
 import io.github.shaoyuanyu.ttts.persistence.student.StudentTable
 import io.github.shaoyuanyu.ttts.persistence.table.TableTable
+import io.github.shaoyuanyu.ttts.persistence.course.CourseTable
+import io.github.shaoyuanyu.ttts.persistence.student_course.StudentCourseTable
 import io.github.shaoyuanyu.ttts.persistence.user.UserTable
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
@@ -49,6 +51,8 @@ fun configureDatabase(
         SchemaUtils.create(RechargeTable)
         SchemaUtils.create(TableTable)// 球桌表
         SchemaUtils.create(ComTable)// 竞赛表
+        SchemaUtils.create(CourseTable)// 课程表
+        SchemaUtils.create(StudentCourseTable)// 学生课程关联表
     }
 
     return database
