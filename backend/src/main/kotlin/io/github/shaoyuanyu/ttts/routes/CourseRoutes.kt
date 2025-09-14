@@ -29,7 +29,6 @@ fun Application.courseRoutes(courseService: CourseService) {
                 getCoachSchedule(courseService)
                 confirmCourse(courseService)
                 updateCourseStatusByCoach(courseService)
-                updateLessonContent(courseService)
             }
             
             // 管理员权限路由
@@ -140,17 +139,6 @@ fun Route.updateCourseStatusByCoach(courseService: CourseService) {
         }
         
         val course = courseService.updateCourseStatus(courseId, status)
-        call.respond(HttpStatusCode.OK, course)
-    }
-}
-
-/**
- * 教练填写课程内容
- */
-fun Route.updateLessonContent(courseService: CourseService) {
-    post("/lesson-content") {
-        val request = call.receive<LessonContentUpdateRequest>()
-        val course = courseService.updateLessonContent(request)
         call.respond(HttpStatusCode.OK, course)
     }
 }

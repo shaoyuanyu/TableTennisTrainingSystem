@@ -68,21 +68,15 @@ class CourseService(
             // 创建课程
             val course = CourseEntity.new {
                 title = request.title
-                description = request.description
+                this.coach = coach
+                this.student = student
+                this.campus = campus
+                this.table = assignedTable
                 date = parsedDate
                 startTime = parsedStartTime
                 endTime = parsedEndTime
-                location = request.location
                 status = CourseStatus.PENDING
                 price = request.price
-                coachId = coach.id.value
-                coachName = coach.userId.realName
-                studentId = student.id.value
-                studentName = student.userId.realName
-                campusId = campus.id.value
-                campusName = campus.campusName
-                tableId = assignedTable
-                lessonContent = null
                 paymentStatus = "PENDING"
                 attendanceStatus = null
                 studentFeedback = null
@@ -105,9 +99,9 @@ class CourseService(
             // 过滤条件
             val filteredQuery = query.toList().filter { course ->
                 (request.status == null || course.status == CourseStatus.valueOf(request.status)) &&
-                (request.studentId == null || course.studentId == UUID.fromString(request.studentId)) &&
-                (request.coachId == null || course.coachId == UUID.fromString(request.coachId)) &&
-                (request.campusId == null || course.campusId == request.campusId) &&
+                (request.studentId == null || course.student.id == UUID.fromString(request.studentId)) &&
+                (request.coachId == null || course.coach.id == UUID.fromString(request.coachId)) &&
+                (request.campusId == null || course.campus.id.value == request.campusId) &&
                 (request.dateFrom == null || course.date >= LocalDate.parse(request.dateFrom)) &&
                 (request.dateTo == null || course.date <= LocalDate.parse(request.dateTo))
             }
@@ -136,7 +130,7 @@ class CourseService(
      */
     fun getStudentSchedule(studentId: String, dateFrom: String?, dateTo: String?): List<Course> =
         transaction(database) {
-            val query = CourseEntity.find { CourseTable.studentId eq UUID.fromString(studentId) }
+            val query = CourseEntity.find { CourseTable.student eq UUID.fromString(studentId) }
 
             val filteredCourses = query.toList().filter { course ->
                 (dateFrom == null || course.date >= LocalDate.parse(dateFrom)) &&
@@ -153,7 +147,7 @@ class CourseService(
      */
     fun getCoachScheduleForStudent(coachId: String, dateFrom: String?, dateTo: String?): List<Course> =
         transaction(database) {
-            val query = CourseEntity.find { CourseTable.coachId eq UUID.fromString(coachId) }
+            val query = CourseEntity.find { CourseTable.coach eq UUID.fromString(coachId) }
 
             val filteredCourses = query.toList().filter { course ->
                 (dateFrom == null || course.date >= LocalDate.parse(dateFrom)) &&
@@ -170,7 +164,7 @@ class CourseService(
      */
     fun getCoachSchedule(coachId: String, dateFrom: String?, dateTo: String?): List<Course> =
         transaction(database) {
-            val query = CourseEntity.find { CourseTable.coachId eq UUID.fromString(coachId) }
+            val query = CourseEntity.find { CourseTable.coach eq UUID.fromString(coachId) }
 
             val filteredCourses = query.toList().filter { course ->
                 (dateFrom == null || course.date >= LocalDate.parse(dateFrom)) &&
@@ -191,18 +185,6 @@ class CourseService(
                 ?: throw NotFoundException("课程不存在")
 
             course.status = status
-            course.expose()
-        }
-    
-    /**
-     * 教练填写课程内容
-     */
-    fun updateLessonContent(request: LessonContentUpdateRequest): Course =
-        transaction(database) {
-            val course = CourseEntity.findById(UUID.fromString(request.courseId))
-                ?: throw NotFoundException("课程不存在")
-
-            course.lessonContent = request.lessonContent
             course.expose()
         }
     
@@ -257,7 +239,7 @@ class CourseService(
     ) {
         // 检查教练时间冲突
         val coachConflictQuery = CourseEntity.find { 
-            CourseTable.coachId eq coachId and
+            CourseTable.coach eq coachId and
             (CourseTable.date eq date) and
             (CourseTable.status neq CourseStatus.CANCELLED)
         }
@@ -277,7 +259,7 @@ class CourseService(
         
         // 检查学生时间冲突
         val studentConflictQuery = CourseEntity.find { 
-            CourseTable.studentId eq studentId and
+            CourseTable.student eq studentId and
             (CourseTable.date eq date) and
             (CourseTable.status neq CourseStatus.CANCELLED)
         }
@@ -344,7 +326,7 @@ class CourseService(
      */
     private fun isTableAvailable(table: TableEntity, date: LocalDate, startTime: LocalTime, endTime: LocalTime): Boolean {
         val conflictingCourses = CourseEntity.find { 
-            (CourseTable.tableId eq table.id.value) and
+            (CourseTable.table eq table.id.value) and
             (CourseTable.date eq date) and
             (CourseTable.status neq CourseStatus.CANCELLED)
         }

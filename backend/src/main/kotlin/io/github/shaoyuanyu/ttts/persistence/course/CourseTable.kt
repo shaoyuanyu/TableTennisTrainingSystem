@@ -14,20 +14,24 @@ import org.jetbrains.exposed.v1.core.dao.id.UUIDTable
 import org.jetbrains.exposed.v1.datetime.date
 import org.jetbrains.exposed.v1.datetime.datetime
 import org.jetbrains.exposed.v1.datetime.time
-import java.util.*
 
 object CourseTable : UUIDTable("courses") {
-    val title: Column<String> = varchar("title", 255)
+    val coach = reference("coach", CoachTable, ReferenceOption.CASCADE)
 
-    val description: Column<String?> = text("description").nullable() // 课程简介（可选）
+    val student = reference("student", StudentTable, ReferenceOption.CASCADE)
+
+    val campus = reference("campus", CampusTable, ReferenceOption.CASCADE)
+
+    // 球桌
+    val table = reference("table", TableTable, ReferenceOption.CASCADE)
+
+    val title: Column<String> = varchar("title", 255)
 
     val date: Column<LocalDate> = date("date")
 
     val startTime: Column<LocalTime> = time("start_time")
 
     val endTime: Column<LocalTime> = time("end_time")
-
-    val location: Column<String> = varchar("location", 255)
 
     val status: Column<CourseStatus> = customEnumeration(
         name = "status",
@@ -37,24 +41,6 @@ object CourseTable : UUIDTable("courses") {
     )
 
     val price: Column<Int> = integer("price")
-
-    val coachId: Column<UUID> = uuid("coach_id").references(CoachTable.id)
-
-    val coachName: Column<String> = varchar("coach_name", 255)
-
-    val studentId: Column<UUID> = uuid("student_id").references(StudentTable.id)
-
-    val studentName: Column<String> = varchar("student_name", 255)
-
-    val campusId: Column<Int> = integer("campus_id").references(CampusTable.id)
-
-    val campusName: Column<String> = varchar("campus_name", 255)
-
-    // 球桌
-    val tableId = reference("table_id", TableTable, ReferenceOption.CASCADE)
-
-    // 教练课后填写的课程内容
-    val lessonContent: Column<String?> = text("lesson_content").nullable()
 
     // PENDING, PAID, REFUNDED
     val paymentStatus: Column<String> = varchar("payment_status", 32).default("PENDING")
