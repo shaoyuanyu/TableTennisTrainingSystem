@@ -27,6 +27,7 @@ class CampusService(
                     email = "jlu@emials.com"
                     balance = 0.0f
                     isCentral = true
+                    tableNumber = 0
                     createdAt = Clock.System.now()
                     lastLoginAt = createdAt
                 }
