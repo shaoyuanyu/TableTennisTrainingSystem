@@ -2,6 +2,7 @@
 
 package io.github.shaoyuanyu.ttts.routes
 
+import io.github.shaoyuanyu.ttts.dto.mutual_selection.MutualSelectionStatus
 import io.github.shaoyuanyu.ttts.exceptions.BadRequestException
 import io.github.shaoyuanyu.ttts.persistence.MutualSelectionService
 import io.github.shaoyuanyu.ttts.utils.getUserIdFromCall
@@ -11,7 +12,6 @@ import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import kotlin.time.Clock
 
 fun Application.mutualSelectionRoutes(mutualSelectionService: MutualSelectionService) {
     routing {
@@ -37,6 +37,8 @@ fun Application.mutualSelectionRoutes(mutualSelectionService: MutualSelectionSer
             authenticate("auth-session-campus-admin", "auth-session-super-admin") {
                 adminCreateRelation(mutualSelectionService)
                 getAllRelations(mutualSelectionService)
+                getRelationById(mutualSelectionService)
+                updateRelation(mutualSelectionService)
             }
         }
     }
@@ -52,16 +54,10 @@ fun Route.applyForCoach(mutualSelectionService: MutualSelectionService) {
         // 接收请求参数
         val params = call.receiveParameters()
         val coachId = params["coachId"] ?: throw BadRequestException("缺少教练ID参数")
-        params["expectedStartTime"] ?: Clock.System.now().toString() //throw BadRequestException("缺少预期开始时间参数")
 
-//        val expectedStartTime = expectedStartTimeStr.toLongOrNull()?.let {
-//            Instant.fromEpochMilliseconds(it)
-//        } ?: throw BadRequestException("时间格式错误")
-        
         val application = mutualSelectionService.applyForCoach(
             studentId = userId,
-            coachId = coachId,
-            expectedStartTime = Clock.System.now() // TODO: 处理时间格式
+            coachId = coachId
         )
         
         call.respond(HttpStatusCode.Created, application)
@@ -273,5 +269,43 @@ fun Route.getCoachHistoricalStudents(mutualSelectionService: MutualSelectionServ
         )
         
         call.respond(HttpStatusCode.OK, students)
+    }
+}
+
+/**
+ * 管理员根据ID获取师生关系详细信息
+ */
+fun Route.getRelationById(mutualSelectionService: MutualSelectionService) {
+    get("/admin/relation/{relationId}") {
+        val relationId = call.parameters["relationId"] ?: throw BadRequestException("缺少关系ID参数")
+        
+        val relation = mutualSelectionService.getRelationById(
+            relationId = relationId
+        )
+        
+        call.respond(HttpStatusCode.OK, relation)
+    }
+}
+
+/**
+ * 管理员更新师生关系信息
+ */
+fun Route.updateRelation(mutualSelectionService: MutualSelectionService) {
+    post("/admin/relation/{relationId}") {
+        val relationId = call.parameters["relationId"] ?: throw BadRequestException("缺少关系ID参数")
+        
+        val params = call.receiveParameters()
+        val status: MutualSelectionStatus? = params["status"]?.let { 
+            MutualSelectionStatus.valueOf(it.uppercase()) 
+        }
+        // 移除对时间参数的处理
+        
+        val updatedRelation = mutualSelectionService.updateRelation(
+            relationId = relationId,
+            status = status
+            // 移除对时间参数的处理
+        )
+        
+        call.respond(HttpStatusCode.OK, updatedRelation)
     }
 }

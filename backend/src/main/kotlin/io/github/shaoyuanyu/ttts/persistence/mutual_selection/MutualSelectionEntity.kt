@@ -43,8 +43,8 @@ fun MutualSelectionEntity.expose() = MutualSelection(
     studentId = studentID.id.value.toString(),
     studentName = studentID.userId.realName,
     status = status,
-    applicationTime = applicationTime.toLocalDateTime(TimeZone.of("Asia/Shanghai")),
-    expectedStartTime = expectedStartTime.toLocalDateTime(TimeZone.of("Asia/Shanghai")),
+    applicationTime = applicationTime.toLocalDateTime(TimeZone.of("Asia/Shanghai"))
+    // 只保留申请时间，移除其他时间字段
 )
 
 fun List<MutualSelectionEntity>.expose() = map { it.expose() }

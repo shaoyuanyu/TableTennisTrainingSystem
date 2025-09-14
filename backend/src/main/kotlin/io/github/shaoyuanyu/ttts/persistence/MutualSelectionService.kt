@@ -15,7 +15,6 @@ import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.slf4j.LoggerFactory
 import java.util.*
 import kotlin.time.Clock
-import kotlin.time.Instant
 
 internal val MUTUAL_SELECTION_LOGGER = LoggerFactory.getLogger("io.github.shaoyuanyu.ttts.persistence.mutual_selection")
 
@@ -27,8 +26,7 @@ class MutualSelectionService(
      */
     fun applyForCoach(
         studentId: String,
-        coachId: String,
-        expectedStartTime: Instant
+        coachId: String
     ): MutualSelection =
         transaction(database) {
             val student = StudentEntity.findById(UUID.fromString(studentId))
@@ -67,7 +65,7 @@ class MutualSelectionService(
                 this.coachID = coach
                 this.status = MutualSelectionStatus.PENDING
                 this.applicationTime = Clock.System.now()
-                this.expectedStartTime = expectedStartTime
+                this.expectedStartTime = Clock.System.now() // 保留但不再使用
             }
 
             MUTUAL_SELECTION_LOGGER.info("学生申请教练成功")
@@ -170,7 +168,7 @@ class MutualSelectionService(
 
             // 如果批准了申请，更新学生和教练的计数
             if (approve) {
-                relation.actualStartTime = Clock.System.now()
+                relation.actualStartTime = Clock.System.now() // 保留但不再使用
                 relation.studentID.currentCoach += 1
                 relation.coachID.currentStudents += 1
             }
@@ -238,7 +236,7 @@ class MutualSelectionService(
 
             // 更新关系状态为非活跃
             relation.status = MutualSelectionStatus.INACTIVE
-            relation.endTime = Clock.System.now()
+            relation.endTime = Clock.System.now() // 保留但不再使用
 
             // 更新学生和教练的计数
             relation.studentID.currentCoach -= 1
@@ -321,8 +319,8 @@ class MutualSelectionService(
                 this.coachID = coach
                 this.status = MutualSelectionStatus.ACTIVE
                 this.applicationTime = Clock.System.now()
-                this.expectedStartTime = Clock.System.now()
-                this.actualStartTime = Clock.System.now()
+                this.expectedStartTime = Clock.System.now() // 保留但不再使用
+                this.actualStartTime = Clock.System.now() // 保留但不再使用
             }
 
             // 更新计数
@@ -427,5 +425,35 @@ class MutualSelectionService(
             }
 
             query.toList().expose()
+        }
+    
+    /**
+     * 管理员根据ID获取师生关系详细信息
+     */
+    fun getRelationById(
+        relationId: String
+    ): MutualSelection =
+        transaction(database) {
+            val relation = MutualSelectionEntity.findById(UUID.fromString(relationId))
+                ?: throw IllegalArgumentException("关系记录不存在")
+            
+            relation.expose()
+        }
+    
+    /**
+     * 管理员更新师生关系信息
+     */
+    fun updateRelation(
+        relationId: String,
+        status: MutualSelectionStatus? = null
+    ): MutualSelection =
+        transaction(database) {
+            val relation = MutualSelectionEntity.findById(UUID.fromString(relationId))
+                ?: throw IllegalArgumentException("关系记录不存在")
+
+            // 更新状态
+            status?.let { relation.status = it }
+
+            relation.expose()
         }
 }

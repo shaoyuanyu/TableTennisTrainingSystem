@@ -12,7 +12,5 @@ data class MutualSelection(
     val studentName: String? = null,
     val status: MutualSelectionStatus,
     val applicationTime: LocalDateTime,
-    val expectedStartTime: LocalDateTime,
-    val actualStartTime: LocalDateTime? = null,
-    val endTime: LocalDateTime? = null,
+    // 移除其他时间字段，只保留申请时间
 )
