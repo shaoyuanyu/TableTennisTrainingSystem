@@ -1236,7 +1236,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /courses/coach-schedule/{coachId}:
+  /courses/student/coach/{coachId}/schedule:
     get:
       tags: [course]
       summary: 学生查看指定教练的时间安排
@@ -1277,8 +1277,8 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /courses/feedback:
-    post:
+  /courses/student/feedback:
+    put:
       tags: [course]
       summary: 学生提交课程反馈
       description: 学生在课程结束后提交反馈和评分
@@ -1302,66 +1302,40 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /courses/confirm:
-    post:
+  /courses/coach/my-schedule:
+    get:
       tags: [course]
-      summary: 教练确认/拒绝课程
-      description: 教练确认或拒绝学生预约的课程
-      security:
-        - SessionAuth: [COACH]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CourseConfirmRequest'
-      responses:
-        '200':
-          description: 操作成功
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Course'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-
-  /courses/{courseId}/status:
-    put:
-      tags: [course]
-      summary: 教练更新课程状态
-      description: 教练更新课程的状态
+      summary: 教练查看自己的课程安排
+      description: 教练获取自己的课程表
       security:
         - SessionAuth: [COACH]
       parameters:
-        - name: courseId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-          description: 课程ID
-        - name: status
+        - name: dateFrom
           in: query
-          required: true
           schema:
             type: string
-          description: 课程状态 (PENDING, CONFIRMED, COMPLETED, CANCELLED)
+            format: date
+          description: 查询起始日期 (YYYY-MM-DD)
+        - name: dateTo
+          in: query
+          schema:
+            type: string
+            format: date
+          description: 查询结束日期 (YYYY-MM-DD)
       responses:
         '200':
-          description: 状态更新成功
+          description: 成功获取课程安排
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Course'
-        '400':
-          $ref: '#/components/responses/BadRequest'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Course'
         '401':
           $ref: '#/components/responses/Unauthorized'
 
-  /courses/lesson-content:
-    post:
+  /courses/coach/lesson-content:
+    put:
       tags: [course]
       summary: 教练填写课程内容
       description: 教练在课程结束后填写课程内容
@@ -1430,6 +1404,99 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CourseScheduleResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /courses/{courseId}:
+    get:
+      tags: [course]
+      summary: 获取课程详情
+      description: 根据ID获取课程详细信息
+      security:
+        - SessionAuth: [CAMPUS_ADMIN, SUPER_ADMIN]
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: 课程ID
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /courses/{courseId}/status:
+    put:
+      tags: [course]
+      summary: 更新课程状态
+      description: 更新课程的状态
+      security:
+        - SessionAuth: [CAMPUS_ADMIN, SUPER_ADMIN]
+      parameters:
+        - name: courseId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: 课程ID
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  description: 课程状态 (PENDING, CONFIRMED, COMPLETED, CANCELLED)
+              required:
+                - status
+      responses:
+        '200':
+          description: 状态更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /courses/payment-status:
+    put:
+      tags: [course]
+      summary: 更新付款状态
+      description: 更新课程的付款状态
+      security:
+        - SessionAuth: [CAMPUS_ADMIN, SUPER_ADMIN]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentStatusUpdateRequest'
+      responses:
+        '200':
+          description: 状态更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -2051,6 +2118,20 @@ components:
         size:
           type: integer
           description: 每页大小
+
+    PaymentStatusUpdateRequest:
+      type: object
+      required:
+        - courseId
+        - paymentStatus
+      properties:
+        courseId:
+          type: string
+          format: uuid
+          description: 课程ID
+        paymentStatus:
+          type: string
+          description: 付款状态 (PENDING, PAID, REFUNDED)
 
   responses:
     BadRequest:
