@@ -10,6 +10,6 @@ class TableEntity(id: EntityID<UUID>) : Entity<UUID>(id) {
 
     var status by TableTable.status
     var group by TableTable.group
-    var tableIndex by TableTable.index
+    var indexInCampus by TableTable.index_in_campus
     var campusId by TableTable.campusId
-    }
+}

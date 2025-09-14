@@ -19,6 +19,7 @@ object TableTable: UUIDTable("table")  {
         fromDb = { value -> Group.valueOf(value as String) },
         toDb = { it.name }
     )
-    var index:Column<Int> = integer("index")
-    val campusId:Column<Int> = integer("campus_id")
+
+    var index_in_campus: Column<Int> = integer("index")
+    val campusId: Column<Int> = integer("campus_id")
 }
