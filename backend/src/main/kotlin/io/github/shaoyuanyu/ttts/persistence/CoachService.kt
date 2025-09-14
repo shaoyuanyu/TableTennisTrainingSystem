@@ -153,6 +153,7 @@ class CoachService(
             }
 
             CoachRecord(
+                coachId = userWithCoachInfo.uuid.toString(),
                 username = userWithCoachInfo.username,
                 realName = userWithCoachInfo.realName,
                 gender = userWithCoachInfo.gender,
@@ -191,6 +192,7 @@ class CoachService(
                 .filter { it.coachInfo?.isApproved == true }
                 .map { user ->
                     CoachRecord(
+                        coachId = user.uuid.toString(),
                         username = user.username,
                         realName = user.realName,
                         gender = user.gender,

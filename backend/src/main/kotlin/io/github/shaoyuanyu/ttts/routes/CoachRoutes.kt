@@ -23,10 +23,6 @@ fun Application.coachRoutes(coachService: CoachService) {
 
             // 所有登录用户
             authenticate("auth-session-all") {
-            }
-
-            // 学生权限
-            authenticate("auth-session-student") {
                 getAllCoach(coachService)
                 queryCoach(coachService)
             }
@@ -68,7 +64,7 @@ fun Route.getAllCoach(coachService: CoachService) {
             throw BadRequestException("每页大小必须在1-100之间")
         }
 
-        val coaches = coachService.getAllCoaches(page,size)
+        val coaches = coachService.getAllCoaches(page, size)
 
         call.respond(HttpStatusCode.OK, coaches)
     }
@@ -163,10 +159,10 @@ fun Route.approveCoach(coachService: CoachService) {
 
         val request = call.receive<ApproveCoachRequest>()
         val coachId = request.coachId
-        val newlevel = request.level
+        val newLevel = request.level
 
         // 调用服务层函数
-        coachService.updateCoachLevel(coachId, adminId,newlevel)
+        coachService.updateCoachLevel(coachId, adminId,newLevel)
 
         // 返回成功响应
         call.respond(HttpStatusCode.OK)
