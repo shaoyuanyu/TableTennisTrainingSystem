@@ -1,2493 +1,1637 @@
-openapi: "3.1.0"
+openapi: 3.0.3
 info:
-  title: "TableTennisTrainingSystem API"
-  description: "API documentation for the Table Tennis Training System"
-  version: "1.0.0"
+  title: 乒乓球训练系统后端API
+  description: 乒乓球训练系统双选系统的完整API文档
+  version: 1.0.0
+  contact:
+    name: 乒乓球训练系统开发团队
+    email: support@ttts.example.com
+
 servers:
-  - url: "http://localhost:8080"
+  - url: http://localhost:8080
+    description: 本地开发服务器
+  - url: https://api.ttts.example.com
+    description: 生产环境服务器
+
 tags:
-  - name: "用户认证"
-    description: "用户注册、登录、登出相关接口"
-  - name: "用户管理"
-    description: "用户信息查询和管理接口"
-  - name: "消息系统"
-    description: "站内消息相关接口"
-  - name: "钱包系统"
-    description: "钱包充值和查询相关接口"
-  - name: "校区管理"
-    description: "校区信息管理相关接口"
-  - name: "教练管理"
-    description: "教练信息查询和管理接口"
-  - name: "双选系统"
-    description: "学生-教练双选相关接口"
+  - name: user
+    description: 用户管理相关接口
+  - name: auth
+    description: 认证相关接口
+  - name: mutual-selection
+    description: 双选系统相关接口
+  - name: message
+    description: 消息系统相关接口
+  - name: coach
+    description: 教练管理相关接口
+  - name: campus
+    description: 校区管理相关接口
+  - name: wallet
+    description: 钱包系统相关接口
+  - name: competition
+    description: 竞赛系统相关接口
+
+security:
+  - SessionAuth: []
+
 paths:
+  # 用户管理接口
   /user/signup:
     post:
-      tags:
-        - "用户认证"
-      summary: "用户注册"
-      description: "允许学生或教练注册账户"
+      tags: [user]
+      summary: 用户注册
+      description: 学生或教练注册账户
+      security: []
       requestBody:
+        required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/User"
-            examples:
-              student_example:
-                summary: "学生注册示例"
-                value:
-                  uuid: "550e8400-e29b-41d4-a716-446655440000"
-                  username: "student001"
-                  plainPassword: "password123"
-                  realName: "张三"
-                  gender: "男"
-                  age: 20
-                  phoneNumber: "13800138000"
-                  email: "student@example.com"
-                  campusId: 1
-                  role: "STUDENT"
-                  status: "ACTIVE"
-                  studentInfo:
-                    balance: 100.0
-                    maxCoach: 3
-                    currentCoach: 0
-              coach_example:
-                summary: "教练注册示例"
-                value:
-                  uuid: "550e8400-e29b-41d4-a716-446655440001"
-                  username: "coach001"
-                  plainPassword: "password123"
-                  realName: "李教练"
-                  gender: "女"
-                  age: 35
-                  phoneNumber: "13900139000"
-                  email: "coach@example.com"
-                  campusId: 1
-                  role: "COACH"
-                  status: "ACTIVE"
-                  coachInfo:
-                    hourlyRate: 100.0
-                    balance: 0.0
-                    maxStudents: 20
-                    currentStudents: 0
-                    isApproved: false
-                    approvedBy: -1
-        required: true
+              $ref: '#/components/schemas/User'
       responses:
-        "201":
-          description: "注册成功"
+        '201':
+          description: 注册成功
           content:
             application/json:
               schema:
-                type: "object"
+                type: object
                 properties:
                   message:
-                    type: "string"
+                    type: string
+                    example: "注册成功"
                   userId:
-                    type: "string"
-              examples:
-                success:
-                  value:
-                    message: "注册成功"
-                    userId: "550e8400-e29b-41d4-a716-446655440000"
-        "400":
-          description: "请求参数错误"
-          content:
-            text/plain:
-              schema:
-                type: "string"
+                    type: string
+                    example: "uuid-string"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
   /user/login:
     post:
-      tags:
-        - "用户认证"
-      summary: "用户登录"
-      description: "通过表单验证用户身份"
+      tags: [auth]
+      summary: 用户登录
+      description: 用户使用用户名和密码登录
+      security: []
       requestBody:
+        required: true
         content:
           application/x-www-form-urlencoded:
             schema:
-              type: "object"
+              type: object
               properties:
                 username:
-                  type: "string"
+                  type: string
                 password:
-                  type: "string"
+                  type: string
               required:
-                - "username"
-                - "password"
-            examples:
-              login_example:
-                summary: "登录示例"
-                value:
-                  username: "student001"
-                  password: "password123"
+                - username
+                - password
       responses:
-        "200":
-          description: "登录成功"
+        '200':
+          description: 登录成功
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/User"
-              examples:
-                student_response:
-                  summary: "学生登录响应"
-                  value:
-                    uuid: "550e8400-e29b-41d4-a716-446655440000"
-                    username: "student001"
-                    realName: "张三"
-                    gender: "男"
-                    age: 20
-                    phoneNumber: "13800138000"
-                    email: "student@example.com"
-                    campusId: 1
-                    role: "STUDENT"
-                    status: "ACTIVE"
-                    studentInfo:
-                      balance: 100.0
-                      maxCoach: 3
-                      currentCoach: 0
-        "401":
-          description: "认证失败"
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
   /user/logout:
     post:
-      tags:
-        - "用户认证"
-      summary: "用户登出"
-      description: "清除用户会话"
+      tags: [auth]
+      summary: 用户登出
+      description: 清除用户会话
       responses:
-        "200":
-          description: "登出成功"
-          content:
-            application/json:
-              schema:
-                type: "object"
-                properties:
-                  message:
-                    type: "string"
-              examples:
-                success:
-                  value:
-                    message: "登出成功"
+        '200':
+          description: 登出成功
+
   /user/info:
     get:
-      tags:
-        - "用户管理"
-      summary: "获取用户信息"
-      description: "获取当前登录用户的信息"
+      tags: [user]
+      summary: 获取用户信息
+      description: 获取当前登录用户的详细信息
       responses:
-        "200":
-          description: "返回用户信息"
+        '200':
+          description: 用户信息
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/User"
-        "401":
-          description: "未认证"
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    
     put:
-      tags:
-        - "用户管理"
-      summary: "更新用户信息"
-      description: "更新当前登录用户的信息"
+      tags: [user]
+      summary: 更新用户信息
+      description: 更新当前登录用户的信息
       requestBody:
+        required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/User"
-            examples:
-              student_update:
-                summary: "学生更新信息示例"
-                value:
-                  uuid: "550e8400-e29b-41d4-a716-446655440000"
-                  username: "student001"
-                  realName: "张三"
-                  gender: "男"
-                  age: 21
-                  phoneNumber: "13800138000"
-                  email: "student@example.com"
-                  campusId: 1
-                  role: "STUDENT"
-                  status: "ACTIVE"
-                  studentInfo:
-                    balance: 80.0
-                    maxCoach: 3
-                    currentCoach: 1
-        required: true
+              $ref: '#/components/schemas/User'
       responses:
-        "200":
-          description: "更新成功"
+        '200':
+          description: 更新成功
           content:
             application/json:
               schema:
-                type: "object"
+                type: object
                 properties:
                   message:
-                    type: "string"
-              examples:
-                success:
-                  value:
-                    message: "用户信息更新成功"
-        "400":
-          description: "请求参数错误"
-        "401":
-          description: "未认证"
+                    type: string
+                    example: "用户信息更新成功"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
   /user/change-password:
     put:
-      tags:
-        - "用户管理"
-      summary: "修改密码"
-      description: "用户修改自己的密码"
+      tags: [user]
+      summary: 修改密码
+      description: 用户修改自己的密码
       requestBody:
+        required: true
         content:
           application/x-www-form-urlencoded:
             schema:
-              type: "object"
+              type: object
               properties:
                 oldPassword:
-                  type: "string"
+                  type: string
+                  description: 旧密码
                 newPassword:
-                  type: "string"
+                  type: string
+                  description: 新密码
               required:
-                - "oldPassword"
-                - "newPassword"
-            examples:
-              change_password:
-                summary: "修改密码示例"
-                value:
-                  oldPassword: "oldpassword123"
-                  newPassword: "newpassword456"
-        required: true
+                - oldPassword
+                - newPassword
       responses:
-        "200":
-          description: "修改成功"
+        '200':
+          description: 密码修改成功
           content:
             application/json:
               schema:
-                type: "object"
+                type: object
                 properties:
                   message:
-                    type: "string"
-              examples:
-                success:
-                  value:
-                    message: "密码修改成功"
-        "400":
-          description: "请求参数错误"
-        "401":
-          description: "未认证"
-  /user/create:
-    post:
-      tags:
-        - "用户管理"
-      summary: "创建用户"
-      description: "超级管理员创建校区管理员"
-      security:
-        - auth-session-super-admin: []
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/User"
-            examples:
-              campus_admin_create:
-                summary: "创建校区管理员示例"
-                value:
-                  uuid: "550e8400-e29b-41d4-a716-446655440002"
-                  username: "campusadmin001"
-                  plainPassword: "password123"
-                  realName: "王管理员"
-                  gender: "男"
-                  age: 30
-                  phoneNumber: "13700137000"
-                  email: "campusadmin@example.com"
-                  campusId: 1
-                  role: "CAMPUS_ADMIN"
-                  status: "ACTIVE"
-        required: true
-      responses:
-        "201":
-          description: "创建成功"
-          content:
-            application/json:
-              schema:
-                type: "object"
-                properties:
-                  message:
-                    type: "string"
-                  userId:
-                    type: "string"
-              examples:
-                success:
-                  value:
-                    message: "校区管理员创建成功"
-                    userId: "550e8400-e29b-41d4-a716-446655440001"
-        "400":
-          description: "请求参数错误"
-        "401":
-          description: "未认证"
-        "403":
-          description: "权限不足"
-  /user/{userId}:
-    delete:
-      tags:
-        - "用户管理"
-      summary: "删除用户"
-      description: "超级管理员删除校区管理员"
-      security:
-        - auth-session-super-admin: []
-      parameters:
-        - name: "userId"
-          in: "path"
-          required: true
-          schema:
-            type: "string"
-      responses:
-        "200":
-          description: "删除成功"
-          content:
-            application/json:
-              schema:
-                type: "object"
-                properties:
-                  message:
-                    type: "string"
-              examples:
-                success:
-                  value:
-                    message: "校区管理员删除成功"
-        "400":
-          description: "请求参数错误"
-        "401":
-          description: "未认证"
-        "403":
-          description: "权限不足"
-  /user/{userId}/reset-password:
-    put:
-      tags:
-        - "用户管理"
-      summary: "重置用户密码"
-      description: "超级管理员重置校区管理员密码"
-      security:
-        - auth-session-super-admin: []
-      parameters:
-        - name: "userId"
-          in: "path"
-          required: true
-          schema:
-            type: "string"
-      responses:
-        "200":
-          description: "重置成功"
-          content:
-            application/json:
-              schema:
-                type: "object"
-                properties:
-                  message:
-                    type: "string"
-              examples:
-                success:
-                  value:
-                    message: "校区管理员密码已重置为默认密码"
-        "400":
-          description: "请求参数错误"
-        "401":
-          description: "未认证"
-        "403":
-          description: "权限不足"
+                    type: string
+                    example: "密码修改成功"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
   /user/users:
     get:
-      tags:
-        - "用户管理"
-      summary: "获取用户列表"
-      description: "分页获取用户列表，支持过滤"
+      tags: [user]
+      summary: 获取所有用户（分页）
+      description: 获取用户列表，支持分页和过滤。仅限超级管理员
       security:
-        - auth-session-super-admin: []
+        - SessionAuth: [SUPER_ADMIN]
       parameters:
-        - name: "page"
-          in: "query"
-          description: "页码，从1开始"
-          required: false
+        - name: page
+          in: query
           schema:
-            type: "integer"
-            format: "int32"
+            type: integer
+            minimum: 1
             default: 1
-        - name: "size"
-          in: "query"
-          description: "每页大小"
-          required: false
+        - name: size
+          in: query
           schema:
-            type: "integer"
-            format: "int32"
+            type: integer
+            minimum: 1
+            maximum: 100
             default: 10
-        - name: "role"
-          in: "query"
-          description: "用户角色过滤"
-          required: false
+        - name: role
+          in: query
           schema:
-            type: "string"
-            enum:
-              - "SUPER_ADMIN"
-              - "CAMPUS_ADMIN"
-              - "COACH"
-              - "STUDENT"
-        - name: "campusId"
-          in: "query"
-          description: "校区ID过滤"
-          required: false
+            $ref: '#/components/schemas/UserRole'
+        - name: campusId
+          in: query
           schema:
-            type: "integer"
-            format: "int32"
+            type: integer
       responses:
-        "200":
-          description: "返回用户列表"
+        '200':
+          description: 用户列表
           content:
             application/json:
               schema:
-                type: "object"
+                type: object
                 properties:
                   users:
-                    type: "array"
+                    type: array
                     items:
-                      $ref: "#/components/schemas/User"
+                      $ref: '#/components/schemas/User'
                   totalCount:
-                    type: "integer"
-                    format: "int64"
+                    type: integer
                   page:
-                    type: "integer"
-                    format: "int32"
+                    type: integer
                   size:
-                    type: "integer"
-                    format: "int32"
+                    type: integer
                   totalPages:
-                    type: "integer"
-                    format: "int32"
-              examples:
-                user_list:
-                  value:
-                    users:
-                      - uuid: "550e8400-e29b-41d4-a716-446655440000"
-                        username: "student001"
-                        realName: "张三"
-                        gender: "男"
-                        age: 20
-                        phoneNumber: "13800138000"
-                        email: "student@example.com"
-                        campusId: 1
-                        role: "STUDENT"
-                        status: "ACTIVE"
-                        studentInfo:
-                          balance: 100.0
-                          maxCoach: 3
-                          currentCoach: 0
-                    totalCount: 1
-                    page: 1
-                    size: 10
-                    totalPages: 1
-        "400":
-          description: "请求参数错误"
-        "401":
-          description: "未认证"
-        "403":
-          description: "权限不足"
+                    type: integer
+
+  /user/create:
+    post:
+      tags: [user]
+      summary: 管理员创建用户
+      description: 超级管理员创建新用户
+      security:
+        - SessionAuth: [SUPER_ADMIN]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '201':
+          description: 用户创建成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "校区管理员创建成功"
+                  userId:
+                    type: string
+
+  /user/{userId}:
+    delete:
+      tags: [user]
+      summary: 删除用户
+      description: 超级管理员删除用户
+      security:
+        - SessionAuth: [SUPER_ADMIN]
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 删除成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "校区管理员删除成功"
+
+  /user/{userId}/reset-password:
+    put:
+      tags: [user]
+      summary: 重置用户密码
+      description: 超级管理员重置用户密码为默认密码
+      security:
+        - SessionAuth: [SUPER_ADMIN]
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 密码重置成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "校区管理员密码已重置为默认密码"
+
   /user/users/{username}:
     get:
-      tags:
-        - "用户管理"
-      summary: "根据用户名获取用户信息"
-      description: "超级管理员根据用户名查询用户详细信息"
+      tags: [user]
+      summary: 根据用户名获取用户信息
+      description: 超级管理员根据用户名查询用户详细信息
       security:
-        - auth-session-super-admin: []
+        - SessionAuth: [SUPER_ADMIN]
       parameters:
-        - name: "username"
-          in: "path"
+        - name: username
+          in: path
           required: true
           schema:
-            type: "string"
+            type: string
       responses:
-        "200":
-          description: "返回用户信息"
+        '200':
+          description: 用户信息
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/User"
-        "400":
-          description: "请求参数错误"
-        "401":
-          description: "未认证"
-        "403":
-          description: "权限不足"
-        "404":
-          description: "关系不存在"
-  /messages:
-    get:
-      tags:
-        - "消息系统"
-      summary: "获取消息列表"
-      description: "获取当前用户的消息列表，支持分页和过滤"
-      security:
-        - auth-session-all: []
-      parameters:
-        - name: "type"
-          in: "query"
-          description: "消息类型过滤"
-          required: false
-          schema:
-            type: "string"
-        - name: "unreadOnly"
-          in: "query"
-          description: "只获取未读消息"
-          required: false
-          schema:
-            type: "boolean"
-            default: false
-        - name: "page"
-          in: "query"
-          description: "页码，从0开始"
-          required: false
-          schema:
-            type: "integer"
-            format: "int32"
-            default: 0
-        - name: "size"
-          in: "query"
-          description: "每页大小"
-          required: false
-          schema:
-            type: "integer"
-            format: "int32"
-            default: 20
-      responses:
-        "200":
-          description: "返回消息列表"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/MessageListResponse"
-        "400":
-          description: "请求参数错误"
-        "401":
-          description: "未认证"
-    post:
-      tags:
-        - "消息系统"
-      summary: "发送消息"
-      description: "发送消息给指定用户（仅限超级管理员）"
-      security:
-        - auth-session-super-admin: []
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreateMessageRequest"
-            examples:
-              send_message:
-                summary: "发送消息示例"
-                value:
-                  recipientId: "550e8400-e29b-41d4-a716-446655440000"
-                  title: "系统通知"
-                  content: "欢迎使用乒乓球训练系统"
-                  type: "SYSTEM"
-        required: true
-      responses:
-        "201":
-          description: "消息发送成功"
-          content:
-            application/json:
-              schema:
-                type: "object"
-                properties:
-                  id:
-                    type: "string"
-                  message:
-                    type: "string"
-              examples:
-                success:
-                  value:
-                    id: "550e8400-e29b-41d4-a716-446655440002"
-                    message: "消息发送成功"
-        "400":
-          description: "请求参数错误"
-        "401":
-          description: "未认证"
-        "403":
-          description: "权限不足"
-  /messages/unread-count:
-    get:
-      tags:
-        - "消息系统"
-      summary: "获取未读消息数量"
-      description: "获取当前用户的未读消息数量"
-      security:
-        - auth-session-all: []
-      responses:
-        "200":
-          description: "返回未读消息数量"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/UnreadCountResponse"
-              examples:
-                unread_count:
-                  value:
-                    count: 5
-        "401":
-          description: "未认证"
-  /messages/{id}/read:
-    put:
-      tags:
-        - "消息系统"
-      summary: "标记消息为已读"
-      description: "将指定消息标记为已读"
-      security:
-        - auth-session-all: []
-      parameters:
-        - name: "id"
-          in: "path"
-          required: true
-          schema:
-            type: "string"
-      responses:
-        "200":
-          description: "标记成功"
-          content:
-            application/json:
-              schema:
-                type: "object"
-                properties:
-                  success:
-                    type: "boolean"
-                  message:
-                    type: "string"
-              examples:
-                success:
-                  value:
-                    success: true
-                    message: "消息已标记为已读"
-        "400":
-          description: "请求参数错误"
-        "401":
-          description: "未认证"
-        "404":
-          description: "消息不存在"
-  /messages/read-all:
-    put:
-      tags:
-        - "消息系统"
-      summary: "标记所有消息为已读"
-      description: "将所有未读消息标记为已读"
-      security:
-        - auth-session-all: []
-      responses:
-        "200":
-          description: "标记成功"
-          content:
-            application/json:
-              schema:
-                type: "object"
-                properties:
-                  success:
-                    type: "boolean"
-                  message:
-                    type: "string"
-                  count:
-                    type: "integer"
-              examples:
-                success:
-                  value:
-                    success: true
-                    message: "成功标记 5 条消息为已读"
-                    count: 5
-        "401":
-          description: "未认证"
-  /messages/{id}:
-    delete:
-      tags:
-        - "消息系统"
-      summary: "删除消息"
-      description: "删除指定消息"
-      security:
-        - auth-session-all: []
-      parameters:
-        - name: "id"
-          in: "path"
-          required: true
-          schema:
-            type: "string"
-      responses:
-        "204":
-          description: "删除成功"
-        "400":
-          description: "请求参数错误"
-        "401":
-          description: "未认证"
-        "404":
-          description: "消息不存在"
-  /wallet/balance:
-    get:
-      tags:
-        - "钱包系统"
-      summary: "获取钱包余额"
-      description: "获取当前登录用户的钱包余额"
-      security:
-        - auth-session-all: []
-      responses:
-        "200":
-          description: "返回钱包余额"
-          content:
-            application/json:
-              schema:
-                type: "object"
-                properties:
-                  balance:
-                    type: "number"
-                    format: "float"
-              examples:
-                balance_response:
-                  value:
-                    balance: 100.0
-        "401":
-          description: "未认证"
-  /wallet/recharge:
-    post:
-      tags:
-        - "钱包系统"
-      summary: "学生充值钱包"
-      description: "学生用户进行钱包充值"
-      security:
-        - auth-session-student: []
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/RechargeRequest"
-            examples:
-              recharge_example:
-                summary: "充值示例"
-                value:
-                  amount: 50.0
-        required: true
-      responses:
-        "200":
-          description: "充值成功，返回当前余额"
-          content:
-            application/json:
-              schema:
-                type: "object"
-                properties:
-                  balance:
-                    type: "number"
-                    format: "float"
-              examples:
-                success:
-                  value:
-                    balance: 150.0
-        "400":
-          description: "请求参数错误"
-        "401":
-          description: "未认证"
-        "403":
-          description: "权限不足"
-  /wallet/recharge/history:
-    get:
-      tags:
-        - "钱包系统"
-      summary: "获取充值记录"
-      description: "获取当前登录用户的充值历史记录"
-      security:
-        - auth-session-all: []
-      parameters:
-        - name: "page"
-          in: "query"
-          description: "页码，从1开始"
-          required: false
-          schema:
-            type: "integer"
-            format: "int32"
-            default: 1
-        - name: "size"
-          in: "query"
-          description: "每页大小"
-          required: false
-          schema:
-            type: "integer"
-            format: "int32"
-            default: 10
-      responses:
-        "200":
-          description: "返回充值记录列表"
-          content:
-            application/json:
-              schema:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/RechargeRecord"
-        "401":
-          description: "未认证"
-  /wallet/recharge/records:
-    get:
-      tags:
-        - "钱包系统"
-      summary: "获取所有充值记录"
-      description: "超级管理员查看所有用户的充值记录"
-      security:
-        - auth-session-super-admin: []
-      parameters:
-        - name: "page"
-          in: "query"
-          description: "页码，从1开始"
-          required: false
-          schema:
-            type: "integer"
-            format: "int32"
-            default: 1
-        - name: "size"
-          in: "query"
-          description: "每页大小"
-          required: false
-          schema:
-            type: "integer"
-            format: "int32"
-            default: 10
-      responses:
-        "200":
-          description: "返回充值记录列表"
-          content:
-            application/json:
-              schema:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/RechargeRecord"
-        "401":
-          description: "未认证"
-        "403":
-          description: "权限不足"
-  /wallet/recharge/records/{username}:
-    get:
-      tags:
-        - "钱包系统"
-      summary: "按用户名获取充值记录"
-      description: "超级管理员查看指定用户的充值记录"
-      security:
-        - auth-session-super-admin: []
-      parameters:
-        - name: "username"
-          in: "path"
-          required: true
-          schema:
-            type: "string"
-        - name: "page"
-          in: "query"
-          description: "页码，从1开始"
-          required: false
-          schema:
-            type: "integer"
-            format: "int32"
-            default: 1
-        - name: "size"
-          in: "query"
-          description: "每页大小"
-          required: false
-          schema:
-            type: "integer"
-            format: "int32"
-            default: 10
-      responses:
-        "200":
-          description: "返回充值记录列表"
-          content:
-            application/json:
-              schema:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/RechargeRecord"
-        "400":
-          description: "请求参数错误"
-        "401":
-          description: "未认证"
-        "403":
-          description: "权限不足"
-        "404":
-          description: "用户不存在"
-  /campus/names:
-    get:
-      tags:
-        - "校区管理"
-      summary: "获取校区列表"
-      description: "获取所有校区名称列表，支持分页"
-      security:
-        - auth-session-all: []
-      parameters:
-        - name: "page"
-          in: "query"
-          description: "页码，从1开始"
-          required: false
-          schema:
-            type: "integer"
-            format: "int32"
-            default: 1
-        - name: "size"
-          in: "query"
-          description: "每页大小"
-          required: false
-          schema:
-            type: "integer"
-            format: "int32"
-            default: 10
-      responses:
-        "200":
-          description: "返回校区列表"
-          content:
-            application/json:
-              schema:
-                type: "object"
-                properties:
-                  campuses:
-                    type: "array"
-                    items:
-                      $ref: "#/components/schemas/Campus"
-                  totalCount:
-                    type: "integer"
-                    format: "int64"
-                  page:
-                    type: "integer"
-                    format: "int32"
-                  size:
-                    type: "integer"
-                    format: "int32"
-                  totalPages:
-                    type: "integer"
-                    format: "int32"
-        "400":
-          description: "请求参数错误"
-        "401":
-          description: "未认证"
-  /campus/create:
-    post:
-      tags:
-        - "校区管理"
-      summary: "创建校区"
-      description: "超级管理员创建新校区"
-      security:
-        - auth-session-super-admin: []
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CampusCreateRequest"
-            examples:
-              campus_create:
-                summary: "创建校区示例"
-                value:
-                  campusName: "海淀校区"
-                  address: "北京市海淀区中关村大街1号"
-                  contactPerson: "张主任"
-                  phone: "010-12345678"
-                  email: "hd@ttts.edu.cn"
-        required: true
-      responses:
-        "201":
-          description: "创建成功"
-          content:
-            application/json:
-              schema:
-                type: "object"
-                properties:
-                  message:
-                    type: "string"
-              examples:
-                success:
-                  value:
-                    message: "创建校区成功"
-        "400":
-          description: "请求参数错误"
-        "401":
-          description: "未认证"
-        "403":
-          description: "权限不足"
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  # 双选系统接口
   /mutual-selection/apply:
     post:
-      tags:
-        - "双选系统"
-      summary: "学生申请教练"
-      description: "学生向指定教练提交申请，需要提供预期开始时间"
+      tags: [mutual-selection]
+      summary: 学生申请教练
+      description: 学生向教练提交申请
       security:
-        - auth-session-student: []
+        - SessionAuth: [STUDENT]
       requestBody:
+        required: true
         content:
           application/x-www-form-urlencoded:
             schema:
-              $ref: "#/components/schemas/ApplyForCoachRequest"
-            examples:
-              apply_example:
-                summary: "申请示例"
-                value:
-                  coachId: "550e8400-e29b-41d4-a716-446655440001"
-                  expectedStartTime: 1700000000000
-        required: true
+              type: object
+              properties:
+                coachId:
+                  type: string
+                  description: 教练ID
+              required:
+                - coachId
       responses:
-        "201":
-          description: "申请成功"
+        '201':
+          description: 申请提交成功
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/StudentCoachRelation"
-              examples:
-                success:
-                  value:
-                    selectionId: "550e8400-e29b-41d4-a716-446655440002"
-                    coachId: "550e8400-e29b-41d4-a716-446655440001"
-                    coachName: "李教练"
-                    studentId: "550e8400-e29b-41d4-a716-446655440000"
-                    studentName: "张三"
-                    status: "pending"
-                    applicationTime: "2023-10-01T10:00:00+08:00"
-                    expectedStartTime: "2023-10-15T09:00:00+08:00"
-                    actualStartTime: null
-                    endTime: null
-        "400":
-          description: "请求参数错误"
-          content:
-            application/json:
-              schema:
-                type: "object"
-                properties:
-                  message:
-                    type: "string"
-              examples:
-                bad_request:
-                  value:
-                    message: "申请失败"
-        "401":
-          description: "未认证"
-        "403":
-          description: "权限不足"
+                $ref: '#/components/schemas/MutualSelection'
+
   /mutual-selection/student-applications:
     get:
-      tags:
-        - "双选系统"
-      summary: "获取学生申请记录"
-      description: "学生查看自己的申请记录，支持分页和状态筛选"
+      tags: [mutual-selection]
+      summary: 获取学生申请记录
+      description: 学生查看自己的申请记录
       security:
-        - auth-session-student: []
+        - SessionAuth: [STUDENT]
       parameters:
-        - name: "status"
-          in: "query"
-          description: "筛选状态"
-          required: false
+        - name: page
+          in: query
           schema:
-            type: "string"
-            enum:
-              - "pending"
-              - "approved"
-              - "rejected"
-              - "active"
-              - "inactive"
-        - name: "page"
-          in: "query"
-          description: "页码 (默认为1)"
-          required: false
-          schema:
-            type: "integer"
-            format: "int32"
+            type: integer
+            minimum: 1
             default: 1
-        - name: "size"
-          in: "query"
-          description: "每页大小 (默认为10，范围1-100)"
-          required: false
+        - name: size
+          in: query
           schema:
-            type: "integer"
-            format: "int32"
+            type: integer
+            minimum: 1
+            maximum: 100
             default: 10
       responses:
-        "200":
-          description: "获取成功"
+        '200':
+          description: 申请记录列表
           content:
             application/json:
               schema:
-                type: "array"
+                type: array
                 items:
-                  $ref: "#/components/schemas/StudentCoachRelation"
-              examples:
-                success:
-                  value:
-                    - selectionId: "550e8400-e29b-41d4-a716-446655440002"
-                      coachId: "550e8400-e29b-41d4-a716-446655440001"
-                      coachName: "李教练"
-                      studentId: "550e8400-e29b-41d4-a716-446655440000"
-                      studentName: "张三"
-                      status: "pending"
-                      applicationTime: "2023-10-01T10:00:00+08:00"
-                      expectedStartTime: "2023-10-15T09:00:00+08:00"
-                      actualStartTime: null
-                      endTime: null
-        "400":
-          description: "请求参数错误"
-          content:
-            application/json:
-              schema:
-                type: "object"
-                properties:
-                  message:
-                    type: "string"
-              examples:
-                bad_request:
-                  value:
-                    message: "获取申请记录失败"
-        "401":
-          description: "未认证"
-        "403":
-          description: "权限不足"
-  /mutual-selection/cancel-approved:
-    post:
-      tags:
-        - "双选系统"
-      summary: "学生取消已批准的关系"
-      description: "学生取消已批准或活跃的关系"
-      security:
-        - auth-session-student: []
-      requestBody:
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              type: "object"
-              properties:
-                relationId:
-                  type: "string"
-              required:
-                - "relationId"
-            examples:
-              cancel_example:
-                summary: "取消关系示例"
-                value:
-                  relationId: "550e8400-e29b-41d4-a716-446655440002"
-        required: true
-      responses:
-        "200":
-          description: "取消成功"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/StudentCoachRelation"
-              examples:
-                success:
-                  value:
-                    selectionId: "550e8400-e29b-41d4-a716-446655440002"
-                    coachId: "550e8400-e29b-41d4-a716-446655440001"
-                    coachName: "李教练"
-                    studentId: "550e8400-e29b-41d4-a716-446655440000"
-                    studentName: "张三"
-                    status: "inactive"
-                    applicationTime: "2023-10-01T10:00:00+08:00"
-        "400":
-          description: "请求参数错误"
-          content:
-            application/json:
-              schema:
-                type: "object"
-                properties:
-                  message:
-                    type: "string"
-              examples:
-                bad_request:
-                  value:
-                    message: "取消关系失败"
-        "401":
-          description: "未认证"
-        "403":
-          description: "权限不足"
+                  $ref: '#/components/schemas/MutualSelection'
+
   /mutual-selection/withdraw:
     post:
-      tags:
-        - "双选系统"
-      summary: "学生撤回申请"
-      description: "学生撤回尚未处理的申请"
+      tags: [mutual-selection]
+      summary: 学生撤回申请
+      description: 学生撤回对教练的申请
       security:
-        - auth-session-student: []
+        - SessionAuth: [STUDENT]
       requestBody:
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: "#/components/schemas/WithdrawApplicationRequest"
-            examples:
-              withdraw_example:
-                summary: "撤回申请示例"
-                value:
-                  relationId: "550e8400-e29b-41d4-a716-446655440002"
         required: true
-      responses:
-        "200":
-          description: "撤回成功"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/StudentCoachRelation"
-              examples:
-                success:
-                  value:
-                    selectionId: "550e8400-e29b-41d4-a716-446655440002"
-                    coachId: "550e8400-e29b-41d4-a716-446655440001"
-                    coachName: "李教练"
-                    studentId: "550e8400-e29b-41d4-a716-446655440000"
-                    studentName: "张三"
-                    status: "inactive"
-                    applicationTime: "2023-10-01T10:00:00+08:00"
-                    expectedStartTime: "2023-10-15T09:00:00+08:00"
-                    actualStartTime: null
-                    endTime: null
-        "400":
-          description: "请求参数错误"
-          content:
-            application/json:
-              schema:
-                type: "object"
-                properties:
-                  message:
-                    type: "string"
-              examples:
-                bad_request:
-                  value:
-                    message: "撤回申请失败"
-        "401":
-          description: "未认证"
-        "403":
-          description: "权限不足"
-  /mutual-selection/coach-applications:
-    get:
-      tags:
-        - "双选系统"
-      summary: "获取教练收到的申请记录"
-      description: "教练查看学生对自己的申请记录，支持分页和状态筛选"
-      security:
-        - auth-session-coach: []
-      parameters:
-        - name: "status"
-          in: "query"
-          description: "筛选状态"
-          required: false
-          schema:
-            type: "string"
-            enum:
-              - "pending"
-              - "approved"
-              - "rejected"
-              - "active"
-              - "inactive"
-        - name: "page"
-          in: "query"
-          description: "页码 (默认为1)"
-          required: false
-          schema:
-            type: "integer"
-            format: "int32"
-            default: 1
-        - name: "size"
-          in: "query"
-          description: "每页大小 (默认为10，范围1-100)"
-          required: false
-          schema:
-            type: "integer"
-            format: "int32"
-            default: 10
-      responses:
-        "200":
-          description: "获取成功"
-          content:
-            application/json:
-              schema:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/StudentCoachRelation"
-              examples:
-                success:
-                  value:
-                    - selectionId: "550e8400-e29b-41d4-a716-446655440002"
-                      coachId: "550e8400-e29b-41d4-a716-446655440001"
-                      coachName: "李教练"
-                      studentId: "550e8400-e29b-41d4-a716-446655440000"
-                      studentName: "张三"
-                      status: "pending"
-                      applicationTime: "2023-10-01T10:00:00+08:00"
-                      expectedStartTime: "2023-10-15T09:00:00+08:00"
-                      actualStartTime: null
-                      endTime: null
-        "400":
-          description: "请求参数错误"
-          content:
-            application/json:
-              schema:
-                type: "object"
-                properties:
-                  message:
-                    type: "string"
-              examples:
-                bad_request:
-                  value:
-                    message: "获取申请记录失败"
-        "401":
-          description: "未认证"
-        "403":
-          description: "权限不足"
-  /mutual-selection/review:
-    post:
-      tags:
-        - "双选系统"
-      summary: "教练审核学生申请"
-      description: "教练审核学生申请，可以批准或拒绝"
-      security:
-        - auth-session-coach: []
-      requestBody:
         content:
           application/x-www-form-urlencoded:
             schema:
-              $ref: "#/components/schemas/ReviewApplicationRequest"
-            examples:
-              approve_example:
-                summary: "批准申请示例"
-                value:
-                  relationId: "550e8400-e29b-41d4-a716-446655440002"
-                  approve: true
-              reject_example:
-                summary: "拒绝申请示例"
-                value:
-                  relationId: "550e8400-e29b-41d4-a716-446655440002"
-                  approve: false
-        required: true
-      responses:
-        "200":
-          description: "审核成功"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/StudentCoachRelation"
-              examples:
-                approve_success:
-                  value:
-                    selectionId: "550e8400-e29b-41d4-a716-446655440002"
-                    coachId: "550e8400-e29b-41d4-a716-446655440001"
-                    coachName: "李教练"
-                    studentId: "550e8400-e29b-41d4-a716-446655440000"
-                    studentName: "张三"
-                    status: "approved"
-                    applicationTime: "2023-10-01T10:00:00+08:00"
-                    expectedStartTime: "2023-10-15T09:00:00+08:00"
-                    actualStartTime: null
-                    endTime: null
-                reject_success:
-                  value:
-                    selectionId: "550e8400-e29b-41d4-a716-446655440002"
-                    coachId: "550e8400-e29b-41d4-a716-446655440001"
-                    coachName: "李教练"
-                    studentId: "550e8400-e29b-41d4-a716-446655440000"
-                    studentName: "张三"
-                    status: "rejected"
-                    applicationTime: "2023-10-01T10:00:00+08:00"
-                    expectedStartTime: "2023-10-15T09:00:00+08:00"
-                    actualStartTime: null
-                    endTime: null
-        "400":
-          description: "请求参数错误"
-          content:
-            application/json:
-              schema:
-                type: "object"
-                properties:
-                  message:
-                    type: "string"
-              examples:
-                bad_request:
-                  value:
-                    message: "审核申请失败"
-        "401":
-          description: "未认证"
-        "403":
-          description: "权限不足"
-  /mutual-selection/all:
-    get:
-      tags:
-        - "双选系统"
-      summary: "获取所有关系记录"
-      description: "管理员获取所有师生关系记录，支持分页和状态筛选"
-      security:
-        - auth-session-campus-admin: []
-        - auth-session-super-admin: []
-      parameters:
-        - name: "status"
-          in: "query"
-          description: "筛选状态"
-          required: false
-          schema:
-            type: "string"
-            enum:
-              - "pending"
-              - "approved"
-              - "rejected"
-              - "active"
-              - "inactive"
-        - name: "page"
-          in: "query"
-          description: "页码 (默认为1)"
-          required: false
-          schema:
-            type: "integer"
-            format: "int32"
-            default: 1
-        - name: "size"
-          in: "query"
-          description: "每页大小 (默认为10，范围1-100)"
-          required: false
-          schema:
-            type: "integer"
-            format: "int32"
-            default: 10
-      responses:
-        "200":
-          description: "获取成功"
-          content:
-            application/json:
-              schema:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/StudentCoachRelation"
-              examples:
-                success:
-                  value:
-                    - selectionId: "550e8400-e29b-41d4-a716-446655440002"
-                      coachId: "550e8400-e29b-41d4-a716-446655440001"
-                      coachName: "李教练"
-                      studentId: "550e8400-e29b-41d4-a716-446655440000"
-                      studentName: "张三"
-                      status: "pending"
-                      applicationTime: "2023-10-01T10:00:00+08:00"
-        "400":
-          description: "请求参数错误"
-          content:
-            application/json:
-              schema:
-                type: "object"
-                properties:
-                  message:
-                    type: "string"
-              examples:
-                bad_request:
-                  value:
-                    message: "获取关系记录失败"
-        "401":
-          description: "未认证"
-        "403":
-          description: "权限不足"
-  /mutual-selection/admin-create:
-    post:
-      tags:
-        - "双选系统"
-      summary: "管理员直接建立关系"
-      description: "管理员绕过申请流程直接建立师生关系"
-      security:
-        - auth-session-campus-admin: []
-        - auth-session-super-admin: []
-      requestBody:
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: "#/components/schemas/AdminCreateRelationRequest"
-            examples:
-              create_example:
-                summary: "创建关系示例"
-                value:
-                  studentId: "550e8400-e29b-41d4-a716-446655440000"
-                  coachId: "550e8400-e29b-41d4-a716-446655440001"
-      requestBody:
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              type: "object"
+              type: object
               properties:
-                studentId:
-                  type: "string"
-                coachId:
-                  type: "string"
+                relationId:
+                  type: string
+                  description: 关系ID
               required:
-                - "studentId"
-                - "coachId"
-            examples:
-              create_example:
-                summary: "创建关系示例"
-                value:
-                  studentId: "550e8400-e29b-41d4-a716-446655440000"
-                  coachId: "550e8400-e29b-41d4-a716-446655440001"
-        required: true
+                - relationId
       responses:
-        "201":
-          description: "创建成功"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/StudentCoachRelation"
-              examples:
-                success:
-                  value:
-                    selectionId: "550e8400-e29b-41d4-a716-446655440002"
-                    coachId: "550e8400-e29b-41d4-a716-446655440001"
-                    coachName: "李教练"
-                    studentId: "550e8400-e29b-41d4-a716-446655440000"
-                    studentName: "张三"
-                    status: "active"
-                    applicationTime: "2023-10-01T10:00:00+08:00"
-                    expectedStartTime: "2023-10-01T10:00:00+08:00"
-                    actualStartTime: "2023-10-01T10:00:00+08:00"
-                    endTime: null
-        "400":
-          description: "请求参数错误"
-          content:
-            application/json:
-              schema:
-                type: "object"
-                properties:
-                  message:
-                    type: "string"
-              examples:
-                bad_request:
-                  value:
-                    message: "创建关系失败"
-        "401":
-          description: "未认证"
-        "403":
-          description: "权限不足"
-  /mutual-selection/admin/relation/{relationId}:
-    get:
-      tags:
-        - "双选系统"
-      summary: "管理员获取师生关系详细信息"
-      description: "管理员根据ID获取师生关系的详细信息"
-      security:
-        - auth-session-campus-admin: []
-        - auth-session-super-admin: []
-      parameters:
-        - name: "relationId"
-          in: "path"
-          required: true
-          schema:
-            type: "string"
-      responses:
-        "200":
-          description: "获取成功"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/StudentCoachRelation"
-              examples:
-                success:
-                  value:
-                    selectionId: "550e8400-e29b-41d4-a716-446655440002"
-                    coachId: "550e8400-e29b-41d4-a716-446655440001"
-                    coachName: "李教练"
-                    studentId: "550e8400-e29b-41d4-a716-446655440000"
-                    studentName: "张三"
-                    status: "active"
-                    applicationTime: "2023-10-01T10:00:00+08:00"
-        "400":
-          description: "请求参数错误"
-        "401":
-          description: "未认证"
-        "403":
-          description: "权限不足"
-        "404":
-          description: "关系不存在"
+        '200':
+          description: 撤回成功
+
+  /mutual-selection/cancel-approved:
     post:
-      tags:
-        - "双选系统"
-      summary: "管理员更新师生关系信息"
-      description: "管理员更新师生关系的状态信息"
+      tags: [mutual-selection]
+      summary: 学生取消已批准的关系
+      description: 学生取消已经建立的师生关系
       security:
-        - auth-session-campus-admin: []
-        - auth-session-super-admin: []
-      parameters:
-        - name: "relationId"
-          in: "path"
-          required: true
-          schema:
-            type: "string"
+        - SessionAuth: [STUDENT]
       requestBody:
+        required: true
         content:
           application/x-www-form-urlencoded:
             schema:
-              type: "object"
+              type: object
               properties:
-                status:
-                  type: "string"
-                  enum:
-                    - "pending"
-                    - "approved"
-                    - "rejected"
-                    - "active"
-                    - "inactive"
-            examples:
-              update_status_example:
-                summary: "更新状态示例"
-                value:
-                  status: "inactive"
-        required: false
+                relationId:
+                  type: string
+                  description: 关系ID
+              required:
+                - relationId
       responses:
-        "200":
-          description: "更新成功"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/StudentCoachRelation"
-              examples:
-                success:
-                  value:
-                    selectionId: "550e8400-e29b-41d4-a716-446655440002"
-                    coachId: "550e8400-e29b-41d4-a716-446655440001"
-                    coachName: "李教练"
-                    studentId: "550e8400-e29b-41d4-a716-446655440000"
-                    studentName: "张三"
-                    status: "inactive"
-                    applicationTime: "2023-10-01T10:00:00+08:00"
-        "400":
-          description: "请求参数错误"
-        "401":
-          description: "未认证"
-        "403":
-          description: "权限不足"
-        "404":
-          description: "关系不存在"
+        '200':
+          description: 取消成功
 
-      tags:
-        - "双选系统"
-      summary: "获取所有关系记录"
-      description: "管理员查看系统中所有的师生关系记录，支持分页和状态筛选"
-      security:
-        - auth-session-campus-admin: []
-        - auth-session-super-admin: []
-      parameters:
-        - name: "status"
-          in: "query"
-          description: "筛选状态"
-          required: false
-          schema:
-            type: "string"
-            enum:
-              - "pending"
-              - "approved"
-              - "rejected"
-              - "active"
-              - "inactive"
-        - name: "page"
-          in: "query"
-          description: "页码 (默认为1)"
-          required: false
-          schema:
-            type: "integer"
-            format: "int32"
-            default: 1
-        - name: "size"
-          in: "query"
-          description: "每页大小 (默认为10，范围1-100)"
-          required: false
-          schema:
-            type: "integer"
-            format: "int32"
-            default: 10
-      responses:
-        "200":
-          description: "获取成功"
-          content:
-            application/json:
-              schema:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/StudentCoachRelation"
-              examples:
-                success:
-                  value:
-                    - selectionId: "550e8400-e29b-41d4-a716-446655440002"
-                      coachId: "550e8400-e29b-41d4-a716-446655440001"
-                      coachName: "李教练"
-                      studentId: "550e8400-e29b-41d4-a716-446655440000"
-                      studentName: "张三"
-                      status: "active"
-                      applicationTime: "2023-10-01T10:00:00+08:00"
-        "400":
-          description: "请求参数错误"
-          content:
-            application/json:
-              schema:
-                type: "object"
-                properties:
-                  message:
-                    type: "string"
-              examples:
-                bad_request:
-                  value:
-                    message: "获取关系记录失败"
-        "401":
-          description: "未认证"
-        "403":
-          description: "权限不足"
-        "404":
-          description: "关系不存在"
-  /coach/coaches:
-    get:
-      tags:
-        - "教练管理"
-      summary: "获取所有教练"
-      description: "获取所有已批准的教练列表，支持分页"
-      security:
-        - auth-session-student: []
-      parameters:
-        - name: "page"
-          in: "query"
-          description: "页码 (默认为1)"
-          required: false
-          schema:
-            type: "integer"
-            format: "int32"
-            default: 1
-        - name: "size"
-          in: "query"
-          description: "每页大小 (默认为10，范围1-100)"
-          required: false
-          schema:
-            type: "integer"
-            format: "int32"
-            default: 10
-      responses:
-        "200":
-          description: "获取成功"
-          content:
-            application/json:
-              schema:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/CoachRecord"
-              examples:
-                success:
-                  value:
-                    - username: "coach001"
-                      realName: "李教练"
-                      gender: "女"
-                      age: 35
-                      photoUrl: "https://example.com/photos/coach001.jpg"
-                      achievements: "前国家队员，10年教学经验"
-                      level: "高级"
-                      hourlyRate: 150.0
-                      currentStudents: 5
-        "400":
-          description: "请求参数错误"
-          content:
-            application/json:
-              schema:
-                type: "object"
-                properties:
-                  message:
-                    type: "string"
-              examples:
-                bad_request:
-                  value:
-                    message: "页码必须大于0"
-        "401":
-          description: "未认证"
-  /coach/queryCoach:
-    post:
-      tags:
-        - "教练管理"
-      summary: "根据用户名查询教练"
-      description: "根据用户名模糊查询教练信息"
-      security:
-        - auth-session-student: []
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/QueryCoachRequest"
-            examples:
-              query_example:
-                summary: "查询示例"
-                value:
-                  username: "coach"
-        required: true
-      responses:
-        "200":
-          description: "查询成功"
-          content:
-            application/json:
-              schema:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/CoachRecord"
-              examples:
-                success:
-                  value:
-                    - username: "coach001"
-                      realName: "李教练"
-                      gender: "女"
-                      age: 35
-                      photoUrl: "https://example.com/photos/coach001.jpg"
-                      achievements: "前国家队员，10年教学经验"
-                      level: "高级"
-                      hourlyRate: 150.0
-                      currentStudents: 5
-        "400":
-          description: "请求参数错误"
-          content:
-            application/json:
-              schema:
-                type: "object"
-                properties:
-                  error:
-                    type: "string"
-              examples:
-                bad_request:
-                  value:
-                    error: "用户名不能为空"
-        "401":
-          description: "未认证"
-  /coach/coaches/campusNotApproved:
-    get:
-      tags:
-        - "教练管理"
-      summary: "获取本校区未审核教练"
-      description: "校区管理员获取本校区所有未审核通过的教练列表，支持分页"
-      security:
-        - auth-session-campus-admin: []
-      parameters:
-        - name: "page"
-          in: "query"
-          description: "页码 (默认为1)"
-          required: false
-          schema:
-            type: "integer"
-            format: "int32"
-            default: 1
-        - name: "size"
-          in: "query"
-          description: "每页大小 (默认为10，范围1-100)"
-          required: false
-          schema:
-            type: "integer"
-            format: "int32"
-            default: 10
-      responses:
-        "200":
-          description: "获取成功"
-          content:
-            application/json:
-              schema:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/CoachApproved"
-              examples:
-                success:
-                  value:
-                    - uuid: "550e8400-e29b-41d4-a716-446655440001"
-                      realName: "李教练"
-                      gender: "女"
-                      age: 35
-                      phoneNumber: "13900139000"
-                      email: "coach@example.com"
-                      photoUrl: "https://example.com/photos/coach001.jpg"
-                      achievements: "前国家队员，10年教学经验"
-        "400":
-          description: "请求参数错误"
-          content:
-            application/json:
-              schema:
-                type: "object"
-                properties:
-                  message:
-                    type: "string"
-              examples:
-                bad_request:
-                  value:
-                    message: "页码必须大于0"
-        "401":
-          description: "未认证"
-        "403":
-          description: "权限不足"
-  /coach/coaches/allNotApproved:
-    get:
-      tags:
-        - "教练管理"
-      summary: "获取所有未审核教练"
-      description: "超级管理员获取所有未审核通过的教练列表，支持分页"
-      security:
-        - auth-session-super-admin: []
-      parameters:
-        - name: "page"
-          in: "query"
-          description: "页码 (默认为1)"
-          required: false
-          schema:
-            type: "integer"
-            format: "int32"
-            default: 1
-        - name: "size"
-          in: "query"
-          description: "每页大小 (默认为10，范围1-100)"
-          required: false
-          schema:
-            type: "integer"
-            format: "int32"
-            default: 10
-      responses:
-        "200":
-          description: "获取成功"
-          content:
-            application/json:
-              schema:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/CoachApproved"
-              examples:
-                success:
-                  value:
-                    - uuid: "550e8400-e29b-41d4-a716-446655440001"
-                      realName: "李教练"
-                      gender: "女"
-                      age: 35
-                      phoneNumber: "13900139000"
-                      email: "coach@example.com"
-                      photoUrl: "https://example.com/photos/coach001.jpg"
-                      achievements: "前国家队员，10年教学经验"
-        "400":
-          description: "请求参数错误"
-          content:
-            application/json:
-              schema:
-                type: "object"
-                properties:
-                  message:
-                    type: "string"
-              examples:
-                bad_request:
-                  value:
-                    message: "页码必须大于0"
-        "401":
-          description: "未认证"
-        "403":
-          description: "权限不足"
-  /coach/approve:
-    post:
-      tags:
-        - "教练管理"
-      summary: "审核教练"
-      description: "管理员审核教练，设置教练等级"
-      security:
-        - auth-session-campus-admin: []
-        - auth-session-super-admin: []
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ApproveCoachRequest"
-            examples:
-              approve_example:
-                summary: "审核示例"
-                value:
-                  coachId: "550e8400-e29b-41d4-a716-446655440001"
-                  level: "高级"
-        required: true
-      responses:
-        "200":
-          description: "审核成功"
-          content:
-            application/json:
-              schema:
-                type: "object"
-                properties:
-                  message:
-                    type: "string"
-              examples:
-                success:
-                  value:
-                    message: "教练审核成功"
-        "400":
-          description: "请求参数错误"
-        "401":
-          description: "未认证"
-        "403":
-          description: "权限不足"
-  /mutual-selection/coach/current-students:
-    get:
-      tags:
-        - "双选系统"
-      summary: "获取教练当前学生列表"
-      description: "教练获取与自己建立关系的所有当前学生列表"
-      security:
-        - auth-session-coach: []
-      responses:
-        "200":
-          description: "获取成功"
-          content:
-            application/json:
-              schema:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/StudentCoachRelation"
-              examples:
-                success:
-                  value:
-                    - selectionId: "550e8400-e29b-41d4-a716-446655440002"
-                      coachId: "550e8400-e29b-41d4-a716-446655440001"
-                      coachName: "李教练"
-                      studentId: "550e8400-e29b-41d4-a716-446655440000"
-                      studentName: "张三"
-                      status: "active"
-                      applicationTime: "2023-10-01T10:00:00+08:00"
-        "401":
-          description: "未认证"
-        "403":
-          description: "权限不足"
-  /mutual-selection/coach/historical-students:
-    get:
-      tags:
-        - "双选系统"
-      summary: "获取教练历史学生列表"
-      description: "教练获取历史学生列表（包括已结束关系的学生）"
-      security:
-        - auth-session-coach: []
-      responses:
-        "200":
-          description: "获取成功"
-          content:
-            application/json:
-              schema:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/StudentCoachRelation"
-              examples:
-                success:
-                  value:
-                    - selectionId: "550e8400-e29b-41d4-a716-446655440003"
-                      coachId: "550e8400-e29b-41d4-a716-446655440001"
-                      coachName: "李教练"
-                      studentId: "550e8400-e29b-41d4-a716-446655440004"
-                      studentName: "王五"
-                      status: "rejected"
-                      applicationTime: "2023-09-15T09:30:00+08:00"
-        "401":
-          description: "未认证"
-        "403":
-          description: "权限不足"
   /mutual-selection/student/current-coaches:
     get:
-      tags:
-        - "双选系统"
-      summary: "获取学生当前教练列表"
-      description: "学生获取与自己建立关系的所有当前教练列表"
+      tags: [mutual-selection]
+      summary: 获取学生当前教练列表
+      description: 学生查看当前已建立关系的教练列表
       security:
-        - auth-session-student: []
+        - SessionAuth: [STUDENT]
       responses:
-        "200":
-          description: "获取成功"
+        '200':
+          description: 教练列表
           content:
             application/json:
               schema:
-                type: "array"
+                type: array
                 items:
-                  $ref: "#/components/schemas/StudentCoachRelation"
-              examples:
-                success:
-                  value:
-                    - selectionId: "550e8400-e29b-41d4-a716-446655440002"
-                      coachId: "550e8400-e29b-41d4-a716-446655440001"
-                      coachName: "李教练"
-                      studentId: "550e8400-e29b-41d4-a716-446655440000"
-                      studentName: "张三"
-                      status: "active"
-                      applicationTime: "2023-10-01T10:00:00+08:00"
-        "401":
-          description: "未认证"
-        "403":
-          description: "权限不足"
-components:
-  schemas:
-    User:
-      type: "object"
-      properties:
-        uuid:
-          type: "string"
-        username:
-          type: "string"
-        plainPassword:
-          type: "string"
-        realName:
-          type: "string"
-        gender:
-          type: "string"
-        age:
-          type: "integer"
-          format: "int32"
-        phoneNumber:
-          type: "string"
-        email:
-          type: "string"
-        campusId:
-          type: "integer"
-          format: "int32"
-        role:
-          type: "string"
-          enum:
-            - "SUPER_ADMIN"
-            - "CAMPUS_ADMIN"
-            - "COACH"
-            - "STUDENT"
-        status:
-          type: "string"
-        createdAt:
-          type: "string"
-          format: "date-time"
-        lastLoginAt:
-          type: "string"
-          format: "date-time"
-        studentInfo:
-          $ref: "#/components/schemas/StudentInfo"
-        coachInfo:
-          $ref: "#/components/schemas/CoachInfo"
-      required:
-        - "username"
-        - "plainPassword"
-        - "realName"
-        - "gender"
-        - "age"
-        - "phoneNumber"
-        - "email"
-        - "campusId"
-        - "role"
-        - "status"
-    StudentInfo:
-      type: "object"
-      properties:
-        balance:
-          type: "number"
-          format: "float"
-        maxCoach:
-          type: "integer"
-          format: "int32"
-        currentCoach:
-          type: "integer"
-          format: "int32"
-      required:
-        - "balance"
-        - "maxCoach"
-        - "currentCoach"
-    CoachInfo:
-      type: "object"
-      properties:
-        photoUrl:
-          type: "string"
-          nullable: true
-        achievements:
-          type: "string"
-          nullable: true
-        level:
-          type: "string"
-          nullable: true
-        hourlyRate:
-          type: "number"
-          format: "float"
-        balance:
-          type: "number"
-          format: "float"
-        maxStudents:
-          type: "integer"
-          format: "int32"
-        currentStudents:
-          type: "integer"
-          format: "int32"
-        isApproved:
-          type: "boolean"
-        approvedBy:
-          type: "string"
-          nullable: true
-      required:
-        - "hourlyRate"
-        - "balance"
-        - "maxStudents"
-        - "currentStudents"
-        - "isApproved"
-    CoachRecord:
-      type: "object"
-      properties:
-        username:
-          type: "string"
-        realName:
-          type: "string"
-        gender:
-          type: "string"
-        age:
-          type: "integer"
-          format: "int32"
-        photoUrl:
-          type: "string"
-        achievements:
-          type: "string"
-        level:
-          type: "string"
-        hourlyRate:
-          type: "number"
-          format: "float"
-        currentStudents:
-          type: "integer"
-          format: "int32"
-      required:
-        - "username"
-        - "realName"
-        - "gender"
-        - "age"
-        - "photoUrl"
-        - "achievements"
-        - "level"
-        - "hourlyRate"
-        - "currentStudents"
-    QueryCoachRequest:
-      type: "object"
-      properties:
-        username:
-          type: "string"
-      required:
-        - "username"
-    ApproveCoachRequest:
-      type: "object"
-      properties:
-        coachId:
-          type: "string"
-        level:
-          type: "string"
-      required:
-        - "coachId"
-        - "level"
-    CoachApproved:
-      type: "object"
-      properties:
-        uuid:
-          type: "string"
-        realName:
-          type: "string"
-        gender:
-          type: "string"
-        age:
-          type: "integer"
-          format: "int32"
-        phoneNumber:
-          type: "string"
-        email:
-          type: "string"
-        photoUrl:
-          type: "string"
-          nullable: true
-        achievements:
-          type: "string"
-          nullable: true
-      required:
-        - "uuid"
-        - "realName"
-        - "gender"
-        - "age"
-        - "phoneNumber"
-        - "email"
-    StudentCoachRelation:
-      type: "object"
-      properties:
-        selectionId:
-          type: "string"
-        coachId:
-          type: "string"
-        coachName:
-          type: "string"
-          nullable: true
-        studentId:
-          type: "string"
-        studentName:
-          type: "string"
-          nullable: true
-        status:
-          type: "string"
-          enum:
-            - "pending"
-            - "approved"
-            - "rejected"
-            - "active"
-            - "inactive"
-        applicationTime:
-          type: "string"
-          format: "date-time"
-      required:
-        - "selectionId"
-        - "coachId"
-        - "studentId"
-        - "status"
-        - "applicationTime"
-    ApplyForCoachRequest:
-      type: "object"
-      properties:
-        coachId:
-          type: "string"
-      required:
-        - "coachId"
-    WithdrawApplicationRequest:
-      type: "object"
-      properties:
-        relationId:
-          type: "string"
-      required:
-        - "relationId"
-    AdminCreateRelationRequest:
-      type: "object"
-      properties:
-        studentId:
-          type: "string"
-        coachId:
-          type: "string"
-      required:
-        - "studentId"
-        - "coachId"
-    CreateMessageRequest:
-      type: "object"
-      properties:
-        recipientId:
-          type: "string"
-        title:
-          type: "string"
+                  $ref: '#/components/schemas/CoachRecord'
+
+  /mutual-selection/coach-applications:
+    get:
+      tags: [mutual-selection]
+      summary: 获取教练收到的申请
+      description: 教练查看收到的学生申请
+      security:
+        - SessionAuth: [COACH]
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: size
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+      responses:
+        '200':
+          description: 申请记录列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MutualSelection'
+
+  /mutual-selection/review:
+    post:
+      tags: [mutual-selection]
+      summary: 教练审核学生申请
+      description: 教练批准或拒绝学生申请
+      security:
+        - SessionAuth: [COACH]
+      requestBody:
+        required: true
         content:
-          type: "string"
-        type:
-          type: "string"
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                selectionId:
+                  type: string
+                  description: 关系ID
+                approve:
+                  type: boolean
+                  description: 是否批准
+              required:
+                - selectionId
+                - approve
+      responses:
+        '200':
+          description: 审核完成
+
+  /mutual-selection/coach/current-students:
+    get:
+      tags: [mutual-selection]
+      summary: 获取教练当前学生列表
+      description: 教练查看当前已建立关系的学生列表
+      security:
+        - SessionAuth: [COACH]
+      responses:
+        '200':
+          description: 学生列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Student'
+
+  /mutual-selection/coach/historical-students:
+    get:
+      tags: [mutual-selection]
+      summary: 获取教练历史学生列表
+      description: 教练查看历史学生列表（包括已结束关系的学生）
+      security:
+        - SessionAuth: [COACH]
+      responses:
+        '200':
+          description: 学生列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Student'
+
+  /mutual-selection/admin-create:
+    post:
+      tags: [mutual-selection]
+      summary: 管理员直接建立关系
+      description: 管理员直接建立师生关系
+      security:
+        - SessionAuth: [CAMPUS_ADMIN, SUPER_ADMIN]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                studentId:
+                  type: string
+                  description: 学生ID
+                coachId:
+                  type: string
+                  description: 教练ID
+              required:
+                - studentId
+                - coachId
+      responses:
+        '201':
+          description: 关系建立成功
+
+  /mutual-selection/all:
+    get:
+      tags: [mutual-selection]
+      summary: 获取所有关系记录
+      description: 管理员查看所有师生关系记录
+      security:
+        - SessionAuth: [CAMPUS_ADMIN, SUPER_ADMIN]
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: size
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+      responses:
+        '200':
+          description: 关系记录列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MutualSelection'
+
+  /mutual-selection/admin/relation/{relationId}:
+    get:
+      tags: [mutual-selection]
+      summary: 获取关系详细信息
+      description: 管理员根据ID获取师生关系详细信息
+      security:
+        - SessionAuth: [CAMPUS_ADMIN, SUPER_ADMIN]
+      parameters:
+        - name: relationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 关系详细信息
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MutualSelection'
+
+    post:
+      tags: [mutual-selection]
+      summary: 更新关系信息
+      description: 管理员更新师生关系信息
+      security:
+        - SessionAuth: [CAMPUS_ADMIN, SUPER_ADMIN]
+      parameters:
+        - name: relationId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                status:
+                  $ref: '#/components/schemas/MutualSelectionStatus'
+      responses:
+        '200':
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MutualSelection'
+
+  # 消息系统接口
+  /messages:
+    get:
+      tags: [message]
+      summary: 获取消息列表
+      description: 获取当前用户的消息列表
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+        - name: unreadOnly
+          in: query
+          schema:
+            type: boolean
+            default: false
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: 消息列表
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageListResponse'
+
+    post:
+      tags: [message]
+      summary: 发送消息
+      description: 发送消息（仅限管理员）
+      security:
+        - SessionAuth: [SUPER_ADMIN]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMessageRequest'
+      responses:
+        '201':
+          description: 消息发送成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  message:
+                    type: string
+                    example: "消息发送成功"
+
+  /messages/unread-count:
+    get:
+      tags: [message]
+      summary: 获取未读消息数量
+      description: 获取当前用户未读消息数量
+      responses:
+        '200':
+          description: 未读消息数量
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnreadCountResponse'
+
+  /messages/{id}/read:
+    put:
+      tags: [message]
+      summary: 标记消息为已读
+      description: 标记单条消息为已读
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 标记成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                    example: "消息已标记为已读"
+
+  /messages/read-all:
+    put:
+      tags: [message]
+      summary: 标记所有消息为已读
+      description: 标记所有消息为已读
+      responses:
+        '200':
+          description: 标记成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                    example: "成功标记 X 条消息为已读"
+                  count:
+                    type: integer
+
+  /messages/{id}:
+    delete:
+      tags: [message]
+      summary: 删除消息
+      description: 删除指定消息
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: 删除成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "消息删除成功"
+
+  # 教练管理接口
+  /coach/coaches:
+    get:
+      tags: [coach]
+      summary: 获取所有教练
+      description: 获取教练列表（分页）
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: size
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+      responses:
+        '200':
+          description: 教练列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CoachRecord'
+
+  /coach/queryCoach:
+    post:
+      tags: [coach]
+      summary: 根据用户名查询教练
+      description: 根据用户名查询教练信息
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueryCoachRequest'
+      responses:
+        '200':
+          description: 教练信息
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CoachRecord'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /coach/coaches/campusNotApproved:
+    get:
+      tags: [coach]
+      summary: 获取本校区未审核教练
+      description: 获取本校区所有未审核通过的教练（分页）
+      security:
+        - SessionAuth: [CAMPUS_ADMIN]
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: size
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+      responses:
+        '200':
+          description: 未审核教练列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CoachRecord'
+
+  /coach/coaches/allNotApproved:
+    get:
+      tags: [coach]
+      summary: 获取所有未审核教练
+      description: 获取所有未审核通过的教练（分页）- 仅限超级管理员
+      security:
+        - SessionAuth: [SUPER_ADMIN]
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: size
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+      responses:
+        '200':
+          description: 未审核教练列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CoachRecord'
+
+  /coach/approve:
+    post:
+      tags: [coach]
+      summary: 审核教练
+      description: 审核教练并设置级别
+      security:
+        - SessionAuth: [CAMPUS_ADMIN]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApproveCoachRequest'
+      responses:
+        '200':
+          description: 审核成功
+
+  # 校区管理接口
+  /campus/names:
+    get:
+      tags: [campus]
+      summary: 获取校区名称列表
+      description: 获取所有校区名称
+      security: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: size
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+      responses:
+        '200':
+          description: 校区名称列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Campus'
+
+  /campus/create:
+    post:
+      tags: [campus]
+      summary: 创建校区
+      description: 创建新校区 - 仅限超级管理员
+      security:
+        - SessionAuth: [SUPER_ADMIN]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CampusCreateRequest'
+      responses:
+        '201':
+          description: 校区创建成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "创建校区成功"
+
+  # 钱包系统接口
+  /wallet/balance:
+    get:
+      tags: [wallet]
+      summary: 获取钱包余额
+      description: 获取当前用户钱包余额
+      responses:
+        '200':
+          description: 钱包余额
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  balance:
+                    type: number
+                    format: float
+
+  /wallet/recharge:
+    post:
+      tags: [wallet]
+      summary: 钱包充值
+      description: 学生用户进行钱包充值
+      security:
+        - SessionAuth: [STUDENT]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RechargeRequest'
+      responses:
+        '200':
+          description: 充值成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  balance:
+                    type: number
+                    format: float
+
+  /wallet/recharge/history:
+    get:
+      tags: [wallet]
+      summary: 获取充值记录
+      description: 获取当前用户的充值历史记录
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: size
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+      responses:
+        '200':
+          description: 充值记录列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RechargeRecord'
+
+  /wallet/recharge/records:
+    get:
+      tags: [wallet]
+      summary: 获取所有充值记录
+      description: 获取所有用户的充值记录（超级管理员）
+      security:
+        - SessionAuth: [SUPER_ADMIN]
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: size
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+      responses:
+        '200':
+          description: 充值记录列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RechargeRecord'
+
+  /wallet/recharge/records/{username}:
+    get:
+      tags: [wallet]
+      summary: 按用户名获取充值记录
+      description: 获取指定用户的充值记录（超级管理员）
+      security:
+        - SessionAuth: [SUPER_ADMIN]
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: size
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+      responses:
+        '200':
+          description: 充值记录列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RechargeRecord'
+
+  # 竞赛系统接口
+  /competition/signup:
+    post:
+      tags: [competition]
+      summary: 竞赛报名
+      description: 学生报名参加竞赛
+      security:
+        - SessionAuth: [STUDENT]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComsignupRequest'
+      responses:
+        '200':
+          description: 报名成功
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "报名成功"
+
+  /competition/querysignup:
+    get:
+      tags: [competition]
+      summary: 查询比赛报名情况
+      description: 学生查询自己的比赛报名情况
+      security:
+        - SessionAuth: [STUDENT]
+      responses:
+        '200':
+          description: 报名详情
+          content:
+            application/json:
+              schema:
+                type: object
+                description: 比赛报名详情
+
+  /competition/campuscompetitions:
+    get:
+      tags: [competition]
+      summary: 获取校区竞赛
+      description: 获取本校区的竞赛信息
+      security:
+        - SessionAuth: [CAMPUS_ADMIN]
+      responses:
+        '200':
+          description: 校区竞赛列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CompetitionInfo'
+
+  /competition/allcompetitions:
+    get:
+      tags: [competition]
+      summary: 获取所有竞赛
+      description: 获取所有竞赛信息（超级管理员）
+      security:
+        - SessionAuth: [SUPER_ADMIN]
+      responses:
+        '200':
+          description: 所有竞赛列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CompetitionInfo'
+
+components:
+  securitySchemes:
+    SessionAuth:
+      type: apiKey
+      in: cookie
+      name: KTOR_SESSION_ID
+
+  schemas:
+    UserRole:
+      type: string
+      enum:
+        - SUPER_ADMIN
+        - CAMPUS_ADMIN
+        - COACH
+        - STUDENT
+
+    User:
+      type: object
+      properties:
+        uuid:
+          type: string
+          nullable: true
+        username:
+          type: string
+        plainPassword:
+          type: string
+          nullable: true
+        encryptedPassword:
+          type: string
+          nullable: true
+        realName:
+          type: string
+        gender:
+          type: string
+        age:
+          type: integer
+        phoneNumber:
+          type: string
+        email:
+          type: string
+        campusId:
+          type: integer
+        role:
+          $ref: '#/components/schemas/UserRole'
+        status:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+          nullable: true
+        lastLoginAt:
+          type: string
+          format: date-time
+          nullable: true
+        studentInfo:
+          $ref: '#/components/schemas/StudentInfo'
+          nullable: true
+        coachInfo:
+          $ref: '#/components/schemas/CoachInfo'
+          nullable: true
       required:
-        - "recipientId"
-        - "title"
-        - "content"
-        - "type"
-    Message:
-      type: "object"
+        - username
+        - realName
+        - gender
+        - age
+        - phoneNumber
+        - email
+        - campusId
+        - role
+        - status
+
+    StudentInfo:
+      type: object
+      properties:
+        balance:
+          type: number
+          format: float
+        maxCoach:
+          type: integer
+        currentCoach:
+          type: integer
+
+    CoachInfo:
+      type: object
+      properties:
+        balance:
+          type: number
+          format: float
+        hourlyRate:
+          type: number
+          format: float
+        maxStudents:
+          type: integer
+        currentStudents:
+          type: integer
+        isApproved:
+          type: boolean
+        approvedBy:
+          type: string
+          nullable: true
+        photoUrl:
+          type: string
+          nullable: true
+        achievements:
+          type: string
+          nullable: true
+        level:
+          type: string
+
+    Student:
+      type: object
+      properties:
+        uuid:
+          type: string
+          nullable: true
+        username:
+          type: string
+        balance:
+          type: number
+          format: float
+        maxCoach:
+          type: integer
+        currentCoach:
+          type: integer
+      required:
+        - username
+        - balance
+        - maxCoach
+        - currentCoach
+
+    CoachRecord:
+      type: object
+      properties:
+        uuid:
+          type: string
+        username:
+          type: string
+        realName:
+          type: string
+        gender:
+          type: string
+        age:
+          type: integer
+        phoneNumber:
+          type: string
+        email:
+          type: string
+        campusId:
+          type: integer
+        hourlyRate:
+          type: number
+          format: float
+        maxStudents:
+          type: integer
+        currentStudents:
+          type: integer
+        isApproved:
+          type: boolean
+        photoUrl:
+          type: string
+          nullable: true
+        achievements:
+          type: string
+          nullable: true
+        level:
+          type: string
+
+    MutualSelectionStatus:
+      type: string
+      enum:
+        - PENDING
+        - APPROVED
+        - REJECTED
+        - CANCELLED
+
+    MutualSelection:
+      type: object
       properties:
         id:
-          type: "string"
+          type: string
+        studentId:
+          type: string
+        coachId:
+          type: string
+        status:
+          $ref: '#/components/schemas/MutualSelectionStatus'
+        appliedAt:
+          type: string
+          format: date-time
+        reviewedAt:
+          type: string
+          format: date-time
+          nullable: true
+        endedAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    Message:
+      type: object
+      properties:
+        id:
+          type: string
         senderId:
-          type: "string"
+          type: string
           nullable: true
         recipientId:
-          type: "string"
+          type: string
         title:
-          type: "string"
+          type: string
         content:
-          type: "string"
+          type: string
         type:
-          type: "string"
+          type: string
         isRead:
-          type: "boolean"
+          type: boolean
         createdAt:
-          type: "string"
-          format: "date-time"
+          type: string
+          format: date-time
         readAt:
-          type: "string"
-          format: "date-time"
+          type: string
+          format: date-time
           nullable: true
+
+    CreateMessageRequest:
+      type: object
+      properties:
+        recipientId:
+          type: string
+        title:
+          type: string
+        content:
+          type: string
+        type:
+          type: string
       required:
-        - "id"
-        - "recipientId"
-        - "title"
-        - "content"
-        - "type"
-        - "isRead"
-        - "createdAt"
+        - recipientId
+        - title
+        - content
+        - type
+
     MessageListResponse:
-      type: "object"
+      type: object
       properties:
         messages:
-          type: "array"
+          type: array
           items:
-            $ref: "#/components/schemas/Message"
+            $ref: '#/components/schemas/Message'
         totalCount:
-          type: "integer"
-          format: "int64"
-      required:
-        - "messages"
-        - "totalCount"
+          type: integer
+
     UnreadCountResponse:
-      type: "object"
+      type: object
       properties:
         count:
-          type: "integer"
-          format: "int32"
-      required:
-        - "count"
-    RechargeRequest:
-      type: "object"
-      properties:
-        amount:
-          type: "number"
-          format: "float"
-      required:
-        - "amount"
-    RechargeRecord:
-      type: "object"
-      properties:
-        id:
-          type: "integer"
-          format: "int64"
-        userId:
-          type: "string"
-        amount:
-          type: "number"
-          format: "float"
-        balanceAfter:
-          type: "number"
-          format: "float"
-        createdAt:
-          type: "string"
-          format: "date-time"
-        description:
-          type: "string"
-      required:
-        - "id"
-        - "userId"
-        - "amount"
-        - "balanceAfter"
-        - "createdAt"
-        - "description"
-    CampusCreateRequest:
-      type: "object"
-      properties:
-        campusName:
-          type: "string"
-        address:
-          type: "string"
-        contactPerson:
-          type: "string"
-        phone:
-          type: "string"
-        email:
-          type: "string"
-      required:
-        - "campusName"
-        - "address"
-        - "contactPerson"
-        - "phone"
-        - "email"
+          type: integer
+
     Campus:
-      type: "object"
+      type: object
       properties:
         id:
-          type: "integer"
-          format: "int32"
+          type: integer
         campusName:
-          type: "string"
+          type: string
         address:
-          type: "string"
+          type: string
         contactPerson:
-          type: "string"
+          type: string
         phone:
-          type: "string"
+          type: string
         email:
-          type: "string"
-        createdAt:
-          type: "string"
-          format: "date-time"
+          type: string
+
+    CampusCreateRequest:
+      type: object
+      properties:
+        campusName:
+          type: string
+        address:
+          type: string
+        contactPerson:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
       required:
-        - "id"
-        - "campusName"
-        - "address"
-        - "contactPerson"
-        - "phone"
-        - "email"
+        - campusName
+        - address
+        - contactPerson
+        - phone
+        - email
+
+    RechargeRequest:
+      type: object
+      properties:
+        amount:
+          type: number
+          format: float
+          minimum: 0.01
+          maximum: 10000
+      required:
+        - amount
+
+    RechargeRecord:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        amount:
+          type: number
+          format: float
+        balanceBefore:
+          type: number
+          format: float
+        balanceAfter:
+          type: number
+          format: float
+        createdAt:
+          type: string
+          format: date-time
+
+    QueryCoachRequest:
+      type: object
+      properties:
+        username:
+          type: string
+      required:
+        - username
+
+    ApproveCoachRequest:
+      type: object
+      properties:
+        coachId:
+          type: string
+        level:
+          type: string
+      required:
+        - coachId
+        - level
+
+    ComsignupRequest:
+      type: object
+      properties:
+        group:
+          type: string
+      required:
+        - group
+
+    ComQueryRequest:
+      type: object
+      properties:
+        tableId:
+          type: integer
+        group:
+          type: string
+        myUsername:
+          type: string
+        opponentUsername:
+          type: string
+          nullable: true
+      required:
+        - tableId
+        - group
+        - myUsername
+
+    CompetitionInfo:
+      type: object
+      properties:
+        tableId:
+          type: integer
+        campusId:
+          type: integer
+        group:
+          type: string
+        player1Username:
+          type: string
+        player2Username:
+          type: string
+
+  responses:
+    BadRequest:
+      description: 请求参数错误
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              message:
+                type: string
+
+    Unauthorized:
+      description: 未授权访问
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Unauthorized"
+              message:
+                type: string
+                example: "未登录或权限不足"
+
+    NotFound:
+      description: 资源不存在
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Not Found"
+              message:
+                type: string
+
+    InternalServerError:
+      description: 服务器内部错误
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Internal Server Error"
+              message:
+                type: string
