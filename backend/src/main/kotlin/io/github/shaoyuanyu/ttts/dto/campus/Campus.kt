@@ -8,6 +8,7 @@ data class CampusCreateRequest(
     var campusName : String,
     var address : String,
     var contactPerson : String,
+    var username : String,
     var phone : String,
     var email : String,
 )
@@ -15,4 +16,8 @@ data class CampusCreateRequest(
 data class CampusqueryRequest(
     val id: Int,
     val campusName : String,
+)
+@Serializable
+data class AddTableRequest(
+    val number: Int,
 )

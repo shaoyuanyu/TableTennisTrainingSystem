@@ -1,5 +1,6 @@
 package io.github.shaoyuanyu.ttts.routes
 
+import io.github.shaoyuanyu.ttts.dto.student.CompetitionResult
 import io.github.shaoyuanyu.ttts.dto.student.comsignupRequest
 import io.github.shaoyuanyu.ttts.dto.user.UserSession
 import io.github.shaoyuanyu.ttts.exceptions.UnauthorizedException
@@ -37,6 +38,7 @@ fun Application.competitionRoutes(studentService: StudentService) {
             //管理员权限
             authenticate ("auth-session-campus-admin"){
                 getCampusCompetitions(studentService)
+                enterCompetitionResults(studentService)
             }
             // 超级管理员权限
             authenticate("auth-session-super-admin") {
@@ -112,4 +114,19 @@ fun Route.getCampusCompetitions(studentService: StudentService) {
             competitions
         )
  }
+}
+/**
+ * 录入本校区比赛成绩
+ */
+fun Route.enterCompetitionResults(studentService: StudentService) {
+    post("/enterresults") {
+        val user=call.receive<CompetitionResult>()
+        val winner=user.winnerName
+        val loser=user.loserName
+        studentService.enterResults(winner,loser)
+        call.respond(
+            HttpStatusCode.OK,
+            "成绩录入成功"
+        )
+    }
 }

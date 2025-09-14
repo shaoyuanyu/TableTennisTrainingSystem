@@ -3,13 +3,17 @@ package io.github.shaoyuanyu.ttts.persistence
 
 import io.github.shaoyuanyu.ttts.dto.campus.CampusCreateRequest
 import io.github.shaoyuanyu.ttts.dto.campus.CampusqueryRequest
+import io.github.shaoyuanyu.ttts.dto.student.Group
+import io.github.shaoyuanyu.ttts.dto.student.Status
 import io.github.shaoyuanyu.ttts.dto.user.UserRole
 import io.github.shaoyuanyu.ttts.persistence.campus.CampusEntity
+import io.github.shaoyuanyu.ttts.persistence.table.TableEntity
 import io.github.shaoyuanyu.ttts.persistence.user.UserEntity
 import io.github.shaoyuanyu.ttts.persistence.user.UserTable
 import io.github.shaoyuanyu.ttts.utils.encryptPasswd
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+import java.util.UUID
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
@@ -65,7 +69,7 @@ class CampusService(
 
             // 创建校区管理员用户
             UserEntity.new {
-                username = newCampus.contactPerson
+                username = newCampus.username
                 realName = newCampus.contactPerson
                 encryptedPassword = encryptPasswd("12345678") // 加密密码
                 gender = ""
@@ -101,5 +105,38 @@ class CampusService(
                 )}
 
             records to total
+        }
+    /**
+     * 增加球桌数量
+     */
+    fun addTable(userId: String, number: Int) =
+        transaction(database) {
+            val userEntity = UserEntity.findById(UUID.fromString(userId))
+                ?: throw IllegalArgumentException("用户不存在")
+
+            val campusId = userEntity.campusId
+            val campusEntity = CampusEntity.findById(campusId)
+                ?: throw IllegalArgumentException("校区不存在")
+
+            // 获取当前的球桌数量作为起始索引
+            var currentTableNumber = campusEntity.tableNumber
+
+            // 循环添加指定数量的球桌
+            repeat(number) {
+                currentTableNumber += 1
+
+                TableEntity.new {
+                    this.status = Status.free
+                    this.group = Group.free
+                    this.indexInCampus = currentTableNumber
+                    this.campusId = campusId
+                }
+            }
+
+            // 更新校区的球桌总数
+            campusEntity.tableNumber = currentTableNumber
+
+        }.also {
+            USER_LOGGER.info("增加球桌成功，用户ID：$userId，增加数量：$number")
         }
 }
