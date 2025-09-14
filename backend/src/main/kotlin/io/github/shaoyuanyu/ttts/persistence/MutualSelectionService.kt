@@ -250,6 +250,34 @@ class MutualSelectionService(
         }
 
     /**
+     * 获取教练待处理申请数量
+     */
+    fun getPendingApplicationCount(coachUUID: String): Int =
+        transaction(database) {
+            val coach = CoachEntity.findById(UUID.fromString(coachUUID))
+                ?: throw IllegalArgumentException("教练不存在")
+
+            MutualSelectionEntity.find {
+                (MutualSelectionTable.coach_id eq coach.id) and
+                        (MutualSelectionTable.status eq MutualSelectionStatus.PENDING)
+            }.count().toInt()
+        }
+    
+    /**
+     * 获取学生待处理申请数量
+     */
+    fun getStudentPendingApplicationCount(studentUUID: String): Int =
+        transaction(database) {
+            val student = StudentEntity.findById(UUID.fromString(studentUUID))
+                ?: throw IllegalArgumentException("学生不存在")
+
+            MutualSelectionEntity.find {
+                (MutualSelectionTable.student_id eq student.id) and
+                        (MutualSelectionTable.status eq MutualSelectionStatus.PENDING)
+            }.count().toInt()
+        }
+
+    /**
      * 管理员直接建立关系
      */
     fun adminCreateRelation(
@@ -348,6 +376,28 @@ class MutualSelectionService(
             // 查询学生所有已批准或活跃的关系
             val query = MutualSelectionEntity.find {
                 (MutualSelectionTable.student_id eq student.id) and
+                        (MutualSelectionTable.status inList listOf(
+                            MutualSelectionStatus.APPROVED,
+                            MutualSelectionStatus.ACTIVE
+                        ))
+            }
+
+            query.toList().expose()
+        }
+    
+    /**
+     * 获取教练当前已建立关系的学生列表
+     */
+    fun getCoachCurrentStudents(
+        coachUUID: String
+    ): List<MutualSelection> =
+        transaction(database) {
+            val coach = CoachEntity.findById(UUID.fromString(coachUUID))
+                ?: throw IllegalArgumentException("教练不存在")
+
+            // 查询教练所有已批准或活跃的关系
+            val query = MutualSelectionEntity.find {
+                (MutualSelectionTable.coach_id eq coach.id) and
                         (MutualSelectionTable.status inList listOf(
                             MutualSelectionStatus.APPROVED,
                             MutualSelectionStatus.ACTIVE

@@ -29,6 +29,7 @@ fun Application.mutualSelectionRoutes(mutualSelectionService: MutualSelectionSer
             authenticate("auth-session-coach") {
                 getCoachApplications(mutualSelectionService)
                 reviewApplication(mutualSelectionService)
+                getCoachCurrentStudents(mutualSelectionService)
             }
 
             // 管理员权限路由
@@ -241,5 +242,20 @@ fun Route.getStudentCurrentCoaches(mutualSelectionService: MutualSelectionServic
         )
         
         call.respond(HttpStatusCode.OK, coaches)
+    }
+}
+
+/**
+ * 教练获取当前已建立关系的学生列表
+ */
+fun Route.getCoachCurrentStudents(mutualSelectionService: MutualSelectionService) {
+    get("/coach/current-students") {
+        val userId = getUserIdFromCall(call)
+
+        val students = mutualSelectionService.getCoachCurrentStudents(
+            coachUUID = userId
+        )
+        
+        call.respond(HttpStatusCode.OK, students)
     }
 }
