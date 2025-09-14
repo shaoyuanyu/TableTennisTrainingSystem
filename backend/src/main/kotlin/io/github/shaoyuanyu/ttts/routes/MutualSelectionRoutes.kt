@@ -30,6 +30,7 @@ fun Application.mutualSelectionRoutes(mutualSelectionService: MutualSelectionSer
                 getCoachApplications(mutualSelectionService)
                 reviewApplication(mutualSelectionService)
                 getCoachCurrentStudents(mutualSelectionService)
+                getCoachHistoricalStudents(mutualSelectionService)
             }
 
             // 管理员权限路由
@@ -253,6 +254,21 @@ fun Route.getCoachCurrentStudents(mutualSelectionService: MutualSelectionService
         val userId = getUserIdFromCall(call)
 
         val students = mutualSelectionService.getCoachCurrentStudents(
+            coachUUID = userId
+        )
+        
+        call.respond(HttpStatusCode.OK, students)
+    }
+}
+
+/**
+ * 教练获取历史学生列表（包括已结束关系的学生）
+ */
+fun Route.getCoachHistoricalStudents(mutualSelectionService: MutualSelectionService) {
+    get("/coach/historical-students") {
+        val userId = getUserIdFromCall(call)
+
+        val students = mutualSelectionService.getCoachHistoricalStudents(
             coachUUID = userId
         )
         

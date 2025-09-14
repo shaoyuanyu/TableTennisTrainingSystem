@@ -406,4 +406,26 @@ class MutualSelectionService(
 
             query.toList().expose()
         }
+    
+    /**
+     * 获取教练历史学生列表（包括已结束关系的学生）
+     */
+    fun getCoachHistoricalStudents(
+        coachUUID: String
+    ): List<MutualSelection> =
+        transaction(database) {
+            val coach = CoachEntity.findById(UUID.fromString(coachUUID))
+                ?: throw IllegalArgumentException("教练不存在")
+
+            // 查询教练所有已结束的关系（包括被拒绝和非活跃的）
+            val query = MutualSelectionEntity.find {
+                (MutualSelectionTable.coach_id eq coach.id) and
+                        (MutualSelectionTable.status inList listOf(
+                            MutualSelectionStatus.REJECTED,
+                            MutualSelectionStatus.INACTIVE
+                        ))
+            }
+
+            query.toList().expose()
+        }
 }
