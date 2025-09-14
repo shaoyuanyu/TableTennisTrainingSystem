@@ -4,9 +4,9 @@ import io.github.shaoyuanyu.ttts.dto.user.User
 import io.github.shaoyuanyu.ttts.dto.user.UserRole
 import io.github.shaoyuanyu.ttts.dto.user.UserSession
 import io.github.shaoyuanyu.ttts.exceptions.BadRequestException
-import io.github.shaoyuanyu.ttts.exceptions.UnauthorizedException
 import io.github.shaoyuanyu.ttts.exceptions.NotFoundException
 import io.github.shaoyuanyu.ttts.persistence.UserService
+import io.github.shaoyuanyu.ttts.utils.getUserIdFromCall
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -112,12 +112,7 @@ fun Route.logout() {
  */
 fun Route.getSelfInfo(userService: UserService) {
     get("/info") {
-        val userId = call.sessions.get<UserSession>().let {
-            if (it == null) {
-                throw UnauthorizedException("未登录")
-            }
-            it.userId
-        }
+        val userId = getUserIdFromCall(call)
 
         call.respond(
             userService.queryUserByUUID(userId)
@@ -134,16 +129,10 @@ fun Route.getSelfInfo(userService: UserService) {
  */
 fun Route.updateSelfInfo(userService: UserService) {
     put("/info") {
+        val userId = getUserIdFromCall(call)
+
         val updatedUser = call.receive<User>()
-        
-        // 从会话中获取用户ID，如果未登录则抛出异常
-        val userId = call.sessions.get<UserSession>().let {
-            if (it == null) {
-                throw UnauthorizedException("未登录")
-            }
-            it.userId
-        }
-        
+
         // 确保用户只能更新自己的信息
         if (updatedUser.uuid != userId) {
             throw BadRequestException("只能更新自己的信息")
@@ -165,19 +154,13 @@ fun Route.updateSelfInfo(userService: UserService) {
  */
 fun Route.changeSelfPassword(userService: UserService) {
     put("/change-password") {
+        val userId = getUserIdFromCall(call)
+
         // 从表单数据中获取密码信息
         val formData = call.receiveParameters()
         val oldPassword = formData["oldPassword"] ?: throw BadRequestException("缺少旧密码参数")
         val newPassword = formData["newPassword"] ?: throw BadRequestException("缺少新密码参数")
-        
-        // 从会话中获取用户ID，如果未登录则抛出异常
-        val userId = call.sessions.get<UserSession>().let {
-            if (it == null) {
-                throw UnauthorizedException("未登录")
-            }
-            it.userId
-        }
-        
+
         userService.changeUserPassword(userId, oldPassword, newPassword)
         
         call.response.status(HttpStatusCode.OK)
@@ -228,11 +211,6 @@ fun Route.createUser(userService: UserService) {
     post("/create") {
         val newUser = call.receive<User>()
         
-        // 当前版本只允许创建校区管理员
-        if (newUser.role != UserRole.CAMPUS_ADMIN) {
-            throw BadRequestException("当前版本只能创建校区管理员")
-        }
-        
         val userId = userService.createUser(newUser)
         
         call.response.status(HttpStatusCode.Created)
@@ -247,12 +225,6 @@ fun Route.deleteUser(userService: UserService) {
     delete("/{userId}") {
         val userId = call.parameters["userId"] ?: throw BadRequestException("缺少用户ID参数")
         
-        // 检查要删除的用户是否是校区管理员
-        val user = userService.queryUserByUUID(userId)
-        if (user.role != UserRole.CAMPUS_ADMIN) {
-            throw BadRequestException("只能删除校区管理员")
-        }
-        
         userService.deleteUser(userId)
         
         call.response.status(HttpStatusCode.OK)
@@ -266,12 +238,6 @@ fun Route.deleteUser(userService: UserService) {
 fun Route.resetCampusAdminPassword(userService: UserService) {
     put("/{userId}/reset-password") {
         val userId = call.parameters["userId"] ?: throw BadRequestException("缺少用户ID参数")
-        
-        // 检查要重置密码的用户是否是校区管理员
-        val user = userService.queryUserByUUID(userId)
-        if (user.role != UserRole.CAMPUS_ADMIN) {
-            throw BadRequestException("只能重置校区管理员密码")
-        }
         
         // 重置密码为默认密码 "123456"
         // TODO: 默认密码改为通过配置文件读取

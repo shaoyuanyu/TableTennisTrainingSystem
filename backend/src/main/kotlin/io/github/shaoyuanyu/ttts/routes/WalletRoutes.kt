@@ -4,13 +4,13 @@ import io.github.shaoyuanyu.ttts.dto.recharge.RechargeRequest
 import io.github.shaoyuanyu.ttts.dto.user.UserRole
 import io.github.shaoyuanyu.ttts.dto.user.UserSession
 import io.github.shaoyuanyu.ttts.exceptions.BadRequestException
-import io.github.shaoyuanyu.ttts.exceptions.UnauthorizedException
 import io.github.shaoyuanyu.ttts.persistence.StudentService
+import io.github.shaoyuanyu.ttts.utils.getUserIdFromCall
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.request.*
-import io.ktor.server.response.respond
+import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
 
@@ -46,13 +46,7 @@ fun Application.walletRoutes(walletService: StudentService) {
  */
 fun Route.getWalletBalance(walletService: StudentService) {
     get("/balance") {
-        // 从会话中获取用户ID，如果未登录则抛出异常
-        val userId = call.sessions.get<UserSession>().let {
-            if (it == null) {
-                throw UnauthorizedException("未登录")
-            }
-            it.userId
-        }
+        val userId = getUserIdFromCall(call)
 
         val balance = walletService.queryBalance(userId)
 
@@ -73,12 +67,7 @@ fun Route.getWalletBalance(walletService: StudentService) {
 fun Route.rechargeWallet(walletService: StudentService) {
     post("/recharge") {
         // 从会话中获取用户ID，如果未登录则抛出异常
-        val userId = call.sessions.get<UserSession>().let {
-            if (it == null) {
-                throw UnauthorizedException("未登录")
-            }
-            it.userId
-        }
+        val userId = getUserIdFromCall(call)
 
         // 验证当前用户角色是否为学生
         val userRole = call.sessions.get<UserSession>()?.userRole
@@ -102,8 +91,8 @@ fun Route.rechargeWallet(walletService: StudentService) {
         // 执行充值操作
         walletService.recharge(userId, amount)
 
-        call.response.status(HttpStatusCode.OK)
         //返回现在余额
+        call.response.status(HttpStatusCode.OK)
         call.respond(walletService.queryBalance(userId))
     }
 }
@@ -118,12 +107,7 @@ fun Route.rechargeWallet(walletService: StudentService) {
 fun Route.getRechargeHistory(walletService: StudentService) {
     get("/recharge/history") {
         // 从会话中获取用户ID，如果未登录则抛出异常
-        val userId = call.sessions.get<UserSession>().let {
-            if (it == null) {
-                throw UnauthorizedException("未登录")
-            }
-            it.userId
-        }
+        val userId = getUserIdFromCall(call)
 
         // 获取查询参数
         val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 1

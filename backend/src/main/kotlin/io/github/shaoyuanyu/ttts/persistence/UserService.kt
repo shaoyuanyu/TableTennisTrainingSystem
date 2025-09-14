@@ -24,7 +24,7 @@ import java.util.*
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
-internal val LOGGER = LoggerFactory.getLogger("io.github.shaoyuanyu.ttts.persistence")
+internal val USER_LOGGER = LoggerFactory.getLogger("io.github.shaoyuanyu.ttts.persistence.user")
 
 // TODO: 是否使用协程，以否使用 suspend 函数
 class UserService(
@@ -206,7 +206,7 @@ class UserService(
             
             userId
         }.also { uuid ->
-            LOGGER.info("创建用户成功，用户 ID：$uuid，用户名：${newUser.username}")
+            USER_LOGGER.info("创建用户成功，用户 ID：$uuid，用户名：${newUser.username}")
         }
 
     /**
@@ -241,7 +241,7 @@ class UserService(
                     else -> user
                 }
             }.also {
-                LOGGER.info("查询用户成功，用户 ID：$uuid，用户名：${it.username}")
+                USER_LOGGER.info("查询用户成功，用户 ID：$uuid，用户名：${it.username}")
             }
         }
 
@@ -255,7 +255,7 @@ class UserService(
                     throw NotFoundException("用户不存在")
                 }
             }.first().exposeWithoutPassword().also {
-                LOGGER.info("查询用户成功，用户 ID：${it.uuid}, 用户名：${it.username}")
+                USER_LOGGER.info("查询用户成功，用户 ID：${it.uuid}, 用户名：${it.username}")
             }
         }
 
@@ -319,7 +319,7 @@ class UserService(
         
         users to totalCount
     }.also {
-        LOGGER.info("查询用户列表成功，页码：$page，每页数量：$size，角色：$role，校区ID：$campusId")
+        USER_LOGGER.info("查询用户列表成功，页码：$page，每页数量：$size，角色：$role，校区ID：$campusId")
     }
 
     /**
@@ -376,7 +376,7 @@ class UserService(
                 }
             }
         }.also {
-            LOGGER.info("更新用户信息成功，用户 ID：${user.uuid}, 用户名：${user.username}")
+            USER_LOGGER.info("更新用户信息成功，用户 ID：${user.uuid}, 用户名：${user.username}")
         }
     }
 
@@ -401,7 +401,7 @@ class UserService(
                 }
             }.first().expose().let { user ->
                 if (validatePasswd(plainPassword, user.encryptedPassword!!)) {
-                    LOGGER.info("验证用户成功，用户 ID：${user.uuid}, 用户名：${user.username}")
+                    USER_LOGGER.info("验证用户成功，用户 ID：${user.uuid}, 用户名：${user.username}")
 
                     user.uuid.toString()
                 } else {
@@ -435,7 +435,7 @@ class UserService(
                 // 更新为新密码
                 userEntity.encryptedPassword = encryptPasswd(newPassword)
             }.also {
-                LOGGER.info("修改用户密码成功，用户 ID：$uuid")
+                USER_LOGGER.info("修改用户密码成功，用户 ID：$uuid")
             }
         }
     }
@@ -452,7 +452,7 @@ class UserService(
 
                 it.delete()
             }.also {
-                LOGGER.info("删除用户成功，用户 ID：$uuid")
+                USER_LOGGER.info("删除用户成功，用户 ID：$uuid")
             }
         }
     }
