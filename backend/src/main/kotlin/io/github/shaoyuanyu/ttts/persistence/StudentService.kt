@@ -3,26 +3,19 @@
 package io.github.shaoyuanyu.ttts.persistence
 
 import io.github.shaoyuanyu.ttts.dto.recharge.RechargeRecord
+import io.github.shaoyuanyu.ttts.dto.student.ComQueryRequest
 import io.github.shaoyuanyu.ttts.exceptions.NotFoundException
 import io.github.shaoyuanyu.ttts.persistence.campus.CampusEntity
-import io.github.shaoyuanyu.ttts.persistence.coach.CoachEntity
 import io.github.shaoyuanyu.ttts.persistence.competition.ComEntity
 import io.github.shaoyuanyu.ttts.persistence.competition.ComTable
 import io.github.shaoyuanyu.ttts.persistence.recharge.RechargeEntity
 import io.github.shaoyuanyu.ttts.persistence.recharge.RechargeTable
 import io.github.shaoyuanyu.ttts.persistence.recharge.expose
 import io.github.shaoyuanyu.ttts.persistence.student.StudentEntity
-import io.github.shaoyuanyu.ttts.persistence.student_coach.StudentCoachRelationEntity
-import io.github.shaoyuanyu.ttts.persistence.student_coach.StudentCoachRelationTable
-import org.jetbrains.exposed.v1.core.Op
-import org.jetbrains.exposed.v1.core.SqlExpressionBuilder
-import org.jetbrains.exposed.v1.core.SqlExpressionBuilder.inList
-import org.jetbrains.exposed.v1.core.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.v1.core.and
 import io.github.shaoyuanyu.ttts.persistence.table.TableEntity
 import io.github.shaoyuanyu.ttts.persistence.table.TableTable
 import io.github.shaoyuanyu.ttts.persistence.user.UserEntity
-import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.slf4j.Logger
@@ -188,19 +181,19 @@ class StudentService(
                 .drop(offset)
                 .take(size)
                 .map { it.expose() }
-
+            USER_LOGGER.info("查询充值记录成功")
             records to totalCount
         }
 
     /**
      * 报名参加比赛
      */
-    fun signupCompetition(userId: String, group: String) =
+    fun signupCompetition(userId: String, group: String) {
         transaction(database) {
             // 验证小组名称是否有效
             val validGroups = listOf("甲", "乙", "丙")
             if (group !in validGroups) {
-                return@transaction Result.failure<String>(IllegalStateException("无效的小组名称，必须是甲、乙或丙"))
+                throw IllegalStateException("无效的小组名称，必须是甲、乙或丙")
             }
 
             // 检查用户是否已经报名
@@ -209,28 +202,25 @@ class StudentService(
                 .singleOrNull()
 
             if (existingSignup != null) {
-                return@transaction Result.failure<String>(IllegalStateException("用户已经报名过比赛"))
+                throw IllegalStateException("用户已经报名过比赛")
             }
 
             // 获取用户信息
-            UserEntity.findById(UUID.fromString(userId)).let { userEntity ->
-                if (userEntity == null) {
-                    throw NotFoundException("用户不存在")
-                }
+            val userEntity = UserEntity.findById(UUID.fromString(userId))
+                ?: throw NotFoundException("用户不存在")
 
             val userCampusId = userEntity.campusId
 
             // 1. 首先查找已经有一个同组人占用的球台（优先分配）
             val partiallyOccupiedTables = TableEntity.find {
                 (TableTable.status eq "部分占用") and
-                        (TableTable.campusId eq userCampusId)and
+                        (TableTable.campusId eq userCampusId) and
                         (TableTable.group eq group)
             }.toList()
 
             val selectedTable: TableEntity
             val tableId: Int
             val newTableStatus: String
-            val newgroup: String = group
 
             if (partiallyOccupiedTables.isNotEmpty()) {
                 // 优先选择部分占用的球台
@@ -241,47 +231,75 @@ class StudentService(
                 // 如果没有部分占用的球台，选择空闲球台
                 val availableTables = TableEntity.find {
                     (TableTable.status eq "空闲") and
-                    (TableTable.campusId eq userCampusId)
+                            (TableTable.campusId eq userCampusId)
                 }.toList()
 
                 if (availableTables.isEmpty()) {
-                    return@transaction Result.failure<String>(IllegalStateException("当前校区没有可用球台"))
+                    throw IllegalStateException("当前校区没有可用球台")
                 }
 
                 selectedTable = availableTables.random()
                 tableId = selectedTable.id.value
                 newTableStatus = "部分占用" // 分配第一个人，部分占用
             }
+
             // 插入报名记录
             ComEntity.new {
                 this.userId = userId
-                username= userEntity.username
+                username = userEntity.username
                 this.group = group
                 this.tableId = tableId
                 campusId = userCampusId
                 createdAt = Clock.System.now()
             }
-                deduct(userId,30.0f) // 报名费30元
+
+            deduct(userId, 30.0f) // 报名费30元
 
             // 更新球台状态
-                TableEntity.findById(tableId).let{tableEntity ->
-                    if (tableEntity == null) {
-                        throw NotFoundException("球台不存在")
-                    }
-                    tableEntity.status = newTableStatus
-                    tableEntity.group = newgroup
-                }
+            val tableEntity = TableEntity.findById(tableId)
+                ?: throw NotFoundException("球台不存在")
 
-            Result.success("报名成功！小组：$group，分配球台：$tableId")
+            tableEntity.status = newTableStatus
+            tableEntity.group = group
 
+            USER_LOGGER.info("报名成功！小组：$group，分配球台：$tableId")
         }
-}
-
+    }
     /**
      * 查询报名信息
      */
-    fun querysignup(userId: String)=
+    fun querySignup(userId: String): ComQueryRequest =
         transaction(database) {
+                // 1. 先查询自己的报名信息
+            val mySignup = ComEntity.find { ComTable.userId eq userId }
+                .limit(1)
+                .singleOrNull()
+                ?: throw NotFoundException("您尚未报名比赛")
 
-    }
+                val myTableId = mySignup.tableId
+                val myGroup = mySignup.group
+                val myUsername = mySignup.username
+
+                // 2. 查询同一球台的所有报名信息（排除自己）
+                val opponentSignups = ComEntity.find {
+                    (ComTable.tableId eq myTableId) and (ComTable.userId neq userId)
+                }.toList()
+
+                // 3. 获取对手的用户名（可能有多个对手，取第一个）
+                val opponentUsername = opponentSignups.firstOrNull()?.username
+
+                // 4. 构建返回结果
+                val signupInfo = ComQueryRequest(
+                    tableId = myTableId,
+                    group = myGroup,
+                    myUsername = myUsername,
+                    opponentUsername = opponentUsername
+                )
+
+            USER_LOGGER.info("查询报名信息成功，用户 ID：$userId，球台 ID：$myTableId，组别：$myGroup，对手用户名：${opponentUsername ?: "无"}")
+
+            signupInfo
+        }
+
+
 }

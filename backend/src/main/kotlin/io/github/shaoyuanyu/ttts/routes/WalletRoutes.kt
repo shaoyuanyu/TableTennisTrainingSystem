@@ -91,9 +91,12 @@ fun Route.rechargeWallet(walletService: StudentService) {
         // 执行充值操作
         walletService.recharge(userId, amount)
 
+        val newBalance = walletService.queryBalance(userId)
         //返回现在余额
         call.response.status(HttpStatusCode.OK)
-        call.respond(walletService.queryBalance(userId))
+        call.respond(
+            mapOf("balance" to newBalance)
+        )
     }
 }
 

@@ -40,7 +40,6 @@ fun Application.coachRoutes(coachService: CoachService) {
             // 超级管理员权限
             authenticate("auth-session-super-admin") {
                 getAllCoachesNotApproved(coachService)
-                approveCoach(coachService)
             }
         }
     }

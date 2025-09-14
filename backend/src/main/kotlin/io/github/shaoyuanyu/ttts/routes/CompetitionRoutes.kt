@@ -4,10 +4,13 @@ import io.github.shaoyuanyu.ttts.dto.student.comsignupRequest
 import io.github.shaoyuanyu.ttts.dto.user.UserSession
 import io.github.shaoyuanyu.ttts.exceptions.UnauthorizedException
 import io.github.shaoyuanyu.ttts.persistence.StudentService
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.auth.authenticate
 import io.ktor.server.request.receive
+import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
@@ -29,6 +32,7 @@ fun Application.competitionRoutes(studentService: StudentService) {
             // 学生权限
             authenticate("auth-session-student") {
                 signupCompetition(studentService)
+                querysignup(studentService)
             }
             //管理员权限
             authenticate ("auth-session-campus-admin"){
@@ -55,19 +59,27 @@ fun Route.signupCompetition(studentService: StudentService) {
             it.userId
         }
         studentService.signupCompetition(userId,groupName)
+        call.respond(
+            HttpStatusCode.OK,
+            "报名成功"
+        )
  }
 }
 /**
  * 查询比赛报名情况
  */
-fun Route.querySignup(studentService: StudentService) {
-    post("/querysignup") {
+fun Route.querysignup(studentService: StudentService) {
+    get("/querysignup") {
         val userId=call.sessions.get<UserSession>().let {
             if (it == null) {
                 throw UnauthorizedException("未登录")
             }
             it.userId
         }
-//        studentService.querysignup()
+        val detail = studentService.querySignup(userId)
+        call.respond(
+            HttpStatusCode.OK,
+            detail
+        )
  }
 }
