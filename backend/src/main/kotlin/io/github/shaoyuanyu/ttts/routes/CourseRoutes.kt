@@ -96,7 +96,7 @@ fun Route.submitStudentFeedback(courseService: CourseService) {
  * 教练查看自己的课程安排
  */
 fun Route.getCoachSchedule(courseService: CourseService) {
-    get("/my-schedule") {
+    get("/coach-schedule") {
         val userId = getUserIdFromCall(call)
         
         val dateFrom = call.request.queryParameters["dateFrom"]
