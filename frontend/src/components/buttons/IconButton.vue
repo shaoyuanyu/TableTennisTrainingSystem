@@ -35,21 +35,8 @@ export default {
 </script>
 
 <style scoped>
-.icon-button :deep(.btn-text) {
-    display: none;
-}
 
 /* 纯图标按钮中，去掉左右图标的外边距，确保视觉居中 */
-.icon-button :deep(.btn-icon-left),
-.icon-button :deep(.btn-icon-right) {
-    margin: 0;
-}
 
 /* 提升图标尺寸与可读性（遵循按钮尺寸） */
-.icon-button :deep(.btn-icon) {
-    font-size: 16px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
 </style>

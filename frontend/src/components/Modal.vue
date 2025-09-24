@@ -33,25 +33,6 @@ const model = computed({
 
 <style scoped>
 /* 玻璃风格覆盖 */
-:deep(.glass-modal .el-dialog__header) {
-    margin-right: 0;
-}
-
-:deep(.glass-modal .el-dialog) {
-    background: var(--surface-3);
-    border: var(--border-width-sm) solid var(--border-color);
-    backdrop-filter: var(--blur-xl);
-    border-radius: var(--radius-xl);
-    box-shadow: var(--elevation-4);
-}
-
-:deep(.glass-modal .el-dialog__title) {
-    color: var(--white-alpha-90);
-}
-
-:deep(.glass-modal .el-dialog__headerbtn .el-dialog__close) {
-    color: var(--white-alpha-85);
-}
 
 .modal-body {
     color: var(--white-alpha-90);

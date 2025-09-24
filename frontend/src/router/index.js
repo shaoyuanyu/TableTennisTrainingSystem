@@ -215,6 +215,16 @@ const router = createRouter({
           },
         },
         {
+          path: 'student/mutual-selection',
+          name: 'StudentMutualSelection',
+          component: () => import('@/views/student/MutualSelectionView.vue'),
+          meta: {
+            requiresAuth: true,
+            title: '教练双选',
+            roles: ['student'],
+          },
+        },
+        {
           path: 'student/matches',
           name: 'MyMatches',
           component: () => import('@/views/student/MyMatchesView.vue'),
@@ -276,6 +286,16 @@ const router = createRouter({
             roles: ['coach'],
           },
         },
+        {
+          path: 'coach/mutual-selection',
+          name: 'CoachMutualSelection',
+          component: () => import('@/views/coach/MutualSelectionView.vue'),
+          meta: {
+            requiresAuth: true,
+            title: '学生双选',
+            roles: ['coach'],
+          },
+        },
 
         // 通用页面
         {
@@ -333,14 +353,14 @@ router.beforeEach(async (to, from, next) => {
   const userStore = useUserStore()
 
   console.log('🔍 路由守卫检查:', {
-    目标路径: to.path,
-    来源路径: from.path,
-    需要认证: to.meta.requiresAuth,
-    用户登录状态: userStore.isLoggedIn,
-    用户角色: userStore.userRole,
-    有用户信息: !!userStore.userInfo.id,
-    token: userStore.token ? '有' : '无',
-    要求角色: to.meta.roles,
+    "目标路径": to.path,
+    "来源路径": from.path,
+    "需要认证": to.meta.requiresAuth,
+    "用户登录状态": userStore.isLoggedIn,
+    "用户角色": userStore.userRole,
+    "有用户信息": !!userStore.userInfo.id,
+    "token": userStore.token ? '有' : '无',
+    "要求角色": to.meta.roles,
   })
 
   // 如果是开发工具或测试页面，直接通过
@@ -373,16 +393,16 @@ router.beforeEach(async (to, from, next) => {
       const normalizedUserRole = normalizeRole(userStore.userRole)
       const hasRolePermission = to.meta.roles.includes(normalizedUserRole)
       console.log('角色权限检查:', {
-        原始角色: userStore.userRole,
-        标准化角色: normalizedUserRole,
-        要求角色: to.meta.roles,
-        有权限: hasRolePermission,
+        "原始角色": userStore.userRole,
+        "标准化角色": normalizedUserRole,
+        "要求角色": to.meta.roles,
+        "有权限": hasRolePermission,
       })
 
       if (!hasRolePermission) {
         console.log('❌ 角色权限不足:', {
-          用户角色: normalizedUserRole,
-          要求角色: to.meta.roles,
+          "用户角色": normalizedUserRole,
+          "要求角色": to.meta.roles,
         })
         ElMessage.error('您没有权限访问该页面')
         const homePage = getDefaultHomePage(userStore.userRole)
@@ -393,8 +413,8 @@ router.beforeEach(async (to, from, next) => {
       // 回退到权限配置文件检查
       if (!hasPagePermission(to.path, userStore.userRole)) {
         console.log('❌ 页面权限检查失败:', {
-          页面: to.path,
-          用户角色: userStore.userRole,
+          "页面": to.path,
+          "用户角色": userStore.userRole,
         })
         ElMessage.error('您没有权限访问该页面')
         const homePage = getDefaultHomePage(userStore.userRole)

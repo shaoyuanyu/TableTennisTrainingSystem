@@ -49,15 +49,4 @@ const sizeClass = computed(() => `size-${props.size}`)
     margin-top: var(--spacing-lg);
 }
 
-.size-sm {
-    padding: var(--spacing-lg);
-}
-
-.size-md {
-    padding: var(--spacing-2xl);
-}
-
-.size-lg {
-    padding: var(--spacing-3xl);
-}
 </style>

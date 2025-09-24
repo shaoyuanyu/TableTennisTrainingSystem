@@ -148,6 +148,7 @@ import {ElMessage, ElMessageBox} from 'element-plus'
 import api from '@/utils/api'
 import PrimaryButton from '@/components/buttons/PrimaryButton.vue'
 import OutlineButton from '@/components/buttons/OutlineButton.vue'
+import {Plus} from "@element-plus/icons-vue";
 
 // 数据列表
 const campusList = ref([])
@@ -386,11 +387,4 @@ onMounted(() => {
   color: #666;
 }
 
-:deep(.el-table .el-button) {
-  margin-right: 8px;
-}
-
-:deep(.el-table .el-button:last-child) {
-  margin-right: 0;
-}
 </style>

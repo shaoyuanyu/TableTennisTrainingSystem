@@ -26,12 +26,10 @@ const scheduleCalendarRef = ref(null)
 .student-schedule-view {
   padding: var(--spacing-2xl);
   min-height: 100vh;
-  font-family: var(--font-family-base);
 }
 
 .student-schedule-view h2 {
   margin: 0 0 var(--spacing-2xl) 0;
-  color: var(--text-white);
   font-size: 2rem;
   font-weight: 600;
   display: flex;

@@ -65,13 +65,13 @@
 
       <!-- 学员菜单 - 扁平化 -->
       <template v-if="isStudent">
-        <el-menu-item index="/student/coaches" class="menu-item">
+        <el-menu-item index="/student/find-coach" class="menu-item">
           <el-icon><Search /></el-icon>
           <template #title>查找教练</template>
         </el-menu-item>
-        <el-menu-item index="/student/my-coaches" class="menu-item">
-          <el-icon><UserFilled /></el-icon>
-          <template #title>我的教练</template>
+        <el-menu-item index="/student/mutual-selection" class="menu-item">
+          <el-icon><User /></el-icon>
+          <template #title>教练双选</template>
         </el-menu-item>
         <el-menu-item index="/student/book-training" class="menu-item">
           <el-icon><Calendar /></el-icon>
@@ -89,15 +89,19 @@
           <el-icon><Grid /></el-icon>
           <template #title>工作台</template>
         </el-menu-item>
+        <el-menu-item index="/coach/mutual-selection" class="menu-item">
+          <el-icon><User /></el-icon>
+          <template #title>学生双选</template>
+        </el-menu-item>
         <el-menu-item index="/coach/schedule" class="menu-item">
           <el-icon><Calendar /></el-icon>
           <template #title>课程安排</template>
         </el-menu-item>
-        <el-menu-item index="/coach/approval" class="menu-item">
+        <el-menu-item index="/coach/appointment-approval" class="menu-item">
           <el-icon><Checked /></el-icon>
           <template #title>预约审批</template>
         </el-menu-item>
-        <el-menu-item index="/coach/feedback" class="menu-item">
+        <el-menu-item index="/coach/student-feedback" class="menu-item">
           <el-icon><EditPen /></el-icon>
           <template #title>学员反馈</template>
         </el-menu-item>
