@@ -100,6 +100,7 @@ fun Route.getCampusNames(campusService: CampusService) {
         call.respond(HttpStatusCode.OK, records)
     }
 }
+
 /**
  * 增加球桌 - 仅限校区管理员
  */
@@ -119,6 +120,7 @@ fun Route.addTable(campusService: CampusService) {
         call.respond(HttpStatusCode.Created, mapOf("message" to "增加球桌成功"))
     }
 }
+
 /**
  * 查询所有本校区空闲的球桌
  */
