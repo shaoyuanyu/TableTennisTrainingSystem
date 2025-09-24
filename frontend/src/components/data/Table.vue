@@ -54,7 +54,8 @@ defineProps({
 
 .title {
     margin: 0;
-    color: var(--white-alpha-90);
+    color: #1a202c;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .table-wrapper :deep(.el-table) {
@@ -67,11 +68,30 @@ defineProps({
 
 .table-wrapper :deep(.el-table__cell) {
     background: transparent;
-    color: var(--white-alpha-90);
+    color: #1a202c;
+    font-weight: 500;
 }
 
 .table-wrapper :deep(.el-table__row:hover .el-table__cell) {
     background: var(--white-alpha-10);
+}
+
+.table-wrapper :deep(.el-table__body tr.el-table__row--striped .el-table__cell) {
+    background: var(--white-alpha-5);
+}
+
+.table-wrapper :deep(.el-table__header th.el-table__cell) {
+    background: var(--white-alpha-20);
+    color: #1a202c;
+    font-weight: var(--font-weight-bold);
+}
+
+.table-wrapper :deep(.el-table__header th.el-table__cell .cell) {
+    white-space: nowrap;
+}
+
+.table-wrapper :deep(.el-table .el-button) {
+    color: #1a202c;
 }
 
 .density-sm :deep(.el-table__cell) {
@@ -92,5 +112,11 @@ defineProps({
 
 .table-skeleton {
     padding: var(--spacing-md) 0;
+}
+
+.table-footer {
+    margin-top: var(--spacing-lg);
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--white-alpha-15);
 }
 </style>

@@ -53,7 +53,7 @@ const router = createRouter({
         {
           path: 'admin/campus',
           name: 'CampusManagement',
-          component: () => import('@/views/admin/CampusManagementViewNew.vue'),
+          component: () => import('@/views/admin/CampusManagementView.vue'),
           meta: {
             requiresAuth: true,
             title: '校区管理',

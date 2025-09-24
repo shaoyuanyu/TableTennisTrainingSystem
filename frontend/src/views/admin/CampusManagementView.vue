@@ -1,68 +1,66 @@
 <template>
   <div class="campus-management">
-    <!-- 页面头部 -->
-    <div class="page-header">
-      <h2>校区管理</h2>
-      <PrimaryButton @click="showAddDialog">
-        <template #icon-left>
-          <el-icon>
-            <Plus />
-          </el-icon>
-        </template>
-        新增校区
-      </PrimaryButton>
-    </div>
+    <!-- 页面头部和列表合并为一个卡片 -->
+    <GlassCard 
+      class="campus-management-card" 
+      variant="enhanced" 
+      :show-decoration="false"
+      title="校区管理"
+      icon="🏢"
+    >
+      <template #default>
+        <GlassTable 
+          :data="campusList" 
+          v-loading="loading" 
+          :stripe="true"
+          density="lg"
+        >
+          <el-table-column prop="campusName" label="校区名称" width="180" />
+          <el-table-column prop="address" label="地址" min-width="200" />
+          <el-table-column prop="contactPerson" label="联系人" width="120" />
+          <el-table-column prop="phone" label="联系电话" width="140" />
+          <el-table-column prop="email" label="邮箱" width="180" />
+          <el-table-column label="操作" width="200" fixed="right">
+            <template #default="{ row }">
+              <el-button size="small" type="primary" @click="showEditDialog(row)"> 编辑 </el-button>
+              <el-button size="small" type="danger" @click="deleteCampus(row)">
+                删除
+              </el-button>
+            </template>
+          </el-table-column>
+        </GlassTable>
 
-    <!-- 校区列表 -->
-    <el-card>
-      <el-table :data="campusList" v-loading="loading" stripe>
-        <el-table-column prop="name" label="校区名称" width="180" />
-        <el-table-column prop="address" label="地址" min-width="200" />
-        <el-table-column prop="contact" label="联系人" width="120" />
-        <el-table-column prop="phone" label="联系电话" width="140" />
-        <el-table-column prop="email" label="邮箱" width="180" />
-        <el-table-column label="状态" width="100">
-          <template #default="{ row }">
-            <el-tag :type="row.status === 'active' ? 'success' : 'danger'">
-              {{ row.status === 'active' ? '运营中' : '已停用' }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column label="统计" width="120">
-          <template #default="{ row }">
-            <div class="stats-cell">
-              <span>学员: {{ row.studentCount }}</span>
-              <span>教练: {{ row.coachCount }}</span>
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" width="200" fixed="right">
-          <template #default="{ row }">
-            <el-button size="small" type="primary" @click="showEditDialog(row)"> 编辑 </el-button>
-            <el-button size="small" type="warning" @click="showAdminDialog(row)">
-              管理员
-            </el-button>
-            <el-button size="small" type="danger" @click="deleteCampus(row)" :disabled="row.isMain">
-              删除
-            </el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-    </el-card>
+        <!-- 新增校区按钮移到表格下方 -->
+        <div class="add-campus-button-container">
+          <PrimaryButton @click="showAddDialog" class="add-campus-button">
+            <template #icon-left>
+              <el-icon>
+                <Plus />
+              </el-icon>
+            </template>
+            新增校区
+          </PrimaryButton>
+        </div>
+      </template>
+    </GlassCard>
 
     <!-- 新增/编辑校区对话框 -->
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="600px" @close="resetForm">
-      <el-form ref="formRef" :model="campusForm" :rules="formRules" label-width="80px">
-        <el-form-item label="校区名称" prop="name">
-          <el-input v-model="campusForm.name" placeholder="请输入校区名称" />
+      <el-form ref="formRef" :model="campusForm" :rules="formRules" label-width="100px">
+        <el-form-item label="校区名称" prop="campusName">
+          <el-input v-model="campusForm.campusName" placeholder="请输入校区名称" />
         </el-form-item>
 
         <el-form-item label="地址" prop="address">
           <el-input v-model="campusForm.address" type="textarea" :rows="2" placeholder="请输入详细地址" />
         </el-form-item>
 
-        <el-form-item label="联系人" prop="contact">
-          <el-input v-model="campusForm.contact" placeholder="请输入联系人姓名" />
+        <el-form-item label="联系人" prop="contactPerson">
+          <el-input v-model="campusForm.contactPerson" placeholder="请输入联系人姓名" />
+        </el-form-item>
+
+        <el-form-item label="管理员用户名" prop="username">
+          <el-input v-model="campusForm.username" placeholder="请输入管理员用户名" />
         </el-form-item>
 
         <el-form-item label="联系电话" prop="phone">
@@ -71,11 +69,6 @@
 
         <el-form-item label="邮箱" prop="email">
           <el-input v-model="campusForm.email" placeholder="请输入邮箱地址" />
-        </el-form-item>
-
-        <el-form-item label="状态" prop="status">
-          <el-switch v-model="campusForm.status" active-value="active" inactive-value="inactive" active-text="运营中"
-            inactive-text="已停用" />
         </el-form-item>
       </el-form>
 
@@ -148,6 +141,9 @@ import {ElMessage, ElMessageBox} from 'element-plus'
 import api from '@/utils/api'
 import PrimaryButton from '@/components/buttons/PrimaryButton.vue'
 import OutlineButton from '@/components/buttons/OutlineButton.vue'
+import GlassHeaderCard from '@/components/cards/specialized/GlassHeaderCard.vue'
+import GlassTable from '@/components/data/Table.vue'
+import GlassCard from '@/components/cards/base/GlassCard.vue'
 import {Plus} from "@element-plus/icons-vue";
 
 // 数据列表
@@ -166,13 +162,12 @@ const selectedCampus = ref(null)
 
 // 表单数据
 const campusForm = reactive({
-  id: null,
-  name: '',
+  campusName: '',
   address: '',
-  contact: '',
+  contactPerson: '',
+  username: '',
   phone: '',
   email: '',
-  status: 'active',
 })
 
 const adminForm = reactive({
@@ -192,7 +187,7 @@ const dialogTitle = computed(() => (isEdit.value ? '编辑校区' : '新增校�
 
 // 表单验证规则
 const formRules = {
-  name: [
+  campusName: [
     { required: true, message: '请输入校区名称', trigger: 'blur' },
     { min: 2, max: 50, message: '校区名称长度在 2 到 50 个字符', trigger: 'blur' },
   ],
@@ -200,9 +195,13 @@ const formRules = {
     { required: true, message: '请输入地址', trigger: 'blur' },
     { min: 5, max: 200, message: '地址长度在 5 到 200 个字符', trigger: 'blur' },
   ],
-  contact: [
+  contactPerson: [
     { required: true, message: '请输入联系人', trigger: 'blur' },
     { min: 2, max: 20, message: '联系人姓名长度在 2 到 20 个字符', trigger: 'blur' },
+  ],
+  username: [
+    { required: true, message: '请输入管理员用户名', trigger: 'blur' },
+    { min: 3, max: 20, message: '用户名长度在 3 到 20 个字符', trigger: 'blur' },
   ],
   phone: [
     { required: true, message: '请输入联系电话', trigger: 'blur' },
@@ -218,9 +217,10 @@ const formRules = {
 const fetchCampusList = async () => {
   loading.value = true
   try {
-    const response = await api.get('/admin/campuses')
-    campusList.value = response.data || []
-  } catch {
+    const response = await api.get('/campus/names?page=1&size=100')
+    campusList.value = response.data.first || []
+  } catch (error) {
+    console.error('获取校区列表失败:', error)
     ElMessage.error('获取校区列表失败')
   } finally {
     loading.value = false
@@ -263,13 +263,12 @@ const resetForm = () => {
     formRef.value.resetFields()
   }
   Object.assign(campusForm, {
-    id: null,
-    name: '',
+    campusName: '',
     address: '',
-    contact: '',
+    contactPerson: '',
+    username: '',
     phone: '',
     email: '',
-    status: 'active',
   })
 }
 
@@ -284,16 +283,17 @@ const saveCampus = async () => {
     saving.value = true
 
     if (isEdit.value) {
-      await api.put(`/admin/campuses/${campusForm.id}`, campusForm)
-      ElMessage.success('校区更新成功')
+      ElMessage.info('编辑功能暂未实现')
     } else {
-      await api.post('/admin/campuses', campusForm)
+      // 创建校区
+      await api.post('/campus/create', campusForm)
       ElMessage.success('校区创建成功')
     }
 
     dialogVisible.value = false
     fetchCampusList()
-  } catch {
+  } catch (error) {
+    console.error('保存校区失败:', error)
     ElMessage.error(isEdit.value ? '更新失败' : '创建失败')
   } finally {
     saving.value = false
@@ -361,30 +361,31 @@ onMounted(() => {
   padding: 20px;
 }
 
-.page-header {
+.campus-management-card {
+  margin-top: 20px;
+}
+
+/* 确保卡片内的所有文字都有良好的对比度 */
+:deep(.glass-card-base) {
+  color: #1a202c;
+}
+
+:deep(.glass-card-title) {
+  color: #1a202c;
+  text-shadow: none;
+}
+
+/* 新增校区按钮容器样式 */
+.add-campus-button-container {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--white-alpha-20);
+}
+
+.add-campus-button {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20px;
 }
-
-.page-header h2 {
-  margin: 0;
-  color: #333;
-}
-
-.stats-cell {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: 12px;
-  color: #666;
-}
-
-.admin-info {
-  margin-left: 8px;
-  font-size: 12px;
-  color: #666;
-}
-
 </style>
