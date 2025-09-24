@@ -166,6 +166,46 @@ class CoachService(
                 currentStudents = userWithCoachInfo.coachInfo.currentStudents
             )
         }
+    /**
+     * 根据uuid查询教练信息
+     */
+    fun queryCoachByUuid(uuid: String): CoachRecord =
+        transaction(database) {
+            val coach = userService.queryUserByUUID(uuid)
+
+            if(coach.username.isBlank()){
+                throw IllegalArgumentException("用户不存在")
+            }
+
+            if (coach.role != UserRole.COACH) {
+                throw IllegalArgumentException("用户不是教练")
+            }
+
+            val coachEntity = CoachEntity.findById(UUID.fromString(coach.uuid))
+            val userWithCoachInfo = if (coachEntity != null) {
+                coach.injectCoachEntity(coachEntity)
+            } else {
+                coach
+            }
+            if(userWithCoachInfo.coachInfo?.isApproved!=true){
+                throw IllegalArgumentException("教练尚未通过审核")
+            }
+
+            CoachRecord(
+                coachId = userWithCoachInfo.uuid.toString(),
+                username = userWithCoachInfo.username,
+                realName = userWithCoachInfo.realName,
+                gender = userWithCoachInfo.gender,
+                age = userWithCoachInfo.age,
+                campusId = userWithCoachInfo.campusId,
+                photoUrl = userWithCoachInfo.coachInfo.photoUrl ?: "",
+                achievements = userWithCoachInfo.coachInfo.achievements ?:"",
+                level = userWithCoachInfo.coachInfo.level ?: "",
+                hourlyRate = userWithCoachInfo.coachInfo.hourlyRate,
+                currentStudents = userWithCoachInfo.coachInfo.currentStudents
+            )
+        }
+
 
     /**
      * 分页获取所有教练信息

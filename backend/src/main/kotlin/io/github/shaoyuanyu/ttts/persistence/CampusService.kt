@@ -8,9 +8,11 @@ import io.github.shaoyuanyu.ttts.dto.student.Status
 import io.github.shaoyuanyu.ttts.dto.user.UserRole
 import io.github.shaoyuanyu.ttts.persistence.campus.CampusEntity
 import io.github.shaoyuanyu.ttts.persistence.table.TableEntity
+import io.github.shaoyuanyu.ttts.persistence.table.TableTable
 import io.github.shaoyuanyu.ttts.persistence.user.UserEntity
 import io.github.shaoyuanyu.ttts.persistence.user.UserTable
 import io.github.shaoyuanyu.ttts.utils.encryptPasswd
+import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import java.util.UUID
@@ -138,5 +140,15 @@ class CampusService(
 
         }.also {
             USER_LOGGER.info("增加球桌成功，用户ID：$userId，增加数量：$number")
+        }
+    /**
+     * 获取校区所有空闲球桌
+     */
+    fun getFreeTables(userId: String): List<TableEntity> =
+        transaction(database) {
+            val campusId= UserEntity.findById(UUID.fromString(userId))?.campusId ?: throw IllegalArgumentException("用户不存在")
+            TableEntity.find {
+                TableTable.status.eq(Status.free) and (TableTable.campusId.eq(campusId))
+            }.toList()
         }
 }

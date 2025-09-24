@@ -1,5 +1,5 @@
 <template>
-  <div class="book-training">
+  <div class="schedule-course">
     <!-- 页面头部 -->
     <div class="page-header">
       <h2>课程预约</h2>
@@ -37,21 +37,17 @@
 
         <!-- 教练列表 -->
         <div class="coaches-grid">
-          <div
-            v-for="coach in availableCoaches"
-            :key="coach.id"
-            class="coach-item"
-            :class="{ selected: selectedCoach?.id === coach.id }"
-            @click="selectCoach(coach)"
-          >
+          <div v-for="coach in availableCoaches" :key="coach.id" class="coach-item"
+            :class="{ selected: selectedCoach?.id === coach.id }" @click="selectCoach(coach)">
             <el-avatar :size="60" :src="coach.avatar || ''">
               {{ coach.realName ? coach.realName.charAt(0) : '?' }}
             </el-avatar>
             <h4>{{ coach.realName || '未知教练' }}</h4>
             <p>{{ coach.level || '未评级' }}</p>
-            <div class="coach-price">
-              ¥{{ coach.hourlyRate || getCoachPrice(coach.level) }}/小时
+            <div class="coach-rating" v-if="coach.rating">
+              <el-rate v-model="coach.rating" disabled show-score text-color="#ff9900" score-template="{value}" />
             </div>
+            <div class="coach-price">¥{{ getCoachPrice(coach.level) }}/小时</div>
           </div>
         </div>
       </div>
@@ -65,14 +61,10 @@
             <h4>选择日期</h4>
             <el-calendar v-model="selectedDate" @panel-change="loadCoachSchedule">
               <template #date-cell="{ data }">
-                <div
-                  class="calendar-cell"
-                  :class="{
-                    available: hasAvailableSlots(data.day),
-                    selected: selectedDate === data.day,
-                  }"
-                  @click="selectDate(data.day)"
-                >
+                <div class="calendar-cell" :class="{
+                  available: hasAvailableSlots(data.day),
+                  selected: selectedDate === data.day,
+                }" @click="selectDate(data.day)">
                   <span class="date-text">{{ data.day.split('-').slice(2).join('') }}</span>
                   <div v-if="hasAvailableSlots(data.day)" class="available-indicator">
                     {{ getAvailableSlots(data.day).length }}个时段
@@ -85,13 +77,8 @@
           <el-col :span="12">
             <h4>选择时间段</h4>
             <div v-if="selectedDate" class="time-slots">
-              <div
-                v-for="slot in getAvailableSlots(selectedDate)"
-                :key="slot.id"
-                class="time-slot"
-                :class="{ selected: selectedTimeSlot?.id === slot.id }"
-                @click="selectTimeSlot(slot)"
-              >
+              <div v-for="slot in getAvailableSlots(selectedDate)" :key="slot.id" class="time-slot"
+                :class="{ selected: selectedTimeSlot?.id === slot.id }" @click="selectTimeSlot(slot)">
                 <div class="slot-time">{{ slot.startTime }} - {{ slot.endTime }}</div>
                 <div class="slot-info">{{ slot.duration }}分钟</div>
               </div>
@@ -121,24 +108,8 @@
             </el-select>
           </el-form-item>
 
-          <el-form-item label="选择球桌">
-            <el-select v-model="selectedTable" placeholder="请选择球桌（可选）" clearable>
-              <el-option
-                v-for="table in availableTables"
-                :key="table.id"
-                :label="`${table.name} (${table.location})`"
-                :value="table.id"
-              />
-            </el-select>
-          </el-form-item>
-
           <el-form-item label="特殊要求">
-            <el-input
-              v-model="courseForm.description"
-              type="textarea"
-              :rows="3"
-              placeholder="请描述您的特殊要求或需要重点练习的内容"
-            />
+            <el-input v-model="courseForm.description" type="textarea" :rows="3" placeholder="请描述您的特殊要求或需要重点练习的内容" />
           </el-form-item>
         </el-form>
       </div>
@@ -179,10 +150,6 @@
 
           <el-descriptions-item label="课程费用">
             <span class="price-text">¥{{ calculatePrice() }}</span>
-          </el-descriptions-item>
-
-          <el-descriptions-item v-if="selectedTable" label="预定球桌">
-            {{ availableTables.find((t) => t.id === selectedTable)?.name || '未知球桌' }}
           </el-descriptions-item>
 
           <el-descriptions-item v-if="courseForm.description" label="特殊要求" :span="2">
@@ -259,10 +226,8 @@ const selectedDate = ref('')
 const selectedTimeSlot = ref(null)
 const availableCoaches = ref([])
 const coachSchedule = ref({})
-const userBalance = ref(0)
+const userBalance = ref(0) // 默认余额0元，实际应从用户信息获取
 const paymentMethod = ref('balance')
-const availableTables = ref([]) // 可用球桌列表
-const selectedTable = ref(null) // 选择的球桌
 
 // 教练筛选
 const coachFilters = reactive({
@@ -290,37 +255,16 @@ const searchCoaches = async () => {
     const response = await api.get('/mutual-selection/student/current-coaches')
     // 后端返回的是双选关系列表，需要提取教练信息
     const relations = response.data || []
-    // 从双选关系中提取基础教练信息
-    const coaches = relations.map((relation) => ({
+    // 从双选关系中提取教练信息
+    availableCoaches.value = relations.map(relation => ({
       id: relation.coachId,
       realName: relation.coachName || '未知教练',
-      level: '未评级', // 当前接口没有返回教练级别
+      // 由于后端接口没有返回教练的级别和价格信息，我们使用默认值
+      level: '未评级', 
       avatar: '',
-      hourlyRate: 100, // 默认价格
+      // 添加默认价格，后续可以通过其他方式获取
+      hourlyRate: 100
     }))
-
-    // 根据每个教练的ID获取详细信息
-    const detailedCoaches = await Promise.all(
-      coaches.map(async (coach) => {
-        try {
-          const detailResponse = await api.post('/coach/queryCoachByUuid', {
-            username: coach.id,
-          })
-          const detail = detailResponse.data
-          return {
-            ...coach,
-            level: detail.level || '未评级',
-            avatar: detail.avatar || '',
-            hourlyRate: detail.hourlyRate || 100, // 使用教练信息中的价格，如果没有则使用默认价格
-          }
-        } catch (error) {
-          console.error(`获取教练 ${coach.id} 详细信息失败:`, error)
-          return coach // 返回原始信息
-        }
-      }),
-    )
-
-    availableCoaches.value = detailedCoaches
     console.log('获取到的教练列表:', availableCoaches.value)
   } catch (error) {
     console.error('获取已建立双选关系的教练列表失败:', error)
@@ -334,12 +278,11 @@ const selectCoach = (coach) => {
 }
 
 // 选择日期
-const selectDate = async (date) => {
-  selectedDate.value = date
-  selectedTimeSlot.value = null
-
-  // 自动加载该日期的教练排班信息
-  await loadCoachSchedule()
+const selectDate = (date) => {
+  if (hasAvailableSlots(date)) {
+    selectedDate.value = date
+    selectedTimeSlot.value = null
+  }
 }
 
 // 选择时间段
@@ -349,76 +292,38 @@ const selectTimeSlot = (slot) => {
 
 // 加载教练排班
 const loadCoachSchedule = async () => {
-  if (!selectedCoach.value || !selectedDate.value) return
+  if (!selectedCoach.value) return
 
   try {
-    // 调用API获取教练在指定日期的排班信息
-    const response = await api.get(`/courses/coach-schedule/${selectedCoach.value.id}`, {
-      params: {
-        dateFrom: selectedDate.value,
-        dateTo: selectedDate.value,
-      },
-    })
-
-    // 初始化排班数据
+    const month = dayjs(selectedDate.value || new Date()).format('YYYY-MM')
+    // 这里应该调用获取教练课表的API
+    // 模拟数据
     const schedule = {}
-
-    // 处理后端返回的排班数据
-    const courses = response.data || []
-    schedule[selectedDate.value] = courses.map((course) => ({
-      id: course.id,
-      startTime: course.startTime,
-      endTime: course.endTime,
-      duration: course.duration || 60, // 默认60分钟
-    }))
-
+    for (let i = 1; i <= 30; i++) {
+      const date = dayjs().add(i, 'day').format('YYYY-MM-DD')
+      schedule[date] = [
+        { id: 1, startTime: '09:00', endTime: '10:00', duration: 60 },
+        { id: 2, startTime: '14:00', endTime: '15:00', duration: 60 },
+        { id: 3, startTime: '19:00', endTime: '20:00', duration: 60 }
+      ]
+    }
     coachSchedule.value = schedule
-    console.log('获取到的教练排班:', schedule)
   } catch (error) {
     console.error('获取排班信息失败:', error)
-    ElMessage.error('获取排班信息失败: ' + (error.message || '未知错误'))
-
-    // 出错时使用模拟数据作为备选方案
-    const schedule = {}
-    schedule[selectedDate.value] = [
-      { id: 1, startTime: '09:00', endTime: '10:00', duration: 60 },
-      { id: 2, startTime: '14:00', endTime: '15:00', duration: 60 },
-      { id: 3, startTime: '19:00', endTime: '20:00', duration: 60 },
-    ]
-    coachSchedule.value = schedule
+    ElMessage.error('获取排班信息失败')
   }
 }
 
 // 获取用户余额
 const fetchUserBalance = async () => {
   try {
+    // 获取学生账户余额
     const response = await api.get('/wallet/balance')
     userBalance.value = response.data.balance || 0
     console.log('获取到的用户余额:', userBalance.value)
   } catch (error) {
     console.error('获取账户余额失败:', error)
-    ElMessage.error('获取账户余额失败: ' + (error.message || '未知错误'))
-  }
-}
-
-// 获取可用球桌列表
-const fetchAvailableTables = async () => {
-  try {
-    // 调用后端API获取本校区的空闲球桌列表
-    const response = await api.get('/campus/queryFreeTables')
-    
-    // 处理后端返回的球桌数据
-    const tables = response.data || []
-    availableTables.value = tables.map(table => ({
-      id: table.id,
-      name: `${table.indexInCampus}号球桌`,
-      location: table.group || '未知区域'
-    }))
-    
-    console.log('获取到的球桌列表:', availableTables.value)
-  } catch (error) {
-    console.error('获取球桌列表失败:', error)
-    ElMessage.error('获取球桌列表失败: ' + (error.message || '未知错误'))
+    ElMessage.error('获取账户余额失败')
   }
 }
 
@@ -434,11 +339,14 @@ const getAvailableSlots = (date) => {
 
 // 获取教练价格
 const getCoachPrice = (level) => {
+  // 由于从双选关系接口获取不到教练级别，我们需要使用默认价格
+  // 或者后续通过其他方式获取教练详细信息
   const prices = {
-    初级: 80,
-    中级: 150,
-    高级: 200,
+    '初级': 80,
+    '中级': 150,
+    '高级': 200
   }
+  // 如果没有级别信息，返回默认价格
   return prices[level] || 100
 }
 
@@ -446,8 +354,7 @@ const getCoachPrice = (level) => {
 const calculatePrice = () => {
   if (!selectedCoach.value || !selectedTimeSlot.value) return 0
   const hours = selectedTimeSlot.value.duration / 60
-  // 使用教练信息中的hourlyRate，如果没有则使用默认价格计算
-  const pricePerHour = selectedCoach.value.hourlyRate || getCoachPrice(selectedCoach.value.level)
+  const pricePerHour = getCoachPrice(selectedCoach.value.level)
   return Math.round(pricePerHour * hours)
 }
 
@@ -467,7 +374,7 @@ const canProceed = () => {
 
 // 下一步
 const nextStep = async () => {
-  if (currentStep.value === 1 && selectedCoach.value && selectedDate.value) {
+  if (currentStep.value === 1 && selectedCoach.value) {
     await loadCoachSchedule()
   }
 
@@ -510,7 +417,7 @@ const confirmBooking = async () => {
       NO: courseForm.NO,
       campusId: userStore.user.campusId,
       price: calculatePrice(),
-      tableId: selectedTable.value || null, // 球桌ID，可以为空，后端会自动分配
+      tableId: null // 球桌ID，可以为空，后端会自动分配
     }
 
     await api.post('/courses/book', bookingData)
@@ -520,7 +427,7 @@ const confirmBooking = async () => {
   } catch (error) {
     if (error !== 'cancel') {
       console.error('预约失败:', error)
-      ElMessage.error('预约失败: ' + (error.message || '未知错误'))
+      ElMessage.error('预约失败，请重试')
     }
   } finally {
     submitting.value = false
@@ -536,7 +443,6 @@ const formatDate = (date) => {
 onMounted(() => {
   searchCoaches()
   fetchUserBalance()
-  fetchAvailableTables() // 获取球桌信息
 
   // 如果URL中有教练ID，直接选中
   if (route.query.coachId) {
@@ -553,8 +459,10 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.book-training {
+.schedule-course {
   padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .page-header {
@@ -613,6 +521,7 @@ onMounted(() => {
 .coach-item:hover {
   border-color: #409eff;
   transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .coach-item.selected {

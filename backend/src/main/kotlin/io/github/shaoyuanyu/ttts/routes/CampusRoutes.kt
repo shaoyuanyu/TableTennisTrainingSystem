@@ -24,6 +24,7 @@ fun Application.campusRoutes(campusService: CampusService) {
 
             // 所有用户
             authenticate("auth-session-all") {
+                queryFreeTables(campusService)
             }
 
             // 校区管理员
@@ -116,5 +117,21 @@ fun Route.addTable(campusService: CampusService) {
         campusService.addTable(userId,number)
 
         call.respond(HttpStatusCode.Created, mapOf("message" to "增加球桌成功"))
+    }
+}
+/**
+ * 查询所有本校区空闲的球桌
+ */
+fun Route.queryFreeTables(campusService: CampusService) {
+    get("/queryFreeTables") {
+        val userId = call.sessions.get<UserSession>().let {
+            if (it == null) {
+                throw UnauthorizedException("未登录")
+            }
+            it.userId
+        }
+        val records = campusService.getFreeTables(userId)
+
+        call.respond(HttpStatusCode.OK, records)
     }
 }

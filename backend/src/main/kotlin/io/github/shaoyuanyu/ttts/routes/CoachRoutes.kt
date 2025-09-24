@@ -26,6 +26,7 @@ fun Application.coachRoutes(coachService: CoachService) {
             authenticate("auth-session-all") {
                 getAllCoach(coachService)
                 queryCoach(coachService)
+                queryCoachByUuid(coachService)
             }
 
             // 教练权限
@@ -87,6 +88,27 @@ fun Route.queryCoach(coachService: CoachService) {
 
         // 调用服务层函数
         val coachRecord = coachService.queryCoachesByUsername(username)
+
+        // 返回成功响应
+        call.respond(HttpStatusCode.OK, coachRecord)
+
+    }
+}
+/**
+ * 根据uuid查询教练信息
+ */
+fun Route.queryCoachByUuid(coachService: CoachService) {
+    post("/queryCoachByUuid") {
+        val request = call.receive<QueryCoachRequest>()
+        val uuid = request.username
+
+        if (uuid.isBlank()) {
+            call.respond(HttpStatusCode.BadRequest, mapOf("error" to "uuid不能为空"))
+            return@post
+        }
+
+        // 调用服务层函数
+        val coachRecord = coachService.queryCoachByUuid(uuid)
 
         // 返回成功响应
         call.respond(HttpStatusCode.OK, coachRecord)

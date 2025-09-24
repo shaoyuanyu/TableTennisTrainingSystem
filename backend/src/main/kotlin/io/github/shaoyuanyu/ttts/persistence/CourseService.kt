@@ -29,7 +29,8 @@ import kotlin.time.ExperimentalTime
 internal val COURSE_SERVICE_LOGGER = LoggerFactory.getLogger("io.github.shaoyuanyu.ttts.persistence.course")
 
 class CourseService(
-    private val database: Database
+    private val database: Database,
+    private val walletService: StudentService
 ) {
 
     /**
@@ -358,6 +359,13 @@ class CourseService(
             val startTime = LocalTime(hour, 0)  // 小时:分钟，如 10:00
             val endTime = LocalTime(hour + 1, 0)  // 小时:分钟，如 11:00
             val location = campus.address
+            val student= StudentEntity.findById(UUID.fromString(CourseBooking.studentId))
+            val balance= student?.balance
+            balance?.let {
+                if (it < CourseBooking.price) {
+                    throw BadRequestException("余额不足")
+                }
+            }
             val Course = CourseCreateRequest(
                 title = CourseBooking.title,
                 description = CourseBooking.description,
@@ -373,6 +381,8 @@ class CourseService(
             )
             // 创建课程
             val course = createCourse(Course)
+            walletService.deduct(CourseBooking.studentId, CourseBooking.price)
+            walletService.recharge(CourseBooking.coachId, (CourseBooking.price * 0.6).toFloat())
 
             COURSE_SERVICE_LOGGER.info("创建课程成功: ${course.id}")
         }

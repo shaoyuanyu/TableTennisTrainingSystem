@@ -38,7 +38,7 @@ fun Application.module() {
     val campusService = CampusService(database)
     val coachService = CoachService(database, userService)
     val mutualSelectionService = MutualSelectionService(database)
-    val courseService = CourseService(database)
+    val courseService = CourseService(database, studentService)
 
     // monitoring
     configureMonitoring()
