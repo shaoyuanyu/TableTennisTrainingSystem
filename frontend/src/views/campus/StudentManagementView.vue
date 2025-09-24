@@ -46,12 +46,12 @@
 
         <el-form-item label="注册时间">
           <el-date-picker v-model="filters.dateRange" type="daterange" range-separator="至" start-placeholder="开始日期"
-            end-placeholder="结束日期" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
+                          end-placeholder="结束日期" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
         </el-form-item>
 
         <el-form-item label="搜索">
           <el-input v-model="filters.keyword" placeholder="姓名/手机号/学号" style="width: 200px"
-            @keyup.enter="fetchStudents" />
+                    @keyup.enter="fetchStudents" />
         </el-form-item>
 
         <el-form-item>
@@ -210,8 +210,8 @@
 
       <div class="pagination-wrapper">
         <el-pagination v-model:current-page="pagination.page" v-model:page-size="pagination.size"
-          :total="pagination.total" :page-sizes="[10, 20, 50, 100]" layout="total, sizes, prev, pager, next, jumper"
-          @size-change="fetchStudents" @current-change="fetchStudents" />
+                       :total="pagination.total" :page-sizes="[10, 20, 50, 100]" layout="total, sizes, prev, pager, next, jumper"
+                       @size-change="fetchStudents" @current-change="fetchStudents" />
       </div>
     </el-card>
 
@@ -474,18 +474,41 @@ const fetchStudents = async () => {
   try {
     const params = {
       page: pagination.page,
-      size: pagination.size,
-      ...filters,
+      size: pagination.size
     }
 
-    const response = await api.get('/campus/students', { params })
-    studentList.value = response.data.list || []
-    pagination.total = response.data.total || 0
+    // 使用正确的API端点获取校区学生数据
+    const response = await api.get('/admin/students', { params })
 
-    // 获取统计数据
-    const statsResponse = await api.get('/campus/students/stats')
-    Object.assign(stats, statsResponse.data || {})
-  } catch {
+    // 根据后端实际返回的数据结构进行适配
+    if (Array.isArray(response.data)) {
+      // 将后端返回的StudentRecord对象映射为前端使用的格式
+      studentList.value = response.data.map(student => ({
+        id: student.studentId,
+        studentId: student.studentId,
+        name: student.realName,
+        username: student.username,
+        gender: student.gender.toLowerCase(), // 转换性别值
+        age: student.age,
+        campusId: student.campusId,
+        balance: student.balance,
+        maxCoach: student.maxCoach,
+        currentCoach: student.currentCoach,
+        // 添加一些默认值以避免前端报错
+        phone: '13800138000',
+        birthDate: new Date(Date.now() - student.age * 365 * 24 * 60 * 60 * 1000).toISOString(), // 根据年龄估算出生日期
+        memberLevel: 'normal',
+        courseCount: student.currentCoach,
+        status: 'active',
+        registeredAt: new Date().toISOString()
+      }))
+      pagination.total = response.data.length
+    } else {
+      studentList.value = []
+      pagination.total = 0
+    }
+  } catch (error) {
+    console.error('获取学员列表失败:', error)
     ElMessage.error('获取学员列表失败')
   } finally {
     loading.value = false
@@ -561,15 +584,17 @@ const saveStudent = async () => {
     saving.value = true
 
     if (isEdit.value) {
-      await api.put(`/campus/students/${studentForm.id}`, studentForm)
-      ElMessage.success('学员信息更新成功')
+      // await api.put(`/admin/students/${studentForm.id}`, studentForm)
+      // ElMessage.success('学员信息更新成功')
+      ElMessage.error('暂时不支持更新学员信息')
     } else {
-      await api.post('/campus/students', studentForm)
-      ElMessage.success('学员创建成功')
+      // await api.post('/admin/students', studentForm)
+      // ElMessage.success('学员创建成功')
+      ElMessage.error('暂时不支持创建学员')
     }
 
     dialogVisible.value = false
-    fetchStudents()
+    await fetchStudents()
   } catch {
     ElMessage.error(isEdit.value ? '更新失败' : '创建失败')
   } finally {
@@ -599,9 +624,9 @@ const handleAction = async (command, student) => {
 // 更新学员状态
 const updateStudentStatus = async (studentId, status) => {
   try {
-    await api.put(`/campus/students/${studentId}/status`, { status })
+    await api.put(`/admin/students/${studentId}/status`, { status })
     ElMessage.success('状态更新成功')
-    fetchStudents()
+    await fetchStudents()
   } catch {
     ElMessage.error('状态更新失败')
   }
@@ -616,9 +641,9 @@ const deleteStudent = async (student) => {
       type: 'warning',
     })
 
-    await api.delete(`/campus/students/${student.id}`)
+    await api.delete(`/admin/students/${student.id}`)
     ElMessage.success('学员删除成功')
-    fetchStudents()
+    await fetchStudents()
   } catch (error) {
     if (error !== 'cancel') {
       ElMessage.error('删除失败')
@@ -636,7 +661,7 @@ const executeBatchOperation = async () => {
   try {
     const studentIds = selectedStudents.value.map((s) => s.id)
 
-    await api.post('/campus/students/batch', {
+    await api.post('/admin/students/batch', {
       operation: batchOperation.type,
       studentIds,
       targetLevel: batchOperation.targetLevel,
@@ -644,7 +669,7 @@ const executeBatchOperation = async () => {
 
     ElMessage.success('批量操作执行成功')
     batchDialogVisible.value = false
-    fetchStudents()
+    await fetchStudents()
   } catch {
     ElMessage.error('批量操作失败')
   }
@@ -652,6 +677,7 @@ const executeBatchOperation = async () => {
 
 // 计算年龄
 const calculateAge = (birthDate) => {
+  if (!birthDate) return 0
   return dayjs().diff(dayjs(birthDate), 'year')
 }
 
@@ -815,11 +841,4 @@ onMounted(() => {
   text-align: center;
 }
 
-:deep(.el-table .el-button) {
-  margin-right: 8px;
-}
-
-:deep(.el-table .el-button:last-child) {
-  margin-right: 0;
-}
 </style>

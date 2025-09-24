@@ -32,6 +32,8 @@ tags:
     description: 竞赛系统相关接口
   - name: course
     description: 课程管理相关接口
+  - name: admin
+    description: 管理员相关接口
 
 security:
   - SessionAuth: []
@@ -1203,6 +1205,77 @@ paths:
                 items:
                   $ref: '#/components/schemas/CompetitionInfo'
 
+  # 管理员接口
+  /admin/students:
+    get:
+      tags: [admin]
+      summary: 获取当前校区所有学生
+      description: 获取管理员所在校区的所有学生（分页）
+      security:
+        - SessionAuth: [CAMPUS_ADMIN, SUPER_ADMIN]
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: size
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+      responses:
+        '200':
+          description: 学生列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StudentRecord'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /admin/coaches:
+    get:
+      tags: [admin]
+      summary: 获取当前校区所有教练
+      description: 获取管理员所在校区的所有已审核教练（分页）
+      security:
+        - SessionAuth: [CAMPUS_ADMIN, SUPER_ADMIN]
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: size
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+      responses:
+        '200':
+          description: 教练列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CoachRecord'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
   # 课程管理接口
   /courses/my-schedule:
     get:
@@ -1628,6 +1701,45 @@ components:
           type: integer
       required:
         - username
+        - balance
+        - maxCoach
+        - currentCoach
+
+    StudentRecord:
+      type: object
+      properties:
+        studentId:
+          type: string
+        username:
+          type: string
+        realName:
+          type: string
+        gender:
+          type: string
+        age:
+          type: integer
+        campusId:
+          type: integer
+        photoUrl:
+          type: string
+        skillLevel:
+          type: string
+        balance:
+          type: number
+          format: float
+        maxCoach:
+          type: integer
+        currentCoach:
+          type: integer
+      required:
+        - studentId
+        - username
+        - realName
+        - gender
+        - age
+        - campusId
+        - photoUrl
+        - skillLevel
         - balance
         - maxCoach
         - currentCoach

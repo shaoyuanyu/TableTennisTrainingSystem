@@ -4,13 +4,13 @@
     <div class="page-header">
       <h2>教练管理</h2>
       <div class="header-actions">
-        <OutlineButton @click="showScheduleDialog">
+        <OutlineButton @click="showBatchDialog">
           <template #icon-left>
             <el-icon>
-              <Calendar />
+              <Operation />
             </el-icon>
           </template>
-          排班管理
+          批量操作
         </OutlineButton>
         <PrimaryButton @click="showAddDialog">
           <template #icon-left>
@@ -28,29 +28,24 @@
       <el-form :model="filters" :inline="true" @submit.prevent="fetchCoaches">
         <el-form-item label="教练状态">
           <el-select v-model="filters.status" placeholder="全部状态" clearable>
-            <el-option label="在职" value="active" />
-            <el-option label="休假" value="leave" />
-            <el-option label="离职" value="resigned" />
+            <el-option label="已审核" value="approved" />
+            <el-option label="待审核" value="pending" />
+            <el-option label="已停用" value="disabled" />
           </el-select>
         </el-form-item>
 
-        <el-form-item label="专业等级">
+        <el-form-item label="教练等级">
           <el-select v-model="filters.level" placeholder="全部等级" clearable>
             <el-option label="初级教练" value="junior" />
             <el-option label="中级教练" value="intermediate" />
             <el-option label="高级教练" value="senior" />
-            <el-option label="特级教练" value="expert" />
+            <el-option label="资深教练" value="expert" />
           </el-select>
-        </el-form-item>
-
-        <el-form-item label="入职时间">
-          <el-date-picker v-model="filters.dateRange" type="daterange" range-separator="至" start-placeholder="开始日期"
-            end-placeholder="结束日期" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
         </el-form-item>
 
         <el-form-item label="搜索">
           <el-input v-model="filters.keyword" placeholder="姓名/手机号/工号" style="width: 200px"
-            @keyup.enter="fetchCoaches" />
+                    @keyup.enter="fetchCoaches" />
         </el-form-item>
 
         <el-form-item>
@@ -67,7 +62,7 @@
           <div class="stat-content">
             <div class="stat-icon active">
               <el-icon>
-                <Avatar />
+                <User />
               </el-icon>
             </div>
             <div class="stat-text">
@@ -81,14 +76,30 @@
       <el-col :span="6">
         <el-card class="stat-card">
           <div class="stat-content">
-            <div class="stat-icon students">
+            <div class="stat-icon new">
               <el-icon>
                 <UserFilled />
               </el-icon>
             </div>
             <div class="stat-text">
+              <div class="stat-number">{{ stats.pending }}</div>
+              <div class="stat-label">待审核</div>
+            </div>
+          </div>
+        </el-card>
+      </el-col>
+
+      <el-col :span="6">
+        <el-card class="stat-card">
+          <div class="stat-content">
+            <div class="stat-icon students">
+              <el-icon>
+                <User />
+              </el-icon>
+            </div>
+            <div class="stat-text">
               <div class="stat-number">{{ stats.totalStudents }}</div>
-              <div class="stat-label">管理学员</div>
+              <div class="stat-label">学员总数</div>
             </div>
           </div>
         </el-card>
@@ -97,30 +108,14 @@
       <el-col :span="6">
         <el-card class="stat-card">
           <div class="stat-content">
-            <div class="stat-icon revenue">
+            <div class="stat-icon courses">
               <el-icon>
-                <Money />
+                <Reading />
               </el-icon>
             </div>
             <div class="stat-text">
-              <div class="stat-number">¥{{ stats.monthlyRevenue }}</div>
-              <div class="stat-label">月度收入</div>
-            </div>
-          </div>
-        </el-card>
-      </el-col>
-
-      <el-col :span="6">
-        <el-card class="stat-card">
-          <div class="stat-content">
-            <div class="stat-icon rating">
-              <el-icon>
-                <Star />
-              </el-icon>
-            </div>
-            <div class="stat-text">
-              <div class="stat-number">{{ stats.averageRating }}</div>
-              <div class="stat-label">平均评分</div>
+              <div class="stat-number">{{ stats.totalCourses }}</div>
+              <div class="stat-label">总课时数</div>
             </div>
           </div>
         </el-card>
@@ -129,7 +124,9 @@
 
     <!-- 教练列表 -->
     <el-card>
-      <el-table :data="coachList" v-loading="loading" stripe>
+      <el-table :data="coachList" v-loading="loading" stripe @selection-change="handleSelectionChange">
+        <el-table-column type="selection" width="55" />
+
         <el-table-column prop="avatar" label="头像" width="80">
           <template #default="{ row }">
             <el-avatar :size="40" :src="row.avatar">
@@ -144,7 +141,7 @@
 
         <el-table-column prop="phone" label="手机号" width="140" />
 
-        <el-table-column prop="level" label="等级" width="120">
+        <el-table-column prop="level" label="教练等级" width="120">
           <template #default="{ row }">
             <el-tag :type="getLevelType(row.level)">
               {{ getLevelText(row.level) }}
@@ -152,24 +149,12 @@
           </template>
         </el-table-column>
 
-        <el-table-column prop="specialties" label="专长" width="150">
-          <template #default="{ row }">
-            <el-tag v-for="specialty in row.specialties" :key="specialty" size="small" class="specialty-tag">
-              {{ specialty }}
-            </el-tag>
-          </template>
+        <el-table-column prop="hourlyRate" label="课时费" width="100">
+          <template #default="{ row }"> ¥{{ row.hourlyRate }}/节 </template>
         </el-table-column>
 
-        <el-table-column prop="studentCount" label="学员数" width="100" />
-
-        <el-table-column prop="rating" label="评分" width="120">
-          <template #default="{ row }">
-            <el-rate v-model="row.rating" disabled size="small" show-score text-color="#ff9900" />
-          </template>
-        </el-table-column>
-
-        <el-table-column prop="monthlyRevenue" label="月收入" width="120">
-          <template #default="{ row }"> ¥{{ row.monthlyRevenue }} </template>
+        <el-table-column prop="students" label="学员数" width="100">
+          <template #default="{ row }"> {{ row.currentStudents }}/{{ row.maxStudents }} </template>
         </el-table-column>
 
         <el-table-column prop="status" label="状态" width="100">
@@ -180,9 +165,9 @@
           </template>
         </el-table-column>
 
-        <el-table-column prop="joinedAt" label="入职时间" width="120">
+        <el-table-column prop="registeredAt" label="注册时间" width="120">
           <template #default="{ row }">
-            {{ formatDate(row.joinedAt) }}
+            {{ formatDate(row.registeredAt) }}
           </template>
         </el-table-column>
 
@@ -196,10 +181,10 @@
               </el-button>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item command="schedule">排班</el-dropdown-item>
-                  <el-dropdown-item command="salary">薪资</el-dropdown-item>
-                  <el-dropdown-item command="leave">请假</el-dropdown-item>
-                  <el-dropdown-item divided command="resign">离职</el-dropdown-item>
+                  <el-dropdown-item command="approve" v-if="row.status === 'pending'">审核通过</el-dropdown-item>
+                  <el-dropdown-item command="disable">停用</el-dropdown-item>
+                  <el-dropdown-item command="enable" v-if="row.status === 'disabled'">启用</el-dropdown-item>
+                  <el-dropdown-item divided command="delete">删除</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -209,8 +194,8 @@
 
       <div class="pagination-wrapper">
         <el-pagination v-model:current-page="pagination.page" v-model:page-size="pagination.size"
-          :total="pagination.total" :page-sizes="[10, 20, 50, 100]" layout="total, sizes, prev, pager, next, jumper"
-          @size-change="fetchCoaches" @current-change="fetchCoaches" />
+                       :total="pagination.total" :page-sizes="[10, 20, 50, 100]" layout="total, sizes, prev, pager, next, jumper"
+                       @size-change="fetchCoaches" @current-change="fetchCoaches" />
       </div>
     </el-card>
 
@@ -250,33 +235,43 @@
           <el-input v-model="coachForm.email" placeholder="请输入邮箱地址" />
         </el-form-item>
 
-        <el-form-item label="教练等级" prop="level">
-          <el-select v-model="coachForm.level" placeholder="选择教练等级">
-            <el-option label="初级教练" value="junior" />
-            <el-option label="中级教练" value="intermediate" />
-            <el-option label="高级教练" value="senior" />
-            <el-option label="特级教练" value="expert" />
-          </el-select>
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="教练等级" prop="level">
+              <el-select v-model="coachForm.level" placeholder="选择教练等级">
+                <el-option label="初级教练" value="junior" />
+                <el-option label="中级教练" value="intermediate" />
+                <el-option label="高级教练" value="senior" />
+                <el-option label="资深教练" value="expert" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="课时费" prop="hourlyRate">
+              <el-input-number v-model="coachForm.hourlyRate" :min="0" :step="10" style="width: 100%" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-form-item label="最大学员数" prop="maxStudents">
+          <el-slider v-model="coachForm.maxStudents" :min="1" :max="50" show-input />
         </el-form-item>
 
-        <el-form-item label="专业特长" prop="specialties">
-          <el-select v-model="coachForm.specialties" multiple placeholder="选择专业特长" style="width: 100%">
-            <el-option label="基础技术" value="基础技术" />
-            <el-option label="进攻技术" value="进攻技术" />
-            <el-option label="防守技术" value="防守技术" />
-            <el-option label="战术指导" value="战术指导" />
-            <el-option label="体能训练" value="体能训练" />
-            <el-option label="心理辅导" value="心理辅导" />
-          </el-select>
+        <el-form-item label="资质证书">
+          <el-upload
+            class="certificate-uploader"
+            action="/api/upload"
+            :show-file-list="false"
+            :on-success="handleCertificateSuccess"
+            :before-upload="beforeCertificateUpload"
+          >
+            <img v-if="coachForm.certificateUrl" :src="coachForm.certificateUrl" class="certificate" />
+            <el-icon v-else class="certificate-uploader-icon"><Plus /></el-icon>
+          </el-upload>
         </el-form-item>
 
-        <el-form-item label="教学经验" prop="experience">
-          <el-input v-model="coachForm.experience" type="textarea" :rows="3" placeholder="教学经验和成就" />
-        </el-form-item>
-
-        <el-form-item label="薪资标准" prop="hourlyRate">
-          <el-input-number v-model="coachForm.hourlyRate" :min="0" :precision="2" placeholder="时薪"
-            style="width: 100%" />
+        <el-form-item label="个人成就">
+          <el-input v-model="coachForm.achievements" type="textarea" :rows="3" placeholder="个人成就介绍" />
         </el-form-item>
       </el-form>
 
@@ -291,126 +286,104 @@
     <!-- 教练详情对话框 -->
     <el-dialog v-model="detailDialogVisible" title="教练详情" width="800px">
       <div v-if="selectedCoach">
-        <el-tabs type="border-card">
-          <el-tab-pane label="基本信息">
-            <el-descriptions :column="2" border>
-              <el-descriptions-item label="工号">
-                {{ selectedCoach.coachId }}
-              </el-descriptions-item>
-              <el-descriptions-item label="姓名">
-                {{ selectedCoach.name }}
-              </el-descriptions-item>
-              <el-descriptions-item label="性别">
-                {{ selectedCoach.gender === 'male' ? '男' : '女' }}
-              </el-descriptions-item>
-              <el-descriptions-item label="手机号">
-                {{ selectedCoach.phone }}
-              </el-descriptions-item>
-              <el-descriptions-item label="邮箱">
-                {{ selectedCoach.email }}
-              </el-descriptions-item>
-              <el-descriptions-item label="教练等级">
-                <el-tag :type="getLevelType(selectedCoach.level)">
-                  {{ getLevelText(selectedCoach.level) }}
-                </el-tag>
-              </el-descriptions-item>
-              <el-descriptions-item label="专业特长" :span="2">
-                <el-tag v-for="specialty in selectedCoach.specialties" :key="specialty" size="small"
-                  style="margin-right: 8px">
-                  {{ specialty }}
-                </el-tag>
-              </el-descriptions-item>
-              <el-descriptions-item label="入职时间">
-                {{ formatDate(selectedCoach.joinedAt) }}
-              </el-descriptions-item>
-              <el-descriptions-item label="状态">
-                <el-tag :type="getStatusType(selectedCoach.status)">
-                  {{ getStatusText(selectedCoach.status) }}
-                </el-tag>
-              </el-descriptions-item>
-            </el-descriptions>
-          </el-tab-pane>
+        <el-descriptions :column="2" border>
+          <el-descriptions-item label="工号">
+            {{ selectedCoach.coachId }}
+          </el-descriptions-item>
+          <el-descriptions-item label="姓名">
+            {{ selectedCoach.name }}
+          </el-descriptions-item>
+          <el-descriptions-item label="性别">
+            {{ selectedCoach.gender === 'male' ? '男' : '女' }}
+          </el-descriptions-item>
+          <el-descriptions-item label="年龄">
+            {{ calculateAge(selectedCoach.birthDate) }}岁
+          </el-descriptions-item>
+          <el-descriptions-item label="手机号">
+            {{ selectedCoach.phone }}
+          </el-descriptions-item>
+          <el-descriptions-item label="邮箱">
+            {{ selectedCoach.email }}
+          </el-descriptions-item>
+          <el-descriptions-item label="教练等级">
+            <el-tag :type="getLevelType(selectedCoach.level)">
+              {{ getLevelText(selectedCoach.level) }}
+            </el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="课时费">
+            ¥{{ selectedCoach.hourlyRate }}/节
+          </el-descriptions-item>
+          <el-descriptions-item label="学员数量">
+            {{ selectedCoach.currentStudents }}/{{ selectedCoach.maxStudents }}
+          </el-descriptions-item>
+          <el-descriptions-item label="注册时间">
+            {{ formatDateTime(selectedCoach.registeredAt) }}
+          </el-descriptions-item>
+          <el-descriptions-item label="状态">
+            <el-tag :type="getStatusType(selectedCoach.status)">
+              {{ getStatusText(selectedCoach.status) }}
+            </el-tag>
+          </el-descriptions-item>
+        </el-descriptions>
 
-          <el-tab-pane label="教学统计">
-            <el-row :gutter="20">
-              <el-col :span="8">
-                <el-statistic title="管理学员" :value="selectedCoach.studentCount" suffix="人" />
-              </el-col>
-              <el-col :span="8">
-                <el-statistic title="月度收入" :value="selectedCoach.monthlyRevenue" prefix="¥" />
-              </el-col>
-              <el-col :span="8">
-                <el-statistic title="教学评分" :value="selectedCoach.rating" :precision="1" suffix="分" />
-              </el-col>
-            </el-row>
+        <!-- 资质证书 -->
+        <div style="margin-top: 20px" v-if="selectedCoach.certificateUrl">
+          <h4>资质证书</h4>
+          <el-image
+            style="width: 100%; height: 200px"
+            :src="selectedCoach.certificateUrl"
+            :preview-src-list="[selectedCoach.certificateUrl]"
+            fit="contain"
+          />
+        </div>
 
-            <div style="margin-top: 20px">
-              <h4>最近教学记录</h4>
-              <el-table :data="selectedCoach.recentClasses" size="small">
-                <el-table-column prop="date" label="上课时间" width="150" />
-                <el-table-column prop="student" label="学员" width="100" />
-                <el-table-column prop="duration" label="时长" width="80" />
-                <el-table-column prop="content" label="课程内容" />
-                <el-table-column prop="rating" label="学员评分" width="100">
-                  <template #default="{ row }">
-                    <el-rate v-model="row.rating" disabled size="small" />
-                  </template>
-                </el-table-column>
-              </el-table>
-            </div>
-          </el-tab-pane>
+        <!-- 个人成就 -->
+        <div style="margin-top: 20px" v-if="selectedCoach.achievements">
+          <h4>个人成就</h4>
+          <div class="achievements-content">
+            {{ selectedCoach.achievements }}
+          </div>
+        </div>
 
-          <el-tab-pane label="排班信息">
-            <el-calendar>
-              <template #date-cell="{ data }">
-                <div class="calendar-day">
-                  <p>{{ data.day.split('-').slice(2).join('-') }}</p>
-                  <div v-if="getScheduleForDate(data.day)" class="schedule-info">
-                    <el-tag size="small">{{ getScheduleForDate(data.day) }}</el-tag>
-                  </div>
-                </div>
+        <!-- 学员列表 -->
+        <div style="margin-top: 20px">
+          <h4>当前学员</h4>
+          <el-table :data="selectedCoach.students" size="small">
+            <el-table-column prop="name" label="姓名" width="120" />
+            <el-table-column prop="phone" label="手机号" width="140" />
+            <el-table-column prop="memberLevel" label="会员等级" width="120">
+              <template #default="{ row }">
+                <el-tag :type="getMemberLevelType(row.memberLevel)">
+                  {{ getMemberLevelText(row.memberLevel) }}
+                </el-tag>
               </template>
-            </el-calendar>
-          </el-tab-pane>
-        </el-tabs>
+            </el-table-column>
+            <el-table-column prop="courseCount" label="剩余课时" width="100" />
+            <el-table-column prop="registeredAt" label="注册时间" width="120">
+              <template #default="{ row }">
+                {{ formatDate(row.registeredAt) }}
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
       </div>
     </el-dialog>
 
-    <!-- 排班管理对话框 -->
-    <el-dialog v-model="scheduleDialogVisible" title="排班管理" width="600px">
+    <!-- 批量操作对话框 -->
+    <el-dialog v-model="batchDialogVisible" title="批量操作" width="400px">
       <el-form label-width="100px">
-        <el-form-item label="选择教练">
-          <el-select v-model="scheduleForm.coachId" placeholder="选择教练">
-            <el-option v-for="coach in coachList" :key="coach.id" :label="coach.name" :value="coach.id" />
-          </el-select>
-        </el-form-item>
-
-        <el-form-item label="排班日期">
-          <el-date-picker v-model="scheduleForm.dateRange" type="daterange" range-separator="至" start-placeholder="开始日期"
-            end-placeholder="结束日期" />
-        </el-form-item>
-
-        <el-form-item label="工作时间">
-          <el-time-picker v-model="scheduleForm.workTime" is-range range-separator="至" start-placeholder="开始时间"
-            end-placeholder="结束时间" format="HH:mm" value-format="HH:mm" />
-        </el-form-item>
-
-        <el-form-item label="休息日">
-          <el-checkbox-group v-model="scheduleForm.restDays">
-            <el-checkbox label="1">周一</el-checkbox>
-            <el-checkbox label="2">周二</el-checkbox>
-            <el-checkbox label="3">周三</el-checkbox>
-            <el-checkbox label="4">周四</el-checkbox>
-            <el-checkbox label="5">周五</el-checkbox>
-            <el-checkbox label="6">周六</el-checkbox>
-            <el-checkbox label="0">周日</el-checkbox>
-          </el-checkbox-group>
+        <el-form-item label="操作类型">
+          <el-radio-group v-model="batchOperation.type">
+            <el-radio label="approve">批量审核</el-radio>
+            <el-radio label="disable">批量停用</el-radio>
+            <el-radio label="enable">批量启用</el-radio>
+          </el-radio-group>
         </el-form-item>
       </el-form>
 
       <template #footer>
-        <OutlineButton @click="scheduleDialogVisible = false">取消</OutlineButton>
-        <PrimaryButton @click="saveSchedule"> 保存排班 </PrimaryButton>
+        <OutlineButton @click="batchDialogVisible = false">取消</OutlineButton>
+        <PrimaryButton @click="executeBatchOperation"> 执行操作 </PrimaryButton>
       </template>
     </el-dialog>
   </div>
@@ -418,16 +391,15 @@
 
 <script setup>
 import {computed, onMounted, reactive, ref} from 'vue'
-import {ElMessage} from 'element-plus'
+import {ElMessage, ElMessageBox} from 'element-plus'
 import {
   ArrowDown,
-  Avatar,
-  Calendar,
-  Money,
+  Operation,
   Plus,
+  Reading,
   Refresh,
   Search,
-  Star,
+  User,
   UserFilled,
 } from '@element-plus/icons-vue'
 import dayjs from 'dayjs'
@@ -438,28 +410,28 @@ import OutlineButton from '@/components/buttons/OutlineButton.vue'
 // 数据列表
 const coachList = ref([])
 const selectedCoach = ref(null)
+const selectedCoaches = ref([])
 
 // 状态
 const loading = ref(false)
 const saving = ref(false)
 const dialogVisible = ref(false)
 const detailDialogVisible = ref(false)
-const scheduleDialogVisible = ref(false)
+const batchDialogVisible = ref(false)
 const isEdit = ref(false)
 
 // 统计数据
 const stats = reactive({
   active: 0,
+  pending: 0,
   totalStudents: 0,
-  monthlyRevenue: 0,
-  averageRating: 0,
+  totalCourses: 0,
 })
 
 // 筛选器
 const filters = reactive({
   status: '',
   level: '',
-  dateRange: [],
   keyword: '',
 })
 
@@ -479,17 +451,15 @@ const coachForm = reactive({
   email: '',
   birthDate: '',
   level: 'junior',
-  specialties: [],
-  experience: '',
-  hourlyRate: 0,
+  hourlyRate: 100,
+  maxStudents: 10,
+  certificateUrl: '',
+  achievements: '',
 })
 
-// 排班表单
-const scheduleForm = reactive({
-  coachId: '',
-  dateRange: [],
-  workTime: [],
-  restDays: [],
+// 批量操作
+const batchOperation = reactive({
+  type: 'approve',
 })
 
 // 表单引用
@@ -509,8 +479,10 @@ const formRules = {
     { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号码', trigger: 'blur' },
   ],
   email: [{ type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' }],
+  birthDate: [{ required: true, message: '请选择出生日期', trigger: 'change' }],
   level: [{ required: true, message: '请选择教练等级', trigger: 'change' }],
-  hourlyRate: [{ required: true, message: '请输入时薪标准', trigger: 'blur' }],
+  hourlyRate: [{ required: true, message: '请输入课时费', trigger: 'change' }],
+  maxStudents: [{ required: true, message: '请设置最大学员数', trigger: 'change' }],
 }
 
 // 获取教练列表
@@ -523,12 +495,13 @@ const fetchCoaches = async () => {
       ...filters,
     }
 
-    const response = await api.get('/campus/coaches', { params })
+    // 修改API调用路径为正确的后端端点
+    const response = await api.get('/admin/coaches', { params })
     coachList.value = response.data.list || []
     pagination.total = response.data.total || 0
 
     // 获取统计数据
-    const statsResponse = await api.get('/campus/coaches/stats')
+    const statsResponse = await api.get('/admin/coaches/stats')
     Object.assign(stats, statsResponse.data || {})
   } catch {
     ElMessage.error('获取教练列表失败')
@@ -542,7 +515,6 @@ const resetFilters = () => {
   Object.assign(filters, {
     status: '',
     level: '',
-    dateRange: [],
     keyword: '',
   })
   fetchCoaches()
@@ -567,9 +539,13 @@ const showDetailDialog = (coach) => {
   detailDialogVisible.value = true
 }
 
-// 显示排班对话框
-const showScheduleDialog = () => {
-  scheduleDialogVisible.value = true
+// 显示批量操作对话框
+const showBatchDialog = () => {
+  if (selectedCoaches.value.length === 0) {
+    ElMessage.warning('请先选择要操作的教练')
+    return
+  }
+  batchDialogVisible.value = true
 }
 
 // 重置表单
@@ -585,9 +561,10 @@ const resetForm = () => {
     email: '',
     birthDate: '',
     level: 'junior',
-    specialties: [],
-    experience: '',
-    hourlyRate: 0,
+    hourlyRate: 100,
+    maxStudents: 10,
+    certificateUrl: '',
+    achievements: '',
   })
 }
 
@@ -602,15 +579,15 @@ const saveCoach = async () => {
     saving.value = true
 
     if (isEdit.value) {
-      await api.put(`/campus/coaches/${coachForm.id}`, coachForm)
+      await api.put(`/admin/coaches/${coachForm.id}`, coachForm)
       ElMessage.success('教练信息更新成功')
     } else {
-      await api.post('/campus/coaches', coachForm)
+      await api.post('/admin/coaches', coachForm)
       ElMessage.success('教练创建成功')
     }
 
     dialogVisible.value = false
-    fetchCoaches()
+    await fetchCoaches()
   } catch {
     ElMessage.error(isEdit.value ? '更新失败' : '创建失败')
   } finally {
@@ -618,32 +595,20 @@ const saveCoach = async () => {
   }
 }
 
-// 保存排班
-const saveSchedule = async () => {
-  try {
-    await api.post('/campus/coaches/schedule', scheduleForm)
-    ElMessage.success('排班设置成功')
-    scheduleDialogVisible.value = false
-  } catch {
-    ElMessage.error('排班设置失败')
-  }
-}
-
 // 处理操作
 const handleAction = async (command, coach) => {
   switch (command) {
-    case 'schedule':
-      scheduleForm.coachId = coach.id
-      showScheduleDialog()
+    case 'approve':
+      await updateCoachStatus(coach.id, 'approved')
       break
-    case 'salary':
-      ElMessage.info('薪资管理功能开发中')
+    case 'disable':
+      await updateCoachStatus(coach.id, 'disabled')
       break
-    case 'leave':
-      ElMessage.info('请假管理功能开发中')
+    case 'enable':
+      await updateCoachStatus(coach.id, 'approved')
       break
-    case 'resign':
-      await updateCoachStatus(coach.id, 'resigned')
+    case 'delete':
+      await deleteCoach(coach)
       break
   }
 }
@@ -651,22 +616,78 @@ const handleAction = async (command, coach) => {
 // 更新教练状态
 const updateCoachStatus = async (coachId, status) => {
   try {
-    await api.put(`/campus/coaches/${coachId}/status`, { status })
+    await api.put(`/admin/coaches/${coachId}/status`, { status })
     ElMessage.success('状态更新成功')
-    fetchCoaches()
+    await fetchCoaches()
   } catch {
     ElMessage.error('状态更新失败')
   }
 }
 
-// 获取指定日期的排班信息
-const getScheduleForDate = (date) => {
-  // 模拟数据，实际应该从API获取
-  const dayOfWeek = dayjs(date).day()
-  if (dayOfWeek === 0 || dayOfWeek === 6) {
-    return '休息'
+// 删除教练
+const deleteCoach = async (coach) => {
+  try {
+    await ElMessageBox.confirm(`确定要删除教练"${coach.name}"吗？此操作不可恢复！`, '确认删除', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    })
+
+    await api.delete(`/admin/coaches/${coach.id}`)
+    ElMessage.success('教练删除成功')
+    await fetchCoaches()
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('删除失败')
+    }
   }
-  return '09:00-18:00'
+}
+
+// 处理选择变化
+const handleSelectionChange = (selection) => {
+  selectedCoaches.value = selection
+}
+
+// 执行批量操作
+const executeBatchOperation = async () => {
+  try {
+    const coachIds = selectedCoaches.value.map((c) => c.id)
+
+    await api.post('/admin/coaches/batch', {
+      operation: batchOperation.type,
+      coachIds,
+    })
+
+    ElMessage.success('批量操作执行成功')
+    batchDialogVisible.value = false
+    await fetchCoaches()
+  } catch {
+    ElMessage.error('批量操作失败')
+  }
+}
+
+// 证书上传成功处理
+const handleCertificateSuccess = (response, file) => {
+  coachForm.certificateUrl = response.data.url
+}
+
+// 证书上传前处理
+const beforeCertificateUpload = (file) => {
+  const isJPG = file.type === 'image/jpeg' || file.type === 'image/png'
+  const isLt2M = file.size / 1024 / 1024 < 2
+
+  if (!isJPG) {
+    ElMessage.error('上传头像图片只能是 JPG/PNG 格式!')
+  }
+  if (!isLt2M) {
+    ElMessage.error('上传头像图片大小不能超过 2MB!')
+  }
+  return isJPG && isLt2M
+}
+
+// 计算年龄
+const calculateAge = (birthDate) => {
+  return dayjs().diff(dayjs(birthDate), 'year')
 }
 
 // 格式化日期
@@ -674,24 +695,29 @@ const formatDate = (date) => {
   return dayjs(date).format('YYYY-MM-DD')
 }
 
-// 获取等级类型
+// 格式化日期时间
+const formatDateTime = (date) => {
+  return dayjs(date).format('YYYY-MM-DD HH:mm')
+}
+
+// 获取教练等级类型
 const getLevelType = (level) => {
   const types = {
     junior: '',
-    intermediate: 'success',
+    intermediate: 'info',
     senior: 'warning',
-    expert: 'danger',
+    expert: 'success',
   }
   return types[level] || ''
 }
 
-// 获取等级文本
+// 获取教练等级文本
 const getLevelText = (level) => {
   const texts = {
     junior: '初级教练',
     intermediate: '中级教练',
     senior: '高级教练',
-    expert: '特级教练',
+    expert: '资深教练',
   }
   return texts[level] || level
 }
@@ -699,9 +725,9 @@ const getLevelText = (level) => {
 // 获取状态类型
 const getStatusType = (status) => {
   const types = {
-    active: 'success',
-    leave: 'warning',
-    resigned: 'danger',
+    approved: 'success',
+    pending: 'warning',
+    disabled: 'danger',
   }
   return types[status] || ''
 }
@@ -709,11 +735,33 @@ const getStatusType = (status) => {
 // 获取状态文本
 const getStatusText = (status) => {
   const texts = {
-    active: '在职',
-    leave: '休假',
-    resigned: '离职',
+    approved: '已审核',
+    pending: '待审核',
+    disabled: '已停用',
   }
   return texts[status] || status
+}
+
+// 获取会员等级类型
+const getMemberLevelType = (level) => {
+  const types = {
+    normal: '',
+    silver: 'info',
+    gold: 'warning',
+    diamond: 'success',
+  }
+  return types[level] || ''
+}
+
+// 获取会员等级文本
+const getMemberLevelText = (level) => {
+  const texts = {
+    normal: '普通会员',
+    silver: '银卡会员',
+    gold: '金卡会员',
+    diamond: '钻石会员',
+  }
+  return texts[level] || level
 }
 
 // 组件挂载
@@ -783,15 +831,15 @@ onMounted(() => {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
-.stat-icon.students {
+.stat-icon.new {
   background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
 }
 
-.stat-icon.revenue {
+.stat-icon.students {
   background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
 }
 
-.stat-icon.rating {
+.stat-icon.courses {
   background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
 }
 
@@ -812,9 +860,34 @@ onMounted(() => {
   margin-top: 4px;
 }
 
-.specialty-tag {
-  margin-right: 4px;
-  margin-bottom: 4px;
+.certificate-uploader .certificate {
+  width: 178px;
+  height: 178px;
+  display: block;
+}
+
+.certificate-uploader .certificate-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 178px;
+  height: 178px;
+  text-align: center;
+  line-height: 178px;
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.certificate-uploader .certificate-uploader-icon:hover {
+  border-color: #409eff;
+}
+
+.achievements-content {
+  padding: 12px;
+  background-color: #f5f7fa;
+  border-radius: 4px;
+  line-height: 1.6;
 }
 
 .pagination-wrapper {
@@ -822,23 +895,4 @@ onMounted(() => {
   text-align: center;
 }
 
-.calendar-day {
-  text-align: center;
-}
-
-.schedule-info {
-  margin-top: 4px;
-}
-
-:deep(.el-table .el-button) {
-  margin-right: 8px;
-}
-
-:deep(.el-table .el-button:last-child) {
-  margin-right: 0;
-}
-
-:deep(.el-calendar-table .el-calendar-day) {
-  height: 80px;
-}
 </style>

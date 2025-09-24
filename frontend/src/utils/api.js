@@ -50,7 +50,7 @@ api.interceptors.response.use(
             const userStore = useUserStore()
             // 避免重复调用logout，检查用户是否确实已登录
             if (userStore.isLoggedIn) {
-              userStore.logout()
+              await userStore.logout()
             }
           }
           // 登录和登出请求的401错误由具体业务逻辑处理，这里不显示消息

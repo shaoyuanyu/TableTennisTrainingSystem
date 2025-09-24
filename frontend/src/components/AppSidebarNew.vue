@@ -21,6 +21,14 @@
           <el-icon><OfficeBuilding /></el-icon>
           <template #title>校区管理</template>
         </el-menu-item>
+        <el-menu-item index="/admin/students" class="menu-item">
+          <el-icon><User /></el-icon>
+          <template #title>学员管理</template>
+        </el-menu-item>
+        <el-menu-item index="/admin/coaches" class="menu-item">
+          <el-icon><Avatar /></el-icon>
+          <template #title>教练管理</template>
+        </el-menu-item>
         <el-menu-item index="/admin/service" class="menu-item">
           <el-icon><CreditCard /></el-icon>
           <template #title>服务状态</template>
