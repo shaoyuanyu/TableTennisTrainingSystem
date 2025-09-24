@@ -31,7 +31,7 @@ internal val COURSE_SERVICE_LOGGER = LoggerFactory.getLogger("io.github.shaoyuan
 class CourseService(
     private val database: Database
 ) {
-    
+
     /**
      * 创建课程
      */
@@ -39,7 +39,7 @@ class CourseService(
         return transaction(database) {
             // 验证输入数据
             validateCourseRequest(request)
-            
+
             // 验证学生和教练是否存在
             val student = StudentEntity.findById(UUID.fromString(request.studentId))
                 ?: throw NotFoundException("学生不存在")
@@ -47,7 +47,7 @@ class CourseService(
                 ?: throw NotFoundException("教练不存在")
             val campus = CampusEntity.findById(request.campusId)
                 ?: throw NotFoundException("校区不存在")
-            
+
             // 检查时间冲突
             checkTimeConflict(
                 UUID.fromString(request.coachId),
@@ -56,15 +56,15 @@ class CourseService(
                 LocalTime.parse(request.startTime),
                 LocalTime.parse(request.endTime)
             )
-            
+
             // 分配球桌
             val assignedTable = assignTable(request, campus.id.value)
-            
+
             // 解析时间
             val parsedDate = LocalDate.parse(request.date)
             val parsedStartTime = LocalTime.parse(request.startTime)
             val parsedEndTime = LocalTime.parse(request.endTime)
-            
+
             // 创建课程
             val course = CourseEntity.new {
                 title = request.title
@@ -83,39 +83,39 @@ class CourseService(
                 studentRating = null
                 createdAt = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
             }
-            
+
             COURSE_SERVICE_LOGGER.info("创建课程成功: ${course.id}")
             course.expose()
         }
     }
-    
+
     /**
      * 查询课程列表（通用查询）
      */
     fun queryCourses(request: QueryCourseRequest): CourseScheduleResponse {
         return transaction(database) {
             val query = CourseEntity.all()
-            
+
             // 过滤条件
             val filteredQuery = query.toList().filter { course ->
                 (request.status == null || course.status == CourseStatus.valueOf(request.status)) &&
-                (request.studentId == null || course.student.id == UUID.fromString(request.studentId)) &&
-                (request.coachId == null || course.coach.id == UUID.fromString(request.coachId)) &&
-                (request.campusId == null || course.campus.id.value == request.campusId) &&
-                (request.dateFrom == null || course.date >= LocalDate.parse(request.dateFrom)) &&
-                (request.dateTo == null || course.date <= LocalDate.parse(request.dateTo))
+                        (request.studentId == null || course.student.id == UUID.fromString(request.studentId)) &&
+                        (request.coachId == null || course.coach.id == UUID.fromString(request.coachId)) &&
+                        (request.campusId == null || course.campus.id.value == request.campusId) &&
+                        (request.dateFrom == null || course.date >= LocalDate.parse(request.dateFrom)) &&
+                        (request.dateTo == null || course.date <= LocalDate.parse(request.dateTo))
             }
-            
+
             // 排序
             val sortedCourses = filteredQuery.sortedWith(
                 compareBy<CourseEntity> { it.date }.thenBy { it.startTime }
             )
-            
+
             // 分页
             val total = sortedCourses.size
             val offset = (request.page - 1) * request.size
             val pagedCourses = sortedCourses.drop(offset).take(request.size)
-            
+
             CourseScheduleResponse(
                 courses = pagedCourses.map { it.expose() },
                 total = total,
@@ -124,7 +124,7 @@ class CourseService(
             )
         }
     }
-    
+
     /**
      * 学生查询自己的课表
      */
@@ -136,12 +136,13 @@ class CourseService(
                 (dateFrom == null || course.date >= LocalDate.parse(dateFrom)) &&
                         (dateTo == null || course.date <= LocalDate.parse(dateTo))
             }
+                .filter() { it.status == CourseStatus.CONFIRMED } // 只取已确认的课程
 
             filteredCourses.sortedWith(
                 compareBy<CourseEntity> { it.date }.thenBy { it.startTime }
             ).map { it.expose() }
         }
-    
+
     /**
      * 学生查询指定教练的课表
      */
@@ -153,12 +154,13 @@ class CourseService(
                 (dateFrom == null || course.date >= LocalDate.parse(dateFrom)) &&
                         (dateTo == null || course.date <= LocalDate.parse(dateTo))
             }
+                .filter() { it.status == CourseStatus.CONFIRMED } // 只取已确认的课程
 
             filteredCourses.sortedWith(
                 compareBy<CourseEntity> { it.date }.thenBy { it.startTime }
             ).map { it.expose() }
         }
-    
+
     /**
      * 教练查询自己的课表
      */
@@ -170,12 +172,13 @@ class CourseService(
                 (dateFrom == null || course.date >= LocalDate.parse(dateFrom)) &&
                         (dateTo == null || course.date <= LocalDate.parse(dateTo))
             }
+                .filter() { it.status == CourseStatus.CONFIRMED } // 只取已确认的课程
 
             filteredCourses.sortedWith(
                 compareBy<CourseEntity> { it.date }.thenBy { it.startTime }
             ).map { it.expose() }
         }
-    
+
     /**
      * 更新课程状态
      */
@@ -187,7 +190,7 @@ class CourseService(
             course.status = status
             course.expose()
         }
-    
+
     /**
      * 学生提交反馈
      */
@@ -201,7 +204,7 @@ class CourseService(
             course.attendanceStatus = request.attendanceStatus
             course.expose()
         }
-    
+
     /**
      * 验证课程请求数据
      */
@@ -210,74 +213,74 @@ class CourseService(
             val date = LocalDate.parse(request.date)
             val startTime = LocalTime.parse(request.startTime)
             val endTime = LocalTime.parse(request.endTime)
-            
+
             if (startTime >= endTime) {
                 throw BadRequestException("开始时间必须早于结束时间")
             }
-            
+
             // 检查是否是未来时间
             val now = Clock.System.now().toLocalDateTime(TimeZone.of("Asia/Shanghai"))
             if (date < now.date || (date == now.date && startTime <= now.time)) {
                 throw BadRequestException("课程时间必须是未来时间")
             }
-            
+
         } catch (_: Exception) {
             throw BadRequestException("日期或时间格式不正确")
         }
     }
-    
+
     /**
      * 检查时间冲突
      */
     private fun checkTimeConflict(
-        coachId: UUID, 
-        studentId: UUID, 
-        date: LocalDate, 
-        startTime: LocalTime, 
+        coachId: UUID,
+        studentId: UUID,
+        date: LocalDate,
+        startTime: LocalTime,
         endTime: LocalTime,
         excludeCourseId: UUID? = null
     ) {
         // 检查教练时间冲突
-        val coachConflictQuery = CourseEntity.find { 
+        val coachConflictQuery = CourseEntity.find {
             CourseTable.coach eq coachId and
-            (CourseTable.date eq date) and
-            (CourseTable.status neq CourseStatus.CANCELLED)
+                    (CourseTable.date eq date) and
+                    (CourseTable.status neq CourseStatus.CANCELLED)
         }
-        
+
         val coachConflict = coachConflictQuery.find { course ->
             (excludeCourseId == null || course.id.value != excludeCourseId) &&
-            (
-                (course.startTime <= startTime && course.endTime > startTime) ||
-                (course.startTime < endTime && course.endTime >= endTime) ||
-                (course.startTime >= startTime && course.endTime <= endTime)
-            )
+                    (
+                            (course.startTime <= startTime && course.endTime > startTime) ||
+                                    (course.startTime < endTime && course.endTime >= endTime) ||
+                                    (course.startTime >= startTime && course.endTime <= endTime)
+                            )
         }
-        
+
         if (coachConflict != null) {
             throw BadRequestException("教练在该时间段已有课程安排")
         }
-        
+
         // 检查学生时间冲突
-        val studentConflictQuery = CourseEntity.find { 
+        val studentConflictQuery = CourseEntity.find {
             CourseTable.student eq studentId and
-            (CourseTable.date eq date) and
-            (CourseTable.status neq CourseStatus.CANCELLED)
+                    (CourseTable.date eq date) and
+                    (CourseTable.status neq CourseStatus.CANCELLED)
         }
-        
+
         val studentConflict = studentConflictQuery.find { course ->
             (excludeCourseId == null || course.id.value != excludeCourseId) &&
-            (
-                (course.startTime <= startTime && course.endTime > startTime) ||
-                (course.startTime < endTime && course.endTime >= endTime) ||
-                (course.startTime >= startTime && course.endTime <= endTime)
-            )
+                    (
+                            (course.startTime <= startTime && course.endTime > startTime) ||
+                                    (course.startTime < endTime && course.endTime >= endTime) ||
+                                    (course.startTime >= startTime && course.endTime <= endTime)
+                            )
         }
-        
+
         if (studentConflict != null) {
             throw BadRequestException("学生在该时间段已有课程安排")
         }
     }
-    
+
     /**
      * 分配球桌
      * @param request 课程创建请求
@@ -290,8 +293,8 @@ class CourseService(
             val specifiedTable = TableEntity.findById(UUID.fromString(request.tableId))
             if (specifiedTable != null && specifiedTable.campusId == campusId) {
                 // 检查球桌在课程时间段是否可用
-                if (isTableAvailable(specifiedTable, LocalDate.parse(request.date), 
-                    LocalTime.parse(request.startTime), LocalTime.parse(request.endTime))) {
+                if (isTableAvailable(specifiedTable, LocalDate.parse(request.date),
+                        LocalTime.parse(request.startTime), LocalTime.parse(request.endTime))) {
                     return specifiedTable
                 } else {
                     throw BadRequestException("指定的球桌在该时间段不可用")
@@ -300,16 +303,16 @@ class CourseService(
                 throw BadRequestException("指定的球桌不存在或不属于该校区")
             }
         }
-        
+
         // 自动分配：查找该校区空闲的球桌
-        val availableTables = TableEntity.find { 
+        val availableTables = TableEntity.find {
             (TableTable.campusId eq campusId) and (TableTable.status eq Status.free)
         }.toList()
-        
+
         val date = LocalDate.parse(request.date)
         val startTime = LocalTime.parse(request.startTime)
         val endTime = LocalTime.parse(request.endTime)
-        
+
         // 找到在指定时间段可用的球桌
         for (table in availableTables) {
             if (isTableAvailable(table, date, startTime, endTime)) {
@@ -320,21 +323,105 @@ class CourseService(
         COURSE_SERVICE_LOGGER.warn("在校区 $campusId 未找到可用球桌，课程将在没有指定球桌的情况下创建")
         throw BadRequestException("没有可用的球桌")
     }
-    
+
     /**
      * 检查球桌在指定时间段是否可用
      */
-    private fun isTableAvailable(table: TableEntity, date: LocalDate, startTime: LocalTime, endTime: LocalTime): Boolean {
-        val conflictingCourses = CourseEntity.find { 
+    private fun isTableAvailable(
+        table: TableEntity,
+        date: LocalDate,
+        startTime: LocalTime,
+        endTime: LocalTime
+    ): Boolean {
+        val conflictingCourses = CourseEntity.find {
             (CourseTable.table eq table.id.value) and
-            (CourseTable.date eq date) and
-            (CourseTable.status neq CourseStatus.CANCELLED)
+                    (CourseTable.date eq date) and
+                    (CourseTable.status neq CourseStatus.CANCELLED)
         }
-        
+
         return conflictingCourses.none { course ->
             (course.startTime <= startTime && course.endTime > startTime) ||
-            (course.startTime < endTime && course.endTime >= endTime) ||
-            (course.startTime >= startTime && course.endTime <= endTime)
+                    (course.startTime < endTime && course.endTime >= endTime) ||
+                    (course.startTime >= startTime && course.endTime <= endTime)
+        }
+    }
+
+    /**
+     * 预约课程
+     */
+    fun bookCourse(CourseBooking: CourseBookingRequest) {
+        transaction(database) {
+
+            val campus = CampusEntity.findById(CourseBooking.campusId)
+                ?: throw NotFoundException("校区不存在")
+            val hour = 8 + CourseBooking.NO
+            val startTime = LocalTime(hour, 0)  // 小时:分钟，如 10:00
+            val endTime = LocalTime(hour + 1, 0)  // 小时:分钟，如 11:00
+            val location = campus.address
+            val Course = CourseCreateRequest(
+                title = CourseBooking.title,
+                description = CourseBooking.description,
+                date = CourseBooking.date,
+                startTime = startTime.toString(),
+                endTime = endTime.toString(),
+                location = location,
+                price = CourseBooking.price,
+                coachId = CourseBooking.coachId,
+                studentId = CourseBooking.studentId,
+                campusId = CourseBooking.campusId,
+                tableId = CourseBooking.tableId
+            )
+            // 创建课程
+            val course = createCourse(Course)
+
+            COURSE_SERVICE_LOGGER.info("创建课程成功: ${course.id}")
+        }
+    }
+
+    /**
+     * 查询教练待审核课程
+     */
+    fun queryconfirmCourse(coachId: String): List<CourseEntity> {
+        return transaction(database) {
+            val pendingCourses = CourseEntity.find {
+                (CourseTable.coach eq UUID.fromString(coachId)) and
+                        (CourseTable.status eq CourseStatus.PENDING)
+            }.toList()
+
+            if (pendingCourses.isEmpty()) {
+                throw NotFoundException("没有待审核的课程")
+            }
+
+            pendingCourses
+        }
+    }
+
+    /**
+     * 教练审核课程
+     */
+    fun judegeCourse(coachId: String, courseId: String,judge:Boolean) {
+        transaction(database) {
+            val course = CourseEntity.findById(UUID.fromString(courseId))
+                ?: throw NotFoundException("课程不存在")
+
+            if (course.coach.id.toString() != coachId) {
+                throw BadRequestException("无权确认此课程")
+            }
+            if (judge) {
+                if (course.status != CourseStatus.PENDING) {
+                    throw BadRequestException("只有正在预约的课程才能确认")
+                }
+
+                course.status = CourseStatus.CONFIRMED
+                COURSE_SERVICE_LOGGER.info("课程已通过: ${course.id}")
+            }else{
+                if (course.status != CourseStatus.PENDING && course.status != CourseStatus.CONFIRMED) {
+                    throw BadRequestException("只有正在预约或已确认的课程才能取消")
+                }
+
+                course.status = CourseStatus.CANCELLED
+                COURSE_SERVICE_LOGGER.info("课程已取消: ${course.id}")
+            }
         }
     }
 }

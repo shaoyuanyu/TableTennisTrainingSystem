@@ -32,7 +32,7 @@ class CourseEntity(uuid: EntityID<UUID>) : UUIDEntity(uuid) {
 
     var status by CourseTable.status
 
-    var price by CourseTable.price
+    var price: Float by CourseTable.price
 
     var paymentStatus by CourseTable.paymentStatus
 

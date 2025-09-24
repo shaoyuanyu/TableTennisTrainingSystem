@@ -19,7 +19,7 @@ data class Course(
     val endTime: String, // HH:MM
     val duration: Int, // minutes
     val status: String, // PENDING, CONFIRMED, COMPLETED, CANCELLED
-    val price: Int,
+    val price: Float,
     val paymentStatus: String? = null, // PENDING, PAID, REFUNDED
     val attendanceStatus: String? = null, // PRESENT, ABSENT, LATE (课程完成后填写)
     val studentFeedback: String? = null, // 学生对课程的反馈

@@ -40,7 +40,7 @@ object CourseTable : UUIDTable("courses") {
         toDb = { it.name }
     )
 
-    val price: Column<Int> = integer("price")
+    val price: Column<Float> = float("price")
 
     // PENDING, PAID, REFUNDED
     val paymentStatus: Column<String> = varchar("payment_status", 32).default("PENDING")

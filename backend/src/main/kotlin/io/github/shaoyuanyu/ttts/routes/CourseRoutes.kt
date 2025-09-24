@@ -22,13 +22,15 @@ fun Application.courseRoutes(courseService: CourseService) {
                 getStudentSchedule(courseService)
                 getCoachScheduleForStudent(courseService)
                 submitStudentFeedback(courseService)
+                bookCourse(courseService)
             }
             
             // 教练权限路由
             authenticate("auth-session-coach") {
                 getCoachSchedule(courseService)
-                confirmCourse(courseService)
                 updateCourseStatusByCoach(courseService)
+                getPendingCoursesForCoach(courseService)
+                coachJudgeCourse(courseService)
             }
             
             // 管理员权限路由
@@ -111,16 +113,6 @@ fun Route.getCoachSchedule(courseService: CourseService) {
         call.respond(HttpStatusCode.OK, courses)
     }
 }
-
-/**
- * 教练确认/拒绝课程
- */
-fun Route.confirmCourse(courseService: CourseService) {
-    post("/confirm") {
-        call.respond(HttpStatusCode.NotImplemented, "功能尚未实现")
-    }
-}
-
 /**
  * 教练更新课程状态
  */
@@ -162,5 +154,39 @@ fun Route.queryCourses(courseService: CourseService) {
         val request = call.receive<QueryCourseRequest>()
         val response = courseService.queryCourses(request)
         call.respond(HttpStatusCode.OK, response)
+    }
+}
+/**
+ * 课程预约
+ */
+fun Route.bookCourse(courseService: CourseService) {
+    post("/book") {
+        val request = call.receive<CourseBookingRequest>()
+        val bookingId = courseService.bookCourse(request)
+        call.respond(HttpStatusCode.Created, mapOf("bookingId" to bookingId, "message" to "课程预约成功"))
+    }
+}
+/**
+ * 教练查询待确认的课程
+ */
+fun Route.getPendingCoursesForCoach(courseService: CourseService) {
+    get("/querypending") {
+        val userId = getUserIdFromCall(call)
+
+        val courses = courseService.queryconfirmCourse(coachId = userId)
+
+        call.respond(HttpStatusCode.OK, courses)
+    }
+}
+/**
+ * 教练审核课程
+ */
+fun Route.coachJudgeCourse(courseService: CourseService) {
+    post("/coach-judge") {
+        val coachId = getUserIdFromCall(call)
+        val courseId = call.receive<CourseConfirmRequest>().courseId
+        val judge = call.receive<CourseConfirmRequest>().confirmed
+        val course = courseService.judegeCourse(coachId, courseId, judge)
+        call.respond(HttpStatusCode.OK, course)
     }
 }
