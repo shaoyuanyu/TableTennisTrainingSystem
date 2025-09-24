@@ -30,9 +30,11 @@ fun Application.configureMonitoring() {
             val acceptLanguage = call.request.headers["Accept-Language"] ?: ""
             val acceptEncoding = call.request.headers["Accept-Encoding"] ?: ""
             val origin = call.request.headers["Origin"] ?: ""
+            val response = call.response
             
-            "Status: $status, HTTP method: $httpMethod, URI: $uri$queryString, " +
-            "User agent: $userAgent, Cookies: $cookies, Content-Type: $contentType, " +
+            "Status: $status, HTTP method: $httpMethod, URI: $uri$queryString, \n" +
+            "\t\t>>> Response: $response, \n" +
+            "\t\t>>> User agent: $userAgent, Cookies: $cookies, Content-Type: $contentType, " +
             "Content-Length: $contentLength, Referer: $referer, Accept: $accept, " +
             "Accept-Language: $acceptLanguage, Accept-Encoding: $acceptEncoding, Origin: $origin"
         }
