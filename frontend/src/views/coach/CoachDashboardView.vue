@@ -59,13 +59,13 @@
           <div class="action-content">
             <div class="action-icon feedback">
               <el-icon>
-                <ChatLineSquare />
+                <User />
               </el-icon>
             </div>
             <div class="action-text">
-              <h3>学员反馈</h3>
-              <p>查看学员评价和反馈</p>
-              <PrimaryButton size="sm" to="/coach/student-feedback">前往</PrimaryButton>
+              <h3>学生双选</h3>
+              <p>{{ pendingApplications }}个待处理</p>
+              <PrimaryButton size="sm" to="/coach/mutual-selection">前往</PrimaryButton>
             </div>
           </div>
         </el-card>
@@ -298,128 +298,44 @@
 import {onMounted, reactive, ref} from 'vue'
 import {useRouter} from 'vue-router'
 import {useUserStore} from '@/stores/user'
-import {ElMessage} from 'element-plus'
 import {
   Bell,
   Calendar,
   ChatLineSquare,
   Clock,
+  Document,
   Money,
   Star,
   TrendCharts,
-  User,
+  User
 } from '@element-plus/icons-vue'
-import dayjs from 'dayjs'
-import api from '@/utils/api'
 import PrimaryButton from '@/components/buttons/PrimaryButton.vue'
 import OutlineButton from '@/components/buttons/OutlineButton.vue'
+import dayjs from 'dayjs'
+import api from '@/utils/api'
+import { getPendingApplicationCount } from '@/api/mutualSelection'
 
-const router = useRouter()
+// 用户状态
 const userStore = useUserStore()
+const router = useRouter()
 
 // 数据状态
+const todayClasses = ref([])
+const recentReviews = ref([])
+const pendingTasks = ref([])
 const stats = reactive({
-  totalStudents: 28,
-  totalClasses: 156,
-  rating: 4.8,
-  monthIncome: 8520,
+  totalStudents: 0,
+  totalClasses: 0,
+  rating: 0,
+  monthIncome: 0,
 })
-
 const incomeData = reactive({
-  today: 480,
-  week: 2100,
-  month: 8520,
+  today: 0,
+  week: 0,
+  month: 0,
 })
-
-const pendingAppointments = ref(3)
-const todayClasses = ref([
-  {
-    id: 1,
-    time: '09:00',
-    student: { name: '张小明', avatar: '' },
-    type: '基础技术课',
-    duration: 60,
-    location: '训练场A',
-    fee: 120,
-    status: 'upcoming',
-  },
-  {
-    id: 2,
-    time: '10:30',
-    student: { name: '李小红', avatar: '' },
-    type: '进阶技术课',
-    duration: 90,
-    location: '训练场B',
-    fee: 180,
-    status: 'upcoming',
-  },
-  {
-    id: 3,
-    time: '14:00',
-    student: { name: '王小强', avatar: '' },
-    type: '实战训练',
-    duration: 120,
-    location: '训练场A',
-    fee: 200,
-    status: 'ongoing',
-  },
-])
-
-const recentReviews = ref([
-  {
-    id: 1,
-    student: { name: '张小明', avatar: '' },
-    rating: 5,
-    content: '教练非常专业，技术指导很到位，我的发球技术有了明显提升！',
-    createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
-  },
-  {
-    id: 2,
-    student: { name: '李小红', avatar: '' },
-    rating: 5,
-    content: '课程安排合理，教练耐心细致，学到了很多实用的技巧。',
-    createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000),
-  },
-  {
-    id: 3,
-    student: { name: '王小强', avatar: '' },
-    rating: 4,
-    content: '教练的实战经验丰富，让我对比赛有了更深的理解。',
-    createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000),
-  },
-])
-
-const pendingTasks = ref([
-  {
-    id: 1,
-    type: 'appointment',
-    title: '新的课程预约',
-    description: '张小明预约了明天下午的基础技术课',
-    createdAt: new Date(Date.now() - 30 * 60 * 1000),
-  },
-  {
-    id: 2,
-    type: 'feedback',
-    title: '学员反馈',
-    description: '李小红对上节课程进行了评价',
-    createdAt: new Date(Date.now() - 45 * 60 * 1000),
-  },
-])
-
-// 获取仪表板数据
-const fetchDashboardData = async () => {
-  try {
-    await api.get('/coach/dashboard')
-    // 在实际应用中，这里会更新响应式数据
-  } catch {
-    ElMessage.error('获取仪表板数据失败')
-  }
-}
-
-// 导航到指定页面
-const navigateTo = (path) => {
-  router.push(path)
-}
+const pendingAppointments = ref(0)
+const pendingApplications = ref(0) // 新增：待处理的双选申请
 
 // 获取问候语
 const getGreeting = () => {
@@ -429,39 +345,86 @@ const getGreeting = () => {
   return '晚上好'
 }
 
-// 开始上课
-const startClass = async (classItem) => {
+// 获取统计数据
+const fetchStats = async () => {
   try {
-    await api.put(`/coach/classes/${classItem.id}/start`)
-    classItem.status = 'ongoing'
-    ElMessage.success('课程开始')
-  } catch {
-    ElMessage.error('操作失败')
+    // 获取总学员数
+    const studentsResponse = await api.get('/coach/students')
+    stats.totalStudents = studentsResponse.data.length || 0
+
+    // 获取总课时数
+    const classesResponse = await api.get('/coach/classes')
+    stats.totalClasses = classesResponse.data.length || 0
+
+    // 获取平均评分
+    const ratingResponse = await api.get('/coach/rating')
+    stats.rating = ratingResponse.data.average || 0
+
+    // 获取本月收入
+    const incomeResponse = await api.get('/coach/income')
+    stats.monthIncome = incomeResponse.data.month || 0
+  } catch (error) {
+    console.error('获取统计数据失败:', error)
   }
 }
 
-// 结束课程
-const completeClass = async (classItem) => {
+// 获取今日课程
+const fetchTodayClasses = async () => {
   try {
-    await api.put(`/coach/classes/${classItem.id}/complete`)
-    classItem.status = 'completed'
-    ElMessage.success('课程结束')
-  } catch {
-    ElMessage.error('操作失败')
+    const response = await api.get('/coach/today-classes')
+    todayClasses.value = response.data || []
+  } catch (error) {
+    console.error('获取今日课程失败:', error)
   }
 }
 
-// 处理待办事项
-const handleTask = (task) => {
-  switch (task.type) {
-    case 'appointment':
-      navigateTo('/coach/appointment-approval')
-      break
-    case 'feedback':
-      navigateTo('/coach/student-feedback')
-      break
-    default:
-      break
+// 获取最新评价
+const fetchRecentReviews = async () => {
+  try {
+    const response = await api.get('/coach/reviews/latest')
+    recentReviews.value = response.data || []
+  } catch (error) {
+    console.error('获取最新评价失败:', error)
+  }
+}
+
+// 获取待处理预约数量
+const fetchPendingAppointments = async () => {
+  try {
+    const response = await api.get('/coach/pending-appointments/count')
+    pendingAppointments.value = response.data.count || 0
+  } catch (error) {
+    console.error('获取待处理预约数量失败:', error)
+  }
+}
+
+// 获取待处理双选申请数量
+const fetchPendingApplications = async () => {
+  try {
+    const response = await getPendingApplicationCount()
+    pendingApplications.value = response.count || 0
+  } catch (error) {
+    console.error('获取待处理双选申请数量失败:', error)
+  }
+}
+
+// 获取收入数据
+const fetchIncomeData = async () => {
+  try {
+    const response = await api.get('/coach/income/stats')
+    Object.assign(incomeData, response.data)
+  } catch (error) {
+    console.error('获取收入数据失败:', error)
+  }
+}
+
+// 获取待处理事项
+const fetchPendingTasks = async () => {
+  try {
+    const response = await api.get('/coach/pending-tasks')
+    pendingTasks.value = response.data || []
+  } catch (error) {
+    console.error('获取待处理事项失败:', error)
   }
 }
 
@@ -472,15 +435,15 @@ const formatDate = (date) => {
 
 // 格式化日期时间
 const formatDateTime = (date) => {
-  return dayjs(date).format('MM-DD HH:mm')
+  return dayjs(date).format('YYYY-MM-DD HH:mm')
 }
 
 // 获取课程状态类型
 const getClassStatusType = (status) => {
   const types = {
-    upcoming: 'primary',
-    ongoing: 'success',
-    completed: 'info',
+    upcoming: 'warning',
+    ongoing: 'primary',
+    completed: 'success',
     cancelled: 'danger',
   }
   return types[status] || ''
@@ -501,15 +464,56 @@ const getClassStatusText = (status) => {
 const getTaskIcon = (type) => {
   const icons = {
     appointment: Calendar,
-    feedback: ChatLineSquare,
-    system: Bell,
+    review: ChatLineSquare,
+    class: Clock,
+    document: Document,
   }
-  return icons[type] || Bell
+  return icons[type] || Document
 }
 
-// 组件挂载
+// 开始上课
+const startClass = (classItem) => {
+  router.push({
+    path: '/coach/class-session',
+    query: { classId: classItem.id },
+  })
+}
+
+// 结束课程
+const completeClass = (classItem) => {
+  router.push({
+    path: '/coach/class-completion',
+    query: { classId: classItem.id },
+  })
+}
+
+// 处理任务
+const handleTask = (task) => {
+  // 根据任务类型跳转到相应页面
+  switch (task.type) {
+    case 'appointment':
+      router.push('/coach/appointment-approval')
+      break
+    case 'review':
+      router.push('/coach/student-feedback')
+      break
+    case 'class':
+      router.push('/coach/schedule')
+      break
+    default:
+      router.push('/coach/dashboard')
+  }
+}
+
+// 组件挂载时获取数据
 onMounted(() => {
-  fetchDashboardData()
+  fetchStats()
+  fetchTodayClasses()
+  fetchRecentReviews()
+  fetchPendingAppointments()
+  fetchPendingApplications() // 新增：获取待处理双选申请数量
+  fetchIncomeData()
+  fetchPendingTasks()
 })
 </script>
 
@@ -732,11 +736,6 @@ onMounted(() => {
   color: #999;
 }
 
-.chart-placeholder .el-icon {
-  font-size: 48px;
-  margin-bottom: 16px;
-}
-
 .income-summary {
   margin-top: 20px;
   display: flex;
@@ -871,12 +870,4 @@ onMounted(() => {
   flex-shrink: 0;
 }
 
-:deep(.el-card.welcome-banner .el-card__body) {
-  background: transparent;
-}
-
-:deep(.el-timeline-item__timestamp) {
-  font-size: 12px;
-  color: #409eff;
-}
 </style>

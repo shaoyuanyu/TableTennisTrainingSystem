@@ -119,7 +119,7 @@
           </div>
 
           <div class="coach-actions">
-            <PrimaryButton size="sm" @click.stop="selectCoach(coach)">选择教练</PrimaryButton>
+            <PrimaryButton size="sm" @click.stop="applyForCoach(coach)">申请双选</PrimaryButton>
             <OutlineButton size="sm" @click.stop="viewCoachDetail(coach)">查看详情</OutlineButton>
           </div>
         </div>
@@ -244,7 +244,7 @@
 import {onMounted, reactive, ref} from 'vue'
 import {useRouter} from 'vue-router'
 import {useUserStore} from '@/stores/user'
-import {ElMessage} from 'element-plus'
+import {ElMessage, ElMessageBox} from 'element-plus'
 import {Calendar, Refresh, Search, User} from '@element-plus/icons-vue'
 import {OutlineButton, PrimaryButton} from '@/components/buttons'
 import dayjs from 'dayjs'
@@ -333,7 +333,33 @@ const viewCoachDetail = async (coach) => {
   }
 }
 
-// 选择教练
+// 申请双选
+const applyForCoach = async (coach) => {
+  try {
+    await ElMessageBox.confirm(
+      `确定要向教练 ${coach.name} 提交双选申请吗？`,
+      '确认申请',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+
+    await api.post('/mutual-selection/apply', { coachId: coach.id })
+
+    ElMessage.success('双选申请已提交，请等待教练审核')
+
+    // 刷新教练列表
+    await searchCoaches()
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('申请提交失败: ' + (error.response?.data?.message || error.message))
+    }
+  }
+}
+
+// 选择教练（用于预约课程）
 const selectCoach = (coach) => {
   router.push({
     path: '/student/book-training',
@@ -402,7 +428,7 @@ onMounted(async () => {
   }
 
   console.log('开始获取教练列表，用户角色:', userStore.userRole)
-  searchCoaches()
+  await searchCoaches()
 })
 </script>
 
@@ -514,10 +540,6 @@ onMounted(async () => {
   margin-bottom: 12px;
 }
 
-.coach-specialty .el-tag {
-  margin: 2px;
-}
-
 .coach-price {
   text-align: center;
   margin-bottom: 16px;
@@ -537,10 +559,6 @@ onMounted(async () => {
 .coach-actions {
   display: flex;
   gap: 8px;
-}
-
-.coach-actions .btn-modern {
-  flex: 1;
 }
 
 .empty-state {
@@ -681,16 +699,4 @@ onMounted(async () => {
   border-top: 1px solid #eee;
 }
 
-.detail-actions .btn-modern {
-  min-width: 120px;
-  margin: 0 8px;
-}
-
-:deep(.el-descriptions-item__label) {
-  font-weight: 500;
-}
-
-:deep(.el-calendar-table .el-calendar-day) {
-  height: 80px;
-}
 </style>
