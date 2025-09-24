@@ -9,6 +9,7 @@ data class CoachRecord(
     var realName: String,
     var gender: String,
     var age : Int,
+    var campusId: Int,
     var photoUrl : String,
     var achievements : String,
     var level : String,

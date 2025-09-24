@@ -6,6 +6,7 @@ import io.github.shaoyuanyu.ttts.dto.coach.ApproveCoachRequest
 import io.github.shaoyuanyu.ttts.dto.coach.QueryCoachRequest
 import io.github.shaoyuanyu.ttts.exceptions.BadRequestException
 import io.github.shaoyuanyu.ttts.persistence.CoachService
+import io.github.shaoyuanyu.ttts.plugins.LOGGER
 import io.github.shaoyuanyu.ttts.utils.getUserIdFromCall
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -46,7 +47,7 @@ fun Application.coachRoutes(coachService: CoachService) {
 }
 
 /**
- * 获取本校区所有教练（分页）
+ * 获取所有教练（分页）
  */
 fun Route.getAllCoach(coachService: CoachService) {
     get("/coaches") {
@@ -64,6 +65,8 @@ fun Route.getAllCoach(coachService: CoachService) {
         }
 
         val coaches = coachService.getAllCoaches(page, size)
+
+        LOGGER.info(coaches.toString())
 
         call.respond(HttpStatusCode.OK, coaches)
     }

@@ -6,75 +6,6 @@
       <p>找到适合你的乒乓球教练，开始你的训练之旅</p>
     </div>
 
-    <!-- 筛选器 -->
-    <el-card class="filter-card">
-      <el-form :model="filters" :inline="true" @submit.prevent="searchCoaches">
-        <el-form-item label="教练等级">
-          <el-select v-model="filters.level" placeholder="全部等级" clearable>
-            <el-option label="初级教练" value="junior" />
-            <el-option label="中级教练" value="intermediate" />
-            <el-option label="高级教练" value="senior" />
-            <el-option label="特级教练" value="expert" />
-          </el-select>
-        </el-form-item>
-
-        <el-form-item label="专业特长">
-          <el-select v-model="filters.specialty" placeholder="全部特长" clearable>
-            <el-option label="基础技术" value="basic" />
-            <el-option label="进阶技术" value="advanced" />
-            <el-option label="实战训练" value="combat" />
-            <el-option label="体能训练" value="fitness" />
-            <el-option label="少儿乒乓" value="kids" />
-          </el-select>
-        </el-form-item>
-
-        <el-form-item label="价格范围">
-          <el-select v-model="filters.priceRange" placeholder="全部价格" clearable>
-            <el-option label="100元以下" value="0-100" />
-            <el-option label="100-150元" value="100-150" />
-            <el-option label="150-200元" value="150-200" />
-            <el-option label="200元以上" value="200-999" />
-          </el-select>
-        </el-form-item>
-
-        <el-form-item label="评分">
-          <el-select v-model="filters.rating" placeholder="全部评分" clearable>
-            <el-option label="4.5分以上" value="4.5" />
-            <el-option label="4.0分以上" value="4.0" />
-            <el-option label="3.5分以上" value="3.5" />
-          </el-select>
-        </el-form-item>
-
-        <el-form-item label="搜索">
-          <el-input v-model="filters.keyword" placeholder="教练姓名" style="width: 150px" @keyup.enter="searchCoaches" />
-        </el-form-item>
-
-        <el-form-item>
-          <PrimaryButton @click="searchCoaches" class="filter-btn">
-            <el-icon>
-              <Search />
-            </el-icon> 搜索
-          </PrimaryButton>
-          <OutlineButton @click="resetFilters" class="filter-btn">
-            <el-icon>
-              <Refresh />
-            </el-icon> 重置
-          </OutlineButton>
-        </el-form-item>
-      </el-form>
-    </el-card>
-
-    <!-- 排序选项 -->
-    <div class="sort-options">
-      <span class="sort-label">排序方式：</span>
-      <el-radio-group v-model="sortBy" @change="searchCoaches">
-        <el-radio-button label="rating">评分最高</el-radio-button>
-        <el-radio-button label="experience">经验最多</el-radio-button>
-        <el-radio-button label="price_asc">价格最低</el-radio-button>
-        <el-radio-button label="students">学员最多</el-radio-button>
-      </el-radio-group>
-    </div>
-
     <!-- 教练列表 -->
     <div v-loading="loading" class="coaches-grid">
       <el-card v-for="coach in coachList" :key="coach.id" class="coach-card" @click="viewCoachDetail(coach)">
@@ -84,6 +15,9 @@
           </el-avatar>
           <el-tag v-if="coach.isOnline" type="success" size="small" class="online-status">
             在线
+          </el-tag>
+          <el-tag v-if="!coach.isSameCampus" type="warning" size="small" class="campus-status">
+            非本校区
           </el-tag>
         </div>
 
@@ -119,7 +53,37 @@
           </div>
 
           <div class="coach-actions">
-            <PrimaryButton size="sm" @click.stop="applyForCoach(coach)">申请双选</PrimaryButton>
+            <PrimaryButton 
+              v-if="coach.applicationStatus === 'APPROVED' || coach.applicationStatus === 'ACTIVE'"
+              size="sm" 
+              type="success"
+              @click.stop
+            >
+              已建立关系
+            </PrimaryButton>
+            <PrimaryButton 
+              v-else-if="coach.applicationStatus === 'PENDING'"
+              size="sm" 
+              type="warning"
+              @click.stop
+            >
+              申请审核中
+            </PrimaryButton>
+            <PrimaryButton 
+              v-else-if="!coach.isSameCampus"
+              size="sm"
+              disabled
+              @click.stop
+            >
+              仅同校可申请
+            </PrimaryButton>
+            <PrimaryButton 
+              v-else
+              size="sm" 
+              @click.stop="applyForCoach(coach)"
+            >
+              申请双选
+            </PrimaryButton>
             <OutlineButton size="sm" @click.stop="viewCoachDetail(coach)">查看详情</OutlineButton>
           </div>
         </div>
@@ -129,7 +93,7 @@
     <!-- 空状态 -->
     <div v-if="!loading && coachList.length === 0" class="empty-state">
       <el-empty description="没有找到符合条件的教练">
-        <PrimaryButton @click="resetFilters">重置筛选条件</PrimaryButton>
+        <PrimaryButton @click="loadCoaches">刷新</PrimaryButton>
       </el-empty>
     </div>
 
@@ -137,7 +101,7 @@
     <div v-if="coachList.length > 0" class="pagination-wrapper">
       <el-pagination v-model:current-page="pagination.page" v-model:page-size="pagination.size"
         :total="pagination.total" :page-sizes="[12, 24, 48]" layout="total, sizes, prev, pager, next, jumper"
-        @size-change="searchCoaches" @current-change="searchCoaches" />
+        @size-change="loadCoaches" @current-change="loadCoaches" />
     </div>
 
     <!-- 教练详情对话框 -->
@@ -154,6 +118,25 @@
               <el-rate v-model="selectedCoach.rating" disabled show-score text-color="#ff9900"
                 score-template="{value}分" />
               <span>({{ selectedCoach.reviewCount }}条评价)</span>
+            </div>
+            <div class="status-tags">
+              <el-tag v-if="!selectedCoach.isSameCampus" type="warning" size="small">
+                非本校区教练
+              </el-tag>
+              <el-tag 
+                v-if="selectedCoach.applicationStatus === 'APPROVED' || selectedCoach.applicationStatus === 'ACTIVE'"
+                type="success" 
+                size="small"
+              >
+                已建立关系
+              </el-tag>
+              <el-tag 
+                v-else-if="selectedCoach.applicationStatus === 'PENDING'"
+                type="warning" 
+                size="small"
+              >
+                申请审核中
+              </el-tag>
             </div>
           </div>
           <div class="header-stats">
@@ -231,8 +214,33 @@
 
         <div class="detail-actions">
           <OutlineButton size="lg" @click="detailDialogVisible = false">关闭</OutlineButton>
-          <PrimaryButton size="lg" @click="selectCoach(selectedCoach)">
+          <PrimaryButton 
+            v-if="(selectedCoach.applicationStatus === 'APPROVED' || selectedCoach.applicationStatus === 'ACTIVE') && selectedCoach.isSameCampus"
+            size="lg" 
+            @click="selectCoach(selectedCoach)"
+          >
             选择这位教练
+          </PrimaryButton>
+          <PrimaryButton 
+            v-else-if="selectedCoach.applicationStatus === 'PENDING'"
+            size="lg"
+            disabled
+          >
+            申请审核中
+          </PrimaryButton>
+          <PrimaryButton 
+            v-else-if="!selectedCoach.isSameCampus"
+            size="lg"
+            disabled
+          >
+            仅同校可选择
+          </PrimaryButton>
+          <PrimaryButton 
+            v-else
+            size="lg" 
+            @click="applyForCoach(selectedCoach)"
+          >
+            申请双选
           </PrimaryButton>
         </div>
       </div>
@@ -241,16 +249,18 @@
 </template>
 
 <script setup>
-import {onMounted, reactive, ref} from 'vue'
+import {onMounted, reactive, ref, watch} from 'vue'
 import {useRouter} from 'vue-router'
 import {useUserStore} from '@/stores/user'
 import {ElMessage, ElMessageBox} from 'element-plus'
-import {Calendar, Refresh, Search, User} from '@element-plus/icons-vue'
+import {Calendar, User} from '@element-plus/icons-vue'
 import {OutlineButton, PrimaryButton} from '@/components/buttons'
 import dayjs from 'dayjs'
 import api from '@/utils/api'
+import { getStudentApplications } from '@/api/mutualSelection'
 
 const router = useRouter()
+const userStore = useUserStore()
 
 // 数据状态
 const coachList = ref([])
@@ -262,17 +272,8 @@ const availableSchedule = ref({})
 const loading = ref(false)
 const detailDialogVisible = ref(false)
 
-// 筛选器
-const filters = reactive({
-  level: '',
-  specialty: '',
-  priceRange: '',
-  rating: '',
-  keyword: '',
-})
-
-// 排序
-const sortBy = ref('rating')
+// 学生申请状态
+const studentApplications = ref([])
 
 // 分页
 const pagination = reactive({
@@ -281,21 +282,83 @@ const pagination = reactive({
   total: 0,
 })
 
-// 搜索教练
-const searchCoaches = async () => {
+// 加载学生申请状态
+const loadStudentApplications = async () => {
+  try {
+    const response = await getStudentApplications()
+    studentApplications.value = response.content || response.list || response
+    
+    // 更新教练列表中的申请状态
+    updateCoachListWithApplicationStatus()
+  } catch (error) {
+    console.error('获取学生申请状态失败:', error)
+  }
+}
+
+// 更新教练列表中的申请状态
+const updateCoachListWithApplicationStatus = () => {
+  if (!studentApplications.value.length || !coachList.value.length) return
+  
+  // 创建教练ID到申请状态的映射
+  const applicationMap = {}
+  studentApplications.value.forEach(app => {
+    applicationMap[app.coachId] = app.status
+  })
+  
+  // 更新教练列表中的申请状态
+  coachList.value = coachList.value.map(coach => ({
+    ...coach,
+    applicationStatus: applicationMap[coach.id] || null
+  }))
+}
+
+// 监听用户登录状态变化
+watch(() => userStore.userId, (newUserId) => {
+  if (newUserId) {
+    loadStudentApplications()
+  }
+}, { immediate: true })
+
+// 加载教练列表
+const loadCoaches = async () => {
   loading.value = true
   try {
+    // 先获取所有教练
     const params = {
       page: pagination.page,
-      size: pagination.size,
-      sortBy: sortBy.value,
-      ...filters,
+      size: pagination.size
     }
 
-    console.log('发送教练查询请求:', { url: '/coaches', params })
-    const response = await api.get('/coaches', { params })
-    coachList.value = response.data.list || response.data.content || []
-    pagination.total = response.data.total || response.data.totalElements || 0
+    console.log('发送教练查询请求:', { url: '/coach/coaches', params })
+    const response = await api.get('/coach/coaches', { params })
+
+    console.log('获取教练列表:', response)
+
+    // 处理后端返回的数据格式并映射到前端需要的字段
+    const allCoaches = response.data || []
+    
+    // 映射数据字段以匹配前端组件的期望
+    coachList.value = allCoaches.map(coach => ({
+      id: coach.coachId,
+      name: coach.realName,
+      username: coach.username,
+      level: coach.level,
+      hourlyRate: coach.hourlyRate,
+      avatar: coach.photoUrl,
+      experience: 0, // 后端暂未提供此字段
+      studentCount: coach.currentStudents,
+      rating: 5, // 默认评分
+      reviewCount: 0, // 默认评价数
+      specialties: [], // 后端暂未提供此字段
+      campusId: coach.campusId,
+      isOnline: true, // 默认在线状态
+      isSameCampus: coach.campusId === userStore.campusId // 添加是否为同校区的标识
+    }))
+
+    // 更新教练列表中的申请状态
+    updateCoachListWithApplicationStatus()
+
+    pagination.total = allCoaches.length
     console.log('获取教练列表成功:', { count: coachList.value.length, total: pagination.total })
   } catch (error) {
     console.error('获取教练列表失败:', error)
@@ -305,26 +368,24 @@ const searchCoaches = async () => {
   }
 }
 
-// 重置筛选器
-const resetFilters = () => {
-  Object.assign(filters, {
-    level: '',
-    specialty: '',
-    priceRange: '',
-    rating: '',
-    keyword: '',
-  })
-  sortBy.value = 'rating'
-  pagination.page = 1
-  searchCoaches()
-}
-
 // 查看教练详情
 const viewCoachDetail = async (coach) => {
   try {
     console.log('获取教练详情:', coach.id)
-    const response = await api.get(`/coaches/${coach.id}`)
-    selectedCoach.value = response.data
+    const response = await api.get(`/coach/coaches/${coach.id}`)
+    selectedCoach.value = {
+      ...response.data,
+      id: response.data.coachId,
+      name: response.data.realName,
+      isSameCampus: response.data.campusId === userStore.campusId
+    }
+    
+    // 添加申请状态
+    const application = studentApplications.value.find(app => app.coachId === selectedCoach.value.id)
+    if (application) {
+      selectedCoach.value.applicationStatus = application.status
+    }
+    
     detailDialogVisible.value = true
     await loadSchedule()
   } catch (error) {
@@ -335,6 +396,12 @@ const viewCoachDetail = async (coach) => {
 
 // 申请双选
 const applyForCoach = async (coach) => {
+  // 检查是否为同校区教练，如果不是则不允许申请
+  if (!coach.isSameCampus) {
+    ElMessage.warning('只能向同校区的教练申请双选')
+    return
+  }
+  
   try {
     await ElMessageBox.confirm(
       `确定要向教练 ${coach.name} 提交双选申请吗？`,
@@ -350,8 +417,9 @@ const applyForCoach = async (coach) => {
 
     ElMessage.success('双选申请已提交，请等待教练审核')
 
-    // 刷新教练列表
-    await searchCoaches()
+    // 刷新教练列表和申请状态
+    await loadStudentApplications()
+    await loadCoaches()
   } catch (error) {
     if (error !== 'cancel') {
       ElMessage.error('申请提交失败: ' + (error.response?.data?.message || error.message))
@@ -399,6 +467,9 @@ const getLevelText = (level) => {
     intermediate: '中级教练',
     senior: '高级教练',
     expert: '特级教练',
+    '初级教练员': '初级教练',
+    '中级教练员': '中级教练',
+    '高级教练员': '高级教练'
   }
   return texts[level] || level
 }
@@ -421,14 +492,14 @@ onMounted(async () => {
   await new Promise((resolve) => setTimeout(resolve, 200))
 
   // 检查用户是否已经正确登录
-  const userStore = useUserStore()
   if (!userStore.isLoggedIn) {
     console.warn('用户未登录，暂不获取教练列表')
     return
   }
 
   console.log('开始获取教练列表，用户角色:', userStore.userRole)
-  await searchCoaches()
+  await loadStudentApplications()
+  await loadCoaches()
 })
 </script>
 
@@ -449,25 +520,6 @@ onMounted(async () => {
 .page-header p {
   margin: 0;
   color: #666;
-}
-
-.filter-card {
-  margin-bottom: 20px;
-}
-
-.sort-options {
-  display: flex;
-  align-items: center;
-  margin-bottom: 20px;
-  padding: 16px 20px;
-  background: #f8f9fa;
-  border-radius: 8px;
-}
-
-.sort-label {
-  margin-right: 16px;
-  color: #666;
-  font-weight: 500;
 }
 
 .coaches-grid {
@@ -499,6 +551,13 @@ onMounted(async () => {
   top: 0;
   right: 50%;
   transform: translateX(50%);
+}
+
+.campus-status {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .coach-info h3 {
@@ -604,6 +663,12 @@ onMounted(async () => {
   gap: 8px;
 }
 
+.status-tags {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
 .header-stats {
   display: flex;
   gap: 20px;
@@ -698,5 +763,4 @@ onMounted(async () => {
   padding-top: 20px;
   border-top: 1px solid #eee;
 }
-
 </style>

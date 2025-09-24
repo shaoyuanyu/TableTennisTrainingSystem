@@ -211,9 +211,13 @@ const validateConfirmPassword = (rule, value, callback) => {
 }
 
 const validatePhone = (rule, value, callback) => {
-  if (!value) callback(new Error('请输入手机号码'))
-  else if (!/^1[3-9]\d{9}$/.test(value)) callback(new Error('请输入正确的手机号码'))
-  else callback()
+  if (!value) {
+    callback()
+  } else if (!/^1[3-9]\d{9}$/.test(value)) {
+    callback(new Error('请输入正确的手机号码'))
+  } else {
+    callback()
+  }
 }
 
 const registerRules = {
@@ -223,12 +227,11 @@ const registerRules = {
     { pattern: /^[a-zA-Z0-9_]+$/, message: '用户名只能包含字母、数字和下划线', trigger: 'blur' },
   ],
   realName: [{ required: true, message: '请输入真实姓名', trigger: 'blur' }],
-  phone: [{ required: true, validator: validatePhone, trigger: 'blur' }],
+  phone: [{ validator: validatePhone, trigger: 'blur' }],
   password: [{ required: true, validator: validatePassword, trigger: 'blur' }],
   confirmPassword: [{ required: true, validator: validateConfirmPassword, trigger: 'blur' }],
   campusId: [{ required: true, message: '请选择校区', trigger: 'change' }],
   email: [
-    { required: true, message: '请输入邮箱地址', trigger: 'blur' },
     { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' },
   ],
   hourlyRate: [{ required: true, message: '请输入课时费', trigger: 'blur' }],

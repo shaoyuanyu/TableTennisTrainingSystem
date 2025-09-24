@@ -34,14 +34,7 @@ export const useUserStore = defineStore('user', () => {
   const isLoggedIn = computed(() => {
     // session认证模式：检查是否有有效的用户信息
     // 不依赖token，因为session认证通过cookie维持状态
-    const hasUserInfo = !!(userInfo.value && userInfo.value.id)
-    console.log('UserStore - isLoggedIn 检查:', {
-      hasUserInfo,
-      userInfo: userInfo.value,
-      role: userInfo.value?.role,
-      normalizedRole: normalizeRole(userInfo.value?.role)
-    })
-    return hasUserInfo
+    return !!(userInfo.value && userInfo.value.id)
   })
   const userRole = computed(() => normalizeRole(userInfo.value.role) || '')
   const userName = computed(() => userInfo.value.name || '')
