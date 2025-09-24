@@ -106,25 +106,25 @@ class UserService(
                 throw BadRequestException("真实姓名不能为空")
             }
             // 验证字段格式
-            if (!newUser.username.matches(Regex("^[a-zA-Z0-9_]{4,20}$"))) {
-                throw BadRequestException("用户名必须是4-20位的字母、数字或下划线")
-            }
-
-            if (!newUser.plainPassword.matches(Regex("^(?=.*[A-Za-z])(?=.*\\d).{8,}$"))) {
-                throw BadRequestException("密码必须至少8位，包含字母和数字")
-            }
-
-            if ( !newUser.phoneNumber.matches(Regex("^1[3-9]\\d{9}$"))) {
-                throw BadRequestException("手机号格式不正确")
-            }
-
-            if (!newUser.email.matches(Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\$"))) {
-                throw BadRequestException("邮箱格式不正确")
-            }
-
-            if (newUser.age < 1 || newUser.age > 120) {
-                throw BadRequestException("年龄必须在1-120之间")
-            }
+//            if (!newUser.username.matches(Regex("^[a-zA-Z0-9_]{4,20}$"))) {
+//                throw BadRequestException("用户名必须是4-20位的字母、数字或下划线")
+//            }
+//
+//            if (!newUser.plainPassword.matches(Regex("^(?=.*[A-Za-z])(?=.*\\d).{8,}$"))) {
+//                throw BadRequestException("密码必须至少8位，包含字母和数字")
+//            }
+//
+//            if ( !newUser.phoneNumber.matches(Regex("^1[3-9]\\d{9}$"))) {
+//                throw BadRequestException("手机号格式不正确")
+//            }
+//
+//            if (!newUser.email.matches(Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\$"))) {
+//                throw BadRequestException("邮箱格式不正确")
+//            }
+//
+//            if (newUser.age < 1 || newUser.age > 120) {
+//                throw BadRequestException("年龄必须在1-120之间")
+//            }
 
 
             // 提前验证角色特定信息
