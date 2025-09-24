@@ -143,10 +143,10 @@ class UserService(
                     if (newUser.coachInfo == null) {
                         throw BadRequestException("教练用户必须提供教练信息")
                     }
-                    // 验证教练信息
-                    if (!newUser.coachInfo.photoUrl.isNullOrBlank() && !newUser.coachInfo.photoUrl.matches(Regex("^https?://.+"))) {
-                        throw BadRequestException("教练照片URL格式不正确")
-                    }
+//                    // 验证教练信息
+//                    if (!newUser.coachInfo.photoUrl.isNullOrBlank() && !newUser.coachInfo.photoUrl.matches(Regex("^https?://.+"))) {
+//                        throw BadRequestException("教练照片URL格式不正确")
+//                    }
                 }
 
                 else -> {

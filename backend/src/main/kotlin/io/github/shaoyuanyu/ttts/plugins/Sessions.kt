@@ -19,9 +19,6 @@ fun Application.configureSessions() {
         ) {
             cookie.path = "/"
             cookie.maxAgeInSeconds = 60 * 60 * 24 * 30 // 一个月
-            cookie.extensions["SameSite"] = "none"  // 修改为 none 以支持跨域
-            cookie.httpOnly = true
-            cookie.secure = false  // 根据项目要求使用HTTP而不是HTTPS
         }
     }
 }

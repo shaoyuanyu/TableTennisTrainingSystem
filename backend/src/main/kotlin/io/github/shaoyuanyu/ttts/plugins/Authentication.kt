@@ -53,6 +53,7 @@ fun Application.configureAuthentication(userService: UserService) {
             }
 
             challenge {
+                LOGGER.info("登录状态异常", call.toString())
                 throw UnauthorizedException("未登录")
             }
         }

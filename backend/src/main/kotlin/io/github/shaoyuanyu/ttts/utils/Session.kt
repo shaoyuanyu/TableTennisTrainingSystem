@@ -2,6 +2,7 @@ package io.github.shaoyuanyu.ttts.utils
 
 import io.github.shaoyuanyu.ttts.dto.user.UserSession
 import io.github.shaoyuanyu.ttts.exceptions.UnauthorizedException
+import io.github.shaoyuanyu.ttts.plugins.LOGGER
 import io.ktor.server.routing.RoutingCall
 import io.ktor.server.sessions.get
 import io.ktor.server.sessions.sessions
@@ -12,6 +13,7 @@ import io.ktor.server.sessions.sessions
 fun getUserIdFromCall(call: RoutingCall): String =
     call.sessions.get<UserSession>().let {
         if (it == null) {
+            LOGGER.info("未登录", call.toString())
             throw UnauthorizedException("未登录")
         }
         it.userId
