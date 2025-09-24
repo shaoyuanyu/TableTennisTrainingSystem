@@ -53,7 +53,7 @@
     <el-card class="filter-card">
       <el-form :model="filters" :inline="true" @submit.prevent="fetchApplications">
         <el-form-item label="状态">
-          <el-select v-model="filters.status" placeholder="全部状态" clearable>
+          <el-select v-model="filters.status" placeholder="全部状态" clearable style="width: 120px">
             <el-option label="待处理" value="PENDING" />
             <el-option label="已批准" value="APPROVED" />
             <el-option label="已拒绝" value="REJECTED" />
@@ -271,12 +271,12 @@ const stats = reactive({
   pendingCount: 0,
   currentStudents: 0,
   capacity: 0,
-  maxCapacity: 20
+  maxCapacity: 0
 })
 
 // 筛选器
 const filters = reactive({
-  status: 'PENDING', // 默认显示待处理
+  status: '', // 默认显示所有状态
   dateRange: [],
   keyword: ''
 })
@@ -307,7 +307,7 @@ const fetchApplications = async () => {
     const params = {
       page: pagination.page,
       size: pagination.size,
-      status: filters.status,
+      status: filters.status || undefined, // 如果状态为空则不传递参数
       startDate: filters.dateRange && filters.dateRange[0] ? filters.dateRange[0] : undefined,
       endDate: filters.dateRange && filters.dateRange[1] ? filters.dateRange[1] : undefined,
       keyword: filters.keyword || undefined
@@ -336,18 +336,28 @@ const fetchApplications = async () => {
 // 获取统计信息
 const fetchStats = async () => {
   try {
-    // 获取待处理申请数量
-    const pendingResponse = await getPendingApplicationCount()
-    stats.pendingCount = pendingResponse.count || pendingResponse || 0
+    // 获取所有申请数据，然后在前端进行统计
+    const response = await api.get('/mutual-selection/coach-applications')
+    const allApplications = response.data.content || response.data.list || response.data || []
 
-    // 获取当前学员数量
-    const studentsResponse = await api.get('/mutual-selection/coach/current-students')
-    stats.currentStudents = studentsResponse.data?.length || 0
+    // 统计待处理申请数量
+    stats.pendingCount = allApplications.filter(app => app.status === 'PENDING').length
+
+    // 统计当前学员数量 (ACTIVE 和 APPROVED 状态)
+    stats.currentStudents = allApplications.filter(app =>
+      app.status === 'ACTIVE' || app.status === 'APPROVED'
+    ).length
+
+    // 获取教练信息以获取最大容量
+    const coachResponse = await api.get('/user/info')
+    const coachData = coachResponse.data || {}
+    stats.maxCapacity = coachData.coachInfo?.maxStudents || 20 // 如果获取不到，默认为20
 
     // 设置容量信息
     stats.capacity = stats.currentStudents
   } catch (error) {
     console.error('获取统计信息失败:', error)
+    ElMessage.error('获取统计信息失败: ' + (error.response?.data?.message || error.message))
   }
 }
 
@@ -359,7 +369,7 @@ const refreshApplications = () => {
 // 重置筛选器
 const resetFilters = () => {
   Object.assign(filters, {
-    status: 'PENDING',
+    status: '', // 重置为显示所有状态
     dateRange: [],
     keyword: ''
   })
@@ -589,4 +599,3 @@ onMounted(() => {
 }
 
 </style>
-

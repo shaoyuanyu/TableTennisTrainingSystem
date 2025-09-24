@@ -67,7 +67,9 @@ export const getCoachHistoricalStudents = async () => {
 
 // 获取教练待处理申请数量
 export const getPendingApplicationCount = async () => {
-  const response = await api.get('/mutual-selection/pending-count')
+  // 由于后端没有提供 /mutual-selection/pending-count 接口
+  // 这个函数暂时保留但不使用，统计逻辑在前端完成
+  const response = await api.get('/mutual-selection/coach-applications')
   return response.data
 }
 
