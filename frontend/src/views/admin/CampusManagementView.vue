@@ -1,17 +1,17 @@
 <template>
   <div class="campus-management">
     <!-- 页面头部和列表合并为一个卡片 -->
-    <GlassCard 
-      class="campus-management-card" 
-      variant="enhanced" 
+    <GlassCard
+      class="campus-management-card"
+      variant="enhanced"
       :show-decoration="false"
       title="校区管理"
       icon="🏢"
     >
       <template #default>
-        <GlassTable 
-          :data="campusList" 
-          v-loading="loading" 
+        <GlassTable
+          :data="campusList"
+          v-loading="loading"
           :stripe="true"
           density="lg"
         >
@@ -141,7 +141,6 @@ import {ElMessage, ElMessageBox} from 'element-plus'
 import api from '@/utils/api'
 import PrimaryButton from '@/components/buttons/PrimaryButton.vue'
 import OutlineButton from '@/components/buttons/OutlineButton.vue'
-import GlassHeaderCard from '@/components/cards/specialized/GlassHeaderCard.vue'
 import GlassTable from '@/components/data/Table.vue'
 import GlassCard from '@/components/cards/base/GlassCard.vue'
 import {Plus} from "@element-plus/icons-vue";
@@ -228,15 +227,6 @@ const fetchCampusList = async () => {
 }
 
 // 获取可用用户列表
-const fetchAvailableUsers = async () => {
-  try {
-    const response = await api.get('/admin/users?role=campus_admin&available=true')
-    availableUsers.value = response.data || []
-  } catch {
-    ElMessage.error('获取用户列表失败')
-  }
-}
-
 // 显示新增对话框
 const showAddDialog = () => {
   isEdit.value = false
@@ -251,12 +241,6 @@ const showEditDialog = (campus) => {
 }
 
 // 显示管理员设置对话框
-const showAdminDialog = (campus) => {
-  selectedCampus.value = campus
-  adminDialogVisible.value = true
-  fetchAvailableUsers()
-}
-
 // 重置表单
 const resetForm = () => {
   if (formRef.value) {
@@ -366,14 +350,6 @@ onMounted(() => {
 }
 
 /* 确保卡片内的所有文字都有良好的对比度 */
-:deep(.glass-card-base) {
-  color: #1a202c;
-}
-
-:deep(.glass-card-title) {
-  color: #1a202c;
-  text-shadow: none;
-}
 
 /* 新增校区按钮容器样式 */
 .add-campus-button-container {
