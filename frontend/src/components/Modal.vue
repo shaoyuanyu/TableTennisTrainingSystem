@@ -13,7 +13,8 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import {computed} from 'vue'
+
 defineOptions({ name: 'GlassModal' })
 
 const props = defineProps({

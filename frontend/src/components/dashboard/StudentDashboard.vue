@@ -319,25 +319,25 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { useUserStore } from '@/stores/user'
+import {onMounted, ref} from 'vue'
+import {useRouter} from 'vue-router'
+import {useUserStore} from '@/stores/user'
 import dayjs from 'dayjs'
-import { PrimaryButton, OutlineButton } from '@/components/buttons'
+import {OutlineButton, PrimaryButton} from '@/components/buttons'
 import {
-  User,
-  Calendar,
-  Star,
-  TrendCharts,
-  UserFilled,
-  Wallet,
-  Operation,
-  View,
-  Plus,
   ArrowRight,
+  Calendar,
   ChatDotRound,
   CreditCard,
   List,
+  Operation,
+  Plus,
+  Star,
+  TrendCharts,
+  User,
+  UserFilled,
+  View,
+  Wallet,
 } from '@element-plus/icons-vue'
 
 const router = useRouter()

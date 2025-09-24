@@ -21,6 +21,7 @@
 
 <script>
 import BaseButton from './buttons/BaseButton.vue'
+
 export default {
   name: 'ActionButtons',
   components: { BaseButton },

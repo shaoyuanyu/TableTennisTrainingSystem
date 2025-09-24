@@ -17,12 +17,12 @@
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router'
-import { PrimaryButton, OutlineButton } from '@/components/buttons'
+import {useRouter} from 'vue-router'
+import {OutlineButton, PrimaryButton} from '@/components/buttons'
 // 原权限相关导入 - 暂时注释掉，权限管理将在后端实现
 // import { useUserStore } from '@/stores/user'
 // import { getDefaultHomePage } from '@/utils/permissions'
-import { WarningFilled } from '@element-plus/icons-vue'
+import {WarningFilled} from '@element-plus/icons-vue'
 
 const router = useRouter()
 // const userStore = useUserStore()

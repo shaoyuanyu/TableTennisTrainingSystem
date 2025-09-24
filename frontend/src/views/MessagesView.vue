@@ -124,15 +124,27 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { ElMessageBox } from 'element-plus'
-import { useToast } from '@/composables/useToast'
-import { useMessageStore } from '@/stores/messageStore'
-import { storeToRefs } from 'pinia'
-import { PrimaryButton, OutlineButton, IconButton } from '@/components/buttons'
+import {onMounted, ref} from 'vue'
+import {ElMessageBox} from 'element-plus'
+import {useToast} from '@/composables/useToast'
+import {useMessageStore} from '@/stores/messageStore'
+import {storeToRefs} from 'pinia'
+import {IconButton, OutlineButton, PrimaryButton} from '@/components/buttons'
 import TagBadge from '@/components/TagBadge.vue'
-import { GlassHeaderCard } from '@/components/cards'
-import { ArrowDown, Search, Check, Delete, More, Bell, Setting, Calendar, Star, User, Trophy } from '@element-plus/icons-vue'
+import {GlassHeaderCard} from '@/components/cards'
+import {
+  ArrowDown,
+  Bell,
+  Calendar,
+  Check,
+  Delete,
+  More,
+  Search,
+  Setting,
+  Star,
+  Trophy,
+  User
+} from '@element-plus/icons-vue'
 
 const messageStore = useMessageStore()
 const toast = useToast()

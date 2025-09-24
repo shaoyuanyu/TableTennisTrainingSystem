@@ -18,7 +18,7 @@
 </template>
 
 <script setup>
-import { useUserStore } from '@/stores/user'
+import {useUserStore} from '@/stores/user'
 import StudentDashboard from '@/components/dashboard/StudentDashboard.vue'
 import CoachDashboard from '@/components/dashboard/CoachDashboard.vue'
 import CampusAdminDashboard from '@/components/dashboard/CampusAdminDashboard.vue'

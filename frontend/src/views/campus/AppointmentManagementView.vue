@@ -380,17 +380,17 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import {onMounted, reactive, ref} from 'vue'
+import {ElMessage, ElMessageBox} from 'element-plus'
 import {
-  Plus,
-  Search,
-  Refresh,
-  Download,
-  Clock,
   Calendar,
   CircleCheck,
+  Clock,
+  Download,
   Money,
+  Plus,
+  Refresh,
+  Search,
 } from '@element-plus/icons-vue'
 import dayjs from 'dayjs'
 import api from '@/utils/api'
@@ -895,16 +895,4 @@ onMounted(() => {
   text-align: center;
 }
 
-:deep(.el-table .el-button) {
-  margin-right: 8px;
-}
-
-:deep(.el-table .el-button:last-child) {
-  margin-right: 0;
-}
-
-:deep(.el-timeline-item__timestamp) {
-  font-weight: bold;
-  color: #409eff;
-}
 </style>

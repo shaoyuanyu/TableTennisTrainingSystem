@@ -10,8 +10,8 @@
 </template>
 
 <script setup>
-import { storeToRefs } from 'pinia'
-import { useToastStore } from '@/stores/toast'
+import {storeToRefs} from 'pinia'
+import {useToastStore} from '@/stores/toast'
 
 const toastStore = useToastStore()
 const { toasts } = storeToRefs(toastStore)

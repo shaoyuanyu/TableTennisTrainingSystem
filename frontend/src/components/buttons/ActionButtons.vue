@@ -4,6 +4,7 @@
 
 <script>
 import ActionButtonsImpl from '../ActionButtons.vue'
+
 export default {
   name: 'ActionButtons',
   components: { ActionButtonsImpl },

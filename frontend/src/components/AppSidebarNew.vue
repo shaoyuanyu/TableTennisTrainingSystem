@@ -131,26 +131,26 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import { useRoute } from 'vue-router'
-import { usePermissions } from '@/composables/usePermissions'
+import {computed} from 'vue'
+import {useRoute} from 'vue-router'
+import {usePermissions} from '@/composables/usePermissions'
 import {
-  Odometer,
-  Setting,
-  OfficeBuilding,
-  CreditCard,
-  Document,
-  Management,
-  User,
   Avatar,
   Calendar,
-  Search,
-  UserFilled,
-  Clock,
-  Grid,
   Checked,
+  Clock,
+  CreditCard,
+  Document,
   EditPen,
+  Grid,
+  Management,
+  Odometer,
+  OfficeBuilding,
   Picture,
+  Search,
+  Setting,
+  User,
+  UserFilled,
 } from '@element-plus/icons-vue'
 
 defineProps({
@@ -194,66 +194,7 @@ const activeMenu = computed(() => route.path)
 }
 
 /* 优化过渡效果 */
-.sidebar-menu :deep(.el-menu-item),
-.sidebar-menu :deep(.el-sub-menu__title) {
-  transition: background-color 0.15s ease;
-}
-
-.sidebar-menu :deep(.el-menu--collapse .el-sub-menu__title) {
-  text-align: center;
-  padding: 0 20px;
-}
-
-.sidebar-menu :deep(.el-menu--collapse .el-menu-item) {
-  text-align: center;
-  padding: 0 20px;
-}
-
-.sidebar-menu :deep(.el-sub-menu__title) {
-  color: rgba(255, 255, 255, 0.95);
-  font-weight: 500;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-}
-
-.sidebar-menu :deep(.el-menu-item) {
-  color: rgba(255, 255, 255, 0.95);
-  font-weight: 500;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-}
-
-.sidebar-menu :deep(.el-menu-item:hover) {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
-}
-
-.sidebar-menu :deep(.el-menu-item.is-active) {
-  background-color: rgba(64, 158, 255, 0.2);
-  color: #ffffff;
-  border-right: 3px solid #409eff;
-}
-
-.sidebar-menu :deep(.el-sub-menu__title:hover) {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
-}
-
-.sidebar-menu :deep(.el-sub-menu.is-active > .el-sub-menu__title) {
-  color: #ffffff;
-  background-color: rgba(64, 158, 255, 0.1);
-}
 
 /* 子菜单样式优化 */
-.sidebar-menu :deep(.el-menu--popup) {
-  background-color: rgba(48, 65, 86, 0.95);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
 
-.sidebar-menu :deep(.el-menu--popup .el-menu-item) {
-  background-color: transparent;
-}
-
-.sidebar-menu :deep(.el-menu--popup .el-menu-item:hover) {
-  background-color: rgba(64, 158, 255, 0.2);
-}
 </style>

@@ -27,7 +27,7 @@
           <template #header>
             <h3>选择教练</h3>
           </template>
-          
+
           <!-- 教练筛选 -->
           <div class="coach-filters">
             <el-form :model="coachFilters" inline>
@@ -39,19 +39,19 @@
                   <el-option label="特级教练" value="特级" />
                 </el-select>
               </el-form-item>
-              
+
               <el-form-item>
                 <el-button type="primary" @click="loadCoaches">筛选</el-button>
                 <el-button @click="resetFilters">重置</el-button>
               </el-form-item>
             </el-form>
           </div>
-          
+
           <!-- 教练列表 -->
           <div class="coaches-grid">
-            <el-card 
-              v-for="coach in coaches" 
-              :key="coach.uuid" 
+            <el-card
+              v-for="coach in coaches"
+              :key="coach.uuid"
               class="coach-card"
               :class="{ selected: selectedCoach?.uuid === coach.uuid }"
               @click="selectCoach(coach)"
@@ -66,11 +66,11 @@
               </div>
             </el-card>
           </div>
-          
+
           <template #footer>
             <div class="step-actions">
-              <PrimaryButton 
-                @click="nextStep" 
+              <PrimaryButton
+                @click="nextStep"
                 :disabled="!selectedCoach"
                 v-if="coaches.length > 0"
               >
@@ -79,11 +79,11 @@
                   <el-icon><ArrowRight /></el-icon>
                 </template>
               </PrimaryButton>
-              <el-alert 
-                v-else 
-                title="暂无符合条件的教练" 
-                type="info" 
-                show-icon 
+              <el-alert
+                v-else
+                title="暂无符合条件的教练"
+                type="info"
+                show-icon
                 style="margin-top: 20px"
               />
             </div>
@@ -103,18 +103,18 @@
               <span>{{ selectedCoach?.realName }}</span>
             </div>
           </template>
-          
+
           <el-row :gutter="20">
             <el-col :span="12">
               <h4>选择日期</h4>
               <el-calendar v-model="selectedDate" @panel-change="loadCoachSchedule">
                 <template #date-cell="{ data }">
-                  <div 
-                    class="calendar-cell" 
+                  <div
+                    class="calendar-cell"
                     :class="{
                       available: hasAvailableSlots(data.day),
                       selected: selectedDate && formatDate(selectedDate) === data.day,
-                    }" 
+                    }"
                     @click="selectDate(data.day)"
                   >
                     <span class="date-text">{{ data.day.split('-')[2] }}</span>
@@ -125,13 +125,13 @@
                 </template>
               </el-calendar>
             </el-col>
-            
+
             <el-col :span="12">
               <h4>选择时间段</h4>
               <div v-if="selectedDate" class="time-slots">
-                <el-card 
-                  v-for="slot in getAvailableSlots(formatDate(selectedDate))" 
-                  :key="slot.id" 
+                <el-card
+                  v-for="slot in getAvailableSlots(formatDate(selectedDate))"
+                  :key="slot.id"
                   class="time-slot"
                   :class="{ selected: selectedTimeSlot?.id === slot.id }"
                   @click="selectTimeSlot(slot)"
@@ -147,7 +147,7 @@
               </div>
             </el-col>
           </el-row>
-          
+
           <template #footer>
             <div class="step-actions">
               <OutlineButton @click="prevStep">
@@ -156,8 +156,8 @@
                 </template>
                 上一步
               </OutlineButton>
-              <PrimaryButton 
-                @click="nextStep" 
+              <PrimaryButton
+                @click="nextStep"
                 :disabled="!selectedTimeSlot"
                 v-if="selectedDate"
               >
@@ -177,41 +177,41 @@
           <template #header>
             <h3>完善课程信息</h3>
           </template>
-          
-          <el-form 
-            ref="courseFormRef" 
-            :model="courseForm" 
-            :rules="courseRules" 
+
+          <el-form
+            ref="courseFormRef"
+            :model="courseForm"
+            :rules="courseRules"
             label-width="120px"
             class="course-form"
           >
             <el-form-item label="课程标题" prop="title">
               <el-input v-model="courseForm.title" placeholder="请输入课程标题" />
             </el-form-item>
-            
+
             <el-form-item label="课程描述">
-              <el-input 
-                v-model="courseForm.description" 
-                type="textarea" 
-                :rows="3" 
-                placeholder="请输入课程描述（可选）" 
+              <el-input
+                v-model="courseForm.description"
+                type="textarea"
+                :rows="3"
+                placeholder="请输入课程描述（可选）"
               />
             </el-form-item>
-            
+
             <el-form-item label="上课地点" prop="location">
               <el-input v-model="courseForm.location" placeholder="请输入上课地点" />
             </el-form-item>
-            
+
             <el-form-item label="特殊要求">
-              <el-input 
-                v-model="courseForm.requirements" 
-                type="textarea" 
-                :rows="3" 
-                placeholder="请描述您的特殊要求或需要重点练习的内容（可选）" 
+              <el-input
+                v-model="courseForm.requirements"
+                type="textarea"
+                :rows="3"
+                placeholder="请描述您的特殊要求或需要重点练习的内容（可选）"
               />
             </el-form-item>
           </el-form>
-          
+
           <template #footer>
             <div class="step-actions">
               <OutlineButton @click="prevStep">
@@ -237,7 +237,7 @@
           <template #header>
             <h3>确认预约信息</h3>
           </template>
-          
+
           <el-descriptions :column="2" border>
             <el-descriptions-item label="教练">
               <div class="coach-info">
@@ -247,44 +247,44 @@
                 <span>{{ selectedCoach?.realName }}</span>
               </div>
             </el-descriptions-item>
-            
+
             <el-descriptions-item label="教练等级">
               {{ selectedCoach?.level }}
             </el-descriptions-item>
-            
+
             <el-descriptions-item label="上课日期">
               {{ formatDate(selectedDate) }}
             </el-descriptions-item>
-            
+
             <el-descriptions-item label="上课时间">
               {{ selectedTimeSlot?.startTime }} - {{ selectedTimeSlot?.endTime }}
             </el-descriptions-item>
-            
+
             <el-descriptions-item label="课程时长">
               {{ selectedTimeSlot?.duration }}分钟
             </el-descriptions-item>
-            
+
             <el-descriptions-item label="课程费用">
               <span class="price-text">¥{{ calculatePrice() }}</span>
             </el-descriptions-item>
-            
+
             <el-descriptions-item label="课程标题">
               {{ courseForm.title }}
             </el-descriptions-item>
-            
+
             <el-descriptions-item label="上课地点" v-if="courseForm.location">
               {{ courseForm.location }}
             </el-descriptions-item>
-            
+
             <el-descriptions-item label="课程描述" v-if="courseForm.description" :span="2">
               {{ courseForm.description }}
             </el-descriptions-item>
-            
+
             <el-descriptions-item label="特殊要求" v-if="courseForm.requirements" :span="2">
               {{ courseForm.requirements }}
             </el-descriptions-item>
           </el-descriptions>
-          
+
           <template #footer>
             <div class="step-actions">
               <OutlineButton @click="prevStep">
@@ -293,8 +293,8 @@
                 </template>
                 上一步
               </OutlineButton>
-              <PrimaryButton 
-                @click="confirmBooking" 
+              <PrimaryButton
+                @click="confirmBooking"
                 :loading="submitting"
               >
                 <template #icon-left>
@@ -311,10 +311,10 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { ArrowLeft, ArrowRight, Check, Refresh } from '@element-plus/icons-vue'
+import {onMounted, reactive, ref} from 'vue'
+import {useRoute, useRouter} from 'vue-router'
+import {ElMessage, ElMessageBox} from 'element-plus'
+import {ArrowLeft, ArrowRight, Check, Refresh} from '@element-plus/icons-vue'
 import dayjs from 'dayjs'
 import api from '@/utils/api'
 import PrimaryButton from '@/components/buttons/PrimaryButton.vue'
@@ -406,11 +406,11 @@ const loadCoachSchedule = async () => {
   try {
     const dateFrom = dayjs(selectedDate.value || new Date()).startOf('month').format('YYYY-MM-DD')
     const dateTo = dayjs(selectedDate.value || new Date()).endOf('month').format('YYYY-MM-DD')
-    
+
     const response = await api.get(`/courses/coach-schedule/${selectedCoach.value.uuid}`, {
       params: { dateFrom, dateTo }
     })
-    
+
     // 按日期分组课程
     const schedule = {}
     ;(response.data || []).forEach(course => {
@@ -419,7 +419,7 @@ const loadCoachSchedule = async () => {
       }
       schedule[course.date].push(course)
     })
-    
+
     coachSchedule.value = schedule
   } catch (error) {
     ElMessage.error('获取教练排班信息失败: ' + (error.message || '未知错误'))
@@ -458,12 +458,12 @@ const nextStep = async () => {
       return
     }
   }
-  
+
   // 加载教练排班信息
   if (currentStep.value === 0 && selectedCoach.value) {
     await loadCoachSchedule()
   }
-  
+
   currentStep.value++
 }
 
@@ -476,8 +476,8 @@ const prevStep = () => {
 const confirmBooking = async () => {
   try {
     await ElMessageBox.confirm(
-      `确定要预约这节课程吗？费用：¥${calculatePrice()}`, 
-      '确认预约', 
+      `确定要预约这节课程吗？费用：¥${calculatePrice()}`,
+      '确认预约',
       {
         confirmButtonText: '确定',
         cancelButtonText: '取消',

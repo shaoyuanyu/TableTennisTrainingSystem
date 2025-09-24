@@ -13,7 +13,7 @@
 
 <script setup>
 defineOptions({ name: 'GlassEmpty' })
-import { computed } from 'vue'
+import {computed} from 'vue'
 
 const props = defineProps({
     title: { type: String, default: '暂无数据' },

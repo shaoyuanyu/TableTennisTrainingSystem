@@ -283,17 +283,17 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import {computed, onMounted, reactive, ref} from 'vue'
+import {ElMessage, ElMessageBox} from 'element-plus'
 import {
-  Timer,
-  User,
   Calendar,
   Money,
-  Trophy,
   Reading,
-  Setting,
   Refresh,
+  Setting,
+  Timer,
+  Trophy,
+  User,
 } from '@element-plus/icons-vue'
 import dayjs from 'dayjs'
 import api from '@/utils/api'

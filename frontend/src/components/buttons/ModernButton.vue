@@ -27,6 +27,7 @@
 
 <script>
 import BaseButton from './BaseButton.vue'
+
 export default {
   name: 'ModernButton',
   components: { BaseButton },

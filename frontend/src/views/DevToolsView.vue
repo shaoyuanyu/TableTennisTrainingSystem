@@ -435,20 +435,20 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
-import { useRoute } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import {computed, onMounted, ref, watch} from 'vue'
+import {useRoute} from 'vue-router'
+import {ElMessage, ElMessageBox} from 'element-plus'
 import {
-  Refresh,
-  Delete,
-  InfoFilled,
-  View,
   Check,
+  Delete,
+  DocumentCopy,
   Download,
   FolderOpened,
-  DocumentCopy,
+  InfoFilled,
+  Refresh,
+  View,
 } from '@element-plus/icons-vue'
-import { useUserStore } from '@/stores/user'
+import {useUserStore} from '@/stores/user'
 import GlassHeaderCard from '@/components/cards/specialized/GlassHeaderCard.vue'
 
 const route = useRoute()

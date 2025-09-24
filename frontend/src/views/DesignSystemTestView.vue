@@ -505,7 +505,7 @@
 </template>
 
 <script>
-import { GlassDisplayCard, CardShowcase, GlassHeaderCard } from '@/components/cards'
+import {CardShowcase, GlassDisplayCard, GlassHeaderCard} from '@/components/cards'
 import ModernButton from '@/components/ModernButton.vue'
 import FormInput from '@/components/FormInput.vue'
 import TagBadge from '@/components/TagBadge.vue'
@@ -513,14 +513,14 @@ import StatusGrid from '@/components/StatusGrid.vue'
 import StorageInfo from '@/components/StorageInfo.vue'
 import ActionButtons from '@/components/ActionButtons.vue'
 // 新按钮体系（示例导入，不强制使用）
-import { PrimaryButton, OutlineButton } from '@/components/buttons'
+import {OutlineButton, PrimaryButton} from '@/components/buttons'
 // 新增：封装组件演示
 import GlassTable from '@/components/data/Table.vue'
 import GlassModal from '@/components/Modal.vue'
 import GlassTooltip from '@/components/Tooltip.vue'
 import BaseField from '@/components/form/BaseField.vue'
-import { useToast } from '@/composables/useToast'
-import { tokens } from '@/utils/tokens'
+import {useToast} from '@/composables/useToast'
+import {tokens} from '@/utils/tokens'
 
 export default {
   name: 'DesignLanguageShowcase',

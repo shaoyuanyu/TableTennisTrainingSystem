@@ -28,8 +28,9 @@
 </template>
 
 <script setup>
-import { PrimaryButton, OutlineButton } from '@/components/buttons'
-import { ArrowLeft, House } from '@element-plus/icons-vue'
+import {OutlineButton, PrimaryButton} from '@/components/buttons'
+import {ArrowLeft, House} from '@element-plus/icons-vue'
+
 defineProps({
   title: {
     type: String,

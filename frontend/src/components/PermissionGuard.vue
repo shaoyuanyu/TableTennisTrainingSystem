@@ -3,8 +3,8 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import { usePermissions } from '@/composables/usePermissions'
+import {computed} from 'vue'
+import {usePermissions} from '@/composables/usePermissions'
 
 const props = defineProps({
   // 权限检查类型：'page' | 'action' | 'role'

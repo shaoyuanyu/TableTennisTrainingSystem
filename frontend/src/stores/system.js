@@ -1,6 +1,6 @@
 // src/stores/system.js
-import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import {defineStore} from 'pinia'
+import {computed, ref} from 'vue'
 
 export const useSystemStore = defineStore('system', () => {
   const loading = ref(false)

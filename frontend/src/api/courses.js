@@ -1,9 +1,9 @@
 import api from '@/utils/api'
-import { useUserStore } from '@/stores/user'
+import {useUserStore} from '@/stores/user'
 
 /**
  * 课程表相关API
- * 
+ *
  * 根据后端实际路由代码：
  * - 学生使用：/courses/my-schedule (在学生权限组中)
  * - 教练使用：/courses/coach-schedule (在教练权限组中)
@@ -25,16 +25,16 @@ export const getCoachSchedule = async (params = {}) => {
 export const getMySchedule = async (params = {}) => {
   const userStore = useUserStore()
   const userRole = userStore.user?.role
-  
+
   // 根据角色选择不同的端点
   let endpoint = '/courses/my-schedule' // 默认学生端点
   if (userRole === 'coach') {
     endpoint = '/courses/coach-schedule'
   }
-  
+
   console.log(`[courses.js] getMySchedule - 用户角色: ${userRole}, 使用端点: ${endpoint}`)
   console.log(`[courses.js] getMySchedule - 请求参数:`, params)
-  
+
   const response = await api.get(endpoint, { params })
   return response.data
 }
@@ -89,7 +89,7 @@ export const getCourseStatistics = async () => {
 
 // 导出课程表为iCal格式
 export const exportScheduleAsIcal = async (params = {}) => {
-  const response = await api.get('/courses/export/ical', { 
+  const response = await api.get('/courses/export/ical', {
     params,
     responseType: 'blob'
   })

@@ -77,9 +77,9 @@
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router'
-import { ArrowDown, User, UserFilled } from '@element-plus/icons-vue'
-import { PrimaryButton, OutlineButton } from '@/components/buttons'
+import {useRouter} from 'vue-router'
+import {ArrowDown, User, UserFilled} from '@element-plus/icons-vue'
+import {OutlineButton, PrimaryButton} from '@/components/buttons'
 
 const router = useRouter()
 

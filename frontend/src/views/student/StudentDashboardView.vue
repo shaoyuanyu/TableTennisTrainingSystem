@@ -281,19 +281,19 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { useUserStore } from '@/stores/user'
-import { ElMessage } from 'element-plus'
+import {onMounted, reactive, ref} from 'vue'
+import {useRouter} from 'vue-router'
+import {useUserStore} from '@/stores/user'
+import {ElMessage} from 'element-plus'
 import {
-  User,
   Calendar,
-  CreditCard,
-  Trophy,
   CircleCheck,
-  Star,
   Clock,
+  CreditCard,
   Medal,
+  Star,
+  Trophy,
+  User,
 } from '@element-plus/icons-vue'
 import dayjs from 'dayjs'
 import api from '@/utils/api'

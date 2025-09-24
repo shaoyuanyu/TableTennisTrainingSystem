@@ -1,14 +1,14 @@
 <template>
   <div class="coach-schedule-view">
     <h2><span class="schedule-icon">🏓</span> 我的教学课表</h2>
-    
+
     <!-- 调试信息 (开发模式下显示) -->
     <div v-if="isDev" class="debug-info">
       <h3>调试信息</h3>
       <pre>{{ debugInfo }}</pre>
     </div>
-    
-    <ScheduleCalendar 
+
+    <ScheduleCalendar
       ref="scheduleCalendarRef"
       user-type="coach"
       :user-id="userId"
@@ -17,8 +17,8 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { useUserStore } from '@/stores/user'
+import {computed, ref} from 'vue'
+import {useUserStore} from '@/stores/user'
 import ScheduleCalendar from '@/components/ScheduleCalendar.vue'
 
 // 获取用户信息
@@ -96,11 +96,11 @@ const debugInfo = computed(() => ({
   .coach-schedule-view {
     padding: var(--spacing-lg);
   }
-  
+
   .debug-info {
     padding: var(--spacing-md);
   }
-  
+
   .debug-info pre {
     font-size: 0.8rem;
   }

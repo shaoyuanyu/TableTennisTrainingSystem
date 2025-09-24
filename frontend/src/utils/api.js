@@ -1,7 +1,7 @@
 import axios from 'axios'
-import { ElMessage } from 'element-plus'
-import { useUserStore } from '@/stores/user'
-import { getErrorMessage } from './errorHandler'
+import {ElMessage} from 'element-plus'
+import {useUserStore} from '@/stores/user'
+import {getErrorMessage} from './errorHandler'
 
 // 创建axios实例，配置session认证（通过cookie）
 const api = axios.create({

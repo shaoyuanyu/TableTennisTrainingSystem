@@ -325,20 +325,20 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { useUserStore } from '@/stores/user'
+import {onMounted, ref} from 'vue'
+import {useRouter} from 'vue-router'
+import {useUserStore} from '@/stores/user'
 import dayjs from 'dayjs'
-import { PrimaryButton, OutlineButton } from '@/components/buttons'
+import {OutlineButton, PrimaryButton} from '@/components/buttons'
 import {
-  User,
+  Bell,
   Calendar,
+  DataAnalysis,
+  Operation,
   Star,
   TrendCharts,
+  User,
   UserFilled,
-  Bell,
-  Operation,
-  DataAnalysis,
 } from '@element-plus/icons-vue'
 
 const router = useRouter()

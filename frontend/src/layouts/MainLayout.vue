@@ -108,16 +108,16 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { useUserStore } from '@/stores/user'
-import { ElMessageBox } from 'element-plus'
-import { Expand, Bell, User, ArrowDown, Setting, SwitchButton } from '@element-plus/icons-vue'
+import {computed, onMounted, ref} from 'vue'
+import {useRouter} from 'vue-router'
+import {useUserStore} from '@/stores/user'
+import {ElMessageBox} from 'element-plus'
+import {ArrowDown, Bell, Expand, Setting, SwitchButton, User} from '@element-plus/icons-vue'
 import AppSidebarNew from '@/components/AppSidebarNew.vue'
-import { useMessageStore } from '@/stores/messageStore'
-import { storeToRefs } from 'pinia'
-import { initializeAuth } from '@/utils/auth'
-import { PrimaryButton, OutlineButton, IconButton } from '@/components/buttons'
+import {useMessageStore} from '@/stores/messageStore'
+import {storeToRefs} from 'pinia'
+import {initializeAuth} from '@/utils/auth'
+import {IconButton, OutlineButton, PrimaryButton} from '@/components/buttons'
 
 // 使用 Pinia Store
 const messageStore = useMessageStore()

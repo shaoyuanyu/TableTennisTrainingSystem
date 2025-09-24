@@ -3,7 +3,7 @@
  * 提供与外部日历系统的同步、导出和邮件功能
  */
 
-import { ElMessage } from 'element-plus'
+import {ElMessage} from 'element-plus'
 import dayjs from 'dayjs'
 
 export function useScheduleSync() {
@@ -70,7 +70,7 @@ export function useScheduleSync() {
     try {
       // 模拟同步过程
       await new Promise(resolve => setTimeout(resolve, 2000))
-      
+
       switch (platform) {
         case 'google':
           // 实际应用中这里会调用 Google Calendar API
@@ -104,10 +104,10 @@ export function useScheduleSync() {
     try {
       // 模拟移动端同步
       await new Promise(resolve => setTimeout(resolve, 1500))
-      
+
       // 实际应用中这里会调用移动端同步API
       console.log('同步到移动设备:', { deviceId, scheduleCount: schedules.length })
-      
+
       return true
     } catch (error) {
       console.error('移动端同步失败:', error)
@@ -123,10 +123,10 @@ export function useScheduleSync() {
   const sendEmail = async (type, options) => {
     try {
       const { email, name, scheduleData } = options
-      
+
       // 模拟邮件发送
       await new Promise(resolve => setTimeout(resolve, 1000))
-      
+
       // 实际应用中这里会调用邮件服务API
       console.log('发送邮件:', {
         type,
@@ -134,7 +134,7 @@ export function useScheduleSync() {
         name,
         scheduleCount: scheduleData?.length || 0
       })
-      
+
       return true
     } catch (error) {
       console.error('邮件发送失败:', error)
@@ -163,17 +163,17 @@ export function useScheduleSync() {
     schedules.forEach(schedule => {
       // 按类型统计
       summary.byType[schedule.type] = (summary.byType[schedule.type] || 0) + 1
-      
+
       // 按状态统计
       summary.byStatus[schedule.status] = (summary.byStatus[schedule.status] || 0) + 1
-      
+
       const scheduleDate = dayjs(schedule.date)
-      
+
       // 未来一周的课程
       if (scheduleDate.isAfter(now) && scheduleDate.isBefore(weekEnd)) {
         summary.upcomingWeek++
       }
-      
+
       // 本月课程
       if (scheduleDate.isSame(now, 'month')) {
         summary.thisMonth++
@@ -208,10 +208,10 @@ export function useScheduleSync() {
 
     schedules.forEach(schedule => {
       if (schedule.id === newSchedule.id) return // 跳过自己
-      
+
       const existingStart = dayjs(`${schedule.date} ${schedule.startTime}`)
       const existingEnd = dayjs(`${schedule.date} ${schedule.endTime}`)
-      
+
       // 检查时间重叠
       if (
         (newStart.isBefore(existingEnd) && newEnd.isAfter(existingStart))
@@ -232,7 +232,7 @@ export function useScheduleSync() {
     const date = dayjs(schedule.date)
     const startTime = schedule.startTime
     const endTime = schedule.endTime
-    
+
     return `${date.format('YYYY年MM月DD日')} ${startTime}-${endTime}`
   }
 

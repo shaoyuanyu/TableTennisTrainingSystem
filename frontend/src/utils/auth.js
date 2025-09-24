@@ -1,4 +1,4 @@
-import { useUserStore } from '@/stores/user'
+import {useUserStore} from '@/stores/user'
 import router from '@/router'
 
 /**

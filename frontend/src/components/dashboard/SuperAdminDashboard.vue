@@ -152,19 +152,19 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import {onMounted, ref} from 'vue'
 import {
+  Calendar,
+  CircleCloseFilled,
+  Document,
+  InfoFilled,
   Monitor,
   OfficeBuilding,
+  Setting,
+  SuccessFilled,
   UserFilled,
   Wallet,
-  Calendar,
-  Setting,
-  Document,
-  SuccessFilled,
   WarningFilled,
-  CircleCloseFilled,
-  InfoFilled,
 } from '@element-plus/icons-vue'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'

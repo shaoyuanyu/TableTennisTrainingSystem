@@ -3,14 +3,14 @@
     <!-- 控制面板 -->
     <div class="schedule-controls ultra">
       <div class="view-switch-group">
-        <ModernButton 
+        <ModernButton
           :variant="currentView === 'week' ? 'solid' : 'outline'"
           color="primary"
           @click="setView('week')"
           text="周视图"
           icon-left="📅"
         />
-        <ModernButton 
+        <ModernButton
           :variant="currentView === 'month' ? 'solid' : 'outline'"
           color="primary"
           @click="setView('month')"
@@ -18,9 +18,9 @@
           icon-left="🗓️"
         />
       </div>
-      
+
       <div class="date-navigation ultra">
-        <ModernButton 
+        <ModernButton
           variant="glass"
           color="primary"
           @click="previousPeriod"
@@ -29,7 +29,7 @@
           square
         />
         <span class="current-period ultra">{{ currentPeriodText }}</span>
-        <ModernButton 
+        <ModernButton
           variant="glass"
           color="primary"
           @click="nextPeriod"
@@ -37,7 +37,7 @@
           class="nav-btn ultra-btn"
           square
         />
-        <ModernButton 
+        <ModernButton
           variant="solid"
           color="primary"
           @click="goToToday"
@@ -46,10 +46,10 @@
           class="today-btn ultra-btn"
         />
       </div>
-      
+
       <!-- 功能按钮 -->
       <div class="schedule-actions ultra">
-        <ModernButton 
+        <ModernButton
           variant="glass"
           color="primary"
           @click="refreshSchedule"
@@ -57,7 +57,7 @@
           icon-left="🔄"
           class="action-btn ultra-btn"
         />
-        <ModernButton 
+        <ModernButton
           variant="glass"
           color="primary"
           @click="exportSchedule"
@@ -65,7 +65,7 @@
           icon-left="📤"
           class="action-btn ultra-btn"
         />
-        <ModernButton 
+        <ModernButton
           variant="glass"
           color="primary"
           @click="sendScheduleEmail"
@@ -80,10 +80,10 @@
     <div v-if="currentView === 'week'" class="week-view ultra">
       <div class="week-header ultra">
         <div class="time-column">时间</div>
-        <div 
-          v-for="day in weekDays" 
-          :key="day.date" 
-          class="day-header" 
+        <div
+          v-for="day in weekDays"
+          :key="day.date"
+          class="day-header"
           :class="{ 'is-today': day.isToday }"
         >
           <div class="day-name">{{ day.name }}</div>
@@ -93,15 +93,15 @@
       <div class="week-body">
         <div v-for="hour in timeSlots" :key="hour" class="time-row">
           <div class="time-column">{{ hour }}</div>
-          <div 
-            v-for="day in weekDays" 
-            :key="`${day.date}-${hour}`" 
+          <div
+            v-for="day in weekDays"
+            :key="`${day.date}-${hour}`"
             class="day-cell"
           >
-            <div 
-              v-for="schedule in getSchedulesForDayAndHour(day.date, hour)" 
+            <div
+              v-for="schedule in getSchedulesForDayAndHour(day.date, hour)"
               :key="schedule.id"
-              class="schedule-item ultra" 
+              class="schedule-item ultra"
               :class="getScheduleClass(schedule)"
               @click.stop="handleScheduleClick(schedule)"
             >
@@ -127,36 +127,36 @@
         </div>
       </div>
       <div class="month-body">
-        <div 
-          v-for="week in monthWeeks" 
-          :key="week[0]?.date || Math.random()" 
+        <div
+          v-for="week in monthWeeks"
+          :key="week[0]?.date || Math.random()"
           class="month-week"
         >
-          <div 
-            v-for="day in week" 
-            :key="day?.date || Math.random()" 
-            class="month-day" 
+          <div
+            v-for="day in week"
+            :key="day?.date || Math.random()"
+            class="month-day"
             :class="{
               'is-today': day?.isToday,
               'is-other-month': day?.isOtherMonth,
               'has-schedules': day && getSchedulesForDay(day.date).length > 0,
-            }" 
+            }"
             @click="handleDayClick(day)"
           >
             <div v-if="day" class="day-number ultra">{{ day.dayNumber }}</div>
             <div v-if="day" class="day-schedules ultra">
-              <div 
-                v-for="schedule in getSchedulesForDay(day.date).slice(0, 3)" 
+              <div
+                v-for="schedule in getSchedulesForDay(day.date).slice(0, 3)"
                 :key="schedule.id"
-                class="month-schedule-item ultra" 
+                class="month-schedule-item ultra"
                 :class="getScheduleClass(schedule)"
-                @click.stop="handleScheduleClick(schedule)" 
+                @click.stop="handleScheduleClick(schedule)"
                 :title="schedule.title"
               >
                 <span class="dot-icon">●</span> {{ schedule.title }}
               </div>
-              <div 
-                v-if="getSchedulesForDay(day.date).length > 3" 
+              <div
+                v-if="getSchedulesForDay(day.date).length > 3"
                 class="more-schedules ultra"
               >
                 +{{ getSchedulesForDay(day.date).length - 3 }} 更多
@@ -168,10 +168,10 @@
     </div>
 
     <!-- 课程详情对话框 -->
-    <el-dialog 
-      v-model="showScheduleDialog" 
-      :title="isStudentView ? '课程详情' : '教学详情'" 
-      width="500px" 
+    <el-dialog
+      v-model="showScheduleDialog"
+      :title="isStudentView ? '课程详情' : '教学详情'"
+      width="500px"
       class="ultra-dialog"
     >
       <div v-if="selectedSchedule" class="schedule-detail ultra">
@@ -180,7 +180,7 @@
             <span class="field-icon">🏓</span> {{ selectedSchedule.title }}
           </el-descriptions-item>
           <el-descriptions-item :label="isStudentView ? '教练' : '学员'">
-            <span class="field-icon">{{ isStudentView ? '🧑‍🏫' : '👤' }}</span> 
+            <span class="field-icon">{{ isStudentView ? '🧑‍🏫' : '👤' }}</span>
             {{ isStudentView ? selectedSchedule.coachName : getStudentNames(selectedSchedule) }}
           </el-descriptions-item>
           <el-descriptions-item label="上课时间">
@@ -200,20 +200,20 @@
         </el-descriptions>
       </div>
       <div class="dialog-footer ultra">
-          <DangerButton 
-            v-if="!isStudentView && canCancelSchedule(selectedSchedule)" 
+          <DangerButton
+            v-if="!isStudentView && canCancelSchedule(selectedSchedule)"
             @click="cancelSchedule"
             text="取消课程"
             icon-left="❌"
           />
-          <ModernButton 
-            v-if="isStudentView && canCancelSchedule(selectedSchedule)" 
+          <ModernButton
+            v-if="isStudentView && canCancelSchedule(selectedSchedule)"
             variant="danger"
             @click="cancelSchedule"
             text="取消预约"
             icon-left="❌"
           />
-          <ModernButton 
+          <ModernButton
             @click="showScheduleDialog = false"
             text="关闭"
             icon-left="✅"
@@ -231,8 +231,8 @@
       <el-form :model="emailOptions" label-width="120px">
         <el-form-item label="收件人邮箱" required>
           <div class="email-recipients">
-            <div 
-              v-for="(email, index) in emailOptions.recipients" 
+            <div
+              v-for="(email, index) in emailOptions.recipients"
               :key="index"
               class="recipient-item"
             >
@@ -259,19 +259,19 @@
             />
           </div>
         </el-form-item>
-        
+
         <el-form-item label="附件选项">
           <el-checkbox v-model="emailOptions.includeAttachment">
             包含 iCal 课表文件
           </el-checkbox>
         </el-form-item>
-        
+
         <el-form-item label="提醒设置">
           <el-checkbox v-model="emailOptions.sendReminder">
             启用课程提醒邮件
           </el-checkbox>
         </el-form-item>
-        
+
         <el-form-item label="邮件预览">
           <div class="email-preview">
             <p><strong>主题：</strong>您的乒乓球训练课表 - {{ dayjs().format('YYYY年MM月DD日') }}</p>
@@ -280,10 +280,10 @@
           </div>
         </el-form-item>
       </el-form>
-      
+
       <template #footer>
         <div class="dialog-footer">
-          <ModernButton 
+          <ModernButton
             variant="outline"
             color="secondary"
             @click="showEmailDialog = false"
@@ -301,23 +301,23 @@
     </el-dialog>
 
     <!-- 加载状态 -->
-    <el-loading 
-      v-loading="loading" 
-      element-loading-text="加载课表数据..." 
+    <el-loading
+      v-loading="loading"
+      element-loading-text="加载课表数据..."
       element-loading-spinner="el-icon-loading"
-      class="ultra-loading" 
+      class="ultra-loading"
     />
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { ModernButton, DangerButton } from '@/components/buttons'
+import {computed, onMounted, ref, watch} from 'vue'
+import {ElMessage, ElMessageBox} from 'element-plus'
+import {DangerButton, ModernButton} from '@/components/buttons'
 import dayjs from 'dayjs'
 import api from '@/utils/api'
-import { useScheduleSync } from '@/utils/scheduleSyncExamples'
-import { useUserStore } from '@/stores/user'
+import {useScheduleSync} from '@/utils/scheduleSyncExamples'
+import {useUserStore} from '@/stores/user'
 
 // 定义组件属性
 const props = defineProps({
@@ -529,8 +529,8 @@ const handleScheduleClick = (schedule) => {
 const cancelSchedule = async () => {
   try {
     await ElMessageBox.confirm(
-      '确定要取消这个课程吗？取消后将无法恢复。', 
-      '确认取消', 
+      '确定要取消这个课程吗？取消后将无法恢复。',
+      '确认取消',
       {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -540,10 +540,10 @@ const cancelSchedule = async () => {
 
     loading.value = true
     // 根据用户类型调用不同的API
-    const endpoint = isStudentView.value 
-      ? `/courses/${selectedSchedule.value.id}/cancel` 
+    const endpoint = isStudentView.value
+      ? `/courses/${selectedSchedule.value.id}/cancel`
       : `/courses/${selectedSchedule.value.id}/cancel`
-    
+
     await api.put(endpoint)
 
     // 更新本地数据
@@ -592,15 +592,15 @@ const handleEmailSend = async () => {
       ElMessage.warning('请至少添加一个收件人')
       return
     }
-    
+
     ElMessage.info('正在发送邮件...')
-    
+
     // 获取收件人邮箱
     const recipients = emailOptions.value.recipients.map(email => ({
       name: email.split('@')[0], // 简单从邮箱提取名称
       email: email
     }))
-    
+
     // 批量发送邮件
     for (const recipient of recipients) {
       await scheduleSync.sendEmail('schedule', {
@@ -609,17 +609,17 @@ const handleEmailSend = async () => {
         scheduleData: schedules.value
       })
     }
-    
+
     ElMessage.success(`邮件发送成功！共发送 ${recipients.length} 封邮件`)
     showEmailDialog.value = false
-    
+
     // 如果启用了提醒，也发送课程提醒
     if (emailOptions.value.sendReminder) {
       setTimeout(() => {
         ElMessage.info('课程提醒也将在适当时间自动发送')
       }, 1000)
     }
-    
+
   } catch (error) {
     console.error('邮件发送失败:', error)
     ElMessage.error('邮件发送失败，请重试')
@@ -678,13 +678,13 @@ const fetchSchedules = async () => {
     // 学生：/courses/my-schedule (在学生权限组中)
     // 教练：/courses/coach-schedule (在教练权限组中)
     const endpoint = isStudentView.value ? '/courses/my-schedule' : '/courses/coach-schedule'
-    
+
     console.log('ScheduleCalendar - 使用端点:', endpoint)
-    
+
     const response = await api.get(endpoint, {
-      params: { 
-        dateFrom: startDate, 
-        dateTo: endDate 
+      params: {
+        dateFrom: startDate,
+        dateTo: endDate
       },
     })
 
@@ -692,12 +692,12 @@ const fetchSchedules = async () => {
     console.log('ScheduleCalendar - 成功获取课表数据:', schedules.value.length, '条记录')
   } catch (error) {
     console.error('ScheduleCalendar - 获取课表失败:', error)
-    
+
     // 提供更详细的错误信息
     if (error.response?.status === 401) {
       const errorMsg = error.response?.data?.message || '认证失败'
       ElMessage.error(`认证失败：${errorMsg}，请重新登录`)
-      
+
       // 如果是认证问题，可能需要重新登录
       const userStore = useUserStore()
       if (userStore.isLoggedIn) {
@@ -706,7 +706,7 @@ const fetchSchedules = async () => {
     } else if (error.response?.status === 403) {
       const errorMsg = error.response?.data?.message || '权限不足'
       ElMessage.error(`权限错误：${errorMsg}`)
-      
+
       // 输出更多调试信息
       console.error('权限错误详情:', {
         status: error.response.status,
@@ -1208,7 +1208,7 @@ defineExpose({
   .dialog-footer.ultra {
     gap: var(--spacing-sm);
   }
-  
+
   .schedule-actions {
     width: 100%;
     justify-content: center;

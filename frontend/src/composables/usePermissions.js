@@ -1,6 +1,6 @@
-import { computed, ref, watchEffect } from 'vue'
-import { useUserStore } from '@/stores/user'
-import { hasPagePermission, hasActionPermission, getAccessibleMenus } from '@/utils/permissions'
+import {computed, ref, watchEffect} from 'vue'
+import {useUserStore} from '@/stores/user'
+import {getAccessibleMenus, hasActionPermission, hasPagePermission} from '@/utils/permissions'
 
 /**
  * 权限管理 Composable

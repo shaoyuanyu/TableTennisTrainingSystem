@@ -1,8 +1,8 @@
-import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import {defineStore} from 'pinia'
+import {computed, ref} from 'vue'
 import api from '@/utils/api'
-import { normalizeRole } from '@/utils/permissions'
-import { getErrorMessage } from '@/utils/errorHandler'
+import {normalizeRole} from '@/utils/permissions'
+import {getErrorMessage} from '@/utils/errorHandler'
 
 export const useUserStore = defineStore('user', () => {
   // 安全解析localStorage中的数据

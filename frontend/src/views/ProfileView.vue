@@ -223,21 +223,21 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
-import { useUserStore } from '@/stores/user'
-import { ElMessage } from 'element-plus'
-import { PrimaryButton, OutlineButton, IconButton } from '@/components/buttons'
+import {computed, onMounted, reactive, ref} from 'vue'
+import {useUserStore} from '@/stores/user'
+import {ElMessage} from 'element-plus'
+import {IconButton, OutlineButton, PrimaryButton} from '@/components/buttons'
 import {
-  User,
+  Avatar,
   Camera,
   Clock,
-  Wallet,
-  Medal,
-  EditPen,
-  Avatar,
-  OfficeBuilding,
   CreditCard,
   Document,
+  EditPen,
+  Medal,
+  OfficeBuilding,
+  User,
+  Wallet,
 } from '@element-plus/icons-vue'
 
 // 角色判断

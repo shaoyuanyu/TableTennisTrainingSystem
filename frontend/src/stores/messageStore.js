@@ -1,11 +1,11 @@
-import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import {defineStore} from 'pinia'
+import {computed, ref} from 'vue'
 import {
-  fetchMessages as apiFetchMessages,
-  markMessageAsRead,
-  markAllMessagesAsRead,
-  deleteMessage as apiDeleteMessage,
   clearAllMessages,
+  deleteMessage as apiDeleteMessage,
+  fetchMessages as apiFetchMessages,
+  markAllMessagesAsRead,
+  markMessageAsRead,
 } from '@/api/message'
 
 export const useMessageStore = defineStore('messages', () => {

@@ -1,7 +1,7 @@
 <script setup>
-import { RouterView } from 'vue-router'
-import { onMounted } from 'vue'
-import { useUserStore } from '@/stores/user'
+import {RouterView} from 'vue-router'
+import {onMounted} from 'vue'
+import {useUserStore} from '@/stores/user'
 import ToastContainer from '@/components/ToastContainer.vue'
 
 const userStore = useUserStore()

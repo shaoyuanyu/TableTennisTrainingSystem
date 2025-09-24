@@ -1,7 +1,7 @@
 <template>
   <div class="student-schedule-view">
     <h2><span class="schedule-icon">🏓</span> 我的课表</h2>
-    <ScheduleCalendar 
+    <ScheduleCalendar
       ref="scheduleCalendarRef"
       user-type="student"
       :user-id="userId"
@@ -10,8 +10,8 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useUserStore } from '@/stores/user'
+import {ref} from 'vue'
+import {useUserStore} from '@/stores/user'
 import ScheduleCalendar from '@/components/ScheduleCalendar.vue'
 
 // 获取用户信息

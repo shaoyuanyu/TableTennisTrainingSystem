@@ -14,6 +14,7 @@
 
 <script>
 import ButtonsModernButton from './buttons/ModernButton.vue'
+
 export default {
   name: 'ModernButton',
   components: { ButtonsModernButton },
