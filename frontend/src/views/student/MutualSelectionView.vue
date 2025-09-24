@@ -9,12 +9,21 @@
     <!-- 申请状态说明 -->
     <el-card class="info-card">
       <h3>双选流程说明</h3>
-      <el-steps :active="2" align-center finish-status="success">
+      <el-steps :active="currentStep" align-center finish-status="success">
         <el-step title="选择教练" description="浏览并选择合适的教练"></el-step>
         <el-step title="提交申请" description="向教练发送双选申请"></el-step>
         <el-step title="等待审核" description="教练审核您的申请"></el-step>
         <el-step title="建立关系" description="审核通过后建立师生关系"></el-step>
       </el-steps>
+
+      <!-- 状态说明 -->
+      <div v-if="applications.length > 0" class="status-summary">
+        <p>
+          <span v-if="hasApprovedApplications">您有 {{ approvedCount }} 个申请已通过审核</span>
+          <span v-else-if="hasPendingApplications">您有 {{ pendingCount }} 个申请正在等待审核</span>
+          <span v-else>您当前没有进行中的申请</span>
+        </p>
+      </div>
     </el-card>
 
     <!-- 我的申请列表 -->
@@ -119,7 +128,7 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from 'vue'
+import { onMounted, reactive, ref, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Refresh } from '@element-plus/icons-vue'
 import dayjs from 'dayjs'
@@ -138,6 +147,55 @@ const pagination = reactive({
   total: 0
 })
 
+// 计算属性
+const currentStep = computed(() => {
+  // 如果没有申请记录，默认显示第2步（提交申请）
+  if (!applications.value || applications.value.length === 0) {
+    return 1
+  }
+
+  // 检查是否有已批准或活跃的申请
+  const approvedOrActive = applications.value.some(app =>
+    app.status === 'APPROVED' || app.status === 'ACTIVE'
+  )
+
+  if (approvedOrActive) {
+    // 如果有已批准或活跃的申请，显示第4步（建立关系）
+    return 4
+  }
+
+  // 检查是否有待处理的申请
+  const pending = applications.value.some(app => app.status === 'PENDING')
+
+  if (pending) {
+    // 如果有待处理的申请，显示第3步（等待审核）
+    return 3
+  }
+
+  // 默认显示第2步（提交申请）
+  return 2
+})
+
+const hasApprovedApplications = computed(() => {
+  return applications.value.some(app =>
+    app.status === 'APPROVED' || app.status === 'ACTIVE'
+  )
+})
+
+const hasPendingApplications = computed(() => {
+  return applications.value.some(app => app.status === 'PENDING')
+})
+
+const approvedCount = computed(() => {
+  return applications.value.filter(app =>
+    app.status === 'APPROVED' || app.status === 'ACTIVE'
+  ).length
+})
+
+const pendingCount = computed(() => {
+  return applications.value.filter(app => app.status === 'PENDING').length
+})
+
 // 获取申请列表
 const fetchApplications = async () => {
   loading.value = true
@@ -150,6 +208,11 @@ const fetchApplications = async () => {
     const response = await getStudentApplications(params)
     applications.value = response.content || response.list || response
     pagination.total = response.totalElements || response.total || 0
+
+    // 如果有已批准的申请，显示成功消息
+    if (hasApprovedApplications.value) {
+      ElMessage.success(`您有 ${approvedCount.value} 个申请已通过审核`)
+    }
   } catch (error) {
     ElMessage.error('获取申请列表失败: ' + (error.response?.data?.message || error.message))
   } finally {
@@ -263,6 +326,21 @@ onMounted(() => {
 
 .info-card h3 {
   margin-top: 0;
+}
+
+.status-summary {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #f0f9ff;
+  border-radius: 4px;
+  border: 1px solid #b3d8ff;
+  text-align: center;
+}
+
+.status-summary p {
+  margin: 0;
+  color: #409eff;
+  font-weight: 500;
 }
 
 .application-card {

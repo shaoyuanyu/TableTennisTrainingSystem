@@ -503,7 +503,7 @@ const confirmBooking = async () => {
     await api.post('/courses/create', bookingData)
 
     ElMessage.success('预约成功！')
-    router.push('/student/schedule')
+    await router.push('/student/schedule')
   } catch (error) {
     if (error !== 'cancel') {
       ElMessage.error('预约失败: ' + (error.message || '未知错误'))

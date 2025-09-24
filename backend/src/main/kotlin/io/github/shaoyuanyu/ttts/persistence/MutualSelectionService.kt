@@ -159,8 +159,8 @@ class MutualSelectionService(
 
             // 更新申请状态
             relation.status = if (approve) {
-                // 如果批准，更新为已批准状态
-                MutualSelectionStatus.APPROVED
+                // 如果批准，更新为已批准状态（当前版本默认批准即激活）
+                MutualSelectionStatus.ACTIVE
             } else {
                 // 如果拒绝，更新为已拒绝状态
                 MutualSelectionStatus.REJECTED
