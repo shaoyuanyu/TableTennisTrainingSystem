@@ -307,8 +307,18 @@ const fetchApplications = async () => {
     const params = {
       page: pagination.page,
       size: pagination.size,
-      ...filters
+      status: filters.status,
+      startDate: filters.dateRange && filters.dateRange[0] ? filters.dateRange[0] : undefined,
+      endDate: filters.dateRange && filters.dateRange[1] ? filters.dateRange[1] : undefined,
+      keyword: filters.keyword || undefined
     }
+
+    // 移除值为undefined的参数
+    Object.keys(params).forEach(key => {
+      if (params[key] === undefined) {
+        delete params[key]
+      }
+    })
 
     const response = await api.get('/mutual-selection/coach-applications', { params })
     applications.value = response.data.content || response.data.list || response.data
@@ -328,7 +338,7 @@ const fetchStats = async () => {
   try {
     // 获取待处理申请数量
     const pendingResponse = await getPendingApplicationCount()
-    stats.pendingCount = pendingResponse.count || 0
+    stats.pendingCount = pendingResponse.count || pendingResponse || 0
 
     // 获取当前学员数量
     const studentsResponse = await api.get('/mutual-selection/coach/current-students')
@@ -579,3 +589,4 @@ onMounted(() => {
 }
 
 </style>
+

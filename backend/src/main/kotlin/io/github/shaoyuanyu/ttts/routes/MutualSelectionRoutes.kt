@@ -5,6 +5,7 @@ package io.github.shaoyuanyu.ttts.routes
 import io.github.shaoyuanyu.ttts.dto.mutual_selection.MutualSelectionStatus
 import io.github.shaoyuanyu.ttts.exceptions.BadRequestException
 import io.github.shaoyuanyu.ttts.persistence.MutualSelectionService
+import io.github.shaoyuanyu.ttts.plugins.LOGGER
 import io.github.shaoyuanyu.ttts.utils.getUserIdFromCall
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -54,6 +55,8 @@ fun Route.applyForCoach(mutualSelectionService: MutualSelectionService) {
         // 接收请求参数
         val params = call.receiveParameters()
         val coachId = params["coachId"] ?: throw BadRequestException("缺少教练ID参数")
+
+        LOGGER.info(params.toString())
 
         val application = mutualSelectionService.applyForCoach(
             studentId = userId,

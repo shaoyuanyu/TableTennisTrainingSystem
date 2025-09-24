@@ -41,8 +41,6 @@ object MutualSelectionTable : UUIDTable("mutual_selection") {
     
     // 索引定义
     init {
-        index(true, coach_id, status)
-        index(true, student_id, status)
-        index(false, application_time)
+        index(true, coach_id, student_id, status)
     }
 }

@@ -36,12 +36,20 @@ export const getCoachApplications = async (params = {}) => {
 
 // 教练审核学生申请
 export const reviewApplication = async (relationId, decision, rejectionReason = null) => {
-  const requestData = { relationId, decision }
+  // 使用FormData发送数据，以匹配后端的receiveParameters()期望
+  const formData = new FormData()
+  formData.append('selectionId', relationId)
+  // 后端期望的是approve参数（布尔值），而不是decision参数
+  formData.append('approve', decision === 'APPROVED')
   if (rejectionReason) {
-    requestData.rejectionReason = rejectionReason
+    formData.append('rejectionReason', rejectionReason)
   }
   
-  const response = await api.post('/mutual-selection/review', requestData)
+  const response = await api.post('/mutual-selection/review', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
   return response.data
 }
 

@@ -413,7 +413,14 @@ const applyForCoach = async (coach) => {
       }
     )
 
-    await api.post('/mutual-selection/apply', { coachId: coach.id })
+    // 修改这里：使用表单格式发送数据而不是JSON，并明确指定Content-Type
+    const formData = new FormData()
+    formData.append('coachId', coach.id)
+    await api.post('/mutual-selection/apply', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
 
     ElMessage.success('双选申请已提交，请等待教练审核')
 
