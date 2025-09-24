@@ -73,7 +73,7 @@
           <el-icon><UserFilled /></el-icon>
           <template #title>我的教练</template>
         </el-menu-item>
-        <el-menu-item index="/student/booking" class="menu-item">
+        <el-menu-item index="/student/book-training" class="menu-item">
           <el-icon><Calendar /></el-icon>
           <template #title>预约培训</template>
         </el-menu-item>

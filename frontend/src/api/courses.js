@@ -1,201 +1,109 @@
 import api from '@/utils/api'
+import { useUserStore } from '@/stores/user'
 
 /**
- * 学员课程表相关API
+ * 课程表相关API
+ * 
+ * 根据后端实际路由代码：
+ * - 学生使用：/courses/my-schedule (在学生权限组中)
+ * - 教练使用：/courses/coach-schedule (在教练权限组中)
  */
 
-// 获取学员课程表列表
-export const getStudentCourses = async (params = {}) => {
-  try {
-    const response = await api.get('/student/courses', { params })
-    return response.data
-  } catch (error) {
-    throw error
-  }
+// 获取学生课程安排
+export const getStudentSchedule = async (params = {}) => {
+  const response = await api.get('/courses/my-schedule', { params })
+  return response.data
 }
 
-// 获取学员课程详情
-export const getStudentCourseDetail = async (courseId) => {
-  try {
-    const response = await api.get(`/student/courses/${courseId}`)
-    return response.data
-  } catch (error) {
-    throw error
-  }
+// 获取教练课程安排
+export const getCoachSchedule = async (params = {}) => {
+  const response = await api.get('/courses/coach-schedule', { params })
+  return response.data
 }
 
-// 学员报名课程
-export const enrollCourse = async (courseId, data = {}) => {
-  try {
-    const response = await api.post(`/student/courses/${courseId}/enroll`, data)
-    return response.data
-  } catch (error) {
-    throw error
+// 获取当前用户的课程安排（自动检测角色）
+export const getMySchedule = async (params = {}) => {
+  const userStore = useUserStore()
+  const userRole = userStore.user?.role
+  
+  // 根据角色选择不同的端点
+  let endpoint = '/courses/my-schedule' // 默认学生端点
+  if (userRole === 'coach') {
+    endpoint = '/courses/coach-schedule'
   }
+  
+  console.log(`[courses.js] getMySchedule - 用户角色: ${userRole}, 使用端点: ${endpoint}`)
+  console.log(`[courses.js] getMySchedule - 请求参数:`, params)
+  
+  const response = await api.get(endpoint, { params })
+  return response.data
 }
 
-// 学员取消课程
-export const cancelEnrollment = async (courseId) => {
-  try {
-    const response = await api.delete(`/student/courses/${courseId}/enroll`)
-    return response.data
-  } catch (error) {
-    throw error
-  }
+// 学生查看指定教练的时间安排（用于预约课程）
+export const getCoachScheduleForStudent = async (coachId, params = {}) => {
+  const response = await api.get(`/courses/coach-schedule/${coachId}`, { params })
+  return response.data
 }
 
-// 学员课程反馈
-export const submitCourseFeedback = async (courseId, feedback) => {
-  try {
-    const response = await api.put(`/student/courses/${courseId}/feedback`, feedback)
-    return response.data
-  } catch (error) {
-    throw error
-  }
+// 学生提交课程反馈
+export const submitStudentFeedback = async (feedbackData) => {
+  const response = await api.post('/courses/feedback', feedbackData)
+  return response.data
 }
 
-/**
- * 教练课程表相关API
- */
-
-// 获取教练课程表列表
-export const getCoachCourses = async (params = {}) => {
-  try {
-    const response = await api.get('/coach/courses', { params })
-    return response.data
-  } catch (error) {
-    throw error
-  }
+// 教练更新课程状态
+export const updateCourseStatus = async (courseId, status) => {
+  const response = await api.put(`/courses/${courseId}/status`, null, {
+    params: { status }
+  })
+  return response.data
 }
 
-// 获取教练课程详情
-export const getCoachCourseDetail = async (courseId) => {
-  try {
-    const response = await api.get(`/coach/courses/${courseId}`)
-    return response.data
-  } catch (error) {
-    throw error
-  }
-}
-
-// 创建新课程
+// 创建课程（管理员权限）
 export const createCourse = async (courseData) => {
-  try {
-    const response = await api.post('/coach/courses', courseData)
-    return response.data
-  } catch (error) {
-    throw error
-  }
+  const response = await api.post('/courses/create', courseData)
+  return response.data
 }
 
-// 更新课程信息
-export const updateCourse = async (courseId, courseData) => {
-  try {
-    const response = await api.put(`/coach/courses/${courseId}`, courseData)
-    return response.data
-  } catch (error) {
-    throw error
-  }
-}
-
-// 删除课程
-export const deleteCourse = async (courseId) => {
-  try {
-    const response = await api.delete(`/coach/courses/${courseId}`)
-    return response.data
-  } catch (error) {
-    throw error
-  }
-}
-
-// 更新课程出勤
-export const updateCourseAttendance = async (courseId, attendanceData) => {
-  try {
-    const response = await api.put(`/coach/courses/${courseId}/attendance`, attendanceData)
-    return response.data
-  } catch (error) {
-    throw error
-  }
+// 查询课程（管理员权限）
+export const queryCourses = async (queryData) => {
+  const response = await api.post('/courses/query', queryData)
+  return response.data
 }
 
 /**
- * 通用查询API
+ * 其他课程相关API（如果需要的话）
  */
 
 // 获取可用时间段
 export const getAvailableTimeSlots = async (params) => {
-  try {
-    const response = await api.get('/courses/available-slots', { params })
-    return response.data
-  } catch (error) {
-    throw error
-  }
+  const response = await api.get('/courses/available-slots', { params })
+  return response.data
 }
 
 // 获取课程统计信息
 export const getCourseStatistics = async () => {
-  try {
-    const response = await api.get('/courses/statistics')
-    return response.data
-  } catch (error) {
-    throw error
-  }
+  const response = await api.get('/courses/statistics')
+  return response.data
 }
-
-// 获取教练列表（用于课程筛选）
-export const getCoachesList = async (campusId = null) => {
-  try {
-    const params = campusId ? { campusId } : {}
-    const response = await api.get('/coaches', { params })
-    return response.data
-  } catch (error) {
-    throw error
-  }
-}
-
-// 获取校区列表
-export const getCampusList = async () => {
-  try {
-    const response = await api.get('/campus/names')
-    return response.data
-  } catch (error) {
-    throw error
-  }
-}
-
-/**
- * 课程表导出和同步功能
- */
 
 // 导出课程表为iCal格式
 export const exportScheduleAsIcal = async (params = {}) => {
-  try {
-    const response = await api.get('/courses/export/ical', { 
-      params,
-      responseType: 'blob'
-    })
-    return response.data
-  } catch (error) {
-    throw error
-  }
+  const response = await api.get('/courses/export/ical', { 
+    params,
+    responseType: 'blob'
+  })
+  return response.data
 }
 
 // 发送课程表邮件
 export const sendScheduleEmail = async (emailData) => {
-  try {
-    const response = await api.post('/courses/send-email', emailData)
-    return response.data
-  } catch (error) {
-    throw error
-  }
+  const response = await api.post('/courses/send-email', emailData)
+  return response.data
 }
 
 // 同步到外部日历
 export const syncToExternalCalendar = async (syncData) => {
-  try {
-    const response = await api.post('/courses/sync-calendar', syncData)
-    return response.data
-  } catch (error) {
-    throw error
-  }
+  const response = await api.post('/courses/sync-calendar', syncData)
+  return response.data
 }
