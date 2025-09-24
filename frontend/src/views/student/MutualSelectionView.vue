@@ -8,7 +8,7 @@
 
     <!-- 申请状态说明 -->
     <el-card class="info-card">
-      <h3>双选流程说明</h3>
+      <h3>我的申请状态</h3>
       <el-steps :active="currentStep" align-center finish-status="success">
         <el-step title="选择教练" description="浏览并选择合适的教练"></el-step>
         <el-step title="提交申请" description="向教练发送双选申请"></el-step>
@@ -19,8 +19,18 @@
       <!-- 状态说明 -->
       <div v-if="applications.length > 0" class="status-summary">
         <p>
-          <span v-if="hasApprovedApplications">您有 {{ approvedCount }} 个申请已通过审核</span>
-          <span v-else-if="hasPendingApplications">您有 {{ pendingCount }} 个申请正在等待审核</span>
+          <span v-if="pendingCount > 0 && approvedCount > 0">
+            您有 {{ pendingCount }} 个申请正在等待审核，{{ approvedCount }} 个申请已通过审核
+          </span>
+          <span v-else-if="pendingCount > 0">
+            您有 {{ pendingCount }} 个申请正在等待审核
+          </span>
+          <span v-else-if="approvedCount > 0">
+            您有 {{ approvedCount }} 个申请已通过审核
+          </span>
+          <span v-else-if="rejectedCount > 0">
+            您有 {{ rejectedCount }} 个申请被拒绝
+          </span>
           <span v-else>您当前没有进行中的申请</span>
         </p>
       </div>
@@ -149,27 +159,27 @@ const pagination = reactive({
 
 // 计算属性
 const currentStep = computed(() => {
-  // 如果没有申请记录，默认显示第2步（提交申请）
+  // 如果没有申请记录，默认显示第1步（选择教练）
   if (!applications.value || applications.value.length === 0) {
     return 1
   }
 
+  // 检查是否有待处理的申请
+  const hasPendingApplications = applications.value.some(app => app.status === 'PENDING')
+
   // 检查是否有已批准或活跃的申请
-  const approvedOrActive = applications.value.some(app =>
+  const hasApprovedOrActive = applications.value.some(app =>
     app.status === 'APPROVED' || app.status === 'ACTIVE'
   )
 
-  if (approvedOrActive) {
-    // 如果有已批准或活跃的申请，显示第4步（建立关系）
-    return 4
+  // 如果有正在等待审核的申请，显示第3步（等待审核）
+  if (hasPendingApplications) {
+    return 3
   }
 
-  // 检查是否有待处理的申请
-  const pending = applications.value.some(app => app.status === 'PENDING')
-
-  if (pending) {
-    // 如果有待处理的申请，显示第3步（等待审核）
-    return 3
+  // 如果没有正在等待审核的申请，但有已批准或活跃的申请，显示第4步（建立关系）
+  if (!hasPendingApplications && hasApprovedOrActive) {
+    return 4
   }
 
   // 默认显示第2步（提交申请）
@@ -194,6 +204,10 @@ const approvedCount = computed(() => {
 
 const pendingCount = computed(() => {
   return applications.value.filter(app => app.status === 'PENDING').length
+})
+
+const rejectedCount = computed(() => {
+  return applications.value.filter(app => app.status === 'REJECTED').length
 })
 
 // 获取申请列表
