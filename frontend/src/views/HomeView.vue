@@ -10,7 +10,7 @@
     <CampusAdminDashboard v-else-if="userStore.isCampusAdmin" />
 
     <!-- 超级管理员首页 -->
-    <SuperAdminDashboard v-else-if="userStore.isSuperAdmin" />
+    <SuperAdminDashboardView v-else-if="userStore.isSuperAdmin" />
 
     <!-- 默认首页（未登录或角色未识别） -->
     <DefaultDashboard v-else />
@@ -22,7 +22,7 @@ import {useUserStore} from '@/stores/user'
 import StudentDashboard from '@/components/dashboard/StudentDashboard.vue'
 import CoachDashboard from '@/components/dashboard/CoachDashboard.vue'
 import CampusAdminDashboard from '@/components/dashboard/CampusAdminDashboard.vue'
-import SuperAdminDashboard from '@/components/dashboard/SuperAdminDashboard.vue'
+import SuperAdminDashboardView from '@/views/admin/SuperAdminDashboardView.vue'
 import DefaultDashboard from '@/components/dashboard/DefaultDashboard.vue'
 
 const userStore = useUserStore()

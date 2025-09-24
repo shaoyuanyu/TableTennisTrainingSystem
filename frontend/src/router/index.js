@@ -61,6 +61,16 @@ const router = createRouter({
           },
         },
         {
+          path: 'admin/dashboard',
+          name: 'SuperAdminDashboard',
+          component: () => import('@/views/admin/SuperAdminDashboardView.vue'),
+          meta: {
+            requiresAuth: true,
+            title: '超级管理员仪表盘',
+            roles: ['super_admin'],
+          },
+        },
+        {
           path: 'admin/service',
           name: 'ServiceStatus',
           component: () => import('@/views/admin/ServiceStatusView.vue'),
