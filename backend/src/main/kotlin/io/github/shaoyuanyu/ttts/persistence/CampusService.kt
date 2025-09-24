@@ -2,7 +2,7 @@
 package io.github.shaoyuanyu.ttts.persistence
 
 import io.github.shaoyuanyu.ttts.dto.campus.CampusCreateRequest
-import io.github.shaoyuanyu.ttts.dto.campus.CampusqueryRequest
+import io.github.shaoyuanyu.ttts.dto.campus.CampusQueryRequest
 import io.github.shaoyuanyu.ttts.dto.student.Group
 import io.github.shaoyuanyu.ttts.dto.student.Status
 import io.github.shaoyuanyu.ttts.dto.user.UserRole
@@ -89,7 +89,7 @@ class CampusService(
     /**
      * 查询所有校区
      */
-    fun getAllCampusNames(page: Int,size: Int):Pair<List<CampusqueryRequest>,Int> =
+    fun getAllCampusNames(page: Int,size: Int):Pair<List<CampusQueryRequest>,Int> =
         transaction(database) {
             val query = CampusEntity.all().toList()
 
@@ -99,7 +99,7 @@ class CampusService(
                 .sortedBy { it.createdAt }
                 .drop(offset)
                 .take(size)
-                .map {CampusqueryRequest(
+                .map {CampusQueryRequest(
                     id = it.id.value,
                     campusName = it.campusName,
                 )}

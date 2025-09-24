@@ -25,10 +25,12 @@ fun Application.campusRoutes(campusService: CampusService) {
             // 所有用户
             authenticate("auth-session-all") {
             }
+
             // 校区管理员
             authenticate("auth-session-campus-admin") {
                 addTable(campusService)
             }
+
             // 超级管理员
             authenticate("auth-session-super-admin") {
                 createCampus(campusService)
