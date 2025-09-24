@@ -4,7 +4,7 @@ import { useUserStore } from '@/stores/user'
 import { getErrorMessage } from './errorHandler'
 
 // 创建axios实例，配置session认证（通过cookie）
-const apiBaseURL = import.meta.env.VITE_API_BASE_URL
+const apiBaseURL = "/api"
 const api = axios.create({
   baseURL: apiBaseURL,
   timeout: 10000,

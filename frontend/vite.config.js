@@ -26,6 +26,13 @@ export default defineConfig(({ mode }) => {
       port,
       // 若端口被占用（例如后端也在 8080），默认会自动递增；如需强制该端口可改为 true
       // strictPort: true,
+      proxy: {
+        '/api': {
+          target: env.VITE_API_BASE_URL,
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api/, ''),
+        },
+      }
     },
   }
 })
