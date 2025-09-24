@@ -288,13 +288,28 @@ const handleRegister = async () => {
     }
 
     console.log('发送到后端的教练注册数据:', JSON.stringify(registerData, null, 2))
-    await userStore.register(registerData)
-
-    ElMessage.success('注册成功！注册即生效，请登录')
-    router.push('/login')
+    const result = await userStore.register(registerData)
+    
+    if ( result.success ) {
+      ElMessage.success('注册成功！请登录')
+      router.push('/login')
+    } else {
+      
+      ElMessage.error(result.message)
+    }
   } catch (error) {
     console.error('注册错误:', error)
-    ElMessage.error(error.message || '注册失败，请稍后重试')
+    // 检查是否是用户名重复错误
+    if (error.response && error.response.status === 400) {
+      const errorMessage = error.response.data?.message || error.message
+      if (errorMessage && errorMessage.includes('用户名已存在')) {
+        // 明确提示用户名重复
+        ElMessage.error('用户名已存在')
+        return
+      }
+    }
+    // 其他错误使用通用提示
+    ElMessage.error(error.message )
   } finally {
     loading.value = false
   }

@@ -69,6 +69,10 @@
           <el-icon><Clock /></el-icon>
           <template #title>我的课程</template>
         </el-menu-item>
+        <el-menu-item index="/student/account-recharge" class="menu-item">
+          <el-icon><Wallet /></el-icon>
+          <template #title>我的钱包</template>
+        </el-menu-item>
       </template>
 
       <!-- 教练菜单 - 扁平化 -->
@@ -143,6 +147,7 @@ import {
   Setting,
   User,
   UserFilled,
+  Wallet,
 } from '@element-plus/icons-vue'
 
 defineProps({
