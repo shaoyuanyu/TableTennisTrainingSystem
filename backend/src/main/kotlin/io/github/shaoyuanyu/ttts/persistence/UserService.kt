@@ -81,30 +81,34 @@ class UserService(
                 throw BadRequestException("用户名已存在")
             }
 
-            // 检查手机号是否已存在
-            if (newUser.phoneNumber.isNotBlank()) {
-                val existingPhoneUser = UserEntity.find { UserTable.phone_number eq newUser.phoneNumber }.firstOrNull()
-                if (existingPhoneUser != null) {
-                    throw BadRequestException("手机号已被注册")
-                }
-            }
+//            // 检查手机号是否已存在
+//            if (newUser.phoneNumber.isNotBlank()) {
+//                val existingPhoneUser = UserEntity.find { UserTable.phone_number eq newUser.phoneNumber }.firstOrNull()
+//                if (existingPhoneUser != null) {
+//                    throw BadRequestException("手机号已被注册")
+//                }
+//            }
 
-            // 检查邮箱是否已存在
-            if (newUser.email.isNotBlank()) {
-                val existingEmailUser = UserEntity.find { UserTable.email eq newUser.email}.firstOrNull()
-                if (existingEmailUser != null) {
-                    throw BadRequestException("邮箱已被注册")
-                }
-            }
+//            // 检查邮箱是否已存在
+//            if (newUser.email.isNotBlank()) {
+//                val existingEmailUser = UserEntity.find { UserTable.email eq newUser.email}.firstOrNull()
+//                if (existingEmailUser != null) {
+//                    throw BadRequestException("邮箱已被注册")
+//                }
+//            }
+
             if (newUser.username.isBlank()) {
                 throw BadRequestException("用户名不能为空")
             }
+
             if (newUser.plainPassword.isNullOrBlank()) {
                 throw BadRequestException("密码不能为空")
             }
+
             if (newUser.realName.isBlank()) {
                 throw BadRequestException("真实姓名不能为空")
             }
+
             // 验证字段格式
 //            if (!newUser.username.matches(Regex("^[a-zA-Z0-9_]{4,20}$"))) {
 //                throw BadRequestException("用户名必须是4-20位的字母、数字或下划线")
@@ -140,9 +144,9 @@ class UserService(
                 }
 
                 UserRole.COACH -> {
-                    if (newUser.coachInfo == null) {
-                        throw BadRequestException("教练用户必须提供教练信息")
-                    }
+//                    if (newUser.coachInfo == null) {
+//                        throw BadRequestException("教练用户必须提供教练信息")
+//                    }
 //                    // 验证教练信息
 //                    if (!newUser.coachInfo.photoUrl.isNullOrBlank() && !newUser.coachInfo.photoUrl.matches(Regex("^https?://.+"))) {
 //                        throw BadRequestException("教练照片URL格式不正确")
