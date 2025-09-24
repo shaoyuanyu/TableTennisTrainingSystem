@@ -15,52 +15,40 @@
         <template #title>仪表盘</template>
       </el-menu-item>
 
-      <!-- 超级管理员菜单 - 优化版本 -->
+      <!-- 超级管理员菜单 - 扁平化 -->
       <template v-if="isSuperAdmin">
-        <el-sub-menu index="admin" class="menu-item">
-          <template #title>
-            <el-icon><Setting /></el-icon>
-            <span>系统管理</span>
-          </template>
-          <el-menu-item index="/admin/campus">
-            <el-icon><OfficeBuilding /></el-icon>
-            <template #title>校区管理</template>
-          </el-menu-item>
-          <el-menu-item index="/admin/service">
-            <el-icon><CreditCard /></el-icon>
-            <template #title>服务状态</template>
-          </el-menu-item>
-          <el-menu-item index="/admin/data">
-            <el-icon><Document /></el-icon>
-            <template #title>数据导出</template>
-          </el-menu-item>
-          <el-menu-item index="/admin/logs">
-            <el-icon><Document /></el-icon>
-            <template #title>系统日志</template>
-          </el-menu-item>
-        </el-sub-menu>
+        <el-menu-item index="/admin/campus" class="menu-item">
+          <el-icon><OfficeBuilding /></el-icon>
+          <template #title>校区管理</template>
+        </el-menu-item>
+        <el-menu-item index="/admin/service" class="menu-item">
+          <el-icon><CreditCard /></el-icon>
+          <template #title>服务状态</template>
+        </el-menu-item>
+        <el-menu-item index="/admin/data" class="menu-item">
+          <el-icon><Document /></el-icon>
+          <template #title>数据导出</template>
+        </el-menu-item>
+        <el-menu-item index="/admin/logs" class="menu-item">
+          <el-icon><Document /></el-icon>
+          <template #title>系统日志</template>
+        </el-menu-item>
       </template>
 
-      <!-- 校区管理员菜单 - 简化版本 -->
+      <!-- 校区管理员菜单 - 扁平化 -->
       <template v-if="isCampusAdmin">
-        <el-sub-menu index="campus" class="menu-item">
-          <template #title>
-            <el-icon><Management /></el-icon>
-            <span>校区管理</span>
-          </template>
-          <el-menu-item index="/campus/students">
-            <el-icon><User /></el-icon>
-            <template #title>学员管理</template>
-          </el-menu-item>
-          <el-menu-item index="/campus/coaches">
-            <el-icon><Avatar /></el-icon>
-            <template #title>教练管理</template>
-          </el-menu-item>
-          <el-menu-item index="/campus/appointments">
-            <el-icon><Calendar /></el-icon>
-            <template #title>预约管理</template>
-          </el-menu-item>
-        </el-sub-menu>
+        <el-menu-item index="/campus/students" class="menu-item">
+          <el-icon><User /></el-icon>
+          <template #title>学员管理</template>
+        </el-menu-item>
+        <el-menu-item index="/campus/coaches" class="menu-item">
+          <el-icon><Avatar /></el-icon>
+          <template #title>教练管理</template>
+        </el-menu-item>
+        <el-menu-item index="/campus/appointments" class="menu-item">
+          <el-icon><Calendar /></el-icon>
+          <template #title>预约管理</template>
+        </el-menu-item>
       </template>
 
       <!-- 学员菜单 - 扁平化 -->

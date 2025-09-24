@@ -159,7 +159,7 @@ const handleRegisterCommand = (command) => {
 const handleUserCommand = async (command) => {
   switch (command) {
     case 'profile':
-      router.push('/profile')
+      await router.push('/profile')
       break
     case 'settings':
       // TODO: 实现设置页面
@@ -171,7 +171,7 @@ const handleUserCommand = async (command) => {
           cancelButtonText: '取消',
           type: 'warning',
         })
-        userStore.logout()
+        await userStore.logout()
       } catch {
         // 用户取消退出
       }
@@ -206,21 +206,6 @@ const handleUserCommand = async (command) => {
   display: flex;
   align-items: center;
   gap: 16px;
-}
-
-.sidebar-toggle.btn-modern {
-  color: rgba(255, 255, 255, 0.9);
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  transition: all 0.3s ease;
-}
-
-.sidebar-toggle.btn-modern:hover {
-  color: #ffffff;
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.3);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .app-title {
@@ -306,37 +291,6 @@ const handleUserCommand = async (command) => {
   gap: 12px;
 }
 
-.guest-actions .btn-modern {
-  background: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  color: #ffffff;
-  font-weight: 600;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-  transition: all 0.3s ease;
-}
-
-.guest-actions .btn-modern:hover {
-  background: rgba(255, 255, 255, 0.25);
-  border-color: rgba(255, 255, 255, 0.4);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.guest-actions .btn-modern {
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: #ffffff;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-}
-
-.guest-actions .btn-modern:not(.btn-primary) {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.guest-actions .btn-modern:not(.btn-primary):hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-
 .sidebar {
   background: rgba(255, 255, 255, 0.12);
   backdrop-filter: blur(15px);
@@ -355,13 +309,5 @@ const handleUserCommand = async (command) => {
 }
 
 /* Element Plus的el-main样式调整 */
-:deep(.el-main) {
-  padding: 0;
-}
 
-:deep(.el-dropdown-menu__item) {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
 </style>
