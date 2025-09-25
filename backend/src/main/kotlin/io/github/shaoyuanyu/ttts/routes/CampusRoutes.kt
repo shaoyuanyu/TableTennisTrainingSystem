@@ -2,9 +2,7 @@ package io.github.shaoyuanyu.ttts.routes
 
 import io.github.shaoyuanyu.ttts.dto.campus.AddTableRequest
 import io.github.shaoyuanyu.ttts.dto.campus.CampusCreateRequest
-import io.github.shaoyuanyu.ttts.dto.user.UserSession
 import io.github.shaoyuanyu.ttts.exceptions.BadRequestException
-import io.github.shaoyuanyu.ttts.exceptions.UnauthorizedException
 import io.github.shaoyuanyu.ttts.persistence.CampusService
 import io.github.shaoyuanyu.ttts.utils.getUserIdFromCall
 import io.ktor.http.*
@@ -13,8 +11,6 @@ import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import io.ktor.server.sessions.get
-import io.ktor.server.sessions.sessions
 
 fun Application.campusRoutes(campusService: CampusService) {
     routing {

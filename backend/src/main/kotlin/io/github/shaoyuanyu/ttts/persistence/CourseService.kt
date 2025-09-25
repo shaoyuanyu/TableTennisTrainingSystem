@@ -464,7 +464,7 @@ class CourseService(
                 isTableAvailable(table, parsedDate, parsedStartTime, parsedEndTime)
             }
 
-            availableTables.map { it.expose() }
+            availableTables.map { it.expose() }.sortedBy(Table::indexInCampus)
         }
     }
 }

@@ -91,6 +91,7 @@ class CampusService(
             USER_LOGGER.info("创建校区成功，校区名：${newCampus.campusName}，管理员：${newCampus.contactPerson}")
         }
     }
+
     /**
      * 查询所有校区
      */
@@ -111,6 +112,7 @@ class CampusService(
 
             records to total
         }
+
     /**
      * 增加球桌数量
      */
@@ -144,6 +146,7 @@ class CampusService(
         }.also {
             USER_LOGGER.info("增加球桌成功，用户ID：$userId，增加数量：$number")
         }
+
     /**
      * 获取校区所有空闲球桌
      */
@@ -152,6 +155,6 @@ class CampusService(
             val campusId= UserEntity.findById(UUID.fromString(userId))?.campusId ?: throw IllegalArgumentException("用户不存在")
             TableEntity.find {
                 TableTable.status.eq(TableStatus.FREE) and (TableTable.campusId.eq(campusId))
-            }.toList().map { it.expose() }
+            }.toList().map { it.expose() }.sortedBy(Table::indexInCampus)
         }
 }

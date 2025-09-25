@@ -199,7 +199,7 @@ fun Route.coachJudgeCourse(courseService: CourseService) {
         val judge = request.confirmed
         val title= request.title
         courseService.judegeCourse(coachId, courseId, judge,title)
-        call.respond(HttpStatusCode.OK,)
+        call.respond(HttpStatusCode.OK)
     }
 }
 
