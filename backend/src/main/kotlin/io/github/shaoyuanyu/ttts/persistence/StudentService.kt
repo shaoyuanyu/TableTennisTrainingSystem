@@ -448,4 +448,74 @@ class StudentService(
             USER_LOGGER.info("比赛结果录入成功，获胜者：$winner，失败者：$loser，球台 ID：${winnerSignup.tableId}")
         }
     }
+
+    /**
+     * 获取用户个人比赛安排
+     */
+    fun getUserSchedule(userId: String): List<Map<String, Any>> {
+        return transaction(database) {
+            // 获取用户信息
+            val userEntity = UserEntity.findById(UUID.fromString(userId))
+                ?: throw NotFoundException("用户不存在")
+            
+            // 获取用户的报名信息
+            val signup = ComEntity.find { 
+                (ComTable.userId eq userId) and 
+                (ComTable.status eq "ACTIVE") 
+            }.singleOrNull() ?: throw NotFoundException("用户未报名比赛")
+            
+            // 获取同组所有用户
+            val groupMembers = ComEntity.find { 
+                (ComTable.group eq signup.group) and 
+                (ComTable.campusId eq userEntity.campusId) and
+                (ComTable.status eq "ACTIVE")
+            }.toList()
+            
+            // 生成循环赛程
+            val players = groupMembers.map { it.username }
+            val matches = generateRoundRobinSchedule(players)
+            
+            // 筛选出包含当前用户的所有比赛
+            val userMatches = matches.filter { match ->
+                match["player1"] == signup.username || match["player2"] == signup.username
+            }
+            
+            userMatches
+        }
+    }
+    
+    /**
+     * 生成循环赛程
+     */
+    private fun generateRoundRobinSchedule(players: List<String>): List<Map<String, Any>> {
+        val n = if (players.size % 2 == 0) players.size else players.size + 1
+        val fixedPlayers = if (players.size % 2 == 1) players + listOf("轮空") else players
+        val rounds = n - 1
+        val matchesPerRound = n / 2
+        
+        val allMatches = mutableListOf<Map<String, Any>>()
+        
+        for (round in 1..rounds) {
+            for (matchIndex in 0 until matchesPerRound) {
+                val player1Index = if (matchIndex == 0) 0 else (round + matchIndex - 1) % (n - 1) + 1
+                val player2Index = if (matchIndex == 0) n - 1 else (round - matchIndex - 1 + n - 1) % (n - 1) + 1
+                
+                val player1 = if (player1Index < fixedPlayers.size) fixedPlayers[player1Index] else "轮空"
+                val player2 = if (player2Index < fixedPlayers.size) fixedPlayers[player2Index] else "轮空"
+                
+                // 确保不是自己和自己比赛（除了轮空的情况）
+                if (player1 != player2 || player1 == "轮空" || player2 == "轮空") {
+                    allMatches.add(
+                        mapOf(
+                            "round" to round,
+                            "player1" to player1,
+                            "player2" to player2
+                        )
+                    )
+                }
+            }
+        }
+        
+        return allMatches
+    }
 }

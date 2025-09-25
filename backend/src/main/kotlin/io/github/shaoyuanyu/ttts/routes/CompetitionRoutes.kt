@@ -34,15 +34,19 @@ fun Application.competitionRoutes(studentService: StudentService) {
             authenticate("auth-session-student") {
                 signupCompetition(studentService)
                 querysignup(studentService)
+                getUserSchedule(studentService)
+                getLatestTournament(studentService) // 添加获取最新比赛信息接口
             }
             //管理员权限
             authenticate ("auth-session-campus-admin"){
                 getCampusCompetitions(studentService)
                 enterCompetitionResults(studentService)
+                getTournaments(studentService) // 添加获取比赛列表接口
             }
             // 超级管理员权限
             authenticate("auth-session-super-admin") {
                 getAllCompetitions(studentService)
+                getTournaments(studentService) // 添加获取比赛列表接口
             }
         }
     }
@@ -86,6 +90,21 @@ fun Route.querysignup(studentService: StudentService) {
  }
 }
 /**
+ * 获取用户个人比赛安排
+ */
+fun Route.getUserSchedule(studentService: StudentService) {
+    get("/my-schedule") {
+        val userId = call.sessions.get<UserSession>()?.userId
+            ?: throw UnauthorizedException("未登录")
+            
+        val schedule = studentService.getUserSchedule(userId)
+        call.respond(
+            HttpStatusCode.OK,
+            schedule
+        )
+    }
+}
+/**
  * 获取所有竞赛信息
  */
 fun Route.getAllCompetitions(studentService: StudentService) {
@@ -127,6 +146,38 @@ fun Route.enterCompetitionResults(studentService: StudentService) {
         call.respond(
             HttpStatusCode.OK,
             "成绩录入成功"
+        )
+    }
+}
+
+/**
+ * 获取比赛列表
+ */
+fun Route.getTournaments(studentService: StudentService) {
+    get("/tournaments") {
+        // TODO: 实现获取比赛列表的逻辑
+        call.respond(
+            HttpStatusCode.OK,
+            mapOf(
+                "items" to emptyList<Any>(),
+                "total" to 0
+            )
+        )
+    }
+}
+
+/**
+ * 获取最新的比赛信息
+ */
+fun Route.getLatestTournament(studentService: StudentService) {
+    get("/latest") {
+        // TODO: 实现获取最新比赛信息的逻辑
+        call.respond(
+            HttpStatusCode.OK,
+            mapOf(
+                "date" to "",
+                "registrationDeadline" to ""
+            )
         )
     }
 }
