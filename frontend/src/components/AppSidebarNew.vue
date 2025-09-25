@@ -33,6 +33,10 @@
           <el-icon><Management /></el-icon>
           <template #title>球台管理</template>
         </el-menu-item>
+        <el-menu-item index="/campus/tournaments" class="menu-item">
+          <el-icon><Trophy /></el-icon>
+          <template #title>比赛管理</template>
+        </el-menu-item>
         <el-menu-item index="/admin/service" class="menu-item">
           <el-icon><CreditCard /></el-icon>
           <template #title>服务状态</template>
@@ -44,10 +48,6 @@
         <el-menu-item index="/admin/logs" class="menu-item">
           <el-icon><Document /></el-icon>
           <template #title>系统日志</template>
-        </el-menu-item>
-        <el-menu-item index="/campus/tournaments" class="menu-item">
-          <el-icon><Trophy /></el-icon>
-          <template #title>比赛管理</template>
         </el-menu-item>
       </template>
 
@@ -108,6 +108,10 @@
         <el-menu-item index="/student/matches" class="menu-item">
           <el-icon><Trophy /></el-icon>
           <template #title>我的比赛</template>
+        </el-menu-item>
+        <el-menu-item index="/student/competition-schedule" class="menu-item">
+          <el-icon><Calendar /></el-icon>
+          <template #title>赛程安排</template>
         </el-menu-item>
       </template>
 

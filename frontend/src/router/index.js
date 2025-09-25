@@ -265,6 +265,16 @@ const router = createRouter({
           },
         },
         {
+          path: 'student/competition-schedule',
+          name: 'CompetitionSchedule',
+          component: () => import('@/views/student/CompetitionScheduleView.vue'),
+          meta: {
+            requiresAuth: true,
+            title: '赛程安排',
+            roles: ['student'],
+          },
+        },
+        {
           path: 'student/evaluation',
           name: 'TrainingEvaluation',
           component: () => import('@/views/student/TrainingEvaluationView.vue'),

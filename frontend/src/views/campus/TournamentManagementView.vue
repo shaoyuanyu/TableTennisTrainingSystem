@@ -1,20 +1,24 @@
 <template>
-  <div class="tournament-management">
-    <PageHeader title="比赛管理" />
-
-    <el-card class="create-tournament-card">
-      <template #header>
-        <div class="card-header">
-          <span>创建新比赛</span>
+  <div class="tournament-management container">
+    <!-- 现代化页头：使用设计系统 .page-header 与头部布局 -->
+    <div class="page-header hover-lift">
+      <div class="header-left">
+        <div class="header-icon-wrapper"><span class="header-icon">🏓</span></div>
+        <div class="header-text">
+          <h3>比赛管理</h3>
+          <p>创建与管理校区比赛，查看列表与报名截止情况</p>
         </div>
-      </template>
+      </div>
+    </div>
 
+    <!-- 创建比赛：使用设计系统 GlassHeaderCard 包裹，统一头部与间距 -->
+  <GlassHeaderCard ref="createSectionRef" title="创建新比赛" icon="🏆" size="medium">
       <el-form
         ref="createFormRef"
         :model="createForm"
         :rules="createRules"
         label-width="120px"
-        class="create-form"
+        class="create-form stack"
       >
         <el-row :gutter="20">
           <el-col :span="12">
@@ -79,7 +83,7 @@
           />
         </el-form-item>
 
-        <el-form-item>
+        <div class="form-actions cluster">
           <el-button
             type="primary"
             @click="createTournament"
@@ -88,44 +92,64 @@
             创建比赛
           </el-button>
           <el-button @click="resetForm">重置</el-button>
-        </el-form-item>
-      </el-form>
-    </el-card>
-
-    <el-card class="tournaments-list">
-      <template #header>
-        <div class="card-header">
-          <span>比赛列表</span>
-          <el-button type="primary" @click="fetchTournaments" :icon="Refresh" circle />
         </div>
+      </el-form>
+    </GlassHeaderCard>
+
+    <!-- 比赛列表：使用 GlassHeaderCard 并在头部右侧放操作按钮 -->
+    <GlassHeaderCard title="比赛列表" icon="📋" size="medium">
+      <template #headerActions>
+        <el-button type="primary" @click="fetchTournaments" :icon="Refresh">刷新</el-button>
       </template>
 
       <el-table
         :data="tournaments"
         v-loading="loading"
         style="width: 100%"
+        stripe
       >
-        <el-table-column prop="name" label="比赛名称" />
-        <el-table-column prop="type" label="类型">
+        <el-table-column prop="name" label="比赛名称" min-width="160" />
+        <el-table-column prop="type" label="类型" min-width="120">
           <template #default="scope">
             {{ scope.row.type }}
           </template>
         </el-table-column>
-        <el-table-column prop="date" label="比赛日期" />
-        <el-table-column prop="registrationDeadline" label="报名截止" />
-        <el-table-column prop="fee" label="报名费">
+        <el-table-column prop="date" label="比赛日期" min-width="140" />
+        <el-table-column prop="registrationDeadline" label="报名截止" min-width="140" />
+        <el-table-column prop="fee" label="报名费" width="120">
           <template #default="scope">
             {{ scope.row.fee }} 元
           </template>
         </el-table-column>
-        <el-table-column label="操作">
+        <el-table-column label="报名人数" width="120">
+          <template #default="scope">
+            {{ scope.row.currentSignupStudentNumber ?? 0 }} 人
+          </template>
+        </el-table-column>
+        <el-table-column label="状态" width="120">
+          <template #default="scope">
+            <el-tag :type="getTournamentStatusType(scope.row)">
+              {{ getTournamentStatusText(scope.row) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="180" fixed="right">
           <template #default="scope">
             <el-button size="small" @click="viewDetails(scope.row)">详情</el-button>
             <el-button
+              v-if="scope.row.status === '未开始'"
+              size="small"
+              type="success"
+              @click="startTournament(scope.row)"
+            >
+              开始比赛
+            </el-button>
+            <el-button
+              v-else
               size="small"
               type="danger"
               @click="deleteTournament(scope.row)"
-              :disabled="scope.row.status === 'completed'"
+              :disabled="scope.row.status === '已结束'"
             >
               删除
             </el-button>
@@ -144,7 +168,7 @@
           @current-change="handleCurrentChange"
         />
       </div>
-    </el-card>
+    </GlassHeaderCard>
   </div>
 </template>
 
@@ -152,10 +176,11 @@
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Refresh } from '@element-plus/icons-vue'
-import PageHeader from '@/components/PageHeader.vue'
+import { GlassHeaderCard } from '@/components/cards'
 import api from '@/utils/api'
 import { useUserStore } from '@/stores/user'
-
+// 页头动作：平滑滚动到创建表单
+const createSectionRef = ref(null)
 // 表单引用
 const createFormRef = ref()
 
@@ -262,7 +287,8 @@ const viewDetails = (tournament) => {
      <strong>比赛日期：</strong>${tournament.date}<br>
      <strong>报名截止：</strong>${tournament.registrationDeadline}<br>
      <strong>报名费用：</strong>${tournament.fee}元<br>
-     <strong>比赛描述：</strong>${tournament.description || '无'}`,
+     <strong>比赛描述：</strong>${tournament.description || '无'}<br>
+     <strong>比赛状态：</strong>${tournament.status}`,
     '比赛详情',
     {
       dangerouslyUseHTMLString: true,
@@ -293,6 +319,62 @@ const deleteTournament = (tournament) => {
   })
 }
 
+// 获取比赛状态 (pending, ongoing, completed)
+const getTournamentStatus = (tournament) => {
+  switch (tournament.status) {
+    case '未开始':
+      return 'pending'
+    case '进行中':
+      return 'ongoing'
+    case '已结束':
+      return 'completed'
+    default:
+      return 'unknown'
+  }
+}
+
+// 获取比赛状态文本
+const getTournamentStatusText = (tournament) => {
+  return tournament.status || '未知'
+}
+
+// 获取比赛状态标签类型
+const getTournamentStatusType = (tournament) => {
+  switch (tournament.status) {
+    case '未开始':
+      return 'warning' // 黄色
+    case '进行中':
+      return 'success' // 绿色
+    case '已结束':
+      return 'info' // 灰色
+    default:
+      return 'info'
+  }
+}
+
+// 开始比赛
+const startTournament = async (tournament) => {
+  ElMessageBox.confirm(
+    `确定要提前开始比赛 "${tournament.name}" 吗？`,
+    '开始比赛确认',
+    {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }
+  ).then(async () => {
+    try {
+      await api.post(`/competition/arrange/${tournament.id}`)
+      ElMessage.success('比赛开始成功')
+      fetchTournaments()
+    } catch (error) {
+      ElMessage.error('开始比赛失败：' + (error.response?.data?.message || error.message))
+    }
+  }).catch(() => {
+    // 用户取消操作
+  })
+}
+
 const getTournamentTypeText = (type) => {
   return type
 }
@@ -314,23 +396,103 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* 页面容器与间距采用设计系统工具类，补充少量定制 */
 .tournament-management {
-  padding: 20px;
+  padding-top: var(--spacing-2xl);
+  padding-bottom: var(--spacing-3xl);
+  color: var(--white-alpha-90);
 }
 
-.card-header {
+/* 页头右侧动作区间距与换行适配 */
+.page-header .header-actions {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
 }
 
-.create-form {
-  margin-top: 20px;
+.glass-header-card + .glass-header-card {
+  /* 邻接卡片之间拉开间距，提高层次性 */
+  margin-top: var(--spacing-2xl);
+}
+
+.create-form :deep(.el-form-item) {
+  margin-bottom: var(--spacing-lg);
+}
+
+.form-actions {
+  justify-content: flex-start;
 }
 
 .pagination-container {
-  margin-top: 20px;
+  margin-top: var(--spacing-lg);
   display: flex;
   justify-content: flex-end;
 }
+
+/* 表格细节微调，增强可读性 */
+:deep(.el-table__header th) {
+  background: #f7f7f8; /* 更浅的表头底色提升分隔 */
+  color: var(--gray-700); /* 深灰增加对比度 */
+}
+:deep(.el-table) {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  color: var(--gray-800); /* 表格主体文本使用深灰 */
+}
+:deep(.el-table .cell),
+:deep(.el-table td),
+:deep(.el-table th) {
+  color: var(--gray-800);
+}
+
+/* 表单可读性与可触性增强：输入框/数字框/日期/文本域 统一玻璃风格 */
+:deep(.el-form-item__label) {
+  color: var(--white-alpha-90);
+}
+
+:deep(.el-input__wrapper) {
+  background: var(--white-alpha-10);
+  border: 1px solid var(--white-alpha-20);
+  border-radius: var(--radius-md);
+  box-shadow: none;
+}
+
+:deep(.el-input__wrapper.is-focus) {
+  box-shadow: 0 0 0 3px var(--focus-color);
+  background: var(--white-alpha-15);
+  border-color: var(--white-alpha-30);
+}
+
+:deep(.el-input__inner),
+:deep(.el-textarea__inner) {
+  color: var(--white-alpha-90);
+}
+
+:deep(.el-input__inner::placeholder),
+:deep(.el-textarea__inner::placeholder) {
+  color: var(--white-alpha-80);
+}
+
+/* 文本域 */
+:deep(.el-textarea__inner) {
+  background: var(--white-alpha-10);
+  border: 1px solid var(--white-alpha-20);
+  border-radius: var(--radius-md);
+}
+
+/* 数字输入 */
+:deep(.el-input-number .el-input__wrapper) {
+  background: var(--white-alpha-10);
+  border: 1px solid var(--white-alpha-20);
+  border-radius: var(--radius-md);
+}
+
+/* 日期选择器（使用相同输入外观） */
+:deep(.el-date-editor.el-input .el-input__wrapper),
+:deep(.el-date-editor--date .el-input__wrapper) {
+  background: var(--white-alpha-10);
+  border: 1px solid var(--white-alpha-20);
+  border-radius: var(--radius-md);
+}
+
 </style>

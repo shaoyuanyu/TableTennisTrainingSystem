@@ -22,6 +22,10 @@ object CompetitionTable : UUIDTable("competition") {
     
     // 报名截止日期
     val registrationDeadline: Column<LocalDate> = date("registration_deadline")
+
+    // 状态
+    // "未开始"、"进行中"、"已结束"
+    val status: Column<String> = varchar("status", 32)
     
     // 报名费用
     val fee: Column<Float> = float("fee")

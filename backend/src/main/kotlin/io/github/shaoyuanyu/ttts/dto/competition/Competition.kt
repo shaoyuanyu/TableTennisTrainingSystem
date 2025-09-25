@@ -12,6 +12,8 @@ data class Competition(
     val campusName: String? = null,
     val date: LocalDate,
     val registrationDeadline: LocalDate,
+    val status: String? = null,
     val fee: Float,
     val description: String,
+    var currentSignupStudentNumber: Int? = null,
 )

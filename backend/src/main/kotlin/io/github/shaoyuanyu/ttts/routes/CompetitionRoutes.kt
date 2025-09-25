@@ -29,6 +29,7 @@ fun Application.competitionRoutes(
             // 所有登录用户
             authenticate("auth-session-all") {
                 getCampusCompetitions(competitionService)
+                getCompetition(competitionService)
             }
 
             // 学生权限
@@ -95,6 +96,16 @@ fun Route.getAllCompetitions(competitionService: CompetitionService) {
     get("/all") {
         val competitions = competitionService.queryAllCompetitions()
         call.respond(HttpStatusCode.OK, competitions)
+    }
+}
+
+fun Route.getCompetition(competitionService: CompetitionService) {
+    get("/{competitionId}") {
+        val competitionId = call.parameters["competitionId"] ?: throw BadRequestException("缺少比赛ID参数")
+
+        val competition = competitionService.queryCompetitionById(competitionId)
+
+        call.respond(HttpStatusCode.OK, competition)
     }
 }
 
