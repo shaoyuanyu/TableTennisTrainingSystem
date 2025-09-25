@@ -3,6 +3,7 @@ package io.github.shaoyuanyu.ttts.routes
 import io.github.shaoyuanyu.ttts.dto.course.*
 import io.github.shaoyuanyu.ttts.exceptions.BadRequestException
 import io.github.shaoyuanyu.ttts.persistence.CourseService
+import io.github.shaoyuanyu.ttts.plugins.LOGGER
 import io.github.shaoyuanyu.ttts.utils.getUserIdFromCall
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -17,6 +18,9 @@ import io.ktor.server.routing.*
 fun Application.courseRoutes(courseService: CourseService) {
     routing {
         route("/courses") {
+            authenticate("auth-form") {
+
+            }
             // 学生权限路由
             authenticate("auth-session-student") {
                 getStudentSchedule(courseService)
@@ -164,8 +168,9 @@ fun Route.queryCourses(courseService: CourseService) {
 fun Route.bookCourse(courseService: CourseService) {
     post("/book") {
         val request = call.receive<CourseBookingRequest>()
-        val bookingId = courseService.bookCourse(request)
-        call.respond(HttpStatusCode.Created, mapOf("bookingId" to bookingId, "message" to "课程预约成功"))
+        LOGGER.info(request.toString())
+        courseService.bookCourse(request)
+        call.respond(HttpStatusCode.Created)
     }
 }
 

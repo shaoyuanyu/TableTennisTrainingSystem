@@ -380,7 +380,7 @@ class CourseService(
             // 创建课程
             val course = createCourse(Course)
             walletService.deduct(CourseBooking.studentId, CourseBooking.price)
-            walletService.recharge(CourseBooking.coachId, (CourseBooking.price * 0.6).toFloat())
+            //walletService.recharge(CourseBooking.coachId, (CourseBooking.price * 0.6).toFloat())
 
             COURSE_SERVICE_LOGGER.info("创建课程成功: ${course.id}")
         }

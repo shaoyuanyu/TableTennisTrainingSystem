@@ -71,7 +71,7 @@
                     available: hasAvailableSlots(data.day),
                     selected: selectedDate === data.day,
                   }"
-                  @click="selectDate(data.day)"
+                  @click="() => selectDate(data.day)"
                 >
                   <span class="date-text">{{ data.day.split('-').slice(2).join('') }}</span>
                   <div v-if="hasAvailableSlots(data.day)" class="available-indicator">
@@ -94,6 +94,11 @@
               >
                 <div class="slot-time">{{ slot.startTime }} - {{ slot.endTime }}</div>
                 <div class="slot-info">{{ slot.duration }}分钟</div>
+              </div>
+
+              <!-- 如果没有可用时间段，显示提示 -->
+              <div v-if="getAvailableSlots(selectedDate).length === 0" style="text-align: center; padding: 20px; color: #999;">
+                暂无可用时间段
               </div>
             </div>
             <div v-else class="no-date">
@@ -248,6 +253,59 @@ import { useUserStore } from '@/stores/user'
 import PrimaryButton from '@/components/buttons/PrimaryButton.vue'
 import OutlineButton from '@/components/buttons/OutlineButton.vue'
 
+// 从session中获取当前用户的UUID
+const getCurrentUserUUID = async () => {
+  try {
+    // 首先尝试从userStore获取
+    const userStore = useUserStore()
+    if (userStore.userInfo?.id) {
+      // 检查是否为有效的UUID格式
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+      if (uuidRegex.test(userStore.userInfo.id)) {
+        return userStore.userInfo.id
+      }
+    }
+
+    // 如果store中没有有效的UUID，尝试调用后端API获取用户信息
+    try {
+      const response = await api.get('/user/info')
+      if (response.data?.uuid) {
+        // 更新store中的用户信息
+        userStore.userInfo.id = response.data.uuid
+        // 更新localStorage中的用户信息
+        const storedUserInfo = localStorage.getItem('userInfo')
+        if (storedUserInfo) {
+          const userInfo = JSON.parse(storedUserInfo)
+          userInfo.id = response.data.uuid
+          localStorage.setItem('userInfo', JSON.stringify(userInfo))
+        }
+        return response.data.uuid
+      }
+    } catch (apiError) {
+      console.error('获取用户信息API调用失败:', apiError)
+    }
+
+    // 如果API调用失败，尝试从localStorage获取
+    const storedUserInfo = localStorage.getItem('userInfo')
+    if (storedUserInfo) {
+      const userInfo = JSON.parse(storedUserInfo)
+      if (userInfo.id) {
+        // 检查是否为有效的UUID格式
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+        if (uuidRegex.test(userInfo.id)) {
+          return userInfo.id
+        }
+      }
+    }
+
+    // 如果以上都没有，返回null
+    return null
+  } catch (error) {
+    console.error('获取用户UUID时出错:', error)
+    return null
+  }
+}
+
 const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
@@ -338,11 +396,17 @@ const selectCoach = (coach) => {
 
 // 选择日期
 const selectDate = async (date) => {
-  selectedDate.value = dayjs(date).format('YYYY-MM-DD')
+  // 直接使用日期字符串，避免时区转换问题
+  if (typeof date === 'string') {
+    selectedDate.value = date
+  } else {
+    // 确保日期格式化时使用正确的格式，避免时区转换导致的日期偏移
+    selectedDate.value = dayjs(date).format('YYYY-MM-DD')
+  }
   selectedTimeSlot.value = null
 
   // 自动加载该日期的教练排班信息
-  if (selectedCoach.value) {
+  if (selectedCoach.value && selectedDate.value) {
     await loadCoachSchedule()
     // 等待DOM更新后再继续
     await nextTick()
@@ -374,21 +438,14 @@ const loadCoachSchedule = async () => {
   
   try {
     // 调用API获取教练在指定日期的排班信息
+    // 确保日期格式为 YYYY-MM-DD 字符串，强制转换为字符串类型
     const params = {
-      dateFrom: selectedDate.value,
-      dateTo: selectedDate.value
+      dateFrom: String(selectedDate.value),
+      dateTo: String(selectedDate.value)
     }
     
-    // 首先尝试使用 getCoachScheduleForStudent 方法
-    let courses;
-    try {
-      courses = await getCoachScheduleForStudent(selectedCoach.value.id, params)
-    } catch (error) {
-      // 如果失败，尝试使用 getCoachSchedule 方法
-      console.warn('使用 getCoachScheduleForStudent 失败，尝试使用 getCoachSchedule:', error)
-      params.coachId = selectedCoach.value.id
-      courses = await getCoachSchedule(params)
-    }
+    // 使用学生查询教练课表的专用接口
+    const courses = await getCoachScheduleForStudent(selectedCoach.value.id, params)
 
     // 确保courses是数组
     const validCourses = Array.isArray(courses) ? courses : []
@@ -431,6 +488,11 @@ const loadCoachSchedule = async () => {
     const availableSlots = fixedTimeSlots.filter(slot => !bookedSlots.includes(slot.NO))
     
     schedule[selectedDate.value] = availableSlots
+    
+    // 添加日志，显示从后端获取的数据和过滤后的空闲时间段
+    console.log('从后端获取的教练排课数据:', validCourses)
+    console.log('已占用的时间段NO:', bookedSlots)
+    console.log('过滤后的空闲时间段:', availableSlots)
   } catch (error) {
     console.error('获取排班信息失败:', error)
     ElMessage.error('获取排班信息失败: ' + (error.message || '未知错误'))
@@ -444,10 +506,11 @@ const loadCoachSchedule = async () => {
       { id: 9, NO: 9, startTime: '19:00', endTime: '20:00', duration: 60 }
     ]
     schedule[selectedDate.value] = fixedTimeSlots
+    
+    console.log('使用模拟数据作为备选方案:', fixedTimeSlots)
   }
   
   coachSchedule.value = schedule
-  console.log('获取到的教练排班:', schedule)
   
   // 强制更新视图
   await nextTick()
@@ -470,7 +533,7 @@ const fetchAvailableTables = async () => {
   try {
     // 调用后端API获取本校区的空闲球桌列表
     const response = await api.get('/campus/queryFreeTables')
-    
+
     // 处理后端返回的球桌数据
     const tables = response.data || []
     availableTables.value = tables.map(table => ({
@@ -478,7 +541,7 @@ const fetchAvailableTables = async () => {
       name: `${table.indexInCampus}号球桌`,
       location: table.group || '未知区域'
     }))
-    
+
     console.log('获取到的球桌列表:', availableTables.value)
   } catch (error) {
     console.error('获取球桌列表失败:', error)
@@ -488,12 +551,17 @@ const fetchAvailableTables = async () => {
 
 // 检查日期是否有可用时段
 const hasAvailableSlots = (date) => {
-  return (coachSchedule.value[date] || []).length > 0
+  const slots = coachSchedule.value[date] || []
+  const hasSlots = slots.length > 0
+  return hasSlots
 }
 
 // 获取可用时间段
 const getAvailableSlots = (date) => {
-  return coachSchedule.value[date] || []
+  const slots = coachSchedule.value[date] || []
+  // 将响应式数据转换为普通数组
+  const plainSlots = Array.from(slots)
+  return plainSlots
 }
 
 // 获取教练价格
@@ -538,13 +606,6 @@ const nextStep = async () => {
     }
   }
 
-  if (currentStep.value === 1) {
-    // 确保在第二步时有排班信息
-    if (selectedCoach.value && selectedDate.value) {
-      await loadCoachSchedule()
-    }
-  }
-
   if (currentStep.value === 2) {
     // 验证表单
     try {
@@ -575,16 +636,64 @@ const confirmBooking = async () => {
 
     submitting.value = true
 
-    const bookingData = {
-      title: courseForm.title,
-      description: courseForm.description || '',
-      coachId: selectedCoach.value?.id || '',
-      studentId: userStore.user?.id || '',
-      date: selectedDate.value || '',
-      NO: courseForm.NO || 1,
-      price: parseFloat(calculatePrice()) || 0,
-      tableId: selectedTable.value || null, // 球桌ID，可以为空，后端会自动分配
+    // 使用新函数获取当前用户的UUID
+    const studentUUID = await getCurrentUserUUID()
+
+    // 确保用户信息存在
+    const currentUser = userStore.userInfo || {}
+    console.log('当前用户信息:', currentUser)
+
+    // 确保日期是正确格式的字符串
+    let dateString = ''
+    if (selectedDate.value) {
+      if (typeof selectedDate.value === 'string') {
+        dateString = selectedDate.value
+      } else if (selectedDate.value instanceof Date) {
+        // 将Date对象格式化为'YYYY-MM-DD'字符串格式
+        dateString = dayjs(selectedDate.value).format('YYYY-MM-DD')
+      }
     }
+    
+    // 如果dateString仍然为空但selectedDate有值，则直接使用selectedDate
+    if (!dateString && selectedDate.value) {
+      dateString = selectedDate.value;
+    }
+
+    // 构建预约数据，确保所有字段类型正确
+    const bookingData = {
+      title: String(courseForm.title || ''),
+      description: String(courseForm.description || ''),
+      coachId: String(selectedCoach.value?.id || ''),
+      studentId: String(studentUUID || currentUser.id || userStore.userId || ''),
+      date: String(dateString || ''),
+      NO: Number.parseInt(courseForm.NO) || 0,
+      campusId: Number.parseInt(currentUser.campusId) || 0,
+      price: Number.parseFloat(calculatePrice()) || 0.0,
+      tableId: selectedTable.value ? String(selectedTable.value) : null
+    }
+
+    // 添加验证确保必填字段不为空
+    if (!bookingData.coachId || bookingData.coachId === '') {
+      throw new Error('教练信息缺失')
+    }
+
+    if (!bookingData.studentId || bookingData.studentId === '') {
+      throw new Error('学生信息缺失，请重新登录')
+    }
+
+    if (!bookingData.date || bookingData.date === '') {
+      throw new Error('预约日期缺失')
+    }
+
+    if (!bookingData.NO || bookingData.NO <= 0) {
+      throw new Error('课程节数无效')
+    }
+
+    if (!bookingData.campusId || bookingData.campusId <= 0) {
+      throw new Error('校区信息缺失')
+    }
+
+    console.log('预约提交数据:', bookingData)  // 添加日志，方便调试
 
     await api.post('/courses/book', bookingData)
 
