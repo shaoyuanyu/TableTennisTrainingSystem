@@ -1,6 +1,6 @@
 <template>
   <div class="my-matches">
-    <PageHeader title="我的比赛安排" />
+    <PageHeader title="我的比赛安排" :centered="true" />
     
     <el-card class="matches-overview" v-if="!hasRegistered">
       <el-result
@@ -18,11 +18,19 @@
     
     <div v-else>
       <el-card class="registration-info">
-        <el-descriptions title="报名信息" :column="3" border>
-          <el-descriptions-item label="参赛组别">{{ registrationInfo.group }}</el-descriptions-item>
-          <el-descriptions-item label="球台编号">{{ registrationInfo.tableId }}</el-descriptions-item>
-          <el-descriptions-item label="对手">{{ registrationInfo.opponentUsername || '待分配' }}</el-descriptions-item>
-        </el-descriptions>
+        <el-result
+          icon="success"
+          title="已报名"
+          sub-title="请等待安排比赛"
+        >
+          <template #extra>
+            <el-descriptions :column="3" border>
+              <el-descriptions-item label="参赛组别">{{ getGroupText(registrationInfo.group) }}</el-descriptions-item>
+              <el-descriptions-item label="球台编号">{{ registrationInfo.tableId }}</el-descriptions-item>
+              <el-descriptions-item label="对手">{{ registrationInfo.opponentUsername || '待分配' }}</el-descriptions-item>
+            </el-descriptions>
+          </template>
+        </el-result>
       </el-card>
       
       <el-card class="schedule-section">
@@ -87,6 +95,16 @@ const loading = ref(false)
 const hasRegistered = ref(false)
 const registrationInfo = ref({})
 const matches = ref([])
+
+// 获取组别文本
+const getGroupText = (groupValue) => {
+  const groupMap = {
+    'A': '甲组',
+    'B': '乙组',
+    'C': '丙组'
+  }
+  return groupMap[groupValue] || groupValue
+}
 
 // 方法
 const fetchRegistrationInfo = async () => {
