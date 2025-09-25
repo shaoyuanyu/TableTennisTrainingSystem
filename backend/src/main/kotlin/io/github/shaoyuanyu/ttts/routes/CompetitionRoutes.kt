@@ -42,8 +42,6 @@ fun Application.competitionRoutes(
             //管理员权限
             authenticate ("auth-session-admin"){
                 createCompetition(competitionService)
-//                enterCompetitionResults(studentService)
-//                deleteTournament(studentService) // 添加删除比赛接口
             }
 
             // 超级管理员权限
@@ -64,11 +62,14 @@ fun Route.createCompetition(competitionService: CompetitionService) {
         competitionService.createCompetition(
             name = request.name,
             type = request.type,
+            campusId = request.campusId,
             date = request.date,
             registrationDeadline = request.registrationDeadline,
             fee = request.fee,
             description = request.description
         )
+
+        call.respond(HttpStatusCode.OK, "比赛创建成功")
     }
 }
 
@@ -193,53 +194,6 @@ fun Route.getAllCompetitions(competitionService: CompetitionService) {
 //        try {
 //            val result = studentService.getTournaments(page, size)
 //            call.respond(HttpStatusCode.OK, result)
-//        } catch (e: Exception) {
-//            call.respond(HttpStatusCode.InternalServerError, mapOf("error" to e.message))
-//        }
-//    }
-//}
-
-/**
- * 删除比赛
- */
-//fun Route.deleteTournament(studentService: StudentService) {
-//    delete("/tournaments/{id}") {
-//        try {
-//            val id = call.parameters["id"]?.toIntOrNull()
-//                ?: throw IllegalArgumentException("无效的比赛ID")
-//
-//            val success = studentService.deleteTournament(id)
-//            if (success) {
-//                call.respond(HttpStatusCode.OK, mapOf("message" to "比赛删除成功"))
-//            } else {
-//                call.respond(HttpStatusCode.NotFound, mapOf("error" to "比赛不存在"))
-//            }
-//        } catch (e: Exception) {
-//            call.respond(HttpStatusCode.BadRequest, mapOf("error" to e.message))
-//        }
-//    }
-//}
-
-///**
-// * 获取最新比赛信息
-// */
-//fun Route.getLatestTournament(studentService: StudentService) {
-//    get("/latest") {
-//        try {
-//            // 调用服务方法获取最新比赛信息
-//            val latestTournament = studentService.getLatestTournament()
-//            call.respond(HttpStatusCode.OK, latestTournament)
-//        } catch (e: NotFoundException) {
-//            // 如果没有找到比赛，返回空对象而不是错误
-//            call.respond(HttpStatusCode.OK, mapOf(
-//                "id" to null,
-//                "name" to "",
-//                "type" to "monthly",
-//                "date" to "",
-//                "registrationDeadline" to "",
-//                "fee" to 30,
-//                "description" to ""
-//            ))
 //        } catch (e: Exception) {
 //            call.respond(HttpStatusCode.InternalServerError, mapOf("error" to e.message))
 //        }

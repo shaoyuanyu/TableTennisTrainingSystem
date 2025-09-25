@@ -5,6 +5,7 @@ import com.zaxxer.hikari.HikariDataSource
 import io.github.shaoyuanyu.ttts.persistence.campus.CampusTable
 import io.github.shaoyuanyu.ttts.persistence.coach.CoachTable
 import io.github.shaoyuanyu.ttts.persistence.competition.CompetitionSignupTable
+import io.github.shaoyuanyu.ttts.persistence.competition.CompetitionTable
 import io.github.shaoyuanyu.ttts.persistence.message.MessageTable
 import io.github.shaoyuanyu.ttts.persistence.mutual_selection.MutualSelectionTable
 import io.github.shaoyuanyu.ttts.persistence.recharge.RechargeTable
@@ -48,9 +49,10 @@ fun configureDatabase(
         SchemaUtils.create(CampusTable)
         SchemaUtils.create(MessageTable)
         SchemaUtils.create(RechargeTable)
-        SchemaUtils.create(TableTable)// 球桌表
-        SchemaUtils.create(CompetitionSignupTable)// 竞赛表
-        SchemaUtils.create(CourseTable)// 课程表
+        SchemaUtils.create(TableTable)
+        SchemaUtils.create(CourseTable)
+        SchemaUtils.create(CompetitionTable)
+        SchemaUtils.create(CompetitionSignupTable)
     }
 
     return database

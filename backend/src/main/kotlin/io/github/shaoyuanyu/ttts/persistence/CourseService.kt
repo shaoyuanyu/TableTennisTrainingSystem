@@ -173,7 +173,7 @@ class CourseService(
                 (dateFrom == null || course.date >= LocalDate.parse(dateFrom)) &&
                         (dateTo == null || course.date <= LocalDate.parse(dateTo))
             }
-                .filter() { it.status == CourseStatus.CONFIRMED } // 只取已确认的课程
+                .filter { it.status == CourseStatus.CONFIRMED } // 只取已确认的课程
 
             filteredCourses.sortedWith(
                 compareBy<CourseEntity> { it.date }.thenBy { it.startTime }

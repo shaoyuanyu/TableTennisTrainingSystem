@@ -1,14 +1,14 @@
 <template>
   <div class="tournament-management">
     <PageHeader title="比赛管理" />
-    
+
     <el-card class="create-tournament-card">
       <template #header>
         <div class="card-header">
           <span>创建新比赛</span>
         </div>
       </template>
-      
+
       <el-form
         ref="createFormRef"
         :model="createForm"
@@ -22,14 +22,14 @@
               <el-input v-model="createForm.name" placeholder="请输入比赛名称" />
             </el-form-item>
           </el-col>
-          
+
           <el-col :span="12">
             <el-form-item label="比赛类型" prop="type">
               <el-input v-model="createForm.type" placeholder="请输入比赛类型" />
             </el-form-item>
           </el-col>
         </el-row>
-        
+
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="比赛日期" prop="date">
@@ -42,7 +42,7 @@
               />
             </el-form-item>
           </el-col>
-          
+
           <el-col :span="12">
             <el-form-item label="报名截止日期" prop="registrationDeadline">
               <el-date-picker
@@ -55,7 +55,7 @@
             </el-form-item>
           </el-col>
         </el-row>
-        
+
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="报名费用" prop="fee">
@@ -69,7 +69,7 @@
             </el-form-item>
           </el-col>
         </el-row>
-        
+
         <el-form-item label="比赛描述" prop="description">
           <el-input
             v-model="createForm.description"
@@ -78,10 +78,10 @@
             placeholder="请输入比赛描述"
           />
         </el-form-item>
-        
+
         <el-form-item>
-          <el-button 
-            type="primary" 
+          <el-button
+            type="primary"
             @click="createTournament"
             :loading="creating"
           >
@@ -91,7 +91,7 @@
         </el-form-item>
       </el-form>
     </el-card>
-    
+
     <el-card class="tournaments-list">
       <template #header>
         <div class="card-header">
@@ -99,14 +99,18 @@
           <el-button type="primary" @click="fetchTournaments" :icon="Refresh" circle />
         </div>
       </template>
-      
+
       <el-table
         :data="tournaments"
         v-loading="loading"
         style="width: 100%"
       >
         <el-table-column prop="name" label="比赛名称" />
-        <el-table-column prop="type" label="类型" />
+        <el-table-column prop="type" label="类型">
+          <template #default="scope">
+            {{ scope.row.type }}
+          </template>
+        </el-table-column>
         <el-table-column prop="date" label="比赛日期" />
         <el-table-column prop="registrationDeadline" label="报名截止" />
         <el-table-column prop="fee" label="报名费">
@@ -117,9 +121,9 @@
         <el-table-column label="操作">
           <template #default="scope">
             <el-button size="small" @click="viewDetails(scope.row)">详情</el-button>
-            <el-button 
-              size="small" 
-              type="danger" 
+            <el-button
+              size="small"
+              type="danger"
               @click="deleteTournament(scope.row)"
               :disabled="scope.row.status === 'completed'"
             >
@@ -128,7 +132,7 @@
           </template>
         </el-table-column>
       </el-table>
-      
+
       <div class="pagination-container">
         <el-pagination
           v-model:current-page="pagination.currentPage"
@@ -164,7 +168,7 @@ const createForm = ref({
   type: '',
   date: '',
   registrationDeadline: '',
-  fee: 30,
+  fee: 0,
   campusId: userStore.campusId, // 从用户状态中获取校区ID
   description: ''
 })
@@ -205,10 +209,10 @@ const createTournament = async () => {
     // 验证表单
     const valid = await createFormRef.value.validate()
     if (!valid) return
-    
+
     // 确保campusId始终从用户状态中获取
     createForm.value.campusId = userStore.campusId
-    
+
     await api.post('/competition/create', createForm.value)
     ElMessage.success('比赛创建成功')
     resetForm()
@@ -241,7 +245,8 @@ const fetchTournaments = async () => {
         size: pagination.value.pageSize
       }
     })
-    tournaments.value = response.data.items
+    tournaments.value = response.data
+    console.log(tournaments.value)
     pagination.value.total = response.data.total
   } catch (error) {
     ElMessage.error('获取比赛列表失败：' + (error.response?.data?.message || error.message))
@@ -253,7 +258,7 @@ const fetchTournaments = async () => {
 const viewDetails = (tournament) => {
   ElMessageBox.alert(
     `<strong>比赛名称：</strong>${tournament.name}<br>
-     <strong>比赛类型：</strong>${tournament.type}<br>
+     <strong>比赛类型：</strong>${getTournamentTypeText(tournament.type)}<br>
      <strong>比赛日期：</strong>${tournament.date}<br>
      <strong>报名截止：</strong>${tournament.registrationDeadline}<br>
      <strong>报名费用：</strong>${tournament.fee}元<br>
@@ -288,6 +293,9 @@ const deleteTournament = (tournament) => {
   })
 }
 
+const getTournamentTypeText = (type) => {
+  return type
+}
 
 const handleSizeChange = (val) => {
   pagination.value.pageSize = val

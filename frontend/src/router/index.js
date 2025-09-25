@@ -100,16 +100,6 @@ const router = createRouter({
             roles: ['super_admin'],
           },
         },
-        {
-          path: 'admin/tournaments',
-          name: 'TournamentManagement',
-          component: () => import('@/views/admin/TournamentManagementView.vue'),
-          meta: {
-            requiresAuth: true,
-            title: '比赛管理',
-            roles: ['super_admin'],
-          },
-        },
 
         // 校区管理员页面
         {
@@ -159,7 +149,7 @@ const router = createRouter({
           meta: {
             requiresAuth: true,
             title: '比赛管理',
-            roles: ['campus_admin'],
+            roles: ['campus_admin', 'super_admin'],
           },
         },
         {

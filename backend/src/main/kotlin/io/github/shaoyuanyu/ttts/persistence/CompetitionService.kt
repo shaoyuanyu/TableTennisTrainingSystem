@@ -40,6 +40,7 @@ class CompetitionService(
     fun createCompetition(
         name: String,
         type: String,
+        campusId: Int,
         date: LocalDate,
         registrationDeadline: LocalDate,
         fee: Float,
@@ -70,6 +71,7 @@ class CompetitionService(
             CompetitionEntity.new {
                 this.name = name
                 this.type = type
+                this.campusId = campusId
                 this.date = date
                 this.registrationDeadline = registrationDeadline
                 this.fee = fee
@@ -84,9 +86,11 @@ class CompetitionService(
      * @param userId 用户ID
      * @return 同校区的比赛列表
      */
-    fun queryCampusCompetition(userId: String): List<Competition> {
+    fun queryCampusCompetition(userId: String): List<Competition> = transaction(database) {
         val campusId = UserEntity.findById(UUID.fromString(userId))?.campusId ?: throw NotFoundException("用户不存在")
-        return CompetitionEntity.find { CompetitionTable.campusId eq campusId }.toList().expose()
+        CompetitionEntity.find {
+            CompetitionTable.campusId eq campusId
+        }.toList().expose()
     }
 
     /**
