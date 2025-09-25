@@ -549,6 +549,56 @@ const fetchAvailableTables = async () => {
   }
 }
 
+// 根据选择的时间段获取可用球桌列表
+const fetchAvailableTablesForTimeSlot = async () => {
+  try {
+    // 确保必要的参数都已选择
+    if (!selectedDate.value || !selectedTimeSlot.value) {
+      console.warn('日期或时间段未选择')
+      return
+    }
+
+    // 确保日期格式正确 (YYYY-MM-DD)
+    let dateString = ''
+    if (typeof selectedDate.value === 'string') {
+      dateString = selectedDate.value
+    } else if (selectedDate.value instanceof Date) {
+      dateString = dayjs(selectedDate.value).format('YYYY-MM-DD')
+    }
+    
+    // 确保时间格式正确 (HH:mm)
+    const startTimeString = selectedTimeSlot.value.startTime
+    const endTimeString = selectedTimeSlot.value.endTime
+    
+    // 调用后端API获取指定时间的可用球桌列表
+    const params = {
+      date: dateString,
+      startTime: startTimeString,
+      endTime: endTimeString
+    }
+    
+    // 使用查询参数方式调用接口
+    const queryString = new URLSearchParams(params).toString()
+    const response = await api.get(`/courses/available-tables?${queryString}`)
+    const tables = response.data
+
+    // 处理后端返回的球桌数据
+    availableTables.value = tables.map(table => ({
+      id: table.id,
+      name: `${table.indexInCampus}号球桌`,
+      location: table.group || '未知区域'
+    }))
+
+    console.log('获取到的可用球桌列表:', availableTables.value)
+  } catch (error) {
+    console.error('获取可用球桌列表失败:', error)
+    ElMessage.error('获取可用球桌列表失败: ' + (error.message || '未知错误'))
+    
+    // 出错时清空球桌列表
+    availableTables.value = []
+  }
+}
+
 // 检查日期是否有可用时段
 const hasAvailableSlots = (date) => {
   const slots = coachSchedule.value[date] || []
@@ -604,6 +654,11 @@ const nextStep = async () => {
     if (selectedDate.value) {
       await loadCoachSchedule()
     }
+  }
+
+  if (currentStep.value === 1 && selectedDate.value && selectedTimeSlot.value) {
+    // 当从第二步进入第三步时，根据选择的日期和时间获取可用球桌列表
+    await fetchAvailableTablesForTimeSlot()
   }
 
   if (currentStep.value === 2) {
@@ -718,7 +773,6 @@ const formatDate = (date) => {
 onMounted(() => {
   searchCoaches()
   fetchUserBalance()
-  fetchAvailableTables() // 获取球桌信息
 
   // 如果URL中有教练ID，直接选中
   if (route.query.coachId) {

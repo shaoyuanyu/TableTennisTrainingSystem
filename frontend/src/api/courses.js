@@ -107,3 +107,11 @@ export const syncToExternalCalendar = async (syncData) => {
   const response = await api.post('/courses/sync-calendar', syncData)
   return response.data
 }
+
+// 获取当前时间段的可用球桌
+export const getAvailableTables = async (params) => {
+  const response = await api.get('/courses/available-tables', { params })
+  return response.data
+}
+
+
