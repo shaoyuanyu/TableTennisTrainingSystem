@@ -64,9 +64,11 @@ export const useUserStore = defineStore('user', () => {
         // 假设后端返回用户信息，如果没有则从其他接口获取
         const userData = response.data
 
+        console.log(userData)
+
         // 设置用户信息（这里可能需要根据后端实际返回调整）
         userInfo.value = {
-          id: userData.id || userData.username,
+          id: userData.uuid,
           name: userData.name || userData.username,
           username: userData.username,
           role: userData.role || 'STUDENT', // 保持后端返回的原始格式
