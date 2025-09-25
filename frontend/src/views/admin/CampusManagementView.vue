@@ -1,48 +1,81 @@
 <template>
   <div class="campus-management">
-    <!-- 页面头部和列表合并为一个卡片 -->
-    <GlassCard
-      class="campus-management-card"
-      variant="enhanced"
-      :show-decoration="false"
-      title="校区管理"
-      icon="🏢"
-    >
-      <template #default>
-        <GlassTable
-          :data="campusList"
-          v-loading="loading"
-          :stripe="true"
-          density="lg"
-        >
-          <el-table-column prop="campusName" label="校区名称" width="180" />
-          <el-table-column prop="address" label="地址" min-width="200" />
-          <el-table-column prop="contactPerson" label="联系人" width="120" />
-          <el-table-column prop="phone" label="联系电话" width="140" />
-          <el-table-column prop="email" label="邮箱" width="180" />
-          <el-table-column label="操作" width="200" fixed="right">
-            <template #default="{ row }">
-              <el-button size="small" type="primary" @click="showEditDialog(row)"> 编辑 </el-button>
-              <el-button size="small" type="danger" @click="deleteCampus(row)">
-                删除
-              </el-button>
+    <!-- 头部卡片：采用统一 GlassHeaderCard 设计语言 -->
+    <GlassHeaderCard title="校区管理" icon="🏢" size="large" class="campus-header-card">
+      <template #headerActions>
+        <div class="header-actions-group">
+          <!-- 搜索框 -->
+          <el-input
+            v-model="search"
+            placeholder="搜索：名称 / 地址 / 联系人 / 电话"
+            clearable
+            class="search-input"
+            size="large"
+            :disabled="loading"
+            aria-label="搜索校区"
+          >
+            <template #prefix>
+              <el-icon><i class="icon-search">🔍</i></el-icon>
             </template>
-          </el-table-column>
-        </GlassTable>
+          </el-input>
 
-        <!-- 新增校区按钮移到表格下方 -->
-        <div class="add-campus-button-container">
-          <PrimaryButton @click="showAddDialog" class="add-campus-button">
+          <!-- 未来：可加入筛选（占位） -->
+          <!-- <el-select v-model="filterStatus" placeholder="状态" clearable size="large" class="status-filter">
+            <el-option label="全部" value="" />
+            <el-option label="主校区" value="main" />
+          </el-select> -->
+
+          <PrimaryButton @click="showAddDialog" size="md" class="add-campus-btn">
             <template #icon-left>
-              <el-icon>
-                <Plus />
-              </el-icon>
+              <el-icon><Plus /></el-icon>
             </template>
             新增校区
           </PrimaryButton>
         </div>
       </template>
-    </GlassCard>
+
+      <!-- 表格区域 -->
+      <GlassTable
+        :data="filteredCampuses"
+        v-loading="loading"
+        :stripe="true"
+        density="lg"
+        empty-title="暂无校区"
+        empty-description="点击上方“新增校区”按钮创建第一个校区"
+      >
+        <el-table-column prop="campusName" label="校区名称" width="200">
+          <template #default="{ row }">
+            <div class="cell-campus-name">
+              <span class="name-text">{{ row.campusName }}</span>
+              <TagBadge
+                v-if="row.isMain"
+                text="主"
+                type="success"
+                size="small"
+                variant="solid"
+                extra-classes="main-campus-badge"
+              />
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column prop="address" label="地址" min-width="240" show-overflow-tooltip />
+        <el-table-column prop="contactPerson" label="联系人" width="120" />
+        <el-table-column prop="phone" label="电话" width="140" />
+        <el-table-column prop="email" label="邮箱" min-width="200" show-overflow-tooltip />
+        <el-table-column label="操作" width="200" fixed="right">
+          <template #default="{ row }">
+            <el-button link size="small" type="primary" @click="showEditDialog(row)">编辑</el-button>
+            <el-divider direction="vertical" />
+            <el-button link size="small" type="danger" @click="deleteCampus(row)">删除</el-button>
+          </template>
+        </el-table-column>
+      </GlassTable>
+
+      <!-- 底部操作/统计（可按需扩展） -->
+      <div class="table-footer-hint" v-if="!loading && filteredCampuses.length">
+        共 {{ filteredCampuses.length }} 个校区
+      </div>
+    </GlassHeaderCard>
 
     <!-- 新增/编辑校区对话框 -->
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="600px" @close="resetForm">
@@ -136,18 +169,34 @@
 </template>
 
 <script setup>
-import {computed, onMounted, reactive, ref} from 'vue'
-import {ElMessage, ElMessageBox} from 'element-plus'
+import { computed, onMounted, reactive, ref } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import api from '@/utils/api'
 import PrimaryButton from '@/components/buttons/PrimaryButton.vue'
 import OutlineButton from '@/components/buttons/OutlineButton.vue'
 import GlassTable from '@/components/data/Table.vue'
-import GlassCard from '@/components/cards/base/GlassCard.vue'
-import {Plus} from "@element-plus/icons-vue";
+import { GlassHeaderCard } from '@/components/cards'
+import TagBadge from '@/components/TagBadge.vue'
+import { Plus } from '@element-plus/icons-vue'
 
 // 数据列表
 const campusList = ref([])
-const availableUsers = ref([])
+const availableUsers = ref([]) // 预留：管理员分配用户
+
+// 过滤与搜索
+const search = ref('')
+// const filterStatus = ref('') // 预留筛选字段
+
+const normalized = (v) => (v || '').toString().toLowerCase()
+const filteredCampuses = computed(() => {
+  if (!search.value) return campusList.value
+  const key = normalized(search.value)
+  return campusList.value.filter((c) => {
+    return [c.campusName, c.address, c.contactPerson, c.phone, c.email]
+      .filter(Boolean)
+      .some((field) => normalized(field).includes(key))
+  })
+})
 
 // 加载状态
 const loading = ref(false)
@@ -217,7 +266,12 @@ const fetchCampusList = async () => {
   loading.value = true
   try {
     const response = await api.get('/campus/names?page=1&size=100')
-    campusList.value = response.data.first || []
+    const raw = response?.data?.first || []
+    // 统一字段 & 兼容后端可能返回 name
+    campusList.value = raw.map((item) => ({
+      ...item,
+      campusName: item.campusName || item.name || '未命名校区',
+    }))
   } catch (error) {
     console.error('获取校区列表失败:', error)
     ElMessage.error('获取校区列表失败')
@@ -292,11 +346,15 @@ const deleteCampus = async (campus) => {
   }
 
   try {
-    await ElMessageBox.confirm(`确定要删除校区"${campus.name}"吗？此操作不可恢复！`, '确认删除', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning',
-    })
+    await ElMessageBox.confirm(
+      `确定要删除校区 "${campus.campusName || campus.name}" 吗？此操作不可恢复！`,
+      '确认删除',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      },
+    )
 
     await api.delete(`/admin/campuses/${campus.id}`)
     ElMessage.success('校区删除成功')
@@ -342,26 +400,62 @@ onMounted(() => {
 
 <style scoped>
 .campus-management {
-  padding: 20px;
+  padding: var(--spacing-xl);
+  padding-top: var(--spacing-lg);
 }
 
-.campus-management-card {
-  margin-top: 20px;
+.campus-header-card {
+  --header-min-height: 64px;
 }
 
-/* 确保卡片内的所有文字都有良好的对比度 */
-
-/* 新增校区按钮容器样式 */
-.add-campus-button-container {
-  display: flex;
-  justify-content: flex-start;
-  margin-top: 20px;
-  padding-top: 20px;
-  border-top: 1px solid var(--white-alpha-20);
-}
-
-.add-campus-button {
+.header-actions-group {
   display: flex;
   align-items: center;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.search-input {
+  width: 360px;
+  max-width: 100%;
+}
+
+.add-campus-btn {
+  /* 轻微凸显主操作 */
+  box-shadow: var(--shadow-sm);
+}
+
+.cell-campus-name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.name-text {
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.table-footer-hint {
+  margin-top: var(--spacing-lg);
+  font-size: var(--font-size-sm);
+  color: var(--text-dim, #4a5568);
+  opacity: 0.85;
+}
+
+@media (max-width: 960px) {
+  .search-input { width: 100%; }
+  .header-actions-group { flex-direction: column; align-items: stretch; }
+  .add-campus-btn { align-self: flex-end; }
+  .name-text { max-width: 120px; }
+}
+
+@media (max-width: 560px) {
+  .campus-management { padding: var(--spacing-lg); }
+  .name-text { max-width: 100px; }
+  .table-footer-hint { text-align: right; }
 }
 </style>
