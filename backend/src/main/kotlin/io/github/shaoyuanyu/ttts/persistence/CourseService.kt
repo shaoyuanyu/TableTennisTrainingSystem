@@ -380,7 +380,7 @@ class CourseService(
             // 创建课程
             val course = createCourse(Course)
             walletService.deduct(CourseBooking.studentId, CourseBooking.price)
-            walletService.recharge(CourseBooking.coachId, (CourseBooking.price * 0.6).toFloat())
+            //walletService.recharge(CourseBooking.coachId, (CourseBooking.price * 0.6).toFloat())
 
             COURSE_SERVICE_LOGGER.info("创建课程成功: ${course.id}")
         }
@@ -389,7 +389,7 @@ class CourseService(
     /**
      * 查询教练待审核课程
      */
-    fun queryconfirmCourse(coachId: String): List<CourseEntity> {
+    fun queryconfirmCourse(coachId: String): List<Course> {
         return transaction(database) {
             val pendingCourses = CourseEntity.find {
                 (CourseTable.coach eq UUID.fromString(coachId)) and
@@ -400,7 +400,7 @@ class CourseService(
                 throw NotFoundException("没有待审核的课程")
             }
 
-            pendingCourses
+            pendingCourses.map { it.expose() }
         }
     }
 

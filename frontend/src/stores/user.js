@@ -61,6 +61,9 @@ export const useUserStore = defineStore('user', () => {
       })
 
       if (response.status === 200 && response.data && response.data.username) {
+        // 打印完整的响应数据，以便调试
+        console.log('登录响应原始数据:', response.data);
+        
         // 假设后端返回用户信息，如果没有则从其他接口获取
         const userData = response.data
 
