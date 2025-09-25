@@ -2,11 +2,19 @@ import api from '@/utils/api'
 
 /**
  * 双选系统相关API
+ * 注意：后端 Ktor 对以下端点使用 call.receiveParameters() 解析：
+ * /apply, /withdraw, /cancel-approved, /review, /admin-create, /admin/relation/{id}
+ * 因此前端需以 multipart/form-data（或 application/x-www-form-urlencoded）提交，而不能直接用 JSON。
+ * 若未来后端改为接收 JSON (call.receive<DTO>()), 可去掉 FormData 写法。
  */
 
 // 学生申请教练
 export const applyForCoach = async (coachId) => {
-  const response = await api.post('/mutual-selection/apply', { coachId })
+  const formData = new FormData()
+  formData.append('coachId', coachId)
+  const response = await api.post('/mutual-selection/apply', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  })
   return response.data
 }
 
@@ -18,13 +26,21 @@ export const getStudentApplications = async (params = {}) => {
 
 // 学生撤回申请
 export const withdrawApplication = async (relationId) => {
-  const response = await api.post('/mutual-selection/withdraw', { relationId })
+  const formData = new FormData()
+  formData.append('relationId', relationId)
+  const response = await api.post('/mutual-selection/withdraw', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  })
   return response.data
 }
 
 // 学生取消已批准的关系
 export const cancelApprovedRelation = async (relationId) => {
-  const response = await api.post('/mutual-selection/cancel-approved', { relationId })
+  const formData = new FormData()
+  formData.append('relationId', relationId)
+  const response = await api.post('/mutual-selection/cancel-approved', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  })
   return response.data
 }
 
@@ -44,11 +60,8 @@ export const reviewApplication = async (relationId, decision, rejectionReason = 
   if (rejectionReason) {
     formData.append('rejectionReason', rejectionReason)
   }
-  
   const response = await api.post('/mutual-selection/review', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data'
-    }
+    headers: { 'Content-Type': 'multipart/form-data' },
   })
   return response.data
 }
@@ -71,10 +84,8 @@ export const getCoachHistoricalStudents = async () => {
   return response.data
 }
 
-// 获取教练待处理申请数量
+// 获取教练待处理申请数量（暂未使用专门接口）
 export const getPendingApplicationCount = async () => {
-  // 由于后端没有提供 /mutual-selection/pending-count 接口
-  // 这个函数暂时保留但不使用，统计逻辑在前端完成
   const response = await api.get('/mutual-selection/coach-applications')
   return response.data
 }
@@ -93,12 +104,21 @@ export const getRelationById = async (relationId) => {
 
 // 管理员更新关系信息
 export const updateRelation = async (relationId, status) => {
-  const response = await api.post(`/mutual-selection/admin/relation/${relationId}`, { status })
+  const formData = new FormData()
+  if (status) formData.append('status', status)
+  const response = await api.post(`/mutual-selection/admin/relation/${relationId}`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  })
   return response.data
 }
 
 // 管理员直接建立关系
 export const adminCreateRelation = async (studentId, coachId) => {
-  const response = await api.post('/mutual-selection/admin-create', { studentId, coachId })
+  const formData = new FormData()
+  formData.append('studentId', studentId)
+  formData.append('coachId', coachId)
+  const response = await api.post('/mutual-selection/admin-create', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  })
   return response.data
 }
