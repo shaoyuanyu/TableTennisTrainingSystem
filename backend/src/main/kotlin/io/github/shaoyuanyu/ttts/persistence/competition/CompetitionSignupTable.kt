@@ -6,8 +6,7 @@ import org.jetbrains.exposed.v1.datetime.timestamp
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
-object ComTable: IntIdTable("competition")   {
-
+object CompetitionSignupTable: IntIdTable("competition_signup")   {
     val userId:Column<String> = varchar("user_id",128)
     val username:Column<String> = varchar("username",32)
     val group:Column<String> = varchar("group",32)
@@ -15,5 +14,4 @@ object ComTable: IntIdTable("competition")   {
     val campusId:Column<Int> = integer("campus_id")
     val status:Column<String> = varchar("status",32)
     val createdAt: Column<Instant> = timestamp("created_at")
-
 }
