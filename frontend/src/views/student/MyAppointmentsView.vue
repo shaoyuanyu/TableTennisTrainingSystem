@@ -50,11 +50,11 @@
         <el-table-column label="教练信息" width="180">
           <template #default="{ row }">
             <div class="coach-info">
-              <el-avatar :size="32" :src="row.coach?.avatar || ''">
-                {{ row.coach?.name ? row.coach?.name.charAt(0) : '?' }}
+              <el-avatar :size="32">
+                {{ row.coachName ? row.coachName.charAt(0) : '?' }}
               </el-avatar>
               <div class="coach-details">
-                <div class="coach-name">{{ row.coach?.name || '未知教练' }}</div>
+                <div class="coach-name">{{ row.coachName || '未知教练' }}</div>
               </div>
             </div>
           </template>
@@ -123,7 +123,7 @@
           </el-descriptions-item>
           
           <el-descriptions-item label="教练姓名">
-            {{ selectedAppointment.coach?.name || '未知教练' }}
+            {{ selectedAppointment.coachName || '未知教练' }}
           </el-descriptions-item>
           
           <el-descriptions-item label="预约日期">
