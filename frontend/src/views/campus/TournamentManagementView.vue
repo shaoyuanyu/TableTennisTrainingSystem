@@ -137,7 +137,7 @@
           <template #default="scope">
             <el-button size="small" @click="viewDetails(scope.row)">详情</el-button>
             <el-button
-              v-if="getTournamentStatus(scope.row) === 'pending'"
+              v-if="scope.row.status === '未开始'"
               size="small"
               type="success"
               @click="startTournament(scope.row)"
@@ -149,7 +149,7 @@
               size="small"
               type="danger"
               @click="deleteTournament(scope.row)"
-              :disabled="scope.row.status === 'completed'"
+              :disabled="scope.row.status === '已结束'"
             >
               删除
             </el-button>
@@ -288,7 +288,7 @@ const viewDetails = (tournament) => {
      <strong>报名截止：</strong>${tournament.registrationDeadline}<br>
      <strong>报名费用：</strong>${tournament.fee}元<br>
      <strong>比赛描述：</strong>${tournament.description || '无'}<br>
-     <strong>比赛状态：</strong>${getTournamentStatusText(tournament)}`,
+     <strong>比赛状态：</strong>${tournament.status}`,
     '比赛详情',
     {
       dangerouslyUseHTMLString: true,
@@ -321,42 +321,31 @@ const deleteTournament = (tournament) => {
 
 // 获取比赛状态 (pending, ongoing, completed)
 const getTournamentStatus = (tournament) => {
-  const today = new Date()
-  const tournamentDate = new Date(tournament.date)
-
-  if (tournamentDate > today) {
-    return 'pending' // 未开始
-  } else if (tournamentDate < today) {
-    return 'completed' // 已结束
-  } else {
-    return 'ongoing' // 进行中
+  switch (tournament.status) {
+    case '未开始':
+      return 'pending'
+    case '进行中':
+      return 'ongoing'
+    case '已结束':
+      return 'completed'
+    default:
+      return 'unknown'
   }
 }
 
 // 获取比赛状态文本
 const getTournamentStatusText = (tournament) => {
-  const status = getTournamentStatus(tournament)
-  switch (status) {
-    case 'pending':
-      return '未开始'
-    case 'ongoing':
-      return '进行中'
-    case 'completed':
-      return '已结束'
-    default:
-      return '未知'
-  }
+  return tournament.status || '未知'
 }
 
 // 获取比赛状态标签类型
 const getTournamentStatusType = (tournament) => {
-  const status = getTournamentStatus(tournament)
-  switch (status) {
-    case 'pending':
+  switch (tournament.status) {
+    case '未开始':
       return 'warning' // 黄色
-    case 'ongoing':
+    case '进行中':
       return 'success' // 绿色
-    case 'completed':
+    case '已结束':
       return 'info' // 灰色
     default:
       return 'info'
@@ -505,4 +494,5 @@ onMounted(() => {
   border: 1px solid var(--white-alpha-20);
   border-radius: var(--radius-md);
 }
+
 </style>

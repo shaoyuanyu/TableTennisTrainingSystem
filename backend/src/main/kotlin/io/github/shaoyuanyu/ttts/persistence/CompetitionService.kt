@@ -77,6 +77,7 @@ class CompetitionService(
             this.campus = campus
             this.date = date
             this.registrationDeadline = registrationDeadline
+            this.status = "未开始"
             this.fee = fee
             this.description = description
         }
@@ -145,6 +146,10 @@ class CompetitionService(
             val competition = CompetitionEntity.findById(UUID.fromString(competitionId))
                 ?: throw NotFoundException("比赛不存在")
 
+            if (competition.status != "未开始") {
+                throw IllegalStateException("比赛已开始，不能再报名")
+            }
+
             // 插入报名记录
             CompetitionSignupEntity.new {
                 this.user = user
@@ -172,6 +177,10 @@ class CompetitionService(
             val competition = CompetitionEntity.findById(UUID.fromString(competitionId))
                 ?: throw NotFoundException("比赛不存在")
 
+            if (competition.status != "未开始") {
+                throw IllegalStateException("比赛已开始，不能再安排")
+            }
+
             // 获取该比赛的所有报名信息，按组别分组
             val signups = CompetitionSignupEntity.find {
                 CompetitionSignupTable.competition eq competition.id
@@ -190,6 +199,8 @@ class CompetitionService(
                     arrangeGroupStageAndKnockout(competition, group, participants)
                 }
             }
+
+            competition.status = "进行中"
         }
     }
     

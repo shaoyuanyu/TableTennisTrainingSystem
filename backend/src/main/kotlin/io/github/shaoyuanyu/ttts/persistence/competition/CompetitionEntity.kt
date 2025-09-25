@@ -11,11 +11,19 @@ class CompetitionEntity(uuid: EntityID<UUID>) : UUIDEntity(uuid) {
     companion object : UUIDEntityClass<CompetitionEntity>(CompetitionTable)
 
     var name by CompetitionTable.name
+
     var type by CompetitionTable.type
+
     var campus by CampusEntity referencedOn CompetitionTable.campus
+
     var date by CompetitionTable.date
+
     var registrationDeadline by CompetitionTable.registrationDeadline
+
+    var status by CompetitionTable.status
+
     var fee by CompetitionTable.fee
+
     var description by CompetitionTable.description
 }
 
@@ -27,6 +35,7 @@ fun CompetitionEntity.expose() = Competition(
     campusName = campus.campusName,
     date = date,
     registrationDeadline = registrationDeadline,
+    status = status,
     fee = fee,
     description = description,
 )
