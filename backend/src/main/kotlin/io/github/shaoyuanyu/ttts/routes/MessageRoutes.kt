@@ -33,7 +33,7 @@ fun Application.messageRoutes(messageService: MessageService) {
             }
 
             // 发送消息（当前版本仅限管理员）
-            authenticate("auth-session-campus-admin", "auth-session-super-admin") {
+            authenticate("auth-session-admin") {
                 sendMessage(messageService)
             }
         }

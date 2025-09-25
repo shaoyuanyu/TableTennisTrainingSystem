@@ -35,7 +35,7 @@ fun Application.mutualSelectionRoutes(mutualSelectionService: MutualSelectionSer
             }
 
             // 管理员权限路由
-            authenticate("auth-session-campus-admin", "auth-session-super-admin") {
+            authenticate("auth-session-admin") {
                 adminCreateRelation(mutualSelectionService)
                 getAllRelations(mutualSelectionService)
                 getRelationById(mutualSelectionService)
