@@ -205,7 +205,7 @@ const createTournament = async () => {
     const valid = await createFormRef.value.validate()
     if (!valid) return
     
-    await api.post('/competition/tournaments/create', createForm.value)
+    await api.post('/competition/create', createForm.value)
     ElMessage.success('比赛创建成功')
     resetForm()
     fetchTournaments()
@@ -230,7 +230,7 @@ const resetForm = () => {
 const fetchTournaments = async () => {
   try {
     loading.value = true
-    const response = await api.get('/competition/tournaments', {
+    const response = await api.get('/competition/self-campus', {
       params: {
         page: pagination.value.currentPage,
         size: pagination.value.pageSize

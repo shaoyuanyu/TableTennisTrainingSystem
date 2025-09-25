@@ -199,7 +199,7 @@ const pagination = ref({
 const createTournament = async () => {
   try {
     creating.value = true
-    await api.post('/competition/tournaments/create', createForm.value)
+    await api.post('/api/competition/create', createForm.value)
     ElMessage.success('比赛创建成功')
     resetForm()
     fetchTournaments()
@@ -224,7 +224,7 @@ const resetForm = () => {
 const fetchTournaments = async () => {
   try {
     loading.value = true
-    const response = await api.get('/competition/tournaments', {
+    const response = await api.get('/api/competition/tournaments', {
       params: {
         page: pagination.value.currentPage,
         size: pagination.value.pageSize
