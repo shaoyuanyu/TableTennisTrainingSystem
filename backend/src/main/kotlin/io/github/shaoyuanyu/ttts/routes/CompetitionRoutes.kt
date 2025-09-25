@@ -40,7 +40,7 @@ fun Application.competitionRoutes(
             }
 
             //管理员权限
-            authenticate ("auth-session-campus-admin", "auth-session-super-admin"){
+            authenticate ("auth-session-admin"){
                 createCompetition(competitionService)
 //                enterCompetitionResults(studentService)
 //                deleteTournament(studentService) // 添加删除比赛接口
