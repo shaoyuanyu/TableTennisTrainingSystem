@@ -61,26 +61,6 @@ const router = createRouter({
           },
         },
         {
-          path: 'admin/students',
-          name: 'SuperAdminStudentManagement',
-          component: () => import('@/views/campus/StudentManagementView.vue'),
-          meta: {
-            requiresAuth: true,
-            title: '学员管理',
-            roles: ['super_admin'],
-          },
-        },
-        {
-          path: 'admin/coaches',
-          name: 'SuperAdminCoachManagement',
-          component: () => import('@/views/campus/CoachManagementView.vue'),
-          meta: {
-            requiresAuth: true,
-            title: '教练管理',
-            roles: ['super_admin'],
-          },
-        },
-        {
           path: 'admin/dashboard',
           name: 'SuperAdminDashboard',
           component: () => import('@/views/admin/SuperAdminDashboardView.vue'),
@@ -139,7 +119,7 @@ const router = createRouter({
           meta: {
             requiresAuth: true,
             title: '学员管理',
-            roles: ['campus_admin'],
+            roles: ['campus_admin', 'super_admin'],
           },
         },
         {
@@ -149,7 +129,17 @@ const router = createRouter({
           meta: {
             requiresAuth: true,
             title: '教练管理',
-            roles: ['campus_admin'],
+            roles: ['campus_admin', 'super_admin'],
+          },
+        },
+        {
+          path: 'campus/tables',
+          name: 'TableManagement',
+          component: () => import('@/views/campus/TableManagementView.vue'),
+          meta: {
+            requiresAuth: true,
+            title: '球台管理',
+            roles: ['campus_admin', 'super_admin'],
           },
         },
         {

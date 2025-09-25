@@ -35,11 +35,13 @@ export const PAGE_PERMISSIONS = {
   // 超级管理员页面
   '/admin/campus': [USER_ROLES.SUPER_ADMIN],
   '/admin/service': [USER_ROLES.SUPER_ADMIN],
+  '/admin/tables': [USER_ROLES.SUPER_ADMIN],
   '/admin/tournaments': [USER_ROLES.SUPER_ADMIN],
 
   // 校区管理员页面
   '/campus/students': [USER_ROLES.CAMPUS_ADMIN],
   '/campus/coaches': [USER_ROLES.CAMPUS_ADMIN],
+  '/campus/tables': [USER_ROLES.CAMPUS_ADMIN, USER_ROLES.SUPER_ADMIN],
   '/campus/appointments': [USER_ROLES.CAMPUS_ADMIN],
   '/campus/logs': [USER_ROLES.CAMPUS_ADMIN, USER_ROLES.SUPER_ADMIN],
 
@@ -161,10 +163,19 @@ export function getAccessibleMenus(userRole) {
   switch (userRole) {
     case USER_ROLES.SUPER_ADMIN:
       menus.push({
+        title: '校区管理',
+        icon: 'OfficeBuilding',
+        children: [
+          { path: '/admin/campus', title: '校区管理', icon: 'Management' },
+          { path: '/admin/students', title: '学员管理', icon: 'User' },
+          { path: '/admin/coaches', title: '教练管理', icon: 'Avatar' },
+          { path: '/admin/tables', title: '球台管理', icon: 'Management' },
+        ],
+      })
+      menus.push({
         title: '系统管理',
         icon: 'Setting',
         children: [
-          { path: '/admin/campus', title: '校区管理', icon: 'OfficeBuilding' },
           { path: '/admin/service', title: '服务状态', icon: 'CreditCard' },
           { path: '/admin/tournaments', title: '比赛管理', icon: 'Trophy' },
         ],
@@ -178,6 +189,7 @@ export function getAccessibleMenus(userRole) {
         children: [
           { path: '/campus/students', title: '学员管理', icon: 'User' },
           { path: '/campus/coaches', title: '教练管理', icon: 'Avatar' },
+          { path: '/campus/tables', title: '球台管理', icon: 'Management' },
           { path: '/campus/appointments', title: '预约管理', icon: 'Calendar' },
           { path: '/campus/logs', title: '日志查询', icon: 'Document' },
         ],
