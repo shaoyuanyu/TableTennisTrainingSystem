@@ -24,7 +24,7 @@ class CompetitionArrangementEntity(id: EntityID<Int>) : IntEntity(id) {
 
     var result by CompetitionArrangementTable.result
 
-    var winner by UserEntity referencedOn CompetitionArrangementTable.winner
+    var winner by CompetitionArrangementTable.winner
 }
 
 fun CompetitionArrangementEntity.expose() = CompetitionArrangement(
@@ -42,7 +42,11 @@ fun CompetitionArrangementEntity.expose() = CompetitionArrangement(
     realNameOfPlayerB = playerB.realName,
     status = status,
     result = result,
-    winner = winner.realName
+    winner = when (winner) {
+        1 -> playerA.realName
+        2 -> playerB.realName
+        else -> ""
+    }
 )
 
 fun List<CompetitionArrangementEntity>.expose() = map { it.expose() }

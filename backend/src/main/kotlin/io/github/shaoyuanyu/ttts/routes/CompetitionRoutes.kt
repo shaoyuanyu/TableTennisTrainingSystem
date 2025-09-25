@@ -2,6 +2,7 @@ package io.github.shaoyuanyu.ttts.routes
 
 import io.github.shaoyuanyu.ttts.dto.competition.Competition
 import io.github.shaoyuanyu.ttts.dto.competition.CompetitionSignupRequest
+import io.github.shaoyuanyu.ttts.exceptions.BadRequestException
 import io.github.shaoyuanyu.ttts.persistence.CompetitionService
 import io.github.shaoyuanyu.ttts.plugins.LOGGER
 import io.github.shaoyuanyu.ttts.utils.getUserIdFromCall
@@ -33,14 +34,14 @@ fun Application.competitionRoutes(
             // 学生权限
             authenticate("auth-session-student") {
                 signupCompetition(competitionService)
-                getUserCompetitionSchedule(competitionService)
                 queryUserSignup(competitionService)
-//                getLatestTournament(studentService) // 添加获取最新比赛信息接口
+                getUserCompetitionSchedule(competitionService)
             }
 
-            //管理员权限
+            // 管理员权限
             authenticate ("auth-session-admin"){
                 createCompetition(competitionService)
+                arrangeCompetition(competitionService)
             }
 
             // 超级管理员权限
@@ -125,14 +126,27 @@ fun Route.queryUserSignup(competitionService: CompetitionService) {
     }
 }
 
+fun Route.arrangeCompetition(competitionService: CompetitionService) {
+    post("/arrange/{competitionId}") {
+        val competitionId = call.parameters["competitionId"] ?: throw BadRequestException("缺少比赛ID参数")
+
+        competitionService.arrangeCompetition(competitionId)
+
+        call.respond(HttpStatusCode.OK, "比赛安排成功")
+    }
+}
+
 /**
  * 获取用户个人比赛安排
  */
 fun Route.getUserCompetitionSchedule(competitionService: CompetitionService) {
-    get("/my-schedule") {
+    get("/my-schedule/{competitionId}") {
         val userId = getUserIdFromCall(call)
 
-        val schedule = competitionService.getUserCompetitionSchedule(userId)
+        val competitionId = call.parameters["competitionId"] ?: throw BadRequestException("缺少比赛ID参数")
+
+        val schedule = competitionService.getUserCompetitionSchedule(userId, competitionId)
+
         call.respond(HttpStatusCode.OK, schedule)
     }
 }

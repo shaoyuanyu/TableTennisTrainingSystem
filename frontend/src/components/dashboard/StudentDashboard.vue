@@ -339,15 +339,20 @@ import {
   View,
   Wallet,
 } from '@element-plus/icons-vue'
+// 添加API导入
+import { getWalletBalance } from '@/api/wallet'
+import { getStudentCurrentCoaches } from '@/api/mutualSelection'
+import { getStudentSchedule } from '@/api/courses'
+import api from '@/utils/api'
 
 const router = useRouter()
 const userStore = useUserStore()
 
 // 响应式数据
-const userBalance = ref(1250.0)
+const userBalance = ref(0) // 初始化为0而不是1250.0
 const todayStats = ref({
-  courses: 2,
-  hours: '3h',
+  courses: 0, // 初始化为0而不是2
+  hours: '0h', // 初始化为0h而不是3h
 })
 
 // 学生统计数据
@@ -355,94 +360,54 @@ const studentStats = ref([
   {
     key: 'courses',
     label: '已报课程',
-    value: '12',
+    value: '0', // 初始化为0而不是12
     icon: '📚',
     gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    trend: 'up',
-    trendText: '+2 本月',
+    trend: 'stable',
+    trendText: '暂无数据',
   },
   {
     key: 'hours',
     label: '训练时长',
-    value: '48h',
+    value: '0h', // 初始化为0h而不是48h
     icon: '⏱️',
     gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-    trend: 'up',
-    trendText: '+8h 本周',
+    trend: 'stable',
+    trendText: '暂无数据',
   },
   {
     key: 'coaches',
     label: '专属教练',
-    value: '3',
+    value: '0', // 初始化为0而不是3
     icon: '👨‍🏫',
     gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
     trend: 'stable',
-    trendText: '保持稳定',
+    trendText: '暂无数据',
   },
   {
     key: 'level',
     label: '技能等级',
-    value: 'B+',
+    value: 'B', // 改为死数据B
     icon: '🏆',
     gradient: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-    trend: 'up',
-    trendText: '最近提升',
+    trend: 'stable',
+    trendText: '保持稳定',
   },
 ])
 
 // 今日课程
-const todaySchedule = ref([
-  {
-    id: 1,
-    time: '09:00',
-    title: '基础训练课',
-    description: '基础技能训练，包括正手、反手练习',
-    type: '基础训练',
-    location: '训练室A',
-    coach: '张教练',
-    status: 'upcoming',
-  },
-  {
-    id: 2,
-    time: '16:00',
-    title: '技术提升课',
-    description: '高级技巧训练，战术指导',
-    type: '技术提升',
-    location: '训练室B',
-    coach: '李教练',
-    status: 'upcoming',
-  },
-])
+const todaySchedule = ref([])
 
 // 我的教练
-const myCoaches = ref([
-  {
-    id: 1,
-    name: '张教练',
-    specialty: '基础技能',
-    rating: 4.8,
-    avatar: '',
-    experience: '5年教学经验',
-    status: 'active',
-  },
-  {
-    id: 2,
-    name: '李教练',
-    specialty: '技术提升',
-    rating: 4.9,
-    avatar: '',
-    experience: '8年教学经验',
-    status: 'active',
-  },
-])
+const myCoaches = ref([])
 
 // 最近交易记录
 // 学习进度
 const progressData = ref([
-  { key: 'basic', label: '基础技能', percentage: 85, color: '#67c23a' },
-  { key: 'advanced', label: '高级技巧', percentage: 65, color: '#409eff' },
-  { key: 'tactics', label: '战术理解', percentage: 70, color: '#e6a23c' },
-  { key: 'physical', label: '体能训练', percentage: 80, color: '#f56c6c' },
+  { key: 'basic', label: '基础技能', percentage: 0, color: '#67c23a' }, // 初始化为0而不是85
+  { key: 'advanced', label: '高级技巧', percentage: 0, color: '#409eff' }, // 初始化为0而不是65
+  { key: 'tactics', label: '战术理解', percentage: 0, color: '#e6a23c' }, // 初始化为0而不是70
+  { key: 'physical', label: '体能训练', percentage: 0, color: '#f56c6c' }, // 初始化为0而不是80
 ])
 
 // 快捷操作
@@ -548,9 +513,124 @@ const handleStatClick = (stat) => {
   }
 }
 
+// 获取账户余额
+const fetchWalletBalance = async () => {
+  try {
+    const data = await getWalletBalance()
+    userBalance.value = data.balance || 0
+    
+    // 更新余额状态显示
+    const balanceStatus = getBalanceStatus()
+    const statIndex = studentStats.value.findIndex(stat => stat.key === 'balance')
+    if (statIndex !== -1) {
+      studentStats.value[statIndex].value = `¥${userBalance.value}`
+      studentStats.value[statIndex].trendText = balanceStatus.text
+    }
+  } catch (error) {
+    console.error('获取账户余额失败:', error)
+  }
+}
+
+// 获取我的教练列表
+const fetchMyCoaches = async () => {
+  try {
+    const data = await getStudentCurrentCoaches()
+    const coaches = Array.isArray(data) ? data : []
+    
+    myCoaches.value = coaches.map(coach => ({
+      id: coach.coachId,
+      name: coach.coachName || '未知教练',
+      specialty: coach.coachSpecialty || '暂无专长信息',
+      rating: coach.coachRating || 0,
+      avatar: coach.coachAvatar || '',
+      experience: coach.coachExperience || '暂无经验信息',
+      status: 'active'
+    }))
+    
+    // 更新教练统计
+    const coachStatIndex = studentStats.value.findIndex(stat => stat.key === 'coaches')
+    if (coachStatIndex !== -1) {
+      studentStats.value[coachStatIndex].value = coaches.length.toString()
+      studentStats.value[coachStatIndex].trendText = coaches.length > 0 ? '保持稳定' : '暂无教练'
+    }
+  } catch (error) {
+    console.error('获取教练列表失败:', error)
+  }
+}
+
+// 获取今日课程安排
+const fetchTodaySchedule = async () => {
+  try {
+    const today = dayjs().format('YYYY-MM-DD')
+    const data = await getStudentSchedule({
+      dateFrom: today,
+      dateTo: today
+    })
+    
+    const courses = Array.isArray(data) ? data : []
+    todaySchedule.value = courses.map(course => ({
+      id: course.id,
+      time: `${course.startTime}`,
+      title: course.title || '课程',
+      description: course.description || '暂无描述',
+      type: '课程',
+      location: course.campusName || '未知地点',
+      coach: course.coachName || '未知教练',
+      status: course.status?.toLowerCase() || 'upcoming'
+    }))
+    
+    // 更新课程统计
+    const courseStatIndex = studentStats.value.findIndex(stat => stat.key === 'courses')
+    if (courseStatIndex !== -1) {
+      studentStats.value[courseStatIndex].value = courses.length.toString()
+      studentStats.value[courseStatIndex].trendText = courses.length > 0 ? `今日${courses.length}节` : '今日无课'
+    }
+    
+    // 更新今日概览
+    todayStats.value.courses = courses.length
+  } catch (error) {
+    console.error('获取今日课程失败:', error)
+  }
+}
+
+// 获取学习进度数据
+const fetchProgressData = async () => {
+  try {
+    // 这里可以调用实际的API获取学习进度数据
+    // 暂时使用模拟数据，实际项目中应替换为真实API调用
+    progressData.value = [
+      { key: 'basic', label: '基础技能', percentage: Math.floor(Math.random() * 100), color: '#67c23a' },
+      { key: 'advanced', label: '高级技巧', percentage: Math.floor(Math.random() * 100), color: '#409eff' },
+      { key: 'tactics', label: '战术理解', percentage: Math.floor(Math.random() * 100), color: '#e6a23c' },
+      { key: 'physical', label: '体能训练', percentage: Math.floor(Math.random() * 100), color: '#f56c6c' },
+    ]
+  } catch (error) {
+    console.error('获取学习进度失败:', error)
+  }
+}
+
+// 初始化数据
+const initializeDashboard = async () => {
+  await Promise.all([
+    fetchWalletBalance(),
+    fetchMyCoaches(),
+    fetchTodaySchedule(),
+    fetchProgressData()
+  ])
+}
+
 onMounted(() => {
-  // 可以在这里加载用户数据
+  initializeDashboard()
 })
+
+const goToCoaches = () => {
+  router.push('/student/my-coaches')
+}
+
+const goToFindCoach = () => {
+  router.push('/student/find-coach')
+}
+
 </script>
 
 <style scoped>

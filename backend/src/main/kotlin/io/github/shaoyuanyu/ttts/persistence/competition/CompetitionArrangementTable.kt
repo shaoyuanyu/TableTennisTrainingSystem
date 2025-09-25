@@ -21,5 +21,5 @@ object CompetitionArrangementTable : IntIdTable("competition_arrangement") {
 
     val result: Column<String> = varchar("result", 32)
 
-    val winner = reference("winner", UserTable, ReferenceOption.CASCADE)
+    val winner: Column<Int> = integer("winner").default(0)
 }

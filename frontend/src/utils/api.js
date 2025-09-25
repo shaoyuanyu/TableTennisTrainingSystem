@@ -68,9 +68,11 @@ api.interceptors.response.use(
         }
         case 422:
           // 422 业务相关错误让具体业务逻辑处理
+          ElMessage.error(data)
           break
         case 429:
           // 429 业务相关错误让具体业务逻辑处理
+          ElMessage.error(data)
           break
         case 500: {
           const errorMsg = getErrorMessage(data, '服务器内部错误')
@@ -78,7 +80,11 @@ api.interceptors.response.use(
           break
         }
         case 502:
+          ElMessage.error(data)
+          break
         case 503:
+          ElMessage.error(data)
+          break
         case 504: {
           const errorMsg = getErrorMessage(data, '服务暂时不可用，请稍后重试')
           ElMessage.error(errorMsg)
@@ -86,7 +92,7 @@ api.interceptors.response.use(
         }
         default:
           // 对于其他状态码，不在拦截器中显示消息，让具体业务逻辑处理
-          break
+          ElMessage.error(data)
       }
     } else if (error.code === 'NETWORK_ERROR' || error.message === 'Network Error') {
       ElMessage.error('网络连接失败，请检查网络状态')
