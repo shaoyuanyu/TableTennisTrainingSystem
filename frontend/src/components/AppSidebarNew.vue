@@ -37,14 +37,6 @@
           <el-icon><Trophy /></el-icon>
           <template #title>比赛管理</template>
         </el-menu-item>
-        <el-menu-item index="/admin/service" class="menu-item">
-          <el-icon><CreditCard /></el-icon>
-          <template #title>服务状态</template>
-        </el-menu-item>
-        <el-menu-item index="/admin/data" class="menu-item">
-          <el-icon><Document /></el-icon>
-          <template #title>数据导出</template>
-        </el-menu-item>
         <el-menu-item index="/admin/logs" class="menu-item">
           <el-icon><Document /></el-icon>
           <template #title>系统日志</template>
@@ -72,10 +64,6 @@
         <el-menu-item index="/campus/tournaments" class="menu-item">
           <el-icon><Trophy /></el-icon>
           <template #title>比赛管理</template>
-        </el-menu-item>
-        <el-menu-item index="/campus/logs" class="menu-item">
-          <el-icon><Document /></el-icon>
-          <template #title>系统日志</template>
         </el-menu-item>
       </template>
 
@@ -117,10 +105,6 @@
 
       <!-- 教练菜单 - 扁平化 -->
       <template v-if="isCoach">
-        <el-menu-item index="/coach/dashboard" class="menu-item">
-          <el-icon><Grid /></el-icon>
-          <template #title>工作台</template>
-        </el-menu-item>
         <el-menu-item index="/coach/mutual-selection" class="menu-item">
           <el-icon><User /></el-icon>
           <template #title>学生双选</template>
@@ -132,10 +116,6 @@
         <el-menu-item index="/coach/appointment-approval" class="menu-item">
           <el-icon><Checked /></el-icon>
           <template #title>预约审批</template>
-        </el-menu-item>
-        <el-menu-item index="/coach/student-feedback" class="menu-item">
-          <el-icon><EditPen /></el-icon>
-          <template #title>学员反馈</template>
         </el-menu-item>
       </template>
 
