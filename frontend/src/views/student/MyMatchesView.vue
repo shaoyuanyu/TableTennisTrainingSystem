@@ -38,11 +38,7 @@
         title="尚未报名"
         sub-title="您还没有报名参加任何比赛"
       >
-        <template #extra>
-          <el-button type="primary" @click="goToRegistration">
-            前往报名
-          </el-button>
-        </template>
+        
       </el-result>
     </el-card>
     
