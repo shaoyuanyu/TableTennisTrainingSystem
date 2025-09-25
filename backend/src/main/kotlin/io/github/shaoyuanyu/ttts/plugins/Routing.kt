@@ -48,7 +48,7 @@ fun Application.configureRouting(
     campusRoutes(campusService)
     coachRoutes(coachService)
     mutualSelectionRoutes(mutualSelectionService)
-    competitionRoutes(studentService, competitionService)
+    competitionRoutes(competitionService)
     courseRoutes(courseService)
     adminRoutes(adminService)
 }
