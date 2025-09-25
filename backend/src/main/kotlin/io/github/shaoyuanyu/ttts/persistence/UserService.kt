@@ -279,7 +279,7 @@ class UserService(
         size: Int = 10,
         role: UserRole? = null,
         campusId: Int? = null
-    ): Pair<List<User>, Long> = transaction(database) {
+    ): List<User> = transaction(database) {
         var query = UserEntity.all().toList()
         
         // 根据角色筛选
@@ -323,7 +323,7 @@ class UserService(
                 }
             }
         
-        users to totalCount
+        users
     }.also {
         USER_LOGGER.info("查询用户列表成功，页码：$page，每页数量：$size，角色：$role，校区ID：$campusId")
     }

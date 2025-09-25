@@ -143,20 +143,8 @@ fun Route.getRechargeHistory(walletService: StudentService) {
 fun Route.getAllRechargeRecords(walletService: StudentService) {
     get("/recharge/records") {
         // 获取查询参数
-        val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 1
-        val size = call.request.queryParameters["size"]?.toIntOrNull() ?: 10
-//        val userId = call.request.queryParameters["userId"]
-//        val startDate = call.request.queryParameters["startDate"]
-//        val endDate = call.request.queryParameters["endDate"]
-
-        // 参数验证
-        if (page <= 0) {
-            throw BadRequestException("页码必须大于0")
-        }
-
-        if (size !in 1..100) {
-            throw BadRequestException("每页大小必须在1-100之间")
-        }
+        val page = 1
+        val size = 100
 
         val records = walletService.getAllRechargeRecords(page,size)
 

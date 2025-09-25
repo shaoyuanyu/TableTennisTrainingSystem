@@ -157,7 +157,7 @@ class StudentService(
      * 获取所有充值记录（超级管理员）
      * @return 充值记录列表
      */
-    fun getAllRechargeRecords(page: Int, size: Int): Pair<List<RechargeRecord>,Long> =
+    fun getAllRechargeRecords(page: Int, size: Int): List<RechargeRecord> =
         transaction(database) {
 
             val query = RechargeEntity.all().toList()
@@ -175,6 +175,7 @@ class StudentService(
                 .take(size)
                 .map { it.expose() }
             USER_LOGGER.info("查询充值记录成功")
-            records to totalCount
+
+            records
         }
 }

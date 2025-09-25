@@ -177,28 +177,17 @@ fun Route.changeSelfPassword(userService: UserService) {
 fun Route.getAllUsers(userService: UserService) {
     get("/users") {
         // 获取查询参数
-        val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 1
-        val size = call.request.queryParameters["size"]?.toIntOrNull() ?: 10
+        val page = 1
+        val size = 100000
         val role = call.request.queryParameters["role"]?.let { UserRole.valueOf(it) }
         val campusId = call.request.queryParameters["campusId"]?.toIntOrNull()
         
-        // 参数验证
-        if (page <= 0) {
-            throw BadRequestException("页码必须大于0")
-        }
-        
-        if (size !in 1..100) {
-            throw BadRequestException("每页大小必须在1-100之间")
-        }
-        
-        val (users, totalCount) = userService.queryUsers(page, size, role, campusId)
+        val users = userService.queryUsers(page, size, role, campusId)
         
         call.respond(mapOf(
             "users" to users,
-            "totalCount" to totalCount,
             "page" to page,
             "size" to size,
-            "totalPages" to ((totalCount + size - 1) / size).toInt()
         ))
     }
 }

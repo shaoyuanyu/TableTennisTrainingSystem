@@ -20,6 +20,7 @@ import org.jetbrains.exposed.v1.core.or
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import java.util.*
+import kotlin.math.min
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
@@ -224,95 +225,63 @@ class CompetitionService(
 
             if (tableCount == 0) throw NotFoundException("该校区没有球台")
 
-            if (n % 2 == 1) {
-                // 奇数人情况：添加一个虚拟的轮空选手
-                val totalPlayers = n + 1
-                val rounds = totalPlayers - 1
+            // 使用标准的循环赛算法（轮转法）
+            val workingPlayers = if (n % 2 == 1) n + 1 else n
+            val rounds = workingPlayers - 1
+            val halfSize = workingPlayers / 2
 
-                for (round in 1..rounds) {
-                    val matches = mutableListOf<Pair<Int?, Int?>>()
-
-                    // 使用标准循环赛算法
-                    for (i in 1..totalPlayers / 2) {
-                        val player1Pos = if (i == 1) 1 else (round + i - 3) % (totalPlayers - 1) + 1
-                        val player2Pos = if (i == 1) (round - 1) % (totalPlayers - 1) + 1
-                        else (round - i - 1 + totalPlayers - 1) % (totalPlayers - 1) + 1
-
-                        // 处理轮空情况
-                        val p1Index = if (player1Pos <= n) player1Pos - 1 else null  // 转换为0基索引
-                        val p2Index = if (player2Pos <= n) player2Pos - 1 else null  // 转换为0基索引
-
-                        if (p1Index != null && p2Index != null) {
-                            matches.add(Pair(p1Index, p2Index))
-                        } else if (p1Index != null) {
-                            // p1轮空轮
-                        } else if (p2Index != null) {
-                            // p2轮空轮
-                        }
-                    }
-
-                    // 为每场比赛分配球台
-                    for ((matchIndex, match) in matches.withIndex()) {
-                        if (matchIndex >= tableCount) break // 球台不够
-
-                        val table = tables[matchIndex]
-
-                        // 只有当两个选手都存在时才创建比赛
-                        if (match.first != null && match.second != null) {
-                            LOGGER.info("安排比赛：${competition.name} 第${round}轮 ${table.indexInCampus}号球台 ${players[match.first!!].realName} VS ${players[match.second!!].realName}")
-
-                            // 创建比赛安排记录
-                            CompetitionArrangementEntity.new {
-                                this.competition = competition
-                                this.turnNumber = round
-                                this.table = table
-                                this.playerA = players[match.first!!]
-                                this.playerB = players[match.second!!]
-                                this.status = "SCHEDULED"
-                                this.result = ""
-                            }
+            // 为确保不出现自己和自己比赛，我们预先生成所有可能的配对
+            val allMatches = mutableListOf<Pair<Int, Int>>()
+            
+            // 生成所有不重复的配对组合
+            for (i in 0 until n) {
+                for (j in i + 1 until n) {
+                    allMatches.add(Pair(i, j))
+                }
+            }
+            
+            // 按轮次分配比赛
+            val matchesPerRound = minOf(halfSize, tableCount)
+            val totalMatches = allMatches.size
+            
+            for (round in 1..rounds) {
+                val matches = mutableListOf<Pair<Int, Int>>()
+                
+                // 从剩余比赛中选择本轮比赛
+                val startIndex = (round - 1) * matchesPerRound
+                val endIndex = minOf(startIndex + matchesPerRound, totalMatches)
+                
+                if (startIndex < totalMatches) {
+                    for (i in startIndex until minOf(endIndex, totalMatches)) {
+                        if (i < allMatches.size) {
+                            matches.add(allMatches[i])
                         }
                     }
                 }
-            } else {
-                // 偶数人情况
-                val rounds = n - 1
 
-                for (round in 1..rounds) {
-                    val matches = mutableListOf<Pair<Int, Int>>()
-                    
-                    // 预计算常量值以避免重复计算
-                    val nMinusOne = n - 1
-                    val roundMinusThree = round - 3
-                    val roundPlusNMinusThree = round + n - 3
-                    
-                    // 使用标准循环赛算法
-                    for (i in 1..n / 2) {
-                        val player1Pos = if (i == 1) 1 else (roundMinusThree + i) % nMinusOne + 1
-                        val player2Pos = if (i == 1) roundPlusNMinusThree % nMinusOne + 1
-                        else (round - i - 1 + nMinusOne) % nMinusOne + 1
+                // 为每场比赛分配球台
+                for ((matchIndex, match) in matches.withIndex()) {
+                    if (matchIndex >= tableCount) break // 球台不够
 
-                        // 转换为0基索引
-                        val p1Index = player1Pos - 1
-                        val p2Index = player2Pos - 1
+                    val table = tables[matchIndex]
 
-                        // 由于算法保证索引有效且不相等，可简化检查
-                        matches.add(Pair(p1Index, p2Index))
-                    }
-
-                    // 为每场比赛分配球台
-                    for ((matchIndex, match) in matches.withIndex()) {
-                        if (matchIndex >= tableCount) break // 球台不够
-
-                        val table = tables[matchIndex]
+                    // 确保两个选手都不是null且不是同一个人
+                    if (match.first < n && 
+                        match.second < n &&
+                        match.first != match.second) {
+                        
+                        val playerA = players[match.first]
+                        val playerB = players[match.second]
+                        
+                        LOGGER.info("安排比赛：${competition.name} 第${round}轮 ${table.indexInCampus}号球台 ${playerA.realName} VS ${playerB.realName}")
 
                         // 创建比赛安排记录
                         CompetitionArrangementEntity.new {
                             this.competition = competition
                             this.turnNumber = round
                             this.table = table
-                            this.playerA = players[match.first]
-                            this.playerB = players[match.second]
+                            this.playerA = playerA
+                            this.playerB = playerB
                             this.status = "SCHEDULED"
                             this.result = ""
                         }

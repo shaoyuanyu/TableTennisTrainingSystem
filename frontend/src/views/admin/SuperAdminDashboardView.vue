@@ -105,7 +105,7 @@
       </GlassCardWithHeader>
     </GlassCardsGrid>
   </div>
-  
+
 </template>
 
 <script setup>
@@ -212,6 +212,7 @@ const fetchOverviewData = async () => {
     try {
       const recResp = await api.get('/wallet/recharge/records?page=1&size=200')
       const records = recResp?.data?.first || recResp?.data || []
+      console.log(records)
       const startOfMonth = dayjs().startOf('month')
       monthRevenue = (records || [])
         .filter(r => r.createdAt && dayjs(r.createdAt).isAfter(startOfMonth))
