@@ -4,8 +4,9 @@ package io.github.shaoyuanyu.ttts.persistence
 import io.github.shaoyuanyu.ttts.dto.campus.CampusCreateRequest
 import io.github.shaoyuanyu.ttts.dto.campus.CampusQueryRequest
 import io.github.shaoyuanyu.ttts.dto.table.Table
-import io.github.shaoyuanyu.ttts.dto.student.Group
-import io.github.shaoyuanyu.ttts.dto.student.Status
+import io.github.shaoyuanyu.ttts.dto.table.TableOccupiedByGroup
+import io.github.shaoyuanyu.ttts.dto.table.TableStatus
+
 import io.github.shaoyuanyu.ttts.dto.user.UserRole
 import io.github.shaoyuanyu.ttts.persistence.campus.CampusEntity
 import io.github.shaoyuanyu.ttts.persistence.table.TableEntity
@@ -130,8 +131,8 @@ class CampusService(
                 currentTableNumber += 1
 
                 TableEntity.new {
-                    this.status = Status.free
-                    this.group = Group.free
+                    this.status = TableStatus.FREE
+                    this.group = TableOccupiedByGroup.FREE
                     this.indexInCampus = currentTableNumber
                     this.campusId = campusId
                 }
@@ -150,7 +151,7 @@ class CampusService(
         transaction(database) {
             val campusId= UserEntity.findById(UUID.fromString(userId))?.campusId ?: throw IllegalArgumentException("用户不存在")
             TableEntity.find {
-                TableTable.status.eq(Status.free) and (TableTable.campusId.eq(campusId))
+                TableTable.status.eq(TableStatus.FREE) and (TableTable.campusId.eq(campusId))
             }.toList().map { it.expose() }
         }
 }

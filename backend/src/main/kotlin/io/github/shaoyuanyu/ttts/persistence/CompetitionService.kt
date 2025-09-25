@@ -2,10 +2,10 @@
 
 package io.github.shaoyuanyu.ttts.persistence
 
-import io.github.shaoyuanyu.ttts.dto.student.ComQueryRequest
-import io.github.shaoyuanyu.ttts.dto.student.CompetitionInfo
-import io.github.shaoyuanyu.ttts.dto.student.Group
-import io.github.shaoyuanyu.ttts.dto.student.Status
+import io.github.shaoyuanyu.ttts.dto.competition.CompetitionInfo
+import io.github.shaoyuanyu.ttts.dto.competition.CompetitionQueryRequest
+import io.github.shaoyuanyu.ttts.dto.table.TableOccupiedByGroup
+import io.github.shaoyuanyu.ttts.dto.table.TableStatus
 import io.github.shaoyuanyu.ttts.exceptions.NotFoundException
 import io.github.shaoyuanyu.ttts.persistence.competition.CompetitionSignupEntity
 import io.github.shaoyuanyu.ttts.persistence.competition.CompetitionSignupTable
@@ -26,6 +26,9 @@ class CompetitionService(
     private val database: Database,
     private val studentService: StudentService,
 ) {
+    fun createCompetition() {
+    }
+
     /**
      * 报名参加比赛
      */
@@ -54,24 +57,24 @@ class CompetitionService(
 
             // 1. 首先查找已经有一个同组人占用的球台（优先分配）
             val partiallyOccupiedTables = TableEntity.find {
-                (TableTable.status eq Status.partlyoccupy) and
+                (TableTable.status eq TableStatus.PARTLY_OCCUPIED) and
                         (TableTable.campusId eq userCampusId) and
-                        (TableTable.group eq Group.valueOf(group))
+                        (TableTable.group eq TableOccupiedByGroup.valueOf(group))
             }.toList()
 
             val selectedTable: TableEntity
             val tableId: Int
-            val newTableStatus: Status
+            val newTableStatus: TableStatus
 
             if (partiallyOccupiedTables.isNotEmpty()) {
                 // 优先选择部分占用的球台
                 selectedTable = partiallyOccupiedTables.random()
                 tableId = selectedTable.indexInCampus
-                newTableStatus = Status.occupy // 分配第二个人后，球台满员
+                newTableStatus = TableStatus.OCCUPIED // 分配第二个人后，球台满员
             } else {
                 // 如果没有部分占用的球台，选择空闲球台
                 val availableTables = TableEntity.find {
-                    (TableTable.status eq Status.free) and
+                    (TableTable.status eq TableStatus.FREE) and
                             (TableTable.campusId eq userCampusId)
                 }.toList()
 
@@ -81,7 +84,7 @@ class CompetitionService(
 
                 selectedTable = availableTables.random()
                 tableId = selectedTable.indexInCampus
-                newTableStatus =Status.partlyoccupy // 分配第一个人，部分占用
+                newTableStatus = TableStatus.PARTLY_OCCUPIED // 分配第一个人，部分占用
             }
 
             // 插入报名记录
@@ -105,7 +108,7 @@ class CompetitionService(
                 ?: throw NotFoundException("球台不存在")
 
             tableEntity.status = newTableStatus
-            tableEntity.group = Group.valueOf(group)
+            tableEntity.group = TableOccupiedByGroup.valueOf(group)
 
             USER_LOGGER.info("报名成功！小组：$group，分配球台：$tableId")
         }
@@ -114,7 +117,7 @@ class CompetitionService(
     /**
      * 查询报名信息
      */
-    fun querySignup(userId: String): ComQueryRequest =
+    fun querySignup(userId: String): CompetitionQueryRequest =
         transaction(database) {
             // 1. 先查询自己的报名信息
             val mySignup = CompetitionSignupEntity.find {
@@ -141,7 +144,7 @@ class CompetitionService(
             val opponentUsername = opponentSignups.firstOrNull()?.username
 
             // 4. 构建返回结果
-            val signupInfo = ComQueryRequest(
+            val signupInfo = CompetitionQueryRequest(
                 tableId = myTableId,
                 group = myGroup,
                 myUsername = myUsername,
@@ -282,8 +285,8 @@ class CompetitionService(
             }
             //更新球台状态为FREE
             tableEntity.map{
-                it.status=Status.free
-                it.group=Group.free
+                it.status = TableStatus.FREE
+                it.group = TableOccupiedByGroup.FREE
             }
             USER_LOGGER.info("比赛结果录入成功，获胜者：$winner，失败者：$loser，球台 ID：${winnerSignup.tableId}")
         }
@@ -344,7 +347,7 @@ class CompetitionService(
                 val player2 = if (player2Index < fixedPlayers.size) fixedPlayers[player2Index] else "轮空"
 
                 // 确保不是自己和自己比赛（除了轮空的情况）
-                if (player1 != player2 || player1 == "轮空" || player2 == "轮空") {
+                if (player1 != player2 || player1 == "轮空") {
                     allMatches.add(
                         mapOf(
                             "round" to round,

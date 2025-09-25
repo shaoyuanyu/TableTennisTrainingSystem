@@ -1,40 +1,14 @@
 package io.github.shaoyuanyu.ttts.routes
 
-import io.github.shaoyuanyu.ttts.dto.student.ComQueryRequest
-import io.github.shaoyuanyu.ttts.dto.student.CompetitionInfo
-import io.github.shaoyuanyu.ttts.dto.student.CompetitionResult
-import io.github.shaoyuanyu.ttts.dto.student.Group
-import io.github.shaoyuanyu.ttts.dto.student.Status
-import io.github.shaoyuanyu.ttts.dto.student.comsignupRequest
-import io.github.shaoyuanyu.ttts.dto.user.UserSession
-import io.github.shaoyuanyu.ttts.exceptions.UnauthorizedException
 import io.github.shaoyuanyu.ttts.persistence.StudentService
-import io.github.shaoyuanyu.ttts.persistence.USER_LOGGER
-import io.github.shaoyuanyu.ttts.persistence.competition.CompetitionSignupEntity
-import io.github.shaoyuanyu.ttts.persistence.competition.CompetitionSignupTable
-import io.github.shaoyuanyu.ttts.persistence.table.TableEntity
-import io.github.shaoyuanyu.ttts.persistence.table.TableTable
-import io.github.shaoyuanyu.ttts.persistence.user.UserEntity
-import io.github.shaoyuanyu.ttts.persistence.user.UserTable
-import io.ktor.http.HttpStatusCode
+import io.github.shaoyuanyu.ttts.utils.getUserIdFromCall
 import io.ktor.server.application.Application
 import io.ktor.server.auth.authenticate
 import io.ktor.server.request.receive
-import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
-import io.ktor.server.routing.get
 import io.ktor.server.routing.post
-import io.ktor.server.routing.delete
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
-import io.ktor.server.sessions.get
-import io.ktor.server.sessions.sessions
-import org.jetbrains.exposed.v1.core.and
-import org.jetbrains.exposed.v1.jdbc.transactions.transaction
-import java.util.UUID
-import kotlin.collections.component1
-import kotlin.collections.component2
-import kotlin.time.Clock
 
 fun Application.competitionRoutes(studentService: StudentService) {
     routing {
@@ -60,16 +34,13 @@ fun Application.competitionRoutes(studentService: StudentService) {
 //                getCampusCompetitions(studentService)
 //                enterCompetitionResults(studentService)
 //                getTournaments(studentService) // 添加获取比赛列表接口
-//                createTournament(studentService) // 添加创建比赛接口
+                createTournament(studentService) // 添加创建比赛接口
 //                deleteTournament(studentService) // 添加删除比赛接口
             }
 
             // 超级管理员权限
             authenticate("auth-session-super-admin") {
 //                getAllCompetitions(studentService)
-//                getTournaments(studentService) // 添加获取比赛列表接口
-//                createTournament(studentService) // 添加创建比赛接口
-//                deleteTournament(studentService) // 添加删除比赛接口
             }
         }
     }
@@ -199,20 +170,16 @@ fun Application.competitionRoutes(studentService: StudentService) {
 /**
  * 创建比赛
  */
-//fun Route.createTournament(studentService: StudentService) {
-//    post("/tournaments/create") {
-//        try {
-//            val userId = call.sessions.get<UserSession>()?.userId
-//                ?: throw UnauthorizedException("未登录")
-//
-//            val request = call.receive<Map<String, Any?>>()
-//            val tournament = studentService.createTournament(request, userId)
-//            call.respond(HttpStatusCode.OK, mapOf("message" to "比赛创建成功", "data" to tournament.expose()))
-//        } catch (e: Exception) {
-//            call.respond(HttpStatusCode.BadRequest, mapOf("error" to e.message))
-//        }
-//    }
-//}
+fun Route.createTournament(studentService: StudentService) {
+    post("/tournaments/create") {
+        val userId = getUserIdFromCall(call)
+
+        val request = call.receive<Map<String, Any?>>()
+//        val tournament = studentService.createTournament(request, userId)
+
+//        call.respond(HttpStatusCode.OK, mapOf("message" to "比赛创建成功", "data" to tournament.expose()))
+    }
+}
 
 /**
  * 删除比赛
@@ -260,4 +227,3 @@ fun Application.competitionRoutes(studentService: StudentService) {
 //        }
 //    }
 //}
-

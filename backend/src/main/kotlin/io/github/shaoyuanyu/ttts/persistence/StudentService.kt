@@ -3,23 +3,11 @@
 package io.github.shaoyuanyu.ttts.persistence
 
 import io.github.shaoyuanyu.ttts.dto.recharge.RechargeRecord
-import io.github.shaoyuanyu.ttts.dto.student.ComQueryRequest
-import io.github.shaoyuanyu.ttts.dto.student.CompetitionInfo
-import io.github.shaoyuanyu.ttts.dto.student.Status
-import io.github.shaoyuanyu.ttts.dto.student.Group
-import io.github.shaoyuanyu.ttts.exceptions.NotFoundException
 import io.github.shaoyuanyu.ttts.persistence.campus.CampusEntity
-import io.github.shaoyuanyu.ttts.persistence.competition.CompetitionSignupEntity
-import io.github.shaoyuanyu.ttts.persistence.competition.CompetitionSignupTable
 import io.github.shaoyuanyu.ttts.persistence.recharge.RechargeEntity
 import io.github.shaoyuanyu.ttts.persistence.recharge.RechargeTable
 import io.github.shaoyuanyu.ttts.persistence.recharge.expose
 import io.github.shaoyuanyu.ttts.persistence.student.StudentEntity
-import org.jetbrains.exposed.v1.core.and
-import io.github.shaoyuanyu.ttts.persistence.table.TableEntity
-import io.github.shaoyuanyu.ttts.persistence.table.TableTable
-import io.github.shaoyuanyu.ttts.persistence.user.UserEntity
-import io.github.shaoyuanyu.ttts.persistence.user.UserTable
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.slf4j.Logger

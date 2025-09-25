@@ -3,7 +3,7 @@
 package io.github.shaoyuanyu.ttts.persistence
 
 import io.github.shaoyuanyu.ttts.dto.course.*
-import io.github.shaoyuanyu.ttts.dto.student.Status
+import io.github.shaoyuanyu.ttts.dto.table.TableStatus
 import io.github.shaoyuanyu.ttts.exceptions.BadRequestException
 import io.github.shaoyuanyu.ttts.exceptions.NotFoundException
 import io.github.shaoyuanyu.ttts.persistence.campus.CampusEntity
@@ -307,7 +307,7 @@ class CourseService(
 
         // 自动分配：查找该校区空闲的球桌
         val availableTables = TableEntity.find {
-            (TableTable.campusId eq campusId) and (TableTable.status eq Status.free)
+            (TableTable.campusId eq campusId) and (TableTable.status eq TableStatus.FREE)
         }.toList()
 
         val date = LocalDate.parse(request.date)
