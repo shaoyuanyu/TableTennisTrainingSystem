@@ -8,6 +8,7 @@ import io.github.shaoyuanyu.ttts.persistence.MessageService
 import io.github.shaoyuanyu.ttts.persistence.MutualSelectionService
 import io.github.shaoyuanyu.ttts.persistence.StudentService
 import io.github.shaoyuanyu.ttts.persistence.AdminService
+import io.github.shaoyuanyu.ttts.persistence.CompetitionService
 import io.github.shaoyuanyu.ttts.routes.campusRoutes
 import io.github.shaoyuanyu.ttts.routes.coachRoutes
 import io.github.shaoyuanyu.ttts.routes.competitionRoutes
@@ -30,7 +31,8 @@ fun Application.configureRouting(
     coachService: CoachService,
     mutualSelectionService: MutualSelectionService,
     courseService: CourseService,
-    adminService: AdminService
+    adminService: AdminService,
+    competitionService: CompetitionService,
 ) {
     routing {
         // open api
@@ -46,7 +48,7 @@ fun Application.configureRouting(
     campusRoutes(campusService)
     coachRoutes(coachService)
     mutualSelectionRoutes(mutualSelectionService)
-    competitionRoutes(studentService)
+    competitionRoutes(studentService, competitionService)
     courseRoutes(courseService)
     adminRoutes(adminService)
 }

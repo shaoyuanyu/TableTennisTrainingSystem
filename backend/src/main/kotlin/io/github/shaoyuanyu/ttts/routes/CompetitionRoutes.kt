@@ -1,7 +1,8 @@
 package io.github.shaoyuanyu.ttts.routes
 
+import io.github.shaoyuanyu.ttts.dto.competition.Competition
+import io.github.shaoyuanyu.ttts.persistence.CompetitionService
 import io.github.shaoyuanyu.ttts.persistence.StudentService
-import io.github.shaoyuanyu.ttts.utils.getUserIdFromCall
 import io.ktor.server.application.Application
 import io.ktor.server.auth.authenticate
 import io.ktor.server.request.receive
@@ -10,7 +11,10 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 
-fun Application.competitionRoutes(studentService: StudentService) {
+fun Application.competitionRoutes(
+    studentService: StudentService,
+    competitionService: CompetitionService,
+) {
     routing {
         route("/competition") {
             // 无权限限制
@@ -34,7 +38,7 @@ fun Application.competitionRoutes(studentService: StudentService) {
 //                getCampusCompetitions(studentService)
 //                enterCompetitionResults(studentService)
 //                getTournaments(studentService) // 添加获取比赛列表接口
-                createTournament(studentService) // 添加创建比赛接口
+                createCompetition(competitionService)
 //                deleteTournament(studentService) // 添加删除比赛接口
             }
 
@@ -170,14 +174,18 @@ fun Application.competitionRoutes(studentService: StudentService) {
 /**
  * 创建比赛
  */
-fun Route.createTournament(studentService: StudentService) {
-    post("/tournaments/create") {
-        val userId = getUserIdFromCall(call)
-
-        val request = call.receive<Map<String, Any?>>()
-//        val tournament = studentService.createTournament(request, userId)
-
-//        call.respond(HttpStatusCode.OK, mapOf("message" to "比赛创建成功", "data" to tournament.expose()))
+fun Route.createCompetition(competitionService: CompetitionService) {
+    post("/create") {
+        val request = call.receive<Competition>()
+        
+        competitionService.createCompetition(
+            name = request.name,
+            type = request.type,
+            date = request.date,
+            registrationDeadline = request.registrationDeadline,
+            fee = request.fee,
+            description = request.description
+        )
     }
 }
 

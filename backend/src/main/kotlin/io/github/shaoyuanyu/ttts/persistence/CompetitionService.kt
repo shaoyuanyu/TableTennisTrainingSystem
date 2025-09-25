@@ -2,23 +2,25 @@
 
 package io.github.shaoyuanyu.ttts.persistence
 
-import io.github.shaoyuanyu.ttts.dto.competition.CompetitionInfo
+import io.github.shaoyuanyu.ttts.dto.competition.CompetitionOneMatchInfo
 import io.github.shaoyuanyu.ttts.dto.competition.CompetitionQueryRequest
 import io.github.shaoyuanyu.ttts.dto.table.TableOccupiedByGroup
 import io.github.shaoyuanyu.ttts.dto.table.TableStatus
 import io.github.shaoyuanyu.ttts.exceptions.NotFoundException
+import io.github.shaoyuanyu.ttts.persistence.competition.CompetitionEntity
 import io.github.shaoyuanyu.ttts.persistence.competition.CompetitionSignupEntity
 import io.github.shaoyuanyu.ttts.persistence.competition.CompetitionSignupTable
 import io.github.shaoyuanyu.ttts.persistence.table.TableEntity
 import io.github.shaoyuanyu.ttts.persistence.table.TableTable
 import io.github.shaoyuanyu.ttts.persistence.user.UserEntity
 import io.github.shaoyuanyu.ttts.persistence.user.UserTable
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
-import java.util.UUID
-import kotlin.collections.component1
-import kotlin.collections.component2
+import java.util.*
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
@@ -26,7 +28,56 @@ class CompetitionService(
     private val database: Database,
     private val studentService: StudentService,
 ) {
-    fun createCompetition() {
+    /**
+     * 创建比赛
+     *
+     * @param name 比赛名称
+     * @param type 比赛类型
+     * @param date 比赛日期
+     * @param registrationDeadline 报名截止日期
+     * @param fee 报名费用
+     * @param description 比赛描述
+     * @return 创建的比赛ID
+     */
+    fun createCompetition(
+        name: String,
+        type: String,
+        date: LocalDate,
+        registrationDeadline: LocalDate,
+        fee: Float,
+        description: String
+    ) {
+        // 参数验证
+        if (name.isBlank()) {
+            throw IllegalArgumentException("比赛名称不能为空")
+        }
+        
+        if (type.isBlank()) {
+            throw IllegalArgumentException("比赛类型不能为空")
+        }
+        
+        if (date < Clock.System.now().toLocalDateTime(TimeZone.of("Asia/Shanghai")).date) {
+            throw IllegalArgumentException("比赛日期不能早于当前日期")
+        }
+        
+        if (registrationDeadline > date) {
+            throw IllegalArgumentException("报名截止日期不能晚于比赛日期")
+        }
+        
+        if (fee < 0) {
+            throw IllegalArgumentException("报名费用不能为负数")
+        }
+        
+        transaction(database) {
+            CompetitionEntity.new {
+                this.name = name
+                this.type = type
+                this.date = date
+                this.registrationDeadline = registrationDeadline
+                this.fee = fee
+                this.description = description
+            }
+        }
     }
 
     /**
@@ -159,7 +210,7 @@ class CompetitionService(
     /**
      * 获取所有比赛信息
      */
-    fun getAllCompetitions(): List<CompetitionInfo> =
+    fun getAllCompetitions(): List<CompetitionOneMatchInfo> =
         transaction(database) {
             // 1. 查询所有比赛记录
             val allCompetitions = CompetitionSignupEntity.all()
@@ -184,7 +235,7 @@ class CompetitionService(
                 when (signups.size) {
                     1 -> {
                         val player = signups[0]
-                        CompetitionInfo(
+                        CompetitionOneMatchInfo(
                             tableId = tableId,
                             campusId = campusId,
                             group = player.group,
@@ -195,7 +246,7 @@ class CompetitionService(
                     in 2..Int.MAX_VALUE -> {
                         val player1 = signups[0]
                         val player2 = signups[1]
-                        CompetitionInfo(
+                        CompetitionOneMatchInfo(
                             tableId = tableId,
                             campusId = campusId,
                             group = player1.group,
@@ -211,7 +262,7 @@ class CompetitionService(
     /**
      * 获取管理员所在校区的比赛信息
      */
-    fun getCampusCompetitions(userId: String): List<CompetitionInfo> =
+    fun getCampusCompetitions(userId: String): List<CompetitionOneMatchInfo> =
         transaction(database) {
             // 获取用户信息
             val userEntity = UserEntity.findById(UUID.fromString(userId))
@@ -233,7 +284,7 @@ class CompetitionService(
                     val player1 = signups[0]
                     val player2 = signups[1]
 
-                    CompetitionInfo(
+                    CompetitionOneMatchInfo(
                         tableId = tableId,
                         campusId = player1.campusId, // 同一球台的用户在同一校区
                         group = player1.group,       // 同一球台的用户在同一小组
@@ -243,7 +294,7 @@ class CompetitionService(
                 } else if (signups.size == 1) {
                     // 只有一人报名，显示等待对手
                     val player = signups[0]
-                    CompetitionInfo(
+                    CompetitionOneMatchInfo(
                         tableId = tableId,
                         campusId = player.campusId,
                         group = player.group,
