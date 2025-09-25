@@ -10,7 +10,7 @@
       </template>
       
       <el-form
-        ref="createForm"
+        ref="createFormRef"
         :model="createForm"
         :rules="createRules"
         label-width="120px"
@@ -25,7 +25,11 @@
           
           <el-col :span="12">
             <el-form-item label="比赛类型" prop="type">
-              <el-input v-model="createForm.type" placeholder="请输入比赛类型" />
+              <el-select v-model="createForm.type" placeholder="请选择比赛类型" style="width: 100%">
+                <el-option label="月赛" value="monthly" />
+                <el-option label="季度赛" value="quarterly" />
+                <el-option label="年度赛" value="annual" />
+              </el-select>
             </el-form-item>
           </el-col>
         </el-row>
@@ -108,7 +112,9 @@
         <el-table-column prop="name" label="比赛名称" />
         <el-table-column prop="type" label="类型">
           <template #default="scope">
-            <el-tag>{{ scope.row.type }}</el-tag>
+            <el-tag v-if="scope.row.type === 'monthly'">月赛</el-tag>
+            <el-tag v-else-if="scope.row.type === 'quarterly'" type="success">季度赛</el-tag>
+            <el-tag v-else-if="scope.row.type === 'annual'" type="warning">年度赛</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="date" label="比赛日期" />
@@ -154,14 +160,22 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { Refresh } from '@element-plus/icons-vue'
 import PageHeader from '@/components/PageHeader.vue'
 import api from '@/utils/api'
+import { useUserStore } from '@/stores/user'
+
+// 表单引用
+const createFormRef = ref()
+
+// 获取用户状态
+const userStore = useUserStore()
 
 // 表单数据
 const createForm = ref({
   name: '',
-  type: '',
+  type: 'monthly',
   date: '',
   registrationDeadline: '',
   fee: 30,
+  campusId: userStore.campusId, // 从用户状态中获取校区ID
   description: ''
 })
 
@@ -171,7 +185,7 @@ const createRules = {
     { required: true, message: '请输入比赛名称', trigger: 'blur' }
   ],
   type: [
-    { required: true, message: '请输入比赛类型', trigger: 'blur' }
+    { required: true, message: '请选择比赛类型', trigger: 'change' }
   ],
   date: [
     { required: true, message: '请选择比赛日期', trigger: 'change' }
@@ -181,7 +195,6 @@ const createRules = {
   ],
   fee: [
     { required: true, message: '请输入报名费用', trigger: 'blur' }
-  ],
   ]
 }
 
@@ -199,6 +212,13 @@ const pagination = ref({
 const createTournament = async () => {
   try {
     creating.value = true
+    // 验证表单
+    const valid = await createFormRef.value.validate()
+    if (!valid) return
+    
+    // 确保campusId始终从用户状态中获取
+    createForm.value.campusId = userStore.campusId
+    
     await api.post('/api/competition/create', createForm.value)
     ElMessage.success('比赛创建成功')
     resetForm()
@@ -213,10 +233,11 @@ const createTournament = async () => {
 const resetForm = () => {
   createForm.value = {
     name: '',
-    type: '',
+    type: 'monthly',
     date: '',
     registrationDeadline: '',
     fee: 30,
+    campusId: userStore.campusId, // 重置时也从用户状态获取
     description: ''
   }
 }
@@ -239,10 +260,19 @@ const fetchTournaments = async () => {
   }
 }
 
+const getTournamentTypeText = (type) => {
+  const typeMap = {
+    monthly: '月赛',
+    quarterly: '季度赛',
+    annual: '年度赛'
+  }
+  return typeMap[type] || type
+}
+
 const viewDetails = (tournament) => {
   ElMessageBox.alert(
     `<strong>比赛名称：</strong>${tournament.name}<br>
-     <strong>比赛类型：</strong>${tournament.type}<br>
+     <strong>比赛类型：</strong>${getTournamentTypeText(tournament.type)}<br>
      <strong>比赛日期：</strong>${tournament.date}<br>
      <strong>报名截止：</strong>${tournament.registrationDeadline}<br>
      <strong>报名费用：</strong>${tournament.fee}元<br>
