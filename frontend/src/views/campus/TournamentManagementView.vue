@@ -237,7 +237,7 @@ const resetForm = () => {
     date: '',
     registrationDeadline: '',
     fee: 30,
-    campusId: userStore.campusId, // 重置时也从用户状态获取
+    campusId: userStore.campusId,
     description: ''
   }
 }
@@ -245,7 +245,7 @@ const resetForm = () => {
 const fetchTournaments = async () => {
   try {
     loading.value = true
-    const response = await api.get('/competition/tournaments', {
+    const response = await api.get('/competition/self-campus', {
       params: {
         page: pagination.value.currentPage,
         size: pagination.value.pageSize
