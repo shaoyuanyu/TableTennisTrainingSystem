@@ -3,7 +3,6 @@ package io.github.shaoyuanyu.ttts.routes
 import io.github.shaoyuanyu.ttts.dto.competition.Competition
 import io.github.shaoyuanyu.ttts.dto.competition.CompetitionSignupRequest
 import io.github.shaoyuanyu.ttts.persistence.CompetitionService
-import io.github.shaoyuanyu.ttts.persistence.StudentService
 import io.github.shaoyuanyu.ttts.plugins.LOGGER
 import io.github.shaoyuanyu.ttts.utils.getUserIdFromCall
 import io.ktor.http.HttpStatusCode
@@ -16,7 +15,6 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
-import io.ktor.server.sessions.sessions
 
 fun Application.competitionRoutes(
     competitionService: CompetitionService,
@@ -35,8 +33,8 @@ fun Application.competitionRoutes(
             // 学生权限
             authenticate("auth-session-student") {
                 signupCompetition(competitionService)
+                getUserCompetitionSchedule(competitionService)
 //                querysignup(studentService)
-//                getUserSchedule(studentService)
 //                getLatestTournament(studentService) // 添加获取最新比赛信息接口
             }
 
@@ -107,9 +105,10 @@ fun Route.signupCompetition(competitionService: CompetitionService) {
         val userId = getUserIdFromCall(call)
 
         val request = call.receive<CompetitionSignupRequest>()
+        val competitionId = request.competitionId
         val groupName = request.group
 
-        competitionService.signupCompetition(userId, groupName)
+        competitionService.signupCompetition(userId, competitionId, groupName)
 
         call.respond(HttpStatusCode.OK, "报名成功")
     }
@@ -137,18 +136,14 @@ fun Route.signupCompetition(competitionService: CompetitionService) {
 /**
  * 获取用户个人比赛安排
  */
-//fun Route.getUserSchedule(studentService: StudentService) {
-//    get("/my-schedule") {
-//        val userId = call.sessions.get<UserSession>()?.userId
-//            ?: throw UnauthorizedException("未登录")
-//
-//        val schedule = studentService.getUserSchedule(userId)
-//        call.respond(
-//            HttpStatusCode.OK,
-//            schedule
-//        )
-//    }
-//}
+fun Route.getUserCompetitionSchedule(competitionService: CompetitionService) {
+    get("/my-schedule") {
+        val userId = getUserIdFromCall(call)
+
+        val schedule = competitionService.getUserCompetitionSchedule(userId)
+        call.respond(HttpStatusCode.OK, schedule)
+    }
+}
 
 /**
  * 获取所有竞赛信息

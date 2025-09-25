@@ -432,6 +432,7 @@ class CourseService(
             }
         }
     }
+
     private fun changeCourseInfo(courseId: String,title: String){
         transaction(database) {
             val course = CourseEntity.findById(UUID.fromString(courseId))

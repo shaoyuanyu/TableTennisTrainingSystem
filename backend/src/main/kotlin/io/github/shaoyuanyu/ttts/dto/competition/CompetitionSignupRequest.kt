@@ -4,5 +4,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class CompetitionSignupRequest(
-    val group:String,
+    val competitionId: String,
+    val group: String,
 )
