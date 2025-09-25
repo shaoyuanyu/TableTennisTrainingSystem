@@ -24,7 +24,7 @@ class CoachService(
     /**
      * 通过审批并更新教练等级
      */
-    fun updateCoachLevel(coachId: String, adminId: String,newLevel: String) {
+    fun updateCoachLevel(coachId: String, adminId: String, newLevel: String) {
         transaction(database) {
             val coachEntity = CoachEntity.findById(UUID.fromString(coachId))
                 ?: throw IllegalArgumentException("教练不存在")

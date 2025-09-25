@@ -35,10 +35,9 @@
 
         <el-form-item label="教练等级">
           <el-select v-model="filters.level" placeholder="全部等级" clearable style="width: 120px">
-            <el-option label="初级教练" value="junior" />
-            <el-option label="中级教练" value="intermediate" />
-            <el-option label="高级教练" value="senior" />
-            <el-option label="资深教练" value="expert" />
+            <el-option label="初级教练员" value="初级教练员" />
+            <el-option label="中级教练员" value="中级教练员" />
+            <el-option label="高级教练员" value="高级教练员" />
           </el-select>
         </el-form-item>
 
@@ -127,7 +126,7 @@
         <el-table-column prop="level" label="教练等级" width="120">
           <template #default="{ row }">
             <el-tag :type="getLevelType(row.level)">
-              {{ getLevelText(row.level) }}
+              {{ row.level }}
             </el-tag>
           </template>
         </el-table-column>
@@ -238,10 +237,9 @@
           <el-col :span="12">
             <el-form-item label="教练等级" prop="level">
               <el-select v-model="coachForm.level" placeholder="选择教练等级">
-                <el-option label="初级教练" value="junior" />
-                <el-option label="中级教练" value="intermediate" />
-                <el-option label="高级教练" value="senior" />
-                <el-option label="资深教练" value="expert" />
+                <el-option label="初级教练员" value="初级教练员" />
+                <el-option label="中级教练员" value="中级教练员" />
+                <el-option label="高级教练员" value="高级教练员" />
               </el-select>
             </el-form-item>
           </el-col>
@@ -386,6 +384,27 @@
       </div>
     </el-dialog>
 
+    <!-- 教练审批对话框 -->
+    <el-dialog v-model="approveDialogVisible" title="审批教练" width="500px">
+      <el-form label-width="100px">
+        <el-form-item label="教练姓名">
+          <el-input v-model="approvingCoach.name" readonly />
+        </el-form-item>
+        <el-form-item label="教练等级">
+          <el-select v-model="approveForm.level" placeholder="请选择教练等级">
+            <el-option label="初级教练员" value="初级教练员" />
+            <el-option label="中级教练员" value="中级教练员" />
+            <el-option label="高级教练员" value="高级教练员" />
+          </el-select>
+        </el-form-item>
+      </el-form>
+
+      <template #footer>
+        <OutlineButton @click="approveDialogVisible = false">取消</OutlineButton>
+        <PrimaryButton @click="executeApprove">确认审批</PrimaryButton>
+      </template>
+    </el-dialog>
+
     <!-- 批量操作对话框 -->
     <el-dialog v-model="batchDialogVisible" title="批量操作" width="400px">
       <el-form label-width="100px">
@@ -471,7 +490,7 @@ const coachForm = reactive({
   phone: '',
   email: '',
   birthDate: '',
-  level: 'junior',
+  level: '初级教练员',
   hourlyRate: 100,
   maxStudents: 10,
   certificateUrl: '',
@@ -655,7 +674,7 @@ const resetForm = () => {
     phone: '',
     email: '',
     birthDate: '',
-    level: 'junior',
+    level: '初级教练员',
     hourlyRate: 100,
     maxStudents: 10,
     certificateUrl: '',
@@ -694,7 +713,7 @@ const saveCoach = async () => {
 const handleAction = async (command, coach) => {
   switch (command) {
     case 'approve':
-      await approveCoach(coach.id, coach.level)
+      showApproveDialog(coach)
       break
     case 'disable':
       // 教练停用功能需要后端API支持，暂时不实现
@@ -706,14 +725,29 @@ const handleAction = async (command, coach) => {
   }
 }
 
-// 审批教练
-const approveCoach = async (coachId, level) => {
+// 审批教练对话框相关数据
+const approveDialogVisible = ref(false)
+const approvingCoach = ref(null)
+const approveForm = reactive({
+  level: '初级教练员'
+})
+
+// 显示审批对话框
+const showApproveDialog = (coach) => {
+  approvingCoach.value = coach
+  approveForm.level = coach.level || '初级教练员'
+  approveDialogVisible.value = true
+}
+
+// 执行审批操作
+const executeApprove = async () => {
   try {
     await api.post('/coach/approve', {
-      coachId: coachId,
-      level: level
+      coachId: approvingCoach.value.id,
+      level: approveForm.level
     })
     ElMessage.success('教练审批成功')
+    approveDialogVisible.value = false
     await fetchCoaches()
   } catch (error) {
     console.error('审批失败:', error)
@@ -844,10 +878,9 @@ const getStudentName = (studentId, studentName) => {
 // 获取教练等级类型
 const getLevelType = (level) => {
   const types = {
-    junior: 'info',
-    intermediate: 'primary',
-    senior: 'warning',
-    expert: 'success',
+    '初级教练员': 'info',
+    '中级教练员': 'primary',
+    '高级教练员': 'success',
   }
   return types[level] || 'info'
 }
@@ -855,10 +888,9 @@ const getLevelType = (level) => {
 // 获取教练等级文本
 const getLevelText = (level) => {
   const texts = {
-    junior: '初级教练',
-    intermediate: '中级教练',
-    senior: '高级教练',
-    expert: '资深教练',
+    junior: '初级教练员',
+    intermediate: '中级教练员',
+    senior: '高级教练员',
   }
   return texts[level] || level
 }
