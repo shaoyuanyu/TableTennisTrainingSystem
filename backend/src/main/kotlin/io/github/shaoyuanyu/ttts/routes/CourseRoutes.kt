@@ -25,6 +25,7 @@ fun Application.courseRoutes(courseService: CourseService) {
             authenticate("auth-session-student") {
                 getStudentSchedule(courseService)
                 getCoachScheduleForStudent(courseService)
+                getAvailableTables(courseService)
                 submitStudentFeedback(courseService)
                 bookCourse(courseService)
             }

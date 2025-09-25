@@ -107,13 +107,9 @@ fun Route.getCampusNames(campusService: CampusService) {
  */
 fun Route.addTable(campusService: CampusService) {
     post("/addTable") {
+        val userId = getUserIdFromCall(call)
+
         val campusData = call.receive<AddTableRequest>()
-        val userId=call.sessions.get<UserSession>().let {
-            if (it == null) {
-                throw UnauthorizedException("未登录")
-            }
-            it.userId
-        }
         val number = campusData.number
 
         campusService.addTable(userId,number)
