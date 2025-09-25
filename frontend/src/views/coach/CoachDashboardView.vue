@@ -315,6 +315,9 @@ import dayjs from 'dayjs'
 import api from '@/utils/api'
 import { getPendingApplicationCount } from '@/api/mutualSelection'
 
+// 添加教练相关的API导入
+import { getTodayClasses, getCoachStudents, getPendingApplications, getPendingAppointments } from '@/api/coach'
+
 // 用户状态
 const userStore = useUserStore()
 const router = useRouter()
@@ -348,21 +351,11 @@ const getGreeting = () => {
 // 获取统计数据
 const fetchStats = async () => {
   try {
-    // 获取总学员数
-    const studentsResponse = await api.get('/coach/students')
-    stats.totalStudents = studentsResponse.data.length || 0
-
-    // 获取总课时数
-    const classesResponse = await api.get('/coach/classes')
-    stats.totalClasses = classesResponse.data.length || 0
-
-    // 获取平均评分
-    const ratingResponse = await api.get('/coach/rating')
-    stats.rating = ratingResponse.data.average || 0
-
-    // 获取本月收入
-    const incomeResponse = await api.get('/coach/income')
-    stats.monthIncome = incomeResponse.data.month || 0
+    // 移除这个功能，因为API不存在
+    stats.totalStudents = 0
+    stats.totalClasses = 0
+    stats.rating = 0
+    stats.monthIncome = 0
   } catch (error) {
     console.error('获取统计数据失败:', error)
   }
@@ -371,18 +364,51 @@ const fetchStats = async () => {
 // 获取今日课程
 const fetchTodayClasses = async () => {
   try {
-    const response = await api.get('/coach/today-classes')
-    todayClasses.value = response.data || []
+    // 使用教练API获取今日课程
+    const response = await getTodayClasses()
+    todayClasses.value = response.map(course => ({
+      id: course.id,
+      student: {
+        name: course.student?.name || '未知学员'
+      },
+      type: course.title || '乒乓球训练',
+      duration: calculateDuration(course.startTime, course.endTime),
+      location: course.location || '未指定地点',
+      fee: course.price || 0,
+      status: mapCourseStatus(course.status),
+      time: `${course.startTime}-${course.endTime}`
+    })) || []
   } catch (error) {
     console.error('获取今日课程失败:', error)
+    todayClasses.value = []
   }
+}
+
+// 计算课程时长（分钟）
+const calculateDuration = (startTime, endTime) => {
+  if (!startTime || !endTime) return 60
+  const start = dayjs(`2000-01-01 ${startTime}`)
+  const end = dayjs(`2000-01-01 ${endTime}`)
+  return end.diff(start, 'minute')
+}
+
+// 映射课程状态
+const mapCourseStatus = (status) => {
+  const statusMap = {
+    'PENDING': 'upcoming',
+    'CONFIRMED': 'upcoming',
+    'ONGOING': 'ongoing',
+    'COMPLETED': 'completed',
+    'CANCELLED': 'cancelled'
+  }
+  return statusMap[status] || 'upcoming'
 }
 
 // 获取最新评价
 const fetchRecentReviews = async () => {
   try {
-    const response = await api.get('/coach/reviews/latest')
-    recentReviews.value = response.data || []
+    // 暂时移除这个功能，因为API不存在
+    recentReviews.value = []
   } catch (error) {
     console.error('获取最新评价失败:', error)
   }
@@ -391,28 +417,32 @@ const fetchRecentReviews = async () => {
 // 获取待处理预约数量
 const fetchPendingAppointments = async () => {
   try {
-    const response = await api.get('/coach/pending-appointments/count')
-    pendingAppointments.value = response.data.count || 0
+    const response = await getPendingAppointments()
+    pendingAppointments.value = response.length || 0
   } catch (error) {
     console.error('获取待处理预约数量失败:', error)
+    pendingAppointments.value = 0
   }
 }
 
 // 获取待处理双选申请数量
 const fetchPendingApplications = async () => {
   try {
-    const response = await getPendingApplicationCount()
-    pendingApplications.value = response.count || 0
+    const response = await getPendingApplications()
+    pendingApplications.value = response.length || 0
   } catch (error) {
     console.error('获取待处理双选申请数量失败:', error)
+    pendingApplications.value = 0
   }
 }
 
 // 获取收入数据
 const fetchIncomeData = async () => {
   try {
-    const response = await api.get('/coach/income/stats')
-    Object.assign(incomeData, response.data)
+    // 暂时移除这个功能，因为API不存在
+    incomeData.today = 0
+    incomeData.week = 0
+    incomeData.month = 0
   } catch (error) {
     console.error('获取收入数据失败:', error)
   }
@@ -421,8 +451,8 @@ const fetchIncomeData = async () => {
 // 获取待处理事项
 const fetchPendingTasks = async () => {
   try {
-    const response = await api.get('/coach/pending-tasks')
-    pendingTasks.value = response.data || []
+    // 暂时移除这个功能，因为API不存在
+    pendingTasks.value = []
   } catch (error) {
     console.error('获取待处理事项失败:', error)
   }
@@ -869,5 +899,4 @@ onMounted(() => {
 .task-action {
   flex-shrink: 0;
 }
-
 </style>
