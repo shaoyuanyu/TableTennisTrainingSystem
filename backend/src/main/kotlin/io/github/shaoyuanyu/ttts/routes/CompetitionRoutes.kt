@@ -3,6 +3,7 @@ package io.github.shaoyuanyu.ttts.routes
 import io.github.shaoyuanyu.ttts.dto.competition.Competition
 import io.github.shaoyuanyu.ttts.persistence.CompetitionService
 import io.github.shaoyuanyu.ttts.persistence.StudentService
+import io.github.shaoyuanyu.ttts.plugins.LOGGER
 import io.github.shaoyuanyu.ttts.utils.getUserIdFromCall
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
@@ -79,6 +80,8 @@ fun Route.getCampusCompetitions(competitionService: CompetitionService) {
         val userId = getUserIdFromCall(call)
 
         val competitions = competitionService.queryCampusCompetition(userId)
+
+        LOGGER.info(competitions.toString())
 
         call.respond(HttpStatusCode.OK, competitions)
     }

@@ -16,7 +16,7 @@ fun Application.adminRoutes(adminService: AdminService) {
     routing {
         route("/admin") {
             // 管理员权限路由
-            authenticate("auth-session-campus-admin", "auth-session-super-admin") {
+            authenticate("auth-session-admin") {
                 getCampusStudents(adminService)
                 getCampusCoaches(adminService)
             }

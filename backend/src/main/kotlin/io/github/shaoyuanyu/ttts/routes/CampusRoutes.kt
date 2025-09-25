@@ -28,7 +28,7 @@ fun Application.campusRoutes(campusService: CampusService) {
             }
 
             // 校区管理员
-            authenticate("auth-session-campus-admin", "auth-session-super-admin") {
+            authenticate("auth-session-admin") {
                 addTable(campusService)
             }
 

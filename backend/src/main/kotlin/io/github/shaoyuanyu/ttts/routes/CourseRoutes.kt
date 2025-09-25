@@ -38,7 +38,7 @@ fun Application.courseRoutes(courseService: CourseService) {
             }
             
             // 管理员权限路由
-            authenticate("auth-session-campus-admin", "auth-session-super-admin") {
+            authenticate("auth-session-admin") {
                 createCourse(courseService)
                 queryCourses(courseService)
             }
