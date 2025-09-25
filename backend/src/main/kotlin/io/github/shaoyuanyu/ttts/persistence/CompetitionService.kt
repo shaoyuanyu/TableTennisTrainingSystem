@@ -2,14 +2,12 @@
 
 package io.github.shaoyuanyu.ttts.persistence
 
-import io.github.shaoyuanyu.ttts.dto.competition.CompetitionOneMatchInfo
+import io.github.shaoyuanyu.ttts.dto.competition.Competition
 import io.github.shaoyuanyu.ttts.dto.competition.CompetitionQueryRequest
 import io.github.shaoyuanyu.ttts.dto.table.TableOccupiedByGroup
 import io.github.shaoyuanyu.ttts.dto.table.TableStatus
 import io.github.shaoyuanyu.ttts.exceptions.NotFoundException
-import io.github.shaoyuanyu.ttts.persistence.competition.CompetitionEntity
-import io.github.shaoyuanyu.ttts.persistence.competition.CompetitionSignupEntity
-import io.github.shaoyuanyu.ttts.persistence.competition.CompetitionSignupTable
+import io.github.shaoyuanyu.ttts.persistence.competition.*
 import io.github.shaoyuanyu.ttts.persistence.table.TableEntity
 import io.github.shaoyuanyu.ttts.persistence.table.TableTable
 import io.github.shaoyuanyu.ttts.persistence.user.UserEntity
@@ -78,6 +76,26 @@ class CompetitionService(
                 this.description = description
             }
         }
+    }
+
+    /**
+     * 根据用户ID查询同校区的比赛信息
+     *
+     * @param userId 用户ID
+     * @return 同校区的比赛列表
+     */
+    fun queryCampusCompetition(userId: String): List<Competition> {
+        val campusId = UserEntity.findById(UUID.fromString(userId))?.campusId ?: throw NotFoundException("用户不存在")
+        return CompetitionEntity.find { CompetitionTable.campusId eq campusId }.toList().expose()
+    }
+
+    /**
+     * 查询所有比赛信息
+     *
+     * @return 包含所有比赛信息的列表
+     */
+    fun queryAllCompetitions(): List<Competition> {
+        return CompetitionEntity.all().toList().expose()
     }
 
     /**
@@ -207,105 +225,105 @@ class CompetitionService(
             signupInfo
         }
 
-    /**
-     * 获取所有比赛信息
-     */
-    fun getAllCompetitions(): List<CompetitionOneMatchInfo> =
-        transaction(database) {
-            // 1. 查询所有比赛记录
-            val allCompetitions = CompetitionSignupEntity.all()
-                .filter { it.status == "ACTIVE" }
-                .toList()
+//    /**
+//     * 获取所有比赛信息
+//     */
+//    fun getAllCompetitions(): List<CompetitionOneMatchInfo> =
+//        transaction(database) {
+//            // 1. 查询所有比赛记录
+//            val allCompetitions = CompetitionSignupEntity.all()
+//                .filter { it.status == "ACTIVE" }
+//                .toList()
+//
+//            if (allCompetitions.isEmpty()) {
+//                throw NotFoundException("当前没有任何比赛报名")
+//            }
+//
+//            // 2. 按复合键（校区+球桌）分组
+//            val competitionsByCompositeKey = allCompetitions
+//                .groupBy { "${it.campusId}-${it.tableId}" }  // 创建复合键
+//
+//            // 3. 构建比赛信息列表
+//            competitionsByCompositeKey.mapNotNull { (compositeKey, signups) ->
+//                // 从复合键中解析出校区ID和球桌ID
+//                val parts = compositeKey.split("-")
+//                val campusId = parts[0].toInt()  // 转换为Int类型
+//                val tableId = parts[1].toInt()
+//
+//                when (signups.size) {
+//                    1 -> {
+//                        val player = signups[0]
+//                        CompetitionOneMatchInfo(
+//                            tableId = tableId,
+//                            campusId = campusId,
+//                            group = player.group,
+//                            player1Username = player.username,
+//                            player2Username = "等待对手"
+//                        )
+//                    }
+//                    in 2..Int.MAX_VALUE -> {
+//                        val player1 = signups[0]
+//                        val player2 = signups[1]
+//                        CompetitionOneMatchInfo(
+//                            tableId = tableId,
+//                            campusId = campusId,
+//                            group = player1.group,
+//                            player1Username = player1.username,
+//                            player2Username = player2.username
+//                        )
+//                    }
+//                    else -> null
+//                }
+//            }
+//        }
 
-            if (allCompetitions.isEmpty()) {
-                throw NotFoundException("当前没有任何比赛报名")
-            }
-
-            // 2. 按复合键（校区+球桌）分组
-            val competitionsByCompositeKey = allCompetitions
-                .groupBy { "${it.campusId}-${it.tableId}" }  // 创建复合键
-
-            // 3. 构建比赛信息列表
-            competitionsByCompositeKey.mapNotNull { (compositeKey, signups) ->
-                // 从复合键中解析出校区ID和球桌ID
-                val parts = compositeKey.split("-")
-                val campusId = parts[0].toInt()  // 转换为Int类型
-                val tableId = parts[1].toInt()
-
-                when (signups.size) {
-                    1 -> {
-                        val player = signups[0]
-                        CompetitionOneMatchInfo(
-                            tableId = tableId,
-                            campusId = campusId,
-                            group = player.group,
-                            player1Username = player.username,
-                            player2Username = "等待对手"
-                        )
-                    }
-                    in 2..Int.MAX_VALUE -> {
-                        val player1 = signups[0]
-                        val player2 = signups[1]
-                        CompetitionOneMatchInfo(
-                            tableId = tableId,
-                            campusId = campusId,
-                            group = player1.group,
-                            player1Username = player1.username,
-                            player2Username = player2.username
-                        )
-                    }
-                    else -> null
-                }
-            }
-        }
-
-    /**
-     * 获取管理员所在校区的比赛信息
-     */
-    fun getCampusCompetitions(userId: String): List<CompetitionOneMatchInfo> =
-        transaction(database) {
-            // 获取用户信息
-            val userEntity = UserEntity.findById(UUID.fromString(userId))
-                ?: throw NotFoundException("用户不存在")
-            val campus=userEntity.campusId
-            val allCompetitions = CompetitionSignupEntity.all()
-                .filter { (it.campusId == campus)and(it.status == "ACTIVE") }
-                .toList()
-            if(allCompetitions.isEmpty()) {
-                throw NotFoundException("当前没有任何比赛报名")
-            }
-            // 2. 按球桌分组，找出每个球桌的比赛双方
-            val competitionsByTable = allCompetitions.groupBy { it.tableId }
-
-            // 3. 构建比赛信息列表
-            competitionsByTable.mapNotNull { (tableId, signups) ->
-                if (signups.size >= 2) {
-                    // 有至少两人报名，形成比赛
-                    val player1 = signups[0]
-                    val player2 = signups[1]
-
-                    CompetitionOneMatchInfo(
-                        tableId = tableId,
-                        campusId = player1.campusId, // 同一球台的用户在同一校区
-                        group = player1.group,       // 同一球台的用户在同一小组
-                        player1Username = player1.username,
-                        player2Username = player2.username
-                    )
-                } else if (signups.size == 1) {
-                    // 只有一人报名，显示等待对手
-                    val player = signups[0]
-                    CompetitionOneMatchInfo(
-                        tableId = tableId,
-                        campusId = player.campusId,
-                        group = player.group,
-                        player1Username = player.username,
-                        player2Username = "等待对手"
-                    )
-                } else {
-                    null // 空球台，跳过
-                }
-            }
-        }
+//    /**
+//     * 获取管理员所在校区的比赛的每轮信息
+//     */
+//    fun getCampusCompetitionMatchs(userId: String): List<CompetitionOneMatchInfo> =
+//        transaction(database) {
+//            // 获取用户信息
+//            val userEntity = UserEntity.findById(UUID.fromString(userId))
+//                ?: throw NotFoundException("用户不存在")
+//            val campus=userEntity.campusId
+//            val allCompetitions = CompetitionSignupEntity.all()
+//                .filter { (it.campusId == campus)and(it.status == "ACTIVE") }
+//                .toList()
+//            if(allCompetitions.isEmpty()) {
+//                throw NotFoundException("当前没有任何比赛报名")
+//            }
+//            // 2. 按球桌分组，找出每个球桌的比赛双方
+//            val competitionsByTable = allCompetitions.groupBy { it.tableId }
+//
+//            // 3. 构建比赛信息列表
+//            competitionsByTable.mapNotNull { (tableId, signups) ->
+//                if (signups.size >= 2) {
+//                    // 有至少两人报名，形成比赛
+//                    val player1 = signups[0]
+//                    val player2 = signups[1]
+//
+//                    CompetitionOneMatchInfo(
+//                        tableId = tableId,
+//                        campusId = player1.campusId, // 同一球台的用户在同一校区
+//                        group = player1.group,       // 同一球台的用户在同一小组
+//                        player1Username = player1.username,
+//                        player2Username = player2.username
+//                    )
+//                } else if (signups.size == 1) {
+//                    // 只有一人报名，显示等待对手
+//                    val player = signups[0]
+//                    CompetitionOneMatchInfo(
+//                        tableId = tableId,
+//                        campusId = player.campusId,
+//                        group = player.group,
+//                        player1Username = player.username,
+//                        player2Username = "等待对手"
+//                    )
+//                } else {
+//                    null // 空球台，跳过
+//                }
+//            }
+//        }
 
     fun enterResults(winner:String,loser:String){
         transaction(database) {

@@ -3,10 +3,14 @@ package io.github.shaoyuanyu.ttts.routes
 import io.github.shaoyuanyu.ttts.dto.competition.Competition
 import io.github.shaoyuanyu.ttts.persistence.CompetitionService
 import io.github.shaoyuanyu.ttts.persistence.StudentService
+import io.github.shaoyuanyu.ttts.utils.getUserIdFromCall
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.auth.authenticate
 import io.ktor.server.request.receive
+import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
@@ -23,6 +27,7 @@ fun Application.competitionRoutes(
 
             // 所有登录用户
             authenticate("auth-session-all") {
+                getCampusCompetitions(competitionService)
             }
 
             // 学生权限
@@ -35,18 +40,57 @@ fun Application.competitionRoutes(
 
             //管理员权限
             authenticate ("auth-session-campus-admin", "auth-session-super-admin"){
-//                getCampusCompetitions(studentService)
-//                enterCompetitionResults(studentService)
-//                getTournaments(studentService) // 添加获取比赛列表接口
                 createCompetition(competitionService)
+//                enterCompetitionResults(studentService)
 //                deleteTournament(studentService) // 添加删除比赛接口
             }
 
             // 超级管理员权限
             authenticate("auth-session-super-admin") {
-//                getAllCompetitions(studentService)
+                getAllCompetitions(competitionService)
             }
         }
+    }
+}
+
+/**
+ * 创建比赛
+ */
+fun Route.createCompetition(competitionService: CompetitionService) {
+    post("/create") {
+        val request = call.receive<Competition>()
+
+        competitionService.createCompetition(
+            name = request.name,
+            type = request.type,
+            date = request.date,
+            registrationDeadline = request.registrationDeadline,
+            fee = request.fee,
+            description = request.description
+        )
+    }
+}
+
+/**
+ * 获取本校区所有比赛
+ */
+fun Route.getCampusCompetitions(competitionService: CompetitionService) {
+    get("/self-campus") {
+        val userId = getUserIdFromCall(call)
+
+        val competitions = competitionService.queryCampusCompetition(userId)
+
+        call.respond(HttpStatusCode.OK, competitions)
+    }
+}
+
+/**
+ * 获取所有校区所有比赛
+ */
+fun Route.getAllCompetitions(competitionService: CompetitionService) {
+    get("/all") {
+        val competitions = competitionService.queryAllCompetitions()
+        call.respond(HttpStatusCode.OK, competitions)
     }
 }
 
@@ -120,25 +164,6 @@ fun Application.competitionRoutes(
 //}
 
 /**
- * 获取本校区所有竞赛信息
- */
-//fun Route.getCampusCompetitions(studentService: StudentService) {
-//    get("/campuscompetitions") {
-//        val userId=call.sessions.get<UserSession>().let {
-//            if (it == null) {
-//                throw UnauthorizedException("未登录")
-//            }
-//            it.userId
-//        }
-//        val competitions = studentService.getCampusCompetitions(userId)
-//        call.respond(
-//            HttpStatusCode.OK,
-//            competitions
-//        )
-//    }
-//}
-
-/**
  * 录入本校区比赛成绩
  */
 //fun Route.enterCompetitionResults(studentService: StudentService) {
@@ -170,24 +195,6 @@ fun Application.competitionRoutes(
 //        }
 //    }
 //}
-
-/**
- * 创建比赛
- */
-fun Route.createCompetition(competitionService: CompetitionService) {
-    post("/create") {
-        val request = call.receive<Competition>()
-        
-        competitionService.createCompetition(
-            name = request.name,
-            type = request.type,
-            date = request.date,
-            registrationDeadline = request.registrationDeadline,
-            fee = request.fee,
-            description = request.description
-        )
-    }
-}
 
 /**
  * 删除比赛

@@ -28,3 +28,5 @@ fun CompetitionEntity.expose() = Competition(
     fee = this.fee,
     description = this.description,
 )
+
+fun List<CompetitionEntity>.expose() = this.map { it.expose() }

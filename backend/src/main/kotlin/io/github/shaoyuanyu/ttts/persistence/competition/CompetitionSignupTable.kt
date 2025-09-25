@@ -1,5 +1,7 @@
 @file:OptIn(ExperimentalTime::class)
+
 package io.github.shaoyuanyu.ttts.persistence.competition
+
 import org.jetbrains.exposed.v1.core.Column
 import org.jetbrains.exposed.v1.core.dao.id.IntIdTable
 import org.jetbrains.exposed.v1.datetime.timestamp
