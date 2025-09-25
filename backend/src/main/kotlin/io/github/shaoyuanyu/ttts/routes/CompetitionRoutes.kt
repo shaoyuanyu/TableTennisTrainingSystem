@@ -13,6 +13,7 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
+import io.ktor.server.routing.delete
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import io.ktor.server.sessions.get
@@ -42,11 +43,15 @@ fun Application.competitionRoutes(studentService: StudentService) {
                 getCampusCompetitions(studentService)
                 enterCompetitionResults(studentService)
                 getTournaments(studentService) // 添加获取比赛列表接口
+                createTournament(studentService) // 添加创建比赛接口
+                deleteTournament(studentService) // 添加删除比赛接口
             }
             // 超级管理员权限
             authenticate("auth-session-super-admin") {
                 getAllCompetitions(studentService)
                 getTournaments(studentService) // 添加获取比赛列表接口
+                createTournament(studentService) // 添加创建比赛接口
+                deleteTournament(studentService) // 添加删除比赛接口
             }
         }
     }
@@ -155,29 +160,79 @@ fun Route.enterCompetitionResults(studentService: StudentService) {
  */
 fun Route.getTournaments(studentService: StudentService) {
     get("/tournaments") {
-        // TODO: 实现获取比赛列表的逻辑
-        call.respond(
-            HttpStatusCode.OK,
-            mapOf(
-                "items" to emptyList<Any>(),
-                "total" to 0
-            )
-        )
+        val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 1
+        val size = call.request.queryParameters["size"]?.toIntOrNull() ?: 10
+        
+        try {
+            val result = studentService.getTournaments(page, size)
+            call.respond(HttpStatusCode.OK, result)
+        } catch (e: Exception) {
+            call.respond(HttpStatusCode.InternalServerError, mapOf("error" to e.message))
+        }
     }
 }
 
 /**
- * 获取最新的比赛信息
+ * 创建比赛
+ */
+fun Route.createTournament(studentService: StudentService) {
+    post("/tournaments/create") {
+        try {
+            val userId = call.sessions.get<UserSession>()?.userId
+                ?: throw UnauthorizedException("未登录")
+            
+            val request = call.receive<Map<String, Any?>>()
+            val tournament = studentService.createTournament(request, userId)
+            call.respond(HttpStatusCode.OK, mapOf("message" to "比赛创建成功", "data" to tournament.expose()))
+        } catch (e: Exception) {
+            call.respond(HttpStatusCode.BadRequest, mapOf("error" to e.message))
+        }
+    }
+}
+
+/**
+ * 删除比赛
+ */
+fun Route.deleteTournament(studentService: StudentService) {
+    delete("/tournaments/{id}") {
+        try {
+            val id = call.parameters["id"]?.toIntOrNull()
+                ?: throw IllegalArgumentException("无效的比赛ID")
+            
+            val success = studentService.deleteTournament(id)
+            if (success) {
+                call.respond(HttpStatusCode.OK, mapOf("message" to "比赛删除成功"))
+            } else {
+                call.respond(HttpStatusCode.NotFound, mapOf("error" to "比赛不存在"))
+            }
+        } catch (e: Exception) {
+            call.respond(HttpStatusCode.BadRequest, mapOf("error" to e.message))
+        }
+    }
+}
+
+/**
+ * 获取最新比赛信息
  */
 fun Route.getLatestTournament(studentService: StudentService) {
     get("/latest") {
-        // TODO: 实现获取最新比赛信息的逻辑
-        call.respond(
-            HttpStatusCode.OK,
-            mapOf(
+        try {
+            // 调用服务方法获取最新比赛信息
+            val latestTournament = studentService.getLatestTournament()
+            call.respond(HttpStatusCode.OK, latestTournament)
+        } catch (e: NotFoundException) {
+            // 如果没有找到比赛，返回空对象而不是错误
+            call.respond(HttpStatusCode.OK, mapOf(
+                "id" to null,
+                "name" to "",
+                "type" to "monthly",
                 "date" to "",
-                "registrationDeadline" to ""
-            )
-        )
+                "registrationDeadline" to "",
+                "fee" to 30,
+                "description" to ""
+            ))
+        } catch (e: Exception) {
+            call.respond(HttpStatusCode.InternalServerError, mapOf("error" to e.message))
+        }
     }
 }

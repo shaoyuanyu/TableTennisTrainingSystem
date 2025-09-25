@@ -72,18 +72,6 @@
               />
             </el-form-item>
           </el-col>
-          
-          <el-col :span="12">
-            <el-form-item label="最大参赛人数" prop="maxParticipants">
-              <el-input-number
-                v-model="createForm.maxParticipants"
-                :min="0"
-                :step="1"
-                controls-position="right"
-                style="width: 100%"
-              />
-            </el-form-item>
-          </el-col>
         </el-row>
         
         <el-form-item label="比赛描述" prop="description">
@@ -136,7 +124,6 @@
             {{ scope.row.fee }} 元
           </template>
         </el-table-column>
-        <el-table-column prop="maxParticipants" label="最大人数" />
         <el-table-column label="操作">
           <template #default="scope">
             <el-button size="small" @click="viewDetails(scope.row)">详情</el-button>
@@ -184,7 +171,6 @@ const createForm = ref({
   date: '',
   registrationDeadline: '',
   fee: 30,
-  maxParticipants: 20,
   description: ''
 })
 
@@ -204,9 +190,6 @@ const createRules = {
   ],
   fee: [
     { required: true, message: '请输入报名费用', trigger: 'blur' }
-  ],
-  maxParticipants: [
-    { required: false, message: '请输入最大参赛人数', trigger: 'blur' }
   ]
 }
 
@@ -228,7 +211,7 @@ const createTournament = async () => {
     const valid = await createFormRef.value.validate()
     if (!valid) return
     
-    await api.post('/api/competition/tournaments/create', createForm.value)
+    await api.post('/competition/tournaments/create', createForm.value)
     ElMessage.success('比赛创建成功')
     resetForm()
     fetchTournaments()
@@ -246,7 +229,6 @@ const resetForm = () => {
     date: '',
     registrationDeadline: '',
     fee: 30,
-    maxParticipants: 20,
     description: ''
   }
 }
@@ -254,7 +236,7 @@ const resetForm = () => {
 const fetchTournaments = async () => {
   try {
     loading.value = true
-    const response = await api.get('/api/competition/tournaments', {
+    const response = await api.get('/competition/tournaments', {
       params: {
         page: pagination.value.currentPage,
         size: pagination.value.pageSize
@@ -276,7 +258,6 @@ const viewDetails = (tournament) => {
      <strong>比赛日期：</strong>${tournament.date}<br>
      <strong>报名截止：</strong>${tournament.registrationDeadline}<br>
      <strong>报名费用：</strong>${tournament.fee}元<br>
-     <strong>最大人数：</strong>${tournament.maxParticipants}<br>
      <strong>比赛描述：</strong>${tournament.description || '无'}`,
     '比赛详情',
     {
@@ -297,7 +278,7 @@ const deleteTournament = (tournament) => {
     }
   ).then(async () => {
     try {
-      await api.delete(`/api/competition/tournaments/${tournament.id}`)
+      await api.delete(`/competition/tournaments/${tournament.id}`)
       ElMessage.success('删除成功')
       fetchTournaments()
     } catch (error) {

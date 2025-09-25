@@ -3,15 +3,15 @@
     <PageHeader title="月赛报名" />
     
     <el-card class="registration-card">
-      <div class="registration-info">
-        <h3>报名须知</h3>
-        <ul>
-          <li>报名费：每人30元</li>
-          <li v-if="tournamentInfo.registrationDeadline">报名截止时间：{{ tournamentInfo.registrationDeadline }}</li>
-          <li v-else>报名时间：每月1-25日</li>
-          <li v-if="tournamentInfo.date">比赛时间：{{ tournamentInfo.date }}</li>
-          <li v-else>比赛时间：每月第四个周日</li>
-          <li>比赛地点：各校区训练馆</li>
+      <div class="registration-info" v-if="tournamentInfo.id !== null">
+        <h3 class="section-title">报名须知</h3>
+        <ul class="info-list">
+          <li class="info-item">报名费：每人{{ tournamentInfo.fee }}元</li>
+          <li class="info-item" v-if="tournamentInfo.registrationDeadline">报名截止时间：{{ tournamentInfo.registrationDeadline }}</li>
+          <li class="info-item" v-else>报名时间：每月1-25日</li>
+          <li class="info-item" v-if="tournamentInfo.date">比赛时间：{{ tournamentInfo.date }}</li>
+          <li class="info-item" v-else>比赛时间：每月第四个周日</li>
+          <li class="info-item">比赛地点：各校区训练馆</li>
         </ul>
         
         <div class="balance-info">
@@ -30,6 +30,7 @@
         :rules="rules"
         label-width="100px"
         class="registration-form"
+        v-if="tournamentInfo.id !== null"
       >
         <el-form-item label="参赛组别" prop="group">
           <el-select v-model="formData.group" placeholder="请选择参赛组别">
@@ -58,6 +59,14 @@
           </el-button>
         </el-form-item>
       </el-form>
+      
+      <div class="no-tournament" v-else>
+        <el-result
+          icon="info"
+          title="暂无比赛"
+          sub-title="当前没有可报名的比赛，请联系管理员创建比赛后再进行报名。"
+        />
+      </div>
     </el-card>
     
     <el-card class="registration-status" v-if="registrationStatus">
@@ -77,7 +86,7 @@
             <el-descriptions :column="1" border>
               <el-descriptions-item label="参赛组别">{{ registrationStatus.group }}</el-descriptions-item>
               <el-descriptions-item label="报名时间">{{ registrationStatus.registeredAt }}</el-descriptions-item>
-              <el-descriptions-item label="扣费金额">30元</el-descriptions-item>
+              <el-descriptions-item label="扣费金额">{{ tournamentInfo.fee || 30 }}元</el-descriptions-item>
             </el-descriptions>
             
             <el-button type="primary" @click="viewSchedule">
@@ -110,9 +119,14 @@ const formData = ref({
 
 // 比赛信息
 const tournamentInfo = ref({
+  id: null,
   date: '',
-  registrationDeadline: ''
+  registrationDeadline: '',
+  fee: 30
 })
+
+// 报名状态
+const registrationStatus = ref(null)
 
 // 表单验证规则
 const rules = {
@@ -123,11 +137,11 @@ const rules = {
 
 // 计算属性
 const isBalanceInsufficient = computed(() => {
-  return userBalance.value < 30
+  return userBalance.value < (tournamentInfo.value.fee || 30)
 })
 
 const balanceStatus = computed(() => {
-  if (userBalance.value >= 30) {
+  if (userBalance.value >= (tournamentInfo.value.fee || 30)) {
     return { type: 'success' }
   } else {
     return { type: 'warning' }
@@ -137,7 +151,7 @@ const balanceStatus = computed(() => {
 // 方法
 const fetchTournamentInfo = async () => {
   try {
-    const response = await api.get('/api/competition/latest')
+    const response = await api.get('/competition/latest')
     tournamentInfo.value = response.data
   } catch (error) {
     console.error('获取比赛信息失败:', error)
@@ -203,6 +217,8 @@ onMounted(() => {
 <style scoped>
 .tournament-registration {
   padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 .registration-card,
@@ -210,12 +226,33 @@ onMounted(() => {
   margin-bottom: 20px;
 }
 
-.registration-info ul {
-  padding-left: 20px;
+.section-title {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #333;
+  font-size: 18px;
+  font-weight: 600;
 }
 
-.registration-info li {
-  margin-bottom: 8px;
+.info-list {
+  padding-left: 0;
+  list-style: none;
+}
+
+.info-item {
+  margin-bottom: 12px;
+  padding: 8px 16px;
+  background-color: #f5f7fa;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.info-item:before {
+  content: "•";
+  color: #409eff;
+  display: inline-block;
+  width: 1em;
+  margin-left: -1em;
 }
 
 .balance-info {
@@ -228,5 +265,10 @@ onMounted(() => {
 
 .status-content {
   text-align: center;
+}
+
+.no-tournament {
+  text-align: center;
+  padding: 40px 0;
 }
 </style>

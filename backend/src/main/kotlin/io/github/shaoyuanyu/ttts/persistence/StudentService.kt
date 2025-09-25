@@ -417,6 +417,121 @@ class StudentService(
             }
         }
 
+    /**
+     * 获取比赛列表（分页）
+     */
+    fun getTournaments(page: Int, size: Int): Map<String, Any> =
+        transaction(database) {
+            val offset = (page - 1) * size
+            val allTournaments = ComEntity.all().toList()
+            val totalCount = allTournaments.size
+            val tournaments = allTournaments
+                .sortedByDescending { it.createdAt }
+                .drop(offset)
+                .take(size)
+                .map { it.expose() }
+            
+            mapOf(
+                "items" to tournaments,
+                "total" to totalCount
+            )
+        }
+
+    /**
+     * 创建比赛
+     */
+    fun createTournament(request: Map<String, Any>, creatorId: String): ComEntity =
+        transaction(database) {
+            val name = request["name"] as? String ?: throw IllegalArgumentException("比赛名称不能为空")
+            val type = request["type"] as? String ?: throw IllegalArgumentException("比赛类型不能为空")
+            val dateStr = request["date"] as? String ?: throw IllegalArgumentException("比赛日期不能为空")
+            val registrationDeadlineStr = request["registrationDeadline"] as? String ?: throw IllegalArgumentException("报名截止日期不能为空")
+            val fee = (request["fee"] as? Number)?.toFloat() ?: 0f
+            val description = request["description"] as? String ?: ""
+            
+            // 验证日期格式
+            try {
+                // 这里应该添加日期解析逻辑，为了简化直接存储字符串
+                // 实际项目中应该使用 proper date parsing
+            } catch (e: Exception) {
+                throw IllegalArgumentException("日期格式不正确")
+            }
+            
+            ComEntity.new {
+                userId = creatorId
+                username = "tournament" // 占位符，实际应该获取创建者用户名
+                group = type // 使用type作为组别
+                tableId = 0 // 比赛不需要球桌ID
+                campusId = 0 // 暂时设置为0
+                status = "ACTIVE"
+                createdAt = Clock.System.now()
+            }.apply {
+                // 使用description字段存储费用和截止日期等信息
+                // 格式: fee|registrationDeadline|description
+                this.description = "$fee|$registrationDeadlineStr|$description"
+            }
+        }
+
+    /**
+     * 删除比赛
+     */
+    fun deleteTournament(id: Int): Boolean =
+        transaction(database) {
+            val tournament = ComEntity.findById(id)
+            if (tournament != null) {
+                tournament.delete()
+                true
+            } else {
+                false
+            }
+        }
+
+    /**
+     * 获取最新比赛信息
+     */
+    fun getLatestTournament(): Map<String, Any?> =
+        transaction(database) {
+            val latestTournament = ComEntity.all()
+                .filter { it.username == "tournament" } // 筛选出比赛记录
+                .maxByOrNull { it.createdAt } // 获取最新的比赛记录
+            
+            if (latestTournament != null) {
+                latestTournament.expose()
+            } else {
+                throw NotFoundException("未找到比赛信息")
+            }
+        }
+
+    // 为ComEntity添加expose方法
+    fun ComEntity.expose(): Map<String, Any?> = mapOf(
+        "id" to id.value,
+        "name" to username, // 使用username作为比赛名称
+        "type" to group, // 使用group作为比赛类型
+        "date" to createdAt.toString(), // 简化处理，实际应该有专门的日期字段
+        "status" to status,
+        "createdAt" to createdAt.toString()
+    ).let { baseMap ->
+        // 如果是比赛记录，解析description字段获取详细信息
+        if (group in listOf("monthly", "quarterly", "annual")) { // 判断为比赛记录
+            val parts = description.split("|")
+            val fee = parts.getOrNull(0)?.toFloatOrNull() ?: 30f
+            val registrationDeadline = parts.getOrNull(1) ?: ""
+            val desc = parts.getOrNull(2) ?: ""
+            
+            baseMap + mapOf(
+                "fee" to fee,
+                "registrationDeadline" to registrationDeadline,
+                "description" to desc
+            )
+        } else {
+            baseMap + mapOf(
+                "fee" to 30,
+                "registrationDeadline" to "",
+                "description" to ""
+            )
+        }
+    }
+
     fun enterResults(winner:String,loser:String){
         transaction(database) {
             val winnerEntity=UserEntity.find{ UserTable.username eq winner}.limit(1).singleOrNull()
