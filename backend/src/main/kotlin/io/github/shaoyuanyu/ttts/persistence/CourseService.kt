@@ -403,7 +403,7 @@ class CourseService(
     /**
      * 教练审核课程
      */
-    fun judegeCourse(coachId: String, courseId: String,judge:Boolean) {
+    fun judegeCourse(coachId: String, courseId: String,judge:Boolean,title: String) {
         transaction(database) {
             val course = CourseEntity.findById(UUID.fromString(courseId))
                 ?: throw NotFoundException("课程不存在")
@@ -415,17 +415,24 @@ class CourseService(
                 if (course.status != CourseStatus.PENDING) {
                     throw BadRequestException("只有正在预约的课程才能确认")
                 }
-
+                changeCourseInfo(courseId,title)
                 course.status = CourseStatus.CONFIRMED
                 COURSE_SERVICE_LOGGER.info("课程已通过: ${course.id}")
             }else{
                 if (course.status != CourseStatus.PENDING && course.status != CourseStatus.CONFIRMED) {
                     throw BadRequestException("只有正在预约或已确认的课程才能取消")
                 }
-
+                changeCourseInfo(courseId,title)
                 course.status = CourseStatus.CANCELLED
                 COURSE_SERVICE_LOGGER.info("课程已取消: ${course.id}")
             }
+        }
+    }
+    private fun changeCourseInfo(courseId: String,title: String){
+        transaction(database) {
+            val course = CourseEntity.findById(UUID.fromString(courseId))
+                ?: throw NotFoundException("课程不存在")
+            course.title = title
         }
     }
 }

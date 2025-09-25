@@ -106,7 +106,7 @@
 
         <el-table-column label="操作" min-width="200" fixed="right">
           <template #default="{ row }">
-            <el-button v-if="row.status === 'PENDING'" size="small" type="success" @click="approveAppointment(row)">
+            <el-button v-if="row.status === 'PENDING'" size="small" type="success" @click="showApproveDialog(row)">
               通过
             </el-button>
             <el-button v-if="row.status === 'PENDING'" size="small" type="danger" @click="showRejectDialog(row)">
@@ -124,31 +124,31 @@
       </div>
     </el-card>
 
+    <!-- 通过课程对话框 -->
+    <el-dialog v-model="approveDialogVisible" title="通过预约" width="500px">
+      <el-form ref="approveFormRef" :model="approveForm" :rules="approveRules" label-width="100px">
+        <el-form-item label="课程标题" prop="title">
+          <el-input v-model="approveForm.title" placeholder="请输入课程标题" />
+        </el-form-item>
+      </el-form>
+
+      <template #footer>
+        <OutlineButton @click="approveDialogVisible = false">取消</OutlineButton>
+        <el-button type="success" @click="confirmApprove" :loading="approving"> 确认通过 </el-button>
+      </template>
+    </el-dialog>
+
     <!-- 拒绝原因对话框 -->
     <el-dialog v-model="rejectDialogVisible" title="拒绝预约" width="500px" @close="resetRejectForm">
       <el-form ref="rejectFormRef" :model="rejectForm" :rules="rejectRules" label-width="100px">
-        <el-form-item label="拒绝原因" prop="reason">
-          <el-select v-model="rejectForm.reason" placeholder="选择拒绝原因">
-            <el-option label="时间冲突" value="time_conflict" />
-            <el-option label="个人安排" value="personal_schedule" />
-            <el-option label="学员水平不符" value="level_mismatch" />
-            <el-option label="课程类型不匹配" value="course_mismatch" />
-            <el-option label="其他原因" value="other" />
-          </el-select>
-        </el-form-item>
-
-        <el-form-item label="详细说明">
-          <el-input v-model="rejectForm.details" type="textarea" :rows="3" placeholder="请详细说明拒绝原因，以便学员理解" />
-        </el-form-item>
-
-        <el-form-item label="建议时间">
-          <el-input v-model="rejectForm.suggestion" placeholder="可选：建议其他可用时间" />
+        <el-form-item label="课程标题" prop="title">
+          <el-input v-model="rejectForm.title" placeholder="请输入拒绝原因" />
         </el-form-item>
       </el-form>
 
       <template #footer>
         <OutlineButton @click="rejectDialogVisible = false">取消</OutlineButton>
-        <DangerButton @click="confirmReject" :loading="rejecting"> 确认拒绝 </DangerButton>
+        <el-button type="danger" @click="confirmReject" :loading="rejecting"> 确认拒绝 </el-button>
       </template>
     </el-dialog>
 
@@ -215,7 +215,9 @@ const selectedAppointment = ref(null)
 
 // 状态
 const loading = ref(false)
+const approving = ref(false)
 const rejecting = ref(false)
+const approveDialogVisible = ref(false)
 const rejectDialogVisible = ref(false)
 const detailDialogVisible = ref(false)
 
@@ -233,18 +235,27 @@ const pagination = reactive({
   total: 0,
 })
 
+// 通过表单
+const approveForm = reactive({
+  title: ''
+})
+
+const approveFormRef = ref()
+
 // 拒绝表单
 const rejectForm = reactive({
-  reason: '',
-  details: '',
-  suggestion: '',
+  title: '',
 })
 
 const rejectFormRef = ref()
 
 // 表单验证规则
+const approveRules = {
+  title: [{ required: true, message: '请输入课程标题', trigger: 'blur' }]
+}
+
 const rejectRules = {
-  reason: [{ required: true, message: '请选择拒绝原因', trigger: 'change' }],
+  title: [{ required: true, message: '请输入拒绝原因', trigger: 'blur' }]
 }
 
 // 计算属性
@@ -346,7 +357,35 @@ const isSelectable = (row) => {
   return row.status === 'PENDING'
 }
 
-// 通过课程预约
+// 确认通过
+const confirmApprove = async () => {
+  if (!approveFormRef.value) return
+
+  try {
+    const valid = await approveFormRef.value.validate()
+    if (!valid) return
+
+    approving.value = true
+
+    // 调用API通过课程预约并更新标题
+    await api.post('/courses/coach-judge', {
+      courseId: selectedAppointment.value.id,
+      confirmed: true,
+      title: approveForm.title
+    })
+
+    ElMessage.success('课程预约已通过')
+    approveDialogVisible.value = false
+    fetchAppointments()
+  } catch (error) {
+    console.error('操作失败:', error)
+    ElMessage.error('操作失败: ' + (error.message || '未知错误'))
+  } finally {
+    approving.value = false
+  }
+}
+
+// 通过课程预约（旧方法，用于批量操作）
 const approveAppointment = async (appointment) => {
   try {
     await ElMessageBox.confirm(
@@ -375,9 +414,19 @@ const approveAppointment = async (appointment) => {
   }
 }
 
+// 显示通过对话框
+const showApproveDialog = (appointment) => {
+  selectedAppointment.value = appointment
+  // 初始化表单数据
+  approveForm.title = appointment.title || ''
+  approveDialogVisible.value = true
+}
+
 // 显示拒绝对话框
 const showRejectDialog = (appointment) => {
   selectedAppointment.value = appointment
+  // 初始化表单数据
+  rejectForm.title = appointment.title || ''
   rejectDialogVisible.value = true
 }
 
@@ -391,10 +440,11 @@ const confirmReject = async () => {
 
     rejecting.value = true
 
-    // 调用API拒绝课程预约
+    // 调用API拒绝课程预约，并将拒绝原因作为标题
     await api.post('/courses/coach-judge', {
       courseId: selectedAppointment.value.id,
-      confirmed: false
+      confirmed: false,
+      title: rejectForm.title
     })
 
     ElMessage.success('课程预约已拒绝')
@@ -480,9 +530,7 @@ const resetRejectForm = () => {
     rejectFormRef.value.resetFields()
   }
   Object.assign(rejectForm, {
-    reason: '',
-    details: '',
-    suggestion: '',
+    title: '',
   })
 }
 

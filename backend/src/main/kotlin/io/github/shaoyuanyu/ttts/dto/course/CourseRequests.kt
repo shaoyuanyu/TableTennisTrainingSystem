@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
 data class CourseConfirmRequest(
     val courseId: String,
     val confirmed: Boolean, // true=确认, false=拒绝
-    val reason: String? = null // 拒绝原因（可选）
+    val title: String,
 )
 
 /**
