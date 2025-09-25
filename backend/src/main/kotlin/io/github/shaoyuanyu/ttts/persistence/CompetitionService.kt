@@ -118,6 +118,16 @@ class CompetitionService(
         }
 
     /**
+     * 根据比赛ID查询比赛信息
+     */
+    fun queryCompetitionById(competitionId: String): Competition =
+        transaction(database) {
+            val competition = CompetitionEntity.findById(UUID.fromString(competitionId))
+                ?: throw NotFoundException("比赛不存在")
+            competition.expose()
+        }
+
+    /**
      * 报名参加比赛
      */
     fun signupCompetition(userId: String, competitionId: String, group: String) {
