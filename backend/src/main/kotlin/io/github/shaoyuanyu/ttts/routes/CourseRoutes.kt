@@ -193,8 +193,9 @@ fun Route.getPendingCoursesForCoach(courseService: CourseService) {
 fun Route.coachJudgeCourse(courseService: CourseService) {
     post("/coach-judge") {
         val coachId = getUserIdFromCall(call)
-        val courseId = call.receive<CourseConfirmRequest>().courseId
-        val judge = call.receive<CourseConfirmRequest>().confirmed
+        val request = call.receive<CourseConfirmRequest>()
+        val courseId = request.courseId
+        val judge = request.confirmed
         val course = courseService.judegeCourse(coachId, courseId, judge)
         call.respond(HttpStatusCode.OK, course)
     }
