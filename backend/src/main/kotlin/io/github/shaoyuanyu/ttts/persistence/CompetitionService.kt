@@ -11,6 +11,7 @@ import io.github.shaoyuanyu.ttts.persistence.competition.*
 import io.github.shaoyuanyu.ttts.persistence.table.TableEntity
 import io.github.shaoyuanyu.ttts.persistence.table.TableTable
 import io.github.shaoyuanyu.ttts.persistence.user.UserEntity
+import io.github.shaoyuanyu.ttts.plugins.LOGGER
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -95,7 +96,10 @@ class CompetitionService(
 
             CompetitionEntity.find {
                 CompetitionTable.campus eq campus.id
-            }.toList().expose()
+            }.toList().expose().map {
+                it.currentSignupStudentNumber = CompetitionSignupEntity.find { CompetitionSignupTable.competition eq UUID.fromString(it.id) }.count().toInt()
+                it
+            }
         }
 
     /**
@@ -105,7 +109,10 @@ class CompetitionService(
      */
     fun queryAllCompetitions(): List<Competition> =
         transaction(database) {
-            CompetitionEntity.all().toList().expose()
+            CompetitionEntity.all().toList().expose().map {
+                it.currentSignupStudentNumber = CompetitionSignupEntity.find { CompetitionSignupTable.competition eq UUID.fromString(it.id) }.count().toInt()
+                it
+            }
         }
 
     /**
@@ -194,102 +201,110 @@ class CompetitionService(
         group: String,
         participants: List<CompetitionSignupEntity>
     ) {
-        if (participants.isEmpty()) return
-        
-        val players = participants.map { it.user }
-        val n = players.size
-        
-        // 获取该校区的球台
-        val tables = TableEntity.find { TableTable.campus eq competition.campus.id }.toList()
-        val tableCount = tables.size
-        
-        if (tableCount == 0) return  // 没有球台无法安排
-        
-        if (n % 2 == 1) {
-            // 奇数人情况：添加一个虚拟的轮空选手
-            val totalPlayers = n + 1
-            val rounds = totalPlayers - 1
-            
-            for (round in 1..rounds) {
-                val matches = mutableListOf<Pair<Int?, Int?>>()
-                
-                // 使用标准循环赛算法
-                for (i in 1..totalPlayers / 2) {
-                    val player1Pos = if (i == 1) 1 else (round + i - 3) % (totalPlayers - 1) + 1
-                    val player2Pos = if (i == 1) (round - 1) % (totalPlayers - 1) + 1 
-                                    else (round - i - 1 + totalPlayers - 1) % (totalPlayers - 1) + 1
-                    
-                    // 处理轮空情况
-                    val p1Index = if (player1Pos <= n) player1Pos - 1 else null  // 转换为0基索引
-                    val p2Index = if (player2Pos <= n) player2Pos - 1 else null  // 转换为0基索引
-                    
-                    if (p1Index != null && p2Index != null) {
-                        matches.add(Pair(p1Index, p2Index))
-                    } else if (p1Index != null) {
-                        // p1轮空轮
-                    } else if (p2Index != null) {
-                        // p2轮空轮
+        transaction(database) {
+            if (participants.isEmpty()) throw IllegalArgumentException("没有报名的玩家")
+
+            val players = participants.map { it.user }
+            val n = players.size
+
+            // 获取该校区的球台
+            val tables = TableEntity.find { TableTable.campus eq competition.campus.id }.toList()
+            val tableCount = tables.size
+
+            if (tableCount == 0) throw NotFoundException("该校区没有球台")
+
+            if (n % 2 == 1) {
+                // 奇数人情况：添加一个虚拟的轮空选手
+                val totalPlayers = n + 1
+                val rounds = totalPlayers - 1
+
+                for (round in 1..rounds) {
+                    val matches = mutableListOf<Pair<Int?, Int?>>()
+
+                    // 使用标准循环赛算法
+                    for (i in 1..totalPlayers / 2) {
+                        val player1Pos = if (i == 1) 1 else (round + i - 3) % (totalPlayers - 1) + 1
+                        val player2Pos = if (i == 1) (round - 1) % (totalPlayers - 1) + 1
+                        else (round - i - 1 + totalPlayers - 1) % (totalPlayers - 1) + 1
+
+                        // 处理轮空情况
+                        val p1Index = if (player1Pos <= n) player1Pos - 1 else null  // 转换为0基索引
+                        val p2Index = if (player2Pos <= n) player2Pos - 1 else null  // 转换为0基索引
+
+                        if (p1Index != null && p2Index != null) {
+                            matches.add(Pair(p1Index, p2Index))
+                        } else if (p1Index != null) {
+                            // p1轮空轮
+                        } else if (p2Index != null) {
+                            // p2轮空轮
+                        }
+                    }
+
+                    // 为每场比赛分配球台
+                    for ((matchIndex, match) in matches.withIndex()) {
+                        if (matchIndex >= tableCount) break // 球台不够
+
+                        val table = tables[matchIndex]
+
+                        // 只有当两个选手都存在时才创建比赛
+                        if (match.first != null && match.second != null) {
+                            LOGGER.info("安排比赛：${competition.name} 第${round}轮 ${table.indexInCampus}号球台 ${players[match.first!!].realName} VS ${players[match.second!!].realName}")
+
+                            // 创建比赛安排记录
+                            CompetitionArrangementEntity.new {
+                                this.competition = competition
+                                this.turnNumber = round
+                                this.table = table
+                                this.playerA = players[match.first!!]
+                                this.playerB = players[match.second!!]
+                                this.status = "SCHEDULED"
+                                this.result = ""
+                            }
+                        }
                     }
                 }
-                
-                // 为每场比赛分配球台
-                for ((matchIndex, match) in matches.withIndex()) {
-                    if (matchIndex >= tableCount) break // 球台不够
+            } else {
+                // 偶数人情况
+                val rounds = n - 1
+
+                for (round in 1..rounds) {
+                    val matches = mutableListOf<Pair<Int, Int>>()
                     
-                    val table = tables[matchIndex]
+                    // 预计算常量值以避免重复计算
+                    val nMinusOne = n - 1
+                    val roundMinusThree = round - 3
+                    val roundPlusNMinusThree = round + n - 3
                     
-                    // 只有当两个选手都存在时才创建比赛
-                    if (match.first != null && match.second != null) {
+                    // 使用标准循环赛算法
+                    for (i in 1..n / 2) {
+                        val player1Pos = if (i == 1) 1 else (roundMinusThree + i) % nMinusOne + 1
+                        val player2Pos = if (i == 1) roundPlusNMinusThree % nMinusOne + 1
+                        else (round - i - 1 + nMinusOne) % nMinusOne + 1
+
+                        // 转换为0基索引
+                        val p1Index = player1Pos - 1
+                        val p2Index = player2Pos - 1
+
+                        // 由于算法保证索引有效且不相等，可简化检查
+                        matches.add(Pair(p1Index, p2Index))
+                    }
+
+                    // 为每场比赛分配球台
+                    for ((matchIndex, match) in matches.withIndex()) {
+                        if (matchIndex >= tableCount) break // 球台不够
+
+                        val table = tables[matchIndex]
+
                         // 创建比赛安排记录
                         CompetitionArrangementEntity.new {
                             this.competition = competition
                             this.turnNumber = round
                             this.table = table
-                            this.playerA = players[match.first!!]
-                            this.playerB = players[match.second!!]
+                            this.playerA = players[match.first]
+                            this.playerB = players[match.second]
                             this.status = "SCHEDULED"
                             this.result = ""
                         }
-                    }
-                }
-            }
-        } else {
-            // 偶数人情况
-            val rounds = n - 1
-            
-            for (round in 1..rounds) {
-                val matches = mutableListOf<Pair<Int, Int>>()
-                
-                // 使用标准循环赛算法
-                for (i in 1..n / 2) {
-                    val player1Pos = if (i == 1) 1 else (round + i - 3) % (n - 1) + 1
-                    val player2Pos = if (i == 1) (round + n - 3) % (n - 1) + 1
-                                    else (round - i - 1 + n - 1) % (n - 1) + 1
-                    
-                    // 转换为0基索引
-                    val p1Index = player1Pos - 1
-                    val p2Index = player2Pos - 1
-                    
-                    if (p1Index < n && p2Index < n && p1Index != p2Index) {
-                        matches.add(Pair(p1Index, p2Index))
-                    }
-                }
-                
-                // 为每场比赛分配球台
-                for ((matchIndex, match) in matches.withIndex()) {
-                    if (matchIndex >= tableCount) break // 球台不够
-                    
-                    val table = tables[matchIndex]
-                    
-                    // 创建比赛安排记录
-                    CompetitionArrangementEntity.new {
-                        this.competition = competition
-                        this.turnNumber = round
-                        this.table = table
-                        this.playerA = players[match.first]
-                        this.playerB = players[match.second]
-                        this.status = "SCHEDULED"
-                        this.result = ""
                     }
                 }
             }
