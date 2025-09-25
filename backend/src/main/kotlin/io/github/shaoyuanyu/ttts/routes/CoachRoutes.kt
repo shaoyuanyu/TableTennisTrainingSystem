@@ -94,6 +94,7 @@ fun Route.queryCoach(coachService: CoachService) {
 
     }
 }
+
 /**
  * 根据uuid查询教练信息
  */

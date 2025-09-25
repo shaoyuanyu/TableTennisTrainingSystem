@@ -113,6 +113,7 @@ fun Route.getCoachSchedule(courseService: CourseService) {
         call.respond(HttpStatusCode.OK, courses)
     }
 }
+
 /**
  * 教练更新课程状态
  */
@@ -156,6 +157,7 @@ fun Route.queryCourses(courseService: CourseService) {
         call.respond(HttpStatusCode.OK, response)
     }
 }
+
 /**
  * 课程预约
  */
@@ -166,6 +168,7 @@ fun Route.bookCourse(courseService: CourseService) {
         call.respond(HttpStatusCode.Created, mapOf("bookingId" to bookingId, "message" to "课程预约成功"))
     }
 }
+
 /**
  * 教练查询待确认的课程
  */
@@ -178,6 +181,7 @@ fun Route.getPendingCoursesForCoach(courseService: CourseService) {
         call.respond(HttpStatusCode.OK, courses)
     }
 }
+
 /**
  * 教练审核课程
  */

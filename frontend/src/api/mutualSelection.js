@@ -59,6 +59,12 @@ export const getCoachCurrentStudents = async () => {
   return response.data
 }
 
+// 学生获取当前教练列表
+export const getStudentCurrentCoaches = async () => {
+  const response = await api.get('/mutual-selection/student/current-coaches')
+  return response.data
+}
+
 // 教练获取历史学生列表
 export const getCoachHistoricalStudents = async () => {
   const response = await api.get('/mutual-selection/coach/historical-students')

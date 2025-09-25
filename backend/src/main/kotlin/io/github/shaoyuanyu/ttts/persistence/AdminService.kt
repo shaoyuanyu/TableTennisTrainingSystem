@@ -62,10 +62,12 @@ class AdminService(
                         age = user.age,
                         campusId = user.campusId,
                         photoUrl = "",
+                        phoneNumber = user.phoneNumber,
                         skillLevel = "",
                         balance = user.studentInfo?.balance ?: 0.0f,
                         maxCoach = user.studentInfo?.maxCoach ?: 0,
-                        currentCoach = user.studentInfo?.currentCoach ?: 0
+                        currentCoach = user.studentInfo?.currentCoach ?: 0,
+                        createdAt = user.createdAt.toString()
                     )
                 }
         }
@@ -108,12 +110,17 @@ class AdminService(
                         realName = user.realName,
                         gender = user.gender,
                         age = user.age,
+                        isApproved = user.coachInfo?.isApproved ?: false,
+                        approvedBy = user.coachInfo?.approvedBy,
                         campusId = user.campusId,
+                        phoneNumber = user.phoneNumber,
                         photoUrl = user.coachInfo?.photoUrl ?: "",
                         achievements = user.coachInfo?.achievements ?:"",
                         level = user.coachInfo?.level ?: "",
                         hourlyRate = user.coachInfo?.hourlyRate ?: 0.0f,
-                        currentStudents = user.coachInfo?.currentStudents ?: 0
+                        currentStudents = user.coachInfo?.currentStudents ?: 0,
+                        maxStudents = user.coachInfo?.maxStudents ?: 0,
+                        createdAt = user.createdAt.toString()
                     )
                 }
         }

@@ -10,9 +10,11 @@ data class StudentRecord(
     val gender: String,
     val age: Int,
     val campusId: Int,
+    val phoneNumber: String,
     val photoUrl: String,
     val skillLevel: String,
     val balance: Float,
     val maxCoach: Int,
-    val currentCoach: Int
+    val currentCoach: Int,
+    val createdAt: String,
 )
