@@ -34,7 +34,7 @@ fun Application.coachRoutes(coachService: CoachService) {
             }
             
             //管理员权限
-            authenticate ("auth-session-campus-admin"){
+            authenticate ("auth-session-campus-admin", "auth-session-super-admin"){
                 getCampusCoachesNotApproved(coachService)
                 approveCoach(coachService)
             }

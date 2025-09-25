@@ -76,8 +76,7 @@ fun Application.configureAuthentication(userService: UserService) {
         // session 验证（campus admin）
         session<UserSession>("auth-session-campus-admin") {
             validate { session ->
-                // TODO: 当前默认 SUPER_ADMIN 有 CAMPUS_ADMIN 的权限
-                if (session.userRole == UserRole.CAMPUS_ADMIN|| session.userRole == UserRole.SUPER_ADMIN) {
+                if (session.userRole == UserRole.CAMPUS_ADMIN) {
                     session
                 } else {
                     throw UnauthorizedException("需要校区管理员权限")

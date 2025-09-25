@@ -56,7 +56,7 @@ fun Application.competitionRoutes(studentService: StudentService) {
             }
 
             //管理员权限
-            authenticate ("auth-session-campus-admin"){
+            authenticate ("auth-session-campus-admin", "auth-session-super-admin"){
 //                getCampusCompetitions(studentService)
 //                enterCompetitionResults(studentService)
 //                getTournaments(studentService) // 添加获取比赛列表接口
