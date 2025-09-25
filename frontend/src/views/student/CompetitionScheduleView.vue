@@ -59,8 +59,8 @@
     <!-- 赛程详情对话框 -->
     <el-dialog 
       v-model="scheduleDialogVisible" 
-      :title="selectedCompetition?.competitionName + ' - 赛程安排'" 
-      width="800px"
+      :title="(selectedCompetition ? selectedCompetition.name : '') + ' - 赛程安排'" 
+      width="90%"
       @close="resetScheduleDialog"
     >
       <div v-if="selectedCompetition && scheduleDetails" class="schedule-details">
@@ -77,10 +77,10 @@
               {{ scope.row.tableId }}号台
             </template>
           </el-table-column>
-          <el-table-column label="状态" width="100">
+          <el-table-column label="状态" width="120">
             <template #default="scope">
               <el-tag :type="getScheduleStatusType(scope.row.status)">
-                {{ scope.row.status }}
+                {{ getScheduleStatusText(scope.row.status) }}
               </el-tag>
             </template>
           </el-table-column>
@@ -204,6 +204,20 @@ const getScheduleStatusType = (status) => {
   }
 }
 
+// 获取赛程状态文本
+const getScheduleStatusText = (status) => {
+  switch (status) {
+    case 'SCHEDULED':
+      return '未开始'
+    case 'ONGOING':
+      return '进行中'
+    case 'COMPLETED':
+      return '已完成'
+    default:
+      return status
+  }
+}
+
 // 查看赛程安排
 const viewSchedule = async (signup) => {
   const competition = getCompetitionBySignup(signup)
@@ -266,7 +280,7 @@ onMounted(() => {
 }
 
 .schedule-details {
-  max-height: 400px;
+  max-height: 500px;
   overflow-y: auto;
 }
 
