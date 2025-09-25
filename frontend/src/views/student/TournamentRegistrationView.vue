@@ -202,6 +202,11 @@ const submitRegistration = async () => {
     return
   }
   
+  if (!tournamentInfo.value || !tournamentInfo.value.id) {
+    ElMessage.warning('比赛信息不完整')
+    return
+  }
+  
   if (isBalanceInsufficient.value) {
     ElMessage.warning('账户余额不足，请先充值')
     return
@@ -210,6 +215,7 @@ const submitRegistration = async () => {
   try {
     loading.value = true
     await api.post('/competition/signup', {
+      competitionId: tournamentInfo.value.id,
       group: formData.value.group
     })
     
