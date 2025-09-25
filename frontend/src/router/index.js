@@ -61,16 +61,6 @@ const router = createRouter({
           },
         },
         {
-          path: 'admin/dashboard',
-          name: 'SuperAdminDashboard',
-          component: () => import('@/views/admin/SuperAdminDashboardView.vue'),
-          meta: {
-            requiresAuth: true,
-            title: '超级管理员仪表盘',
-            roles: ['super_admin'],
-          },
-        },
-        {
           path: 'admin/service',
           name: 'ServiceStatus',
           component: () => import('@/views/admin/ServiceStatusView.vue'),
@@ -164,16 +154,7 @@ const router = createRouter({
         },
 
         // 学员页面
-        {
-          path: 'student/dashboard',
-          name: 'StudentDashboard',
-          component: () => import('@/views/student/StudentDashboardView.vue'),
-          meta: {
-            requiresAuth: true,
-            title: '学员仪表盘',
-            roles: ['student'],
-          },
-        },
+        
         {
           path: 'student/find-coach',
           name: 'FindCoach',
@@ -296,16 +277,7 @@ const router = createRouter({
         },
 
         // 教练页面
-        {
-          path: 'coach/dashboard',
-          name: 'CoachDashboard',
-          component: () => import('@/views/coach/CoachDashboardView.vue'),
-          meta: {
-            requiresAuth: true,
-            title: '教练仪表盘',
-            roles: ['coach'],
-          },
-        },
+       
         {
           path: 'coach/appointment-approval',
           name: 'AppointmentApproval',
