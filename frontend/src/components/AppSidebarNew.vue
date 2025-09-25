@@ -101,6 +101,10 @@
           <el-icon><Wallet /></el-icon>
           <template #title>我的钱包</template>
         </el-menu-item>
+        <el-menu-item index="/student/my-appointments" class="menu-item">
+          <el-icon><Calendar /></el-icon>
+          <template #title>我的预约</template>
+        </el-menu-item>
         <el-menu-item index="/student/matches" class="menu-item">
           <el-icon><Trophy /></el-icon>
           <template #title>我的比赛</template>

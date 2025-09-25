@@ -114,4 +114,10 @@ export const getAvailableTables = async (params) => {
   return response.data
 }
 
+// 获取我的预约列表
+export const getMyAppointments = async (params = {}) => {
+  const response = await api.get('/courses/my-ordered-courses', { params })
+  return response.data
+}
+
 

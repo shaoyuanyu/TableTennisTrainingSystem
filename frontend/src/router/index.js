@@ -274,6 +274,16 @@ const router = createRouter({
             roles: ['student'],
           },
         },
+        {
+          path: 'student/my-appointments',
+          name: 'MyAppointments',
+          component: () => import('@/views/student/MyAppointmentsView.vue'),
+          meta: {
+            requiresAuth: true,
+            title: '我的预约',
+            roles: ['student'],
+          },
+        },
 
         // 教练页面
         {

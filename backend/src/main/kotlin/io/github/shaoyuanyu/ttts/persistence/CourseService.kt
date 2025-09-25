@@ -17,7 +17,6 @@ import io.github.shaoyuanyu.ttts.persistence.table.TableEntity
 import io.github.shaoyuanyu.ttts.persistence.table.TableTable
 import io.github.shaoyuanyu.ttts.persistence.table.expose
 import io.github.shaoyuanyu.ttts.persistence.user.UserEntity
-import io.github.shaoyuanyu.ttts.persistence.user.UserTable
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
@@ -466,6 +465,19 @@ class CourseService(
             }
 
             availableTables.map { it.expose() }.sortedBy(Table::indexInCampus)
+        }
+    }
+
+    /**
+     * 获取当前学生所有已选择但未完成的课程
+     */
+    fun getStudentOrderedCourses(studentId: String): List<Course> {
+        return transaction(database) {
+            val courses = CourseEntity.find {
+                (CourseTable.student eq UUID.fromString(studentId))
+            }.filter { it.status != CourseStatus.COMPLETED }
+                .toList()
+            courses.map { it.expose() }
         }
     }
 }

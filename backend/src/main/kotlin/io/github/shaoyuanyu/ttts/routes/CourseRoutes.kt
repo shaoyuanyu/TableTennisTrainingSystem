@@ -28,6 +28,7 @@ fun Application.courseRoutes(courseService: CourseService) {
                 getAvailableTables(courseService)
                 submitStudentFeedback(courseService)
                 bookCourse(courseService)
+                getStudentOrderedCourses(courseService)
             }
             
             // 教练权限路由
@@ -87,9 +88,18 @@ fun Route.getCoachScheduleForStudent(courseService: CourseService) {
         call.respond(HttpStatusCode.OK, courses)
     }
 }
-
 /**
- * 学生提交课程反馈
+ * 学生查看已提交的预约申请
+ */
+fun Route.getStudentOrderedCourses(courseService: CourseService) {
+    get("/my-ordered-courses"){
+        val userId = getUserIdFromCall(call)
+        val courses = courseService.getStudentOrderedCourses(userId)
+        call.respond(HttpStatusCode.OK, courses)
+    }
+}
+/**
+ * 提交学生反馈
  */
 fun Route.submitStudentFeedback(courseService: CourseService) {
     post("/feedback") {
