@@ -17,22 +17,6 @@
     </el-card>
     
     <div v-else>
-      <el-card class="registration-info">
-        <el-result
-          icon="success"
-          title="已报名"
-          sub-title="请等待安排比赛"
-        >
-          <template #extra>
-            <el-descriptions :column="3" border>
-              <el-descriptions-item label="参赛组别">{{ getGroupText(registrationInfo.group) }}</el-descriptions-item>
-              <el-descriptions-item label="球台编号">{{ registrationInfo.tableId }}</el-descriptions-item>
-              <el-descriptions-item label="对手">{{ registrationInfo.opponentUsername || '待分配' }}</el-descriptions-item>
-            </el-descriptions>
-          </template>
-        </el-result>
-      </el-card>
-      
       <el-card class="schedule-section">
         <template #header>
           <div class="card-header">
@@ -57,8 +41,8 @@
         
         <el-timeline v-else>
           <el-timeline-item
-            v-for="match in matches"
-            :key="`${match.round}-${match.player1}-${match.player2}`"
+            v-for="(match, index) in matches"
+            :key="index"
             :timestamp="`第 ${match.round} 轮`"
             placement="top"
           >
@@ -77,6 +61,28 @@
           </el-timeline-item>
         </el-timeline>
       </el-card>
+      
+      <!-- 比赛记录部分 -->
+      <el-card class="competition-history" v-if="competitions.length > 0">
+        <template #header>
+          <div class="card-header">
+            <span>我的比赛记录</span>
+          </div>
+        </template>
+        
+        <el-table :data="competitions" style="width: 100%">
+          <el-table-column prop="name" label="比赛名称" />
+          <el-table-column prop="type" label="比赛类型" />
+          <el-table-column prop="date" label="比赛时间" />
+          <el-table-column prop="status" label="比赛状态">
+            <template #default="scope">
+              <el-tag v-if="scope.row.status === '进行中'" type="success">进行中</el-tag>
+              <el-tag v-else-if="scope.row.status === '已结束'" type="info">已结束</el-tag>
+              <el-tag v-else type="warning">未知状态</el-tag>
+            </template>
+          </el-table-column>
+        </el-table>
+      </el-card>
     </div>
   </div>
 </template>
@@ -85,6 +91,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { Refresh } from '@element-plus/icons-vue'
 import PageHeader from '@/components/PageHeader.vue'
 import api from '@/utils/api'
 
@@ -93,8 +100,8 @@ const router = useRouter()
 // 状态管理
 const loading = ref(false)
 const hasRegistered = ref(false)
-const registrationInfo = ref({})
 const matches = ref([])
+const competitions = ref([]) // 比赛记录
 
 // 获取组别文本
 const getGroupText = (groupValue) => {
@@ -106,26 +113,17 @@ const getGroupText = (groupValue) => {
   return groupMap[groupValue] || groupValue
 }
 
-// 方法
-const fetchRegistrationInfo = async () => {
-  try {
-    const response = await api.get('/competition/querysignup')
-    registrationInfo.value = response.data
-    hasRegistered.value = true
-  } catch (error) {
-    hasRegistered.value = false
-  }
-}
 
-const fetchMySchedule = async () => {
+// 获取用户已报名的比赛记录
+const fetchCompetitions = async () => {
   try {
-    loading.value = true
-    const response = await api.get('/competition/my-schedule')
-    matches.value = response.data.sort((a, b) => a.round - b.round)
+    // 先获取用户报名信息
+    const signupResponse = await api.get('/competition/signup')
+  
   } catch (error) {
-    ElMessage.error('获取比赛安排失败')
-  } finally {
-    loading.value = false
+    console.error('获取比赛记录失败:', error)
+    ElMessage.error('获取比赛记录失败: ' + (error.response?.data?.error || error.message))
+    competitions.value = []
   }
 }
 
@@ -135,8 +133,7 @@ const goToRegistration = () => {
 
 // 生命周期
 onMounted(() => {
-  fetchRegistrationInfo()
-  fetchMySchedule()
+  fetchCompetitions()
 })
 </script>
 
@@ -145,11 +142,17 @@ onMounted(() => {
   padding: 20px;
 }
 
-.registration-info {
-  margin-bottom: 20px;
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .schedule-section {
+  margin-bottom: 20px;
+}
+
+.competition-history {
   margin-bottom: 20px;
 }
 
@@ -184,5 +187,9 @@ onMounted(() => {
 
 .no-matches {
   padding: 40px 0;
+}
+
+.dialog-footer {
+  text-align: right;
 }
 </style>
