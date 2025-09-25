@@ -1,8 +1,8 @@
 package io.github.shaoyuanyu.ttts.routes
 
 import io.github.shaoyuanyu.ttts.dto.competition.Competition
+import io.github.shaoyuanyu.ttts.dto.competition.CompetitionSignupRequest
 import io.github.shaoyuanyu.ttts.persistence.CompetitionService
-import io.github.shaoyuanyu.ttts.persistence.StudentService
 import io.github.shaoyuanyu.ttts.plugins.LOGGER
 import io.github.shaoyuanyu.ttts.utils.getUserIdFromCall
 import io.ktor.http.HttpStatusCode
@@ -17,7 +17,6 @@ import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 
 fun Application.competitionRoutes(
-    studentService: StudentService,
     competitionService: CompetitionService,
 ) {
     routing {
@@ -33,9 +32,9 @@ fun Application.competitionRoutes(
 
             // 学生权限
             authenticate("auth-session-student") {
-//                signupCompetition(studentService)
+                signupCompetition(competitionService)
+                getUserCompetitionSchedule(competitionService)
 //                querysignup(studentService)
-//                getUserSchedule(studentService)
 //                getLatestTournament(studentService) // 添加获取最新比赛信息接口
             }
 
@@ -101,23 +100,19 @@ fun Route.getAllCompetitions(competitionService: CompetitionService) {
 /**
  * 竞赛报名
  */
-//fun Route.signupCompetition(studentService: StudentService) {
-//    post("/signup") {
-//        val request = call.receive<comsignupRequest>()
-//        val groupName=request.group
-//        val userId=call.sessions.get<UserSession>().let {
-//            if (it == null) {
-//                throw UnauthorizedException("未登录")
-//            }
-//            it.userId
-//        }
-//        studentService.signupCompetition(userId, groupName)
-//        call.respond(
-//            HttpStatusCode.OK,
-//            "报名成功"
-//        )
-//    }
-//}
+fun Route.signupCompetition(competitionService: CompetitionService) {
+    post("/signup") {
+        val userId = getUserIdFromCall(call)
+
+        val request = call.receive<CompetitionSignupRequest>()
+        val competitionId = request.competitionId
+        val groupName = request.group
+
+        competitionService.signupCompetition(userId, competitionId, groupName)
+
+        call.respond(HttpStatusCode.OK, "报名成功")
+    }
+}
 
 /**
  * 查询比赛报名情况
@@ -141,18 +136,14 @@ fun Route.getAllCompetitions(competitionService: CompetitionService) {
 /**
  * 获取用户个人比赛安排
  */
-//fun Route.getUserSchedule(studentService: StudentService) {
-//    get("/my-schedule") {
-//        val userId = call.sessions.get<UserSession>()?.userId
-//            ?: throw UnauthorizedException("未登录")
-//
-//        val schedule = studentService.getUserSchedule(userId)
-//        call.respond(
-//            HttpStatusCode.OK,
-//            schedule
-//        )
-//    }
-//}
+fun Route.getUserCompetitionSchedule(competitionService: CompetitionService) {
+    get("/my-schedule") {
+        val userId = getUserIdFromCall(call)
+
+        val schedule = competitionService.getUserCompetitionSchedule(userId)
+        call.respond(HttpStatusCode.OK, schedule)
+    }
+}
 
 /**
  * 获取所有竞赛信息

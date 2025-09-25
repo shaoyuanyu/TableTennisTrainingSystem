@@ -2,18 +2,15 @@ package io.github.shaoyuanyu.ttts.routes
 
 import io.github.shaoyuanyu.ttts.dto.campus.AddTableRequest
 import io.github.shaoyuanyu.ttts.dto.campus.CampusCreateRequest
-import io.github.shaoyuanyu.ttts.dto.user.UserSession
 import io.github.shaoyuanyu.ttts.exceptions.BadRequestException
-import io.github.shaoyuanyu.ttts.exceptions.UnauthorizedException
 import io.github.shaoyuanyu.ttts.persistence.CampusService
+import io.github.shaoyuanyu.ttts.utils.getUserIdFromCall
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import io.ktor.server.sessions.get
-import io.ktor.server.sessions.sessions
 
 fun Application.campusRoutes(campusService: CampusService) {
     routing {
@@ -106,13 +103,9 @@ fun Route.getCampusNames(campusService: CampusService) {
  */
 fun Route.addTable(campusService: CampusService) {
     post("/addTable") {
+        val userId = getUserIdFromCall(call)
+
         val campusData = call.receive<AddTableRequest>()
-        val userId=call.sessions.get<UserSession>().let {
-            if (it == null) {
-                throw UnauthorizedException("未登录")
-            }
-            it.userId
-        }
         val number = campusData.number
 
         campusService.addTable(userId,number)
@@ -126,12 +119,8 @@ fun Route.addTable(campusService: CampusService) {
  */
 fun Route.queryFreeTables(campusService: CampusService) {
     get("/queryFreeTables") {
-        val userId = call.sessions.get<UserSession>().let {
-            if (it == null) {
-                throw UnauthorizedException("未登录")
-            }
-            it.userId
-        }
+        val userId = getUserIdFromCall(call)
+
         val records = campusService.getFreeTables(userId)
 
         call.respond(HttpStatusCode.OK, records)

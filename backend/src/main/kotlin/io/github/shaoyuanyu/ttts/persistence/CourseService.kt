@@ -3,6 +3,7 @@
 package io.github.shaoyuanyu.ttts.persistence
 
 import io.github.shaoyuanyu.ttts.dto.course.*
+import io.github.shaoyuanyu.ttts.dto.table.Table
 import io.github.shaoyuanyu.ttts.dto.table.TableStatus
 import io.github.shaoyuanyu.ttts.exceptions.BadRequestException
 import io.github.shaoyuanyu.ttts.exceptions.NotFoundException
@@ -14,6 +15,9 @@ import io.github.shaoyuanyu.ttts.persistence.course.expose
 import io.github.shaoyuanyu.ttts.persistence.student.StudentEntity
 import io.github.shaoyuanyu.ttts.persistence.table.TableEntity
 import io.github.shaoyuanyu.ttts.persistence.table.TableTable
+import io.github.shaoyuanyu.ttts.persistence.table.expose
+import io.github.shaoyuanyu.ttts.persistence.user.UserEntity
+import io.github.shaoyuanyu.ttts.persistence.user.UserTable
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
@@ -428,11 +432,40 @@ class CourseService(
             }
         }
     }
+
     private fun changeCourseInfo(courseId: String,title: String){
         transaction(database) {
             val course = CourseEntity.findById(UUID.fromString(courseId))
                 ?: throw NotFoundException("课程不存在")
             course.title = title
+        }
+    }
+
+    /**
+     * 获取指定时间范围内可用的球桌列表
+     */
+    fun getAvailableTables(userId: String, date: String, startTime: String, endTime: String): List<Table> {
+        return transaction(database) {
+            // 获取用户所在校区
+            val user = UserEntity.findById(UUID.fromString(userId))
+                ?: throw BadRequestException("用户不存在")
+            val campusId = user.campusId
+
+            // 获取该校区所有空闲的球桌
+            val freeTables = TableEntity.find {
+                (TableTable.campusId eq campusId) and (TableTable.status eq TableStatus.FREE)
+            }.toList()
+
+            val parsedDate = LocalDate.parse(date)
+            val parsedStartTime = LocalTime.parse(startTime)
+            val parsedEndTime = LocalTime.parse(endTime)
+
+            // 过滤出在指定时间范围内可用的球桌
+            val availableTables = freeTables.filter { table ->
+                isTableAvailable(table, parsedDate, parsedStartTime, parsedEndTime)
+            }
+
+            availableTables.map { it.expose() }.sortedBy(Table::indexInCampus)
         }
     }
 }
