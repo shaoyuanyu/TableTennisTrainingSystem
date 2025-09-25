@@ -11,7 +11,6 @@ import io.github.shaoyuanyu.ttts.persistence.competition.*
 import io.github.shaoyuanyu.ttts.persistence.table.TableEntity
 import io.github.shaoyuanyu.ttts.persistence.table.TableTable
 import io.github.shaoyuanyu.ttts.persistence.user.UserEntity
-import io.github.shaoyuanyu.ttts.plugins.LOGGER
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -20,7 +19,6 @@ import org.jetbrains.exposed.v1.core.or
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import java.util.*
-import kotlin.math.min
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
@@ -169,6 +167,8 @@ class CompetitionService(
                 this.status = "ACTIVE"
                 this.createdAt = Clock.System.now()
             }
+
+            studentService.deduct(userId, competition.fee)
         }
     }
 
@@ -202,19 +202,13 @@ class CompetitionService(
 
             // 为每个组别安排比赛
             for ((group, participants) in groupedSignups) {
-                if (participants.size <= 6) {
-                    // 少于等于6人，采用全循环方式
-                    arrangeRoundRobin(competition, group, participants)
-                } else {
-                    // 多于6人，分小组全循环，再交叉淘汰
-                    arrangeGroupStageAndKnockout(competition, group, participants)
-                }
+                arrangeRoundRobin(competition, group, participants)
             }
 
             competition.status = "进行中"
         }
     }
-    
+
     /**
      * 全循环排赛算法
      */
@@ -224,77 +218,45 @@ class CompetitionService(
         participants: List<CompetitionSignupEntity>
     ) {
         transaction(database) {
-            if (participants.isEmpty()) throw IllegalArgumentException("没有报名的玩家")
-
+            if (participants.isEmpty()) return@transaction
+            
+            // 获取该校区的所有球台
+            val tables = TableEntity.find { TableTable.campus eq competition.campus.id }.toList()
+            if (tables.isEmpty()) throw IllegalStateException("该校区没有可用球台")
+            
             val players = participants.map { it.user }
             val n = players.size
-
-            // 获取该校区的球台
-            val tables = TableEntity.find { TableTable.campus eq competition.campus.id }.toList()
-            val tableCount = tables.size
-
-            if (tableCount == 0) throw NotFoundException("该校区没有球台")
-
-            // 使用标准的循环赛算法（轮转法）
-            val workingPlayers = if (n % 2 == 1) n + 1 else n
-            val rounds = workingPlayers - 1
-            val halfSize = workingPlayers / 2
-
-            // 为确保不出现自己和自己比赛，我们预先生成所有可能的配对
-            val allMatches = mutableListOf<Pair<Int, Int>>()
             
-            // 生成所有不重复的配对组合
-            for (i in 0 until n) {
-                for (j in i + 1 until n) {
-                    allMatches.add(Pair(i, j))
-                }
+            // 创建循环赛对阵表
+            val rounds = mutableListOf<List<Pair<Int, Int>>>()
+            
+            if (n % 2 == 0) {
+                // 偶数人情况
+                evenRoundRobin(n, rounds)
+            } else {
+                // 奇数人情况，添加一个轮空位（用-1表示）
+                oddRoundRobin(n, rounds)
             }
             
-            // 按轮次分配比赛
-            val matchesPerRound = minOf(halfSize, tableCount)
-            val totalMatches = allMatches.size
-            
-            for (round in 1..rounds) {
-                val matches = mutableListOf<Pair<Int, Int>>()
+            // 为每一轮创建比赛安排
+            for ((roundIndex, round) in rounds.withIndex()) {
+                val turnNumber = roundIndex + 1
+                // 循环使用球台
+                val table = tables[roundIndex % tables.size]
                 
-                // 从剩余比赛中选择本轮比赛
-                val startIndex = (round - 1) * matchesPerRound
-                val endIndex = minOf(startIndex + matchesPerRound, totalMatches)
-                
-                if (startIndex < totalMatches) {
-                    for (i in startIndex until minOf(endIndex, totalMatches)) {
-                        if (i < allMatches.size) {
-                            matches.add(allMatches[i])
-                        }
-                    }
-                }
-
-                // 为每场比赛分配球台
-                for ((matchIndex, match) in matches.withIndex()) {
-                    if (matchIndex >= tableCount) break // 球台不够
-
-                    val table = tables[matchIndex]
-
-                    // 确保两个选手都不是null且不是同一个人
-                    if (match.first < n && 
-                        match.second < n &&
-                        match.first != match.second) {
-                        
-                        val playerA = players[match.first]
-                        val playerB = players[match.second]
-                        
-                        LOGGER.info("安排比赛：${competition.name} 第${round}轮 ${table.indexInCampus}号球台 ${playerA.realName} VS ${playerB.realName}")
-
-                        // 创建比赛安排记录
-                        CompetitionArrangementEntity.new {
-                            this.competition = competition
-                            this.turnNumber = round
-                            this.table = table
-                            this.playerA = playerA
-                            this.playerB = playerB
-                            this.status = "SCHEDULED"
-                            this.result = ""
-                        }
+                for ((playerAIndex, playerBIndex) in round) {
+                    // 如果有轮空(-1)，则跳过这场比赛
+                    if (playerAIndex == -1 || playerBIndex == -1) continue
+                    
+                    CompetitionArrangementEntity.new {
+                        this.competition = competition
+                        this.turnNumber = turnNumber
+                        this.table = table
+                        this.playerA = players[playerAIndex]
+                        this.playerB = players[playerBIndex]
+                        this.status = "未开始"
+                        this.result = ""
+                        this.winner = 0
                     }
                 }
             }
@@ -302,16 +264,69 @@ class CompetitionService(
     }
     
     /**
-     * 分组循环+交叉淘汰算法
+     * 偶数人循环赛算法
      */
-    private fun arrangeGroupStageAndKnockout(
-        competition: CompetitionEntity,
-        group: String,
-        participants: List<CompetitionSignupEntity>
-    ) {
-        // TODO: 实现分组循环+交叉淘汰算法
-        // 这里简化处理，仍使用全循环算法
-        arrangeRoundRobin(competition, group, participants)
+    private fun evenRoundRobin(n: Int, rounds: MutableList<List<Pair<Int, Int>>>) {
+        val players = (0 until n).toMutableList()
+        
+        // 进行 n-1 轮比赛
+        for (round in 0 until n - 1) {
+            val matches = mutableListOf<Pair<Int, Int>>()
+            
+            // 第一个选手固定，其他选手顺时针轮转
+            matches.add(Pair(players[0], players[n - 1]))
+            
+            // 其余配对
+            for (i in 1 until n / 2) {
+                val left = players[i]
+                val right = players[n - 1 - i]
+                matches.add(Pair(left, right))
+            }
+            
+            rounds.add(matches)
+            
+            // 轮转选手（除第一个外）
+            val temp = players[n - 1]
+            for (i in n - 1 downTo 2) {
+                players[i] = players[i - 1]
+            }
+            players[1] = temp
+        }
+    }
+    
+    /**
+     * 奇数人循环赛算法
+     */
+    private fun oddRoundRobin(n: Int, rounds: MutableList<List<Pair<Int, Int>>>) {
+        // 添加一个轮空位，使其变为偶数
+        val players = (0 until n).toMutableList()
+        players.add(-1) // -1 表示轮空
+        
+        val totalPlayers = players.size
+        
+        // 进行 totalPlayers-1 轮比赛
+        for (round in 0 until totalPlayers - 1) {
+            val matches = mutableListOf<Pair<Int, Int>>()
+            
+            // 第一个选手固定，其他选手顺时针轮转
+            matches.add(Pair(players[0], players[totalPlayers - 1]))
+            
+            // 其余配对
+            for (i in 1 until totalPlayers / 2) {
+                val left = players[i]
+                val right = players[totalPlayers - 1 - i]
+                matches.add(Pair(left, right))
+            }
+            
+            rounds.add(matches)
+            
+            // 轮转选手（除第一个外）
+            val temp = players[totalPlayers - 1]
+            for (i in totalPlayers - 1 downTo 2) {
+                players[i] = players[i - 1]
+            }
+            players[1] = temp
+        }
     }
 
     /**
