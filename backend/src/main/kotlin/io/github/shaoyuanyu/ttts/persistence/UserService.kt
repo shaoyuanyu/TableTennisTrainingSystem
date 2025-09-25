@@ -292,9 +292,6 @@ class UserService(
             query = query.filter { user -> user.campus.id.value == it }
         }
         
-        // 获取总数
-        val totalCount = query.size.toLong()
-        
         // 分页查询
         val users = query
             .drop((page - 1) * size)
@@ -326,6 +323,27 @@ class UserService(
         users
     }.also {
         USER_LOGGER.info("查询用户列表成功，页码：$page，每页数量：$size，角色：$role，校区ID：$campusId")
+    }
+
+    /**
+     * 统计用户总数
+     *
+     * @param campusId 校区ID过滤
+     * @return 用户总数
+     */
+    fun countUsers(
+        campusId: Int? = null
+    ): Long = transaction(database) {
+        var query = UserEntity.all().toList()
+        
+        // 根据校区ID筛选
+        campusId?.let {
+            query = query.filter { user -> user.campus.id.value == it }
+        }
+        
+        query.size.toLong()
+    }.also {
+        USER_LOGGER.info("统计用户总数成功，校区ID：$campusId，总数：$it")
     }
 
     /**

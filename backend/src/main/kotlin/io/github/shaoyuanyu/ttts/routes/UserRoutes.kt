@@ -38,6 +38,7 @@ fun Application.userRoutes(userService: UserService) {
 
             // campus admin
             authenticate("auth-session-admin") {
+                getTotalNum(userService)
             }
 
             // super admin
@@ -47,6 +48,7 @@ fun Application.userRoutes(userService: UserService) {
                 resetCampusAdminPassword(userService)
                 getAllUsers(userService)
                 getUserByUsername(userService)
+
             }
         }
     }
@@ -178,7 +180,7 @@ fun Route.getAllUsers(userService: UserService) {
     get("/users") {
         // 获取查询参数
         val page = 1
-        val size = 100000
+        val size = 100
         val role = call.request.queryParameters["role"]?.let { UserRole.valueOf(it) }
         val campusId = call.request.queryParameters["campusId"]?.toIntOrNull()
         
@@ -191,7 +193,18 @@ fun Route.getAllUsers(userService: UserService) {
         ))
     }
 }
-
+/**
+ * 获取用户总数
+ */
+fun Route.getTotalNum(userService: UserService){
+    get("/totalUserNum") {
+        val userId=getUserIdFromCall(call)
+        val campusId=userService.queryUserByUUID(userId).campusId
+        // 获取用户总数
+        val totalCount = userService.countUsers(campusId)
+        call.respond(mapOf("totalCount" to totalCount))
+    }
+}
 /**
  * 管理员创建用户
  */

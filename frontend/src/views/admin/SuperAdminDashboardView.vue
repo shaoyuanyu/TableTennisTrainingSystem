@@ -105,7 +105,6 @@
       </GlassCardWithHeader>
     </GlassCardsGrid>
   </div>
-
 </template>
 
 <script setup>
@@ -137,8 +136,9 @@ const loading = ref({
 // 系统概览数据
 const overviewItems = ref([
   { key: 'campuses', title: '校区总数', icon: '🏢', variant: 'display', value: '0', description: '所有运营中的校区' },
-  { key: 'users', title: '用户总数', icon: '👥', variant: 'content', value: '0', description: '系统注册用户数' },
+  { key: 'users', title: '本校区用户数', icon: '👥', variant: 'content', value: '0', description: '本校区注册用户数' },
   { key: 'revenue', title: '本月充值', icon: '💰', variant: 'enhanced', value: '¥0', description: '所有用户本月充值合计（近似）' },
+  { key: 'unread', title: '未读消息', icon: '✉️', variant: 'minimal', value: '0', description: '消息中心未读数量' },
 ])
 
 // 校区列表
@@ -201,7 +201,7 @@ const fetchOverviewData = async () => {
     // 用户总数（仅超管）
     let usersTotal = 0
     try {
-      const usersResp = await api.get('/user/users?page=1&size=1')
+      const usersResp = await api.get('/user/totalUserNum')
       usersTotal = usersResp?.data?.totalCount ?? 0
     } catch {
       usersTotal = 0
@@ -223,7 +223,7 @@ const fetchOverviewData = async () => {
 
     overviewItems.value = [
       { key: 'campuses', title: '校区总数', icon: '🏢', variant: 'display', value: String(campusTotal), description: '所有运营中的校区' },
-      { key: 'users', title: '用户总数', icon: '👥', variant: 'content', value: String(usersTotal), description: '系统注册用户数' },
+      { key: 'users', title: '本校区用户数', icon: '👥', variant: 'content', value: String(usersTotal), description: '本校区注册用户数' },
       { key: 'revenue', title: '本月充值', icon: '💰', variant: 'enhanced', value: `¥${Number(monthRevenue).toLocaleString() }`, description: '所有用户本月充值合计（近似）' },
       { key: 'unread', title: '未读消息', icon: '✉️', variant: 'minimal', value: String(unreadCount.value || 0), description: '消息中心未读数量' },
     ]
@@ -334,5 +334,4 @@ onMounted(() => {
   font-size: 14px;
   color: var(--el-text-color-regular);
 }
-
 </style>
