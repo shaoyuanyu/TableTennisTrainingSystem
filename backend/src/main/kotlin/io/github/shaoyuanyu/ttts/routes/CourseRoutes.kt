@@ -201,3 +201,18 @@ fun Route.coachJudgeCourse(courseService: CourseService) {
         call.respond(HttpStatusCode.OK,)
     }
 }
+
+/**
+ * 获取可用球桌列表
+ */
+fun Route.getAvailableTables(courseService: CourseService) {
+    get("/available-tables") {
+        val userId = getUserIdFromCall(call)
+        val date = call.request.queryParameters["date"] ?: throw BadRequestException("缺少日期参数")
+        val startTime = call.request.queryParameters["startTime"] ?: throw BadRequestException("缺少开始时间参数")
+        val endTime = call.request.queryParameters["endTime"] ?: throw BadRequestException("缺少结束时间参数")
+        
+        val availableTables = courseService.getAvailableTables(userId, date, startTime, endTime)
+        call.respond(HttpStatusCode.OK, availableTables)
+    }
+}
