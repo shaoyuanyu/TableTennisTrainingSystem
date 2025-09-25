@@ -25,11 +25,7 @@
           
           <el-col :span="12">
             <el-form-item label="比赛类型" prop="type">
-              <el-select v-model="createForm.type" placeholder="请选择比赛类型" style="width: 100%">
-                <el-option label="月赛" value="monthly" />
-                <el-option label="季度赛" value="quarterly" />
-                <el-option label="年度赛" value="annual" />
-              </el-select>
+              <el-input v-model="createForm.type" placeholder="请输入比赛类型" />
             </el-form-item>
           </el-col>
         </el-row>
@@ -112,9 +108,7 @@
         <el-table-column prop="name" label="比赛名称" />
         <el-table-column prop="type" label="类型">
           <template #default="scope">
-            <el-tag v-if="scope.row.type === 'monthly'">月赛</el-tag>
-            <el-tag v-else-if="scope.row.type === 'quarterly'" type="success">季度赛</el-tag>
-            <el-tag v-else-if="scope.row.type === 'annual'" type="warning">年度赛</el-tag>
+            <el-tag>{{ scope.row.type }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="date" label="比赛日期" />
@@ -167,7 +161,7 @@ const createFormRef = ref()
 // 表单数据
 const createForm = ref({
   name: '',
-  type: 'monthly',
+  type: '',
   date: '',
   registrationDeadline: '',
   fee: 30,
@@ -180,7 +174,7 @@ const createRules = {
     { required: true, message: '请输入比赛名称', trigger: 'blur' }
   ],
   type: [
-    { required: true, message: '请选择比赛类型', trigger: 'change' }
+    { required: true, message: '请输入比赛类型', trigger: 'blur' }
   ],
   date: [
     { required: true, message: '请选择比赛日期', trigger: 'change' }
@@ -225,7 +219,7 @@ const createTournament = async () => {
 const resetForm = () => {
   createForm.value = {
     name: '',
-    type: 'monthly',
+    type: '',
     date: '',
     registrationDeadline: '',
     fee: 30,
@@ -289,14 +283,6 @@ const deleteTournament = (tournament) => {
   })
 }
 
-const getTournamentTypeText = (type) => {
-  const typeMap = {
-    monthly: '月赛',
-    quarterly: '季度赛',
-    annual: '年度赛'
-  }
-  return typeMap[type] || type
-}
 
 const handleSizeChange = (val) => {
   pagination.value.pageSize = val

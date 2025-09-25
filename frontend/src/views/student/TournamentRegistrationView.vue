@@ -1,6 +1,6 @@
 <template>
   <div class="tournament-registration">
-    <PageHeader title="月赛报名" />
+    <PageHeader title="月赛报名" :centered="true" />
     
     <el-card class="registration-card">
       <div class="registration-info" v-if="tournamentInfo.id !== null">
@@ -8,9 +8,9 @@
         <ul class="info-list">
           <li class="info-item">报名费：每人{{ tournamentInfo.fee }}元</li>
           <li class="info-item" v-if="tournamentInfo.registrationDeadline">报名截止时间：{{ tournamentInfo.registrationDeadline }}</li>
-          <li class="info-item" v-else>报名时间：每月1-25日</li>
+          
           <li class="info-item" v-if="tournamentInfo.date">比赛时间：{{ tournamentInfo.date }}</li>
-          <li class="info-item" v-else>比赛时间：每月第四个周日</li>
+          
           <li class="info-item">比赛地点：各校区训练馆</li>
         </ul>
         
@@ -64,7 +64,7 @@
         <el-result
           icon="info"
           title="暂无比赛"
-          sub-title="当前没有可报名的比赛，请联系管理员创建比赛后再进行报名。"
+          sub-title="当前没有可报名的比赛，请等待管理员创建比赛后再进行报名。"
         />
       </div>
     </el-card>

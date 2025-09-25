@@ -1,7 +1,7 @@
 <template>
   <div class="page-header">
     <div class="header-content">
-      <h1 class="page-title">{{ title }}</h1>
+      <h1 class="page-title" :class="{ 'centered': centered }">{{ title }}</h1>
       <div class="header-actions" v-if="$slots.default">
         <slot></slot>
       </div>
@@ -21,6 +21,10 @@ defineProps({
   description: {
     type: String,
     default: ''
+  },
+  centered: {
+    type: Boolean,
+    default: false
   }
 })
 </script>
@@ -37,6 +41,12 @@ defineProps({
   align-items: center;
   flex-wrap: wrap;
   gap: 16px;
+}
+
+.header-content .centered {
+  flex: 1;
+  text-align: center;
+  margin: 0;
 }
 
 .page-title {
@@ -65,6 +75,10 @@ defineProps({
   .header-content {
     flex-direction: column;
     align-items: flex-start;
+  }
+  
+  .header-content .centered {
+    text-align: left;
   }
   
   .page-title {
