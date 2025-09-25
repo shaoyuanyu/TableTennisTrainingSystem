@@ -33,6 +33,10 @@
           <el-icon><Document /></el-icon>
           <template #title>系统日志</template>
         </el-menu-item>
+        <el-menu-item index="/admin/tournaments" class="menu-item">
+          <el-icon><Trophy /></el-icon>
+          <template #title>比赛管理</template>
+        </el-menu-item>
       </template>
 
       <!-- 校区管理员菜单 - 扁平化 -->
@@ -48,6 +52,14 @@
         <el-menu-item index="/campus/appointments" class="menu-item">
           <el-icon><Calendar /></el-icon>
           <template #title>预约管理</template>
+        </el-menu-item>
+        <el-menu-item index="/campus/tournaments" class="menu-item">
+          <el-icon><Trophy /></el-icon>
+          <template #title>比赛管理</template>
+        </el-menu-item>
+        <el-menu-item index="/campus/logs" class="menu-item">
+          <el-icon><Document /></el-icon>
+          <template #title>系统日志</template>
         </el-menu-item>
       </template>
 
@@ -72,6 +84,10 @@
         <el-menu-item index="/student/account-recharge" class="menu-item">
           <el-icon><Wallet /></el-icon>
           <template #title>我的钱包</template>
+        </el-menu-item>
+        <el-menu-item index="/student/matches" class="menu-item">
+          <el-icon><Trophy /></el-icon>
+          <template #title>我的比赛</template>
         </el-menu-item>
       </template>
 
@@ -148,6 +164,7 @@ import {
   User,
   UserFilled,
   Wallet,
+  Trophy
 } from '@element-plus/icons-vue'
 
 defineProps({

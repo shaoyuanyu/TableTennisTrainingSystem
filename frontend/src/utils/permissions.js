@@ -35,6 +35,7 @@ export const PAGE_PERMISSIONS = {
   // 超级管理员页面
   '/admin/campus': [USER_ROLES.SUPER_ADMIN],
   '/admin/service': [USER_ROLES.SUPER_ADMIN],
+  '/admin/tournaments': [USER_ROLES.SUPER_ADMIN],
 
   // 校区管理员页面
   '/campus/students': [USER_ROLES.CAMPUS_ADMIN],
@@ -165,6 +166,7 @@ export function getAccessibleMenus(userRole) {
         children: [
           { path: '/admin/campus', title: '校区管理', icon: 'OfficeBuilding' },
           { path: '/admin/service', title: '服务状态', icon: 'CreditCard' },
+          { path: '/admin/tournaments', title: '比赛管理', icon: 'Trophy' },
         ],
       })
       break

@@ -77,9 +77,9 @@
               </el-icon>
             </div>
             <div class="action-text">
-              <h3>赛事报名</h3>
-              <p>参加各种乒乓球比赛</p>
-              <PrimaryButton size="sm" to="/student/tournament-registration">前往</PrimaryButton>
+              <h3>我的比赛</h3>
+              <p>查看比赛安排和赛程</p>
+              <PrimaryButton size="sm" to="/student/matches">前往</PrimaryButton>
             </div>
           </div>
         </el-card>
