@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalTime::class)
-package io.github.shaoyuanyu.ttts.persistence.competition
 
+package io.github.shaoyuanyu.ttts.persistence.competition
 
 import org.jetbrains.exposed.v1.core.dao.id.EntityID
 import org.jetbrains.exposed.v1.dao.IntEntity
