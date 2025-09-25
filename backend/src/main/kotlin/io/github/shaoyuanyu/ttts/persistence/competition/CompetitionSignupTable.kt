@@ -11,14 +11,11 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
 object CompetitionSignupTable: IntIdTable("competition_signup")   {
-
     val competition = reference("competition", CompetitionTable, ReferenceOption.CASCADE)
 
     val user = reference("user", UserTable, ReferenceOption.CASCADE)
 
     val group: Column<String> = varchar("group",32)
-
-    val campusId: Column<Int> = integer("campus_id")
 
     val status: Column<String> = varchar("status",32)
 

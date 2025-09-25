@@ -2,6 +2,7 @@
 
 package io.github.shaoyuanyu.ttts.persistence.competition
 
+import io.github.shaoyuanyu.ttts.dto.competition.CompetitionSignup
 import io.github.shaoyuanyu.ttts.persistence.user.UserEntity
 import org.jetbrains.exposed.v1.core.dao.id.EntityID
 import org.jetbrains.exposed.v1.dao.IntEntity
@@ -17,9 +18,20 @@ class CompetitionSignupEntity(id: EntityID<Int>) : IntEntity(id) {
 
     var group by CompetitionSignupTable.group
 
-    var campusId by CompetitionSignupTable.campusId
-
     var status by CompetitionSignupTable.status
 
     var createdAt by CompetitionSignupTable.createdAt
 }
+
+fun CompetitionSignupEntity.expose() = CompetitionSignup(
+    competitionId = competition.id.value.toString(),
+    competitionName = competition.name,
+    userId = user.id.value.toString(),
+    group = group,
+    campusId = competition.campus.id.value,
+    campusName = competition.campus.campusName,
+    status = status,
+    createdAt = createdAt.toString()
+)
+
+fun List<CompetitionSignupEntity>.expose() = map { it.expose() }

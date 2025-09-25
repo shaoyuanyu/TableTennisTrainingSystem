@@ -295,7 +295,7 @@ class CourseService(
         // 如果请求中指定了球桌，优先使用指定的球桌
         if (request.tableId != null) {
             val specifiedTable = TableEntity.findById(UUID.fromString(request.tableId))
-            if (specifiedTable != null && specifiedTable.campusId == campusId) {
+            if (specifiedTable != null && specifiedTable.campus.id.value == campusId) {
                 // 检查球桌在课程时间段是否可用
                 if (isTableAvailable(
                         specifiedTable, LocalDate.parse(request.date),
@@ -313,7 +313,7 @@ class CourseService(
 
         // 自动分配：查找该校区空闲的球桌
         val availableTables = TableEntity.find {
-            (TableTable.campusId eq campusId) and (TableTable.status eq TableStatus.FREE)
+            (TableTable.campus eq campusId) and (TableTable.status eq TableStatus.FREE)
         }.toList()
 
         val date = LocalDate.parse(request.date)
@@ -362,7 +362,7 @@ class CourseService(
 
             val student = StudentEntity.findById(UUID.fromString(CourseBooking.studentId))
                 ?: throw NotFoundException("学生不存在")
-            val campus = student.userId.campusId
+            val campus = student.userId.campus
             val balance = student.balance
             if (balance < CourseBooking.price) {
                 throw BadRequestException("余额不足")
@@ -370,7 +370,7 @@ class CourseService(
             val hour = 7 + CourseBooking.NO
             val startTime = LocalTime(hour, 0)  // 小时:分钟，如 10:00
             val endTime = LocalTime(hour + 1, 0)  // 小时:分钟，如 11:00
-            val location = CampusEntity.findById(campus)?.address ?: ""
+            val location = campus.address
             val Course = CourseCreateRequest(
                 title = CourseBooking.title,
                 description = CourseBooking.description,
@@ -381,7 +381,7 @@ class CourseService(
                 price = CourseBooking.price,
                 coachId = CourseBooking.coachId,
                 studentId = CourseBooking.studentId,
-                campusId = campus,
+                campusId = campus.id.value,
                 tableId = CourseBooking.tableId
             )
             // 创建课程
@@ -452,11 +452,10 @@ class CourseService(
             // 获取用户所在校区
             val user = UserEntity.findById(UUID.fromString(userId))
                 ?: throw BadRequestException("用户不存在")
-            val campusId = user.campusId
 
             // 获取该校区所有空闲的球桌
             val freeTables = TableEntity.find {
-                (TableTable.campusId eq campusId) and (TableTable.status eq TableStatus.FREE)
+                (TableTable.campus eq user.campus.id) and (TableTable.status eq TableStatus.FREE)
             }.toList()
 
             val parsedDate = LocalDate.parse(date)

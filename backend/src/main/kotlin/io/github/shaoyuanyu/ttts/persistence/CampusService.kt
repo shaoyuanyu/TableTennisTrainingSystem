@@ -69,9 +69,6 @@ class CampusService(
                 lastLoginAt = createdAt
             }
 
-            // 获取新创建的校区ID
-            val campusId = campusEntity.id.value
-
             // 创建校区管理员用户
             UserEntity.new {
                 username = newCampus.username
@@ -81,7 +78,7 @@ class CampusService(
                 age = 0
                 phoneNumber = newCampus.phone
                 email = newCampus.email
-                this.campusId = campusId // 关联校区ID
+                this.campus = campusEntity
                 role = UserRole.CAMPUS_ADMIN
                 status = "ACTIVE"
                 this.createdAt = Clock.System.now()
@@ -121,9 +118,7 @@ class CampusService(
             val userEntity = UserEntity.findById(UUID.fromString(userId))
                 ?: throw IllegalArgumentException("用户不存在")
 
-            val campusId = userEntity.campusId
-            val campusEntity = CampusEntity.findById(campusId)
-                ?: throw IllegalArgumentException("校区不存在")
+            val campusEntity = userEntity.campus
 
             // 获取当前的球桌数量作为起始索引
             var currentTableNumber = campusEntity.tableNumber
@@ -136,7 +131,7 @@ class CampusService(
                     this.status = TableStatus.FREE
                     this.group = TableOccupiedByGroup.FREE
                     this.indexInCampus = currentTableNumber
-                    this.campusId = campusId
+                    this.campus = campusEntity
                 }
             }
 
@@ -152,9 +147,10 @@ class CampusService(
      */
     fun getFreeTables(userId: String): List<Table> =
         transaction(database) {
-            val campusId= UserEntity.findById(UUID.fromString(userId))?.campusId ?: throw IllegalArgumentException("用户不存在")
+            val user = UserEntity.findById(UUID.fromString(userId)) ?: throw IllegalArgumentException("用户ID $userId 不存在")
+
             TableEntity.find {
-                TableTable.status.eq(TableStatus.FREE) and (TableTable.campusId.eq(campusId))
+                (TableTable.status.eq(TableStatus.FREE)) and (TableTable.campus eq user.campus.id)
             }.toList().map { it.expose() }.sortedBy(Table::indexInCampus)
         }
 }

@@ -31,14 +31,14 @@ class AdminService(
             // 获取管理员所属校区ID
             val adminEntity = UserEntity.findById(UUID.fromString(adminId))
                 ?: throw IllegalArgumentException("管理员不存在")
-            val adminCampusId = adminEntity.campusId
+            val adminCampusId = adminEntity.campus
 
             val offset = (page - 1) * size
 
             UserEntity.all()
                 .filter { user ->
                     user.role == UserRole.STUDENT &&
-                            user.campusId == adminCampusId // 只筛选同校区的学生
+                            user.campus == adminCampusId // 只筛选同校区的学生
                 }
                 .sortedBy { it.createdAt }
                 .drop(offset)
@@ -80,14 +80,14 @@ class AdminService(
             // 获取管理员所属校区ID
             val adminEntity = UserEntity.findById(UUID.fromString(adminId))
                 ?: throw IllegalArgumentException("管理员不存在")
-            val adminCampusId = adminEntity.campusId
+            val adminCampusId = adminEntity.campus
 
             val offset = (page - 1) * size
 
             UserEntity.all()
                 .filter { user ->
                     user.role == UserRole.COACH &&
-                            user.campusId == adminCampusId // 只筛选同校区的教练
+                            user.campus == adminCampusId // 只筛选同校区的教练
                 }
                 .sortedBy { it.createdAt }
                 .drop(offset)

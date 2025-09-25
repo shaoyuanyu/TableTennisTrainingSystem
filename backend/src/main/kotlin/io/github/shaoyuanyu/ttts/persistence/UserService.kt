@@ -9,6 +9,7 @@ import io.github.shaoyuanyu.ttts.dto.user.injectStudentEntity
 import io.github.shaoyuanyu.ttts.exceptions.BadRequestException
 import io.github.shaoyuanyu.ttts.exceptions.UnauthorizedException
 import io.github.shaoyuanyu.ttts.exceptions.NotFoundException
+import io.github.shaoyuanyu.ttts.persistence.campus.CampusEntity
 import io.github.shaoyuanyu.ttts.persistence.coach.CoachEntity
 import io.github.shaoyuanyu.ttts.persistence.student.StudentEntity
 import io.github.shaoyuanyu.ttts.persistence.user.UserEntity
@@ -43,7 +44,7 @@ class UserService(
                     age = 0
                     phoneNumber = ""
                     email = ""
-                    campusId = 1
+                    campus = CampusEntity.all().first()
                     role = UserRole.SUPER_ADMIN
                     status = ""
                     createdAt = Clock.System.now()
@@ -167,7 +168,7 @@ class UserService(
                 age = newUser.age
                 phoneNumber = newUser.phoneNumber
                 email = newUser.email
-                campusId = newUser.campusId
+                campus = CampusEntity.findById(newUser.campusId) ?: throw BadRequestException("校区不存在")
                 role = newUser.role
                 status = "ACTIVE"
                 createdAt = Clock.System.now()
@@ -288,7 +289,7 @@ class UserService(
         
         // 根据校区ID筛选
         campusId?.let {
-            query = query.filter { user -> user.campusId == it }
+            query = query.filter { user -> user.campus.id.value == it }
         }
         
         // 获取总数
@@ -351,7 +352,7 @@ class UserService(
                 it.age = user.age
                 it.phoneNumber = user.phoneNumber
                 it.email = user.email
-                it.campusId = user.campusId
+                it.campus = CampusEntity.findById(user.campusId) ?: throw BadRequestException("校区不存在")
                 // 注意：不更新角色和状态字段，防止用户越权修改
             }
             

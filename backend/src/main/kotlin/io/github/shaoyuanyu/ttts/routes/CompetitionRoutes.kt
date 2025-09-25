@@ -34,7 +34,7 @@ fun Application.competitionRoutes(
             authenticate("auth-session-student") {
                 signupCompetition(competitionService)
                 getUserCompetitionSchedule(competitionService)
-//                querysignup(studentService)
+                queryUserSignup(competitionService)
 //                getLatestTournament(studentService) // 添加获取最新比赛信息接口
             }
 
@@ -117,21 +117,13 @@ fun Route.signupCompetition(competitionService: CompetitionService) {
 /**
  * 查询比赛报名情况
  */
-//fun Route.querysignup(studentService: StudentService) {
-//    get("/querysignup") {
-//        val userId=call.sessions.get<UserSession>().let {
-//            if (it == null) {
-//                throw UnauthorizedException("未登录")
-//            }
-//            it.userId
-//        }
-//        val detail = studentService.querySignup(userId)
-//        call.respond(
-//            HttpStatusCode.OK,
-//            detail
-//        )
-//    }
-//}
+fun Route.queryUserSignup(competitionService: CompetitionService) {
+    get("/signup") {
+        val userId = getUserIdFromCall(call)
+
+        call.respond(HttpStatusCode.OK, competitionService.queryCompetitionSignup(userId))
+    }
+}
 
 /**
  * 获取用户个人比赛安排
@@ -144,49 +136,3 @@ fun Route.getUserCompetitionSchedule(competitionService: CompetitionService) {
         call.respond(HttpStatusCode.OK, schedule)
     }
 }
-
-/**
- * 获取所有竞赛信息
- */
-//fun Route.getAllCompetitions(studentService: StudentService) {
-//    get("/allcompetitions") {
-//        val competitions = studentService.getAllCompetitions()
-//        call.respond(
-//            HttpStatusCode.OK,
-//            competitions
-//        )
-//    }
-//}
-
-/**
- * 录入本校区比赛成绩
- */
-//fun Route.enterCompetitionResults(studentService: StudentService) {
-//    post("/enterresults") {
-//        val user=call.receive<CompetitionResult>()
-//        val winner=user.winnerName
-//        val loser=user.loserName
-//        studentService.enterResults(winner,loser)
-//        call.respond(
-//            HttpStatusCode.OK,
-//            "成绩录入成功"
-//        )
-//    }
-//}
-
-/**
- * 获取比赛列表
- */
-//fun Route.getTournaments(studentService: StudentService) {
-//    get("/tournaments") {
-//        val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 1
-//        val size = call.request.queryParameters["size"]?.toIntOrNull() ?: 10
-//
-//        try {
-//            val result = studentService.getTournaments(page, size)
-//            call.respond(HttpStatusCode.OK, result)
-//        } catch (e: Exception) {
-//            call.respond(HttpStatusCode.InternalServerError, mapOf("error" to e.message))
-//        }
-//    }
-//}

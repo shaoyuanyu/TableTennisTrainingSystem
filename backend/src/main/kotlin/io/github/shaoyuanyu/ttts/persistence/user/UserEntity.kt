@@ -3,6 +3,7 @@
 package io.github.shaoyuanyu.ttts.persistence.user
 
 import io.github.shaoyuanyu.ttts.dto.user.User
+import io.github.shaoyuanyu.ttts.persistence.campus.CampusEntity
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.exposed.v1.core.dao.id.EntityID
@@ -21,7 +22,7 @@ class UserEntity(uuid: EntityID<UUID>) : UUIDEntity(uuid) {
     var age by UserTable.age
     var phoneNumber by UserTable.phone_number
     var email by UserTable.email
-    var campusId by UserTable.campus_id
+    var campus by CampusEntity referencedOn UserTable.campus
     var role by UserTable.role
     var status by UserTable.status
     var createdAt by UserTable.created_at
@@ -37,7 +38,8 @@ fun UserEntity.expose() = User(
     age = age,
     phoneNumber = phoneNumber,
     email = email,
-    campusId = campusId,
+    campusId = campus.id.value,
+    campusName = campus.campusName,
     role = role,
     status = status,
     createdAt = createdAt.toLocalDateTime(TimeZone.of("Asia/Shanghai")),
@@ -52,7 +54,8 @@ fun UserEntity.exposeWithoutPassword() = User(
     age = age,
     phoneNumber = phoneNumber,
     email = email,
-    campusId = campusId,
+    campusId = campus.id.value,
+    campusName = campus.campusName,
     role = role,
     status = status,
     createdAt = createdAt.toLocalDateTime(TimeZone.of("Asia/Shanghai")),

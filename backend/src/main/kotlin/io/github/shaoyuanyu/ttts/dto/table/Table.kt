@@ -8,5 +8,6 @@ data class Table(
     val status: String,
     val group: String,
     val indexInCampus: Int,
-    val campusId: Int
+    val campusId: Int,
+    val campusName: String,
 )

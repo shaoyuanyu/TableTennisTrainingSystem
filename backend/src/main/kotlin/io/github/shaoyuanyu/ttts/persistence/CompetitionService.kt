@@ -3,7 +3,9 @@
 package io.github.shaoyuanyu.ttts.persistence
 
 import io.github.shaoyuanyu.ttts.dto.competition.Competition
+import io.github.shaoyuanyu.ttts.dto.competition.CompetitionSignup
 import io.github.shaoyuanyu.ttts.exceptions.NotFoundException
+import io.github.shaoyuanyu.ttts.persistence.campus.CampusEntity
 import io.github.shaoyuanyu.ttts.persistence.competition.*
 import io.github.shaoyuanyu.ttts.persistence.user.UserEntity
 import kotlinx.datetime.LocalDate
@@ -39,40 +41,42 @@ class CompetitionService(
         registrationDeadline: LocalDate,
         fee: Float,
         description: String
-    ) {
+    ) = transaction(database) {
         // 参数验证
         if (name.isBlank()) {
             throw IllegalArgumentException("比赛名称不能为空")
         }
-        
+
         if (type.isBlank()) {
             throw IllegalArgumentException("比赛类型不能为空")
         }
-        
+
         if (date < Clock.System.now().toLocalDateTime(TimeZone.of("Asia/Shanghai")).date) {
             throw IllegalArgumentException("比赛日期不能早于当前日期")
         }
-        
+
         if (registrationDeadline > date) {
             throw IllegalArgumentException("报名截止日期不能晚于比赛日期")
         }
-        
+
         if (fee < 0) {
             throw IllegalArgumentException("报名费用不能为负数")
         }
-        
-        transaction(database) {
-            CompetitionEntity.new {
-                this.name = name
-                this.type = type
-                this.campusId = campusId
-                this.date = date
-                this.registrationDeadline = registrationDeadline
-                this.fee = fee
-                this.description = description
-            }
+
+        // 获取校区
+        val campus = CampusEntity.findById(campusId) ?: throw NotFoundException("校区不存在")
+
+        CompetitionEntity.new {
+            this.name = name
+            this.type = type
+            this.campus = campus
+            this.date = date
+            this.registrationDeadline = registrationDeadline
+            this.fee = fee
+            this.description = description
         }
     }
+
 
     /**
      * 根据用户ID查询同校区的比赛信息
@@ -80,21 +84,25 @@ class CompetitionService(
      * @param userId 用户ID
      * @return 同校区的比赛列表
      */
-    fun queryCampusCompetition(userId: String): List<Competition> = transaction(database) {
-        val campusId = UserEntity.findById(UUID.fromString(userId))?.campusId ?: throw NotFoundException("用户不存在")
-        CompetitionEntity.find {
-            CompetitionTable.campusId eq campusId
-        }.toList().expose()
-    }
+    fun queryCampusCompetition(userId: String): List<Competition> =
+        transaction(database) {
+            val campus = UserEntity.findById(UUID.fromString(userId))?.campus
+                ?: throw NotFoundException("用户不存在")
+
+            CompetitionEntity.find {
+                CompetitionTable.campus eq campus.id
+            }.toList().expose()
+        }
 
     /**
      * 查询所有比赛信息
      *
      * @return 包含所有比赛信息的列表
      */
-    fun queryAllCompetitions(): List<Competition> {
-        return CompetitionEntity.all().toList().expose()
-    }
+    fun queryAllCompetitions(): List<Competition> =
+        transaction(database) {
+            CompetitionEntity.all().toList().expose()
+        }
 
     /**
      * 报名参加比赛
@@ -131,12 +139,19 @@ class CompetitionService(
                 this.user = user
                 this.competition = competition
                 this.group = group
-                this.campusId = user.campusId
                 this.status = "ACTIVE"
                 this.createdAt = Clock.System.now()
             }
         }
     }
+
+    /**
+     * 查询比赛报名信息
+     */
+    fun queryCompetitionSignup(userId: String): List<CompetitionSignup> =
+        transaction(database) {
+            CompetitionSignupEntity.find { CompetitionSignupTable.user eq UUID.fromString(userId) }.toList().expose()
+        }
 
     /**
      * 获取用户个人比赛安排

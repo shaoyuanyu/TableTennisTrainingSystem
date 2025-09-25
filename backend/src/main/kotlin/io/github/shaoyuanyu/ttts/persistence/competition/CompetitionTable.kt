@@ -1,7 +1,9 @@
 package io.github.shaoyuanyu.ttts.persistence.competition
 
+import io.github.shaoyuanyu.ttts.persistence.campus.CampusTable
 import kotlinx.datetime.LocalDate
 import org.jetbrains.exposed.v1.core.Column
+import org.jetbrains.exposed.v1.core.ReferenceOption
 import org.jetbrains.exposed.v1.core.dao.id.UUIDTable
 import org.jetbrains.exposed.v1.datetime.date
 
@@ -13,7 +15,7 @@ object CompetitionTable : UUIDTable("competition") {
     val type: Column<String> = varchar("type", 50)
 
     // 比赛所属校区
-    val campusId: Column<Int> = integer("campus_id")
+    val campus = reference("campus", CampusTable, ReferenceOption.CASCADE)
     
     // 比赛日期
     val date: Column<LocalDate> = date("date")

@@ -42,11 +42,11 @@ fun configureDatabase(
     // 第一次transaction与数据库建立连接
     // 检查table并创建缺失的，DSL "CREATE TABLE IF NOT EXISTS"
     transaction(database) {
+        SchemaUtils.create(CampusTable)
         SchemaUtils.create(UserTable)
         SchemaUtils.create(CoachTable)
         SchemaUtils.create(StudentTable)
         SchemaUtils.create(MutualSelectionTable)
-        SchemaUtils.create(CampusTable)
         SchemaUtils.create(MessageTable)
         SchemaUtils.create(RechargeTable)
         SchemaUtils.create(TableTable)

@@ -34,10 +34,10 @@ fun Application.module() {
     )
 
     // 创建各类服务
+    val campusService = CampusService(database)
     val userService = UserService(database)
     val messageService = MessageService(database)
     val studentService = StudentService(database, userService)
-    val campusService = CampusService(database)
     val coachService = CoachService(database, userService)
     val mutualSelectionService = MutualSelectionService(database)
     val courseService = CourseService(database, studentService)
