@@ -8,24 +8,37 @@
       class="dashboard-header"
     >
       <template #extra>
-        <el-tag type="success">系统运行正常</el-tag>
+        <div class="header-extras">
+          <el-tag type="success">系统运行正常</el-tag>
+          <el-tag type="primary" v-if="unreadCount > 0">未读消息 {{ unreadCount }}</el-tag>
+        </div>
       </template>
     </GlassHeaderCard>
 
     <!-- 系统概览 -->
     <GlassCardsGrid layout="auto" class="overview-grid">
-      <GlassDisplayCard
-        v-for="item in overviewItems"
-        :key="item.key"
-        :title="item.title"
-        :icon="item.icon"
-        :variant="item.variant"
-      >
-        <div class="overview-content">
-          <div class="overview-value">{{ item.value }}</div>
-          <div class="overview-description">{{ item.description }}</div>
-        </div>
-      </GlassDisplayCard>
+      <template v-if="loading.overview">
+        <GlassDisplayCard v-for="n in 4" :key="`sk-${n}`" title="加载中" icon="⏳" variant="content">
+          <div class="overview-content">
+            <el-skeleton :rows="1" animated style="margin-bottom: 12px;" />
+            <el-skeleton :rows="2" animated />
+          </div>
+        </GlassDisplayCard>
+      </template>
+      <template v-else>
+        <GlassDisplayCard
+          v-for="item in overviewItems"
+          :key="item.key"
+          :title="item.title"
+          :icon="item.icon"
+          :variant="item.variant"
+        >
+          <div class="overview-content">
+            <div class="overview-value">{{ item.value }}</div>
+            <div class="overview-description">{{ item.description }}</div>
+          </div>
+        </GlassDisplayCard>
+      </template>
     </GlassCardsGrid>
 
     <!-- 校区管理与系统状态 -->
@@ -42,43 +55,18 @@
           </PrimaryButton>
         </template>
 
-        <div style="padding: 16px 0;">
+        <div style="padding: 8px 0;">
           <GlassTable
             :data="campusList"
             :loading="loading.campuses"
             density="sm"
             :stripe="true"
+            empty-title="暂无校区"
+            empty-description="点击右上角进入校区管理创建"
           >
             <el-table-column prop="campusName" label="校区名称" />
-            <el-table-column prop="address" label="地址" />
-            <el-table-column prop="contactPerson" label="联系人" />
-            <el-table-column label="状态" width="80">
-              <template #default="{ row }">
-                <el-tag :type="row.status === 'active' ? 'success' : 'info'">
-                  {{ row.status === 'active' ? '运营中' : '待启用' }}
-                </el-tag>
-              </template>
-            </el-table-column>
           </GlassTable>
         </div>
-
-        <GlassTable
-          :data="campusList"
-          :loading="loading.campuses"
-          density="sm"
-          :stripe="true"
-        >
-          <el-table-column prop="campusName" label="校区名称" />
-          <el-table-column prop="address" label="地址" />
-          <el-table-column prop="contactPerson" label="联系人" />
-          <el-table-column label="状态" width="80">
-            <template #default="{ row }">
-              <el-tag :type="row.status === 'active' ? 'success' : 'info'">
-                {{ row.status === 'active' ? '运营中' : '待启用' }}
-              </el-tag>
-            </template>
-          </el-table-column>
-        </GlassTable>
       </GlassCardWithHeader>
 
       <!-- 系统状态 -->
@@ -99,67 +87,29 @@
       </GlassCardWithHeader>
     </GlassCardsGrid>
 
-    <!-- 数据导出与系统日志 -->
+    <!-- 最近消息预览 -->
     <GlassCardsGrid layout="fixed-2">
-      <!-- 数据导出 -->
-      <GlassCardWithHeader
-        title="数据导出"
-        icon="📊"
-        class="data-export-card"
-      >
+      <GlassCardWithHeader title="最近消息" class="system-logs-card">
         <template #headerActions>
-          <PrimaryButton @click="$router.push('/admin/data')" size="sm">
-            导出数据
-          </PrimaryButton>
+          <PrimaryButton @click="$router.push('/messages')" size="sm">查看全部</PrimaryButton>
         </template>
-
-        <div class="data-export-content" style="padding: 16px 0;">
-          <p>系统累计数据量: {{ formatBytes(systemStats.totalDataSize) }}</p>
-          <p>最近备份: {{ systemStats.lastBackup }}</p>
-        </div>
-      </GlassCardWithHeader>
-
-      <!-- 系统日志 -->
-      <GlassCardWithHeader
-        title="系统日志"
-        icon="📝"
-        class="system-logs-card"
-      >
-        <template #headerActions>
-          <PrimaryButton @click="$router.push('/admin/logs')" size="sm">
-            查看日志
-          </PrimaryButton>
-        </template>
-
-        <div style="padding: 16px 0;">
-          <GlassTable
-            :data="recentLogs"
-            :loading="loading.logs"
-            density="sm"
-          >
-            <el-table-column prop="level" label="级别" width="80">
-              <template #default="{ row }">
-                <el-tag :type="getLogTagType(row.level)">
-                  {{ getLogLevelText(row.level) }}
-                </el-tag>
-              </template>
-            </el-table-column>
-            <el-table-column prop="message" label="消息" />
-            <el-table-column prop="timestamp" label="时间" width="160">
-              <template #default="{ row }">
-                {{ formatTime(row.timestamp) }}
-              </template>
+        <div style="padding: 8px 0;">
+          <GlassTable :data="recentMessages" :loading="loading.messages" density="sm">
+            <el-table-column prop="type" label="类型" width="120" />
+            <el-table-column prop="title" label="标题" />
+            <el-table-column prop="createdAt" label="时间" width="180">
+              <template #default="{ row }">{{ formatTime(row.createdAt) }}</template>
             </el-table-column>
           </GlassTable>
         </div>
       </GlassCardWithHeader>
     </GlassCardsGrid>
   </div>
+  
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 import api from '@/utils/api'
 import {
   GlassHeaderCard,
@@ -173,49 +123,22 @@ import StatusGrid from '@/components/StatusGrid.vue'
 import { ElMessage } from 'element-plus'
 import dayjs from 'dayjs'
 
-// Router
-const router = useRouter()
+// Router（如需路由跳转可启用）
+// import { useRouter } from 'vue-router'
+// const router = useRouter()
 
 // 数据状态
 const loading = ref({
   campuses: false,
-  logs: false
+  messages: false,
+  overview: false
 })
 
 // 系统概览数据
 const overviewItems = ref([
-  {
-    key: 'campuses',
-    title: '校区总数',
-    icon: '🏢',
-    variant: 'display',
-    value: '0',
-    description: '所有运营中的校区'
-  },
-  {
-    key: 'users',
-    title: '用户总数',
-    icon: '👥',
-    variant: 'content',
-    value: '0',
-    description: '系统注册用户数'
-  },
-  {
-    key: 'revenue',
-    title: '本月收入',
-    icon: '💰',
-    variant: 'enhanced',
-    value: '¥0',
-    description: '所有校区收入合计'
-  },
-  {
-    key: 'courses',
-    title: '课程总数',
-    icon: '📚',
-    variant: 'minimal',
-    value: '0',
-    description: '已完成和进行中的课程'
-  }
+  { key: 'campuses', title: '校区总数', icon: '🏢', variant: 'display', value: '0', description: '所有运营中的校区' },
+  { key: 'users', title: '用户总数', icon: '👥', variant: 'content', value: '0', description: '系统注册用户数' },
+  { key: 'revenue', title: '本月充值', icon: '💰', variant: 'enhanced', value: '¥0', description: '所有用户本月充值合计（近似）' },
 ])
 
 // 校区列表
@@ -246,93 +169,68 @@ const systemStatus = ref([
   }
 ])
 
-// 系统统计
-const systemStats = ref({
-  totalDataSize: 0,
-  lastBackup: '无'
-})
+// 预留：系统统计（后续如需回归可启用）
+// const systemStats = ref({ totalDataSize: 0, lastBackup: '无' })
 
-// 最近日志
-const recentLogs = ref([])
+// 最近消息
+const recentMessages = ref([])
+const unreadCount = ref(0)
 
-// 格式化字节大小
-const formatBytes = (bytes) => {
-  if (bytes === 0) return '0 Bytes'
-  const k = 1024
-  const sizes = ['Bytes', 'KB', 'MB', 'GB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-}
-
-// 获取日志级别文本
-const getLogLevelText = (level) => {
-  const levelMap = {
-    error: '错误',
-    warning: '警告',
-    info: '信息',
-    debug: '调试'
-  }
-  return levelMap[level] || level
-}
-
-// 获取日志标签类型
-const getLogTagType = (level) => {
-  const typeMap = {
-    error: 'danger',
-    warning: 'warning',
-    info: 'primary',
-    debug: 'info'
-  }
-  return typeMap[level] || 'info'
-}
+// 统计格式化函数预留（当前未使用）
+// const formatBytes = (bytes) => {
+//   if (bytes === 0) return '0 Bytes'
+//   const k = 1024
+//   const sizes = ['Bytes', 'KB', 'MB', 'GB']
+//   const i = Math.floor(Math.log(bytes) / Math.log(k))
+//   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+// }
 
 // 格式化时间
 const formatTime = (timestamp) => {
   return dayjs(timestamp).format('MM-DD HH:mm:ss')
 }
 
-// 获取系统概览数据
+// 获取系统概览数据（真实 API 对接）
 const fetchOverviewData = async () => {
+  loading.value.overview = true
   try {
-    // 在实际项目中，这里应该调用真实的API
-    // 暂时使用模拟数据
+    // 校区总数（/campus/names 返回 Pair -> second 为总数）
+    const campusResp = await api.get('/campus/names?page=1&size=1')
+    const campusTotal = campusResp?.data?.second ?? 0
+
+    // 用户总数（仅超管）
+    let usersTotal = 0
+    try {
+      const usersResp = await api.get('/user/users?page=1&size=1')
+      usersTotal = usersResp?.data?.totalCount ?? 0
+    } catch {
+      usersTotal = 0
+    }
+
+    // 本月充值（近似：取前200条记录按 createdAt 过滤）
+    let monthRevenue = 0
+    try {
+      const recResp = await api.get('/wallet/recharge/records?page=1&size=200')
+      const records = recResp?.data?.first || recResp?.data || []
+      const startOfMonth = dayjs().startOf('month')
+      monthRevenue = (records || [])
+        .filter(r => r.createdAt && dayjs(r.createdAt).isAfter(startOfMonth))
+        .reduce((sum, r) => sum + (Number(r.amount) || 0), 0)
+    } catch {
+      monthRevenue = 0
+    }
+
     overviewItems.value = [
-      {
-        key: 'campuses',
-        title: '校区总数',
-        icon: '🏢',
-        variant: 'display',
-        value: '5',
-        description: '所有运营中的校区'
-      },
-      {
-        key: 'users',
-        title: '用户总数',
-        icon: '👥',
-        variant: 'content',
-        value: '1,248',
-        description: '系统注册用户数'
-      },
-      {
-        key: 'revenue',
-        title: '本月收入',
-        icon: '💰',
-        variant: 'enhanced',
-        value: '¥85,600',
-        description: '所有校区收入合计'
-      },
-      {
-        key: 'courses',
-        title: '课程总数',
-        icon: '📚',
-        variant: 'minimal',
-        value: '3,421',
-        description: '已完成和进行中的课程'
-      }
+      { key: 'campuses', title: '校区总数', icon: '🏢', variant: 'display', value: String(campusTotal), description: '所有运营中的校区' },
+      { key: 'users', title: '用户总数', icon: '👥', variant: 'content', value: String(usersTotal), description: '系统注册用户数' },
+      { key: 'revenue', title: '本月充值', icon: '💰', variant: 'enhanced', value: `¥${Number(monthRevenue).toLocaleString() }`, description: '所有用户本月充值合计（近似）' },
+      { key: 'unread', title: '未读消息', icon: '✉️', variant: 'minimal', value: String(unreadCount.value || 0), description: '消息中心未读数量' },
     ]
   } catch (error) {
     console.error('获取系统概览数据失败:', error)
     ElMessage.error('获取系统概览数据失败')
+  } finally {
+    loading.value.overview = false
   }
 }
 
@@ -353,63 +251,39 @@ const fetchCampusList = async () => {
   }
 }
 
-// 获取系统日志
-const fetchSystemLogs = async () => {
-  loading.value.logs = true
+// 获取最近消息
+const fetchRecentMessages = async () => {
+  loading.value.messages = true
   try {
-    // 模拟日志数据
-    recentLogs.value = [
-      {
-        id: 1,
-        level: 'info',
-        message: '系统启动完成',
-        timestamp: new Date(Date.now() - 1000 * 60 * 5)
-      },
-      {
-        id: 2,
-        level: 'warning',
-        message: '用户登录失败次数过多',
-        timestamp: new Date(Date.now() - 1000 * 60 * 30)
-      },
-      {
-        id: 3,
-        level: 'info',
-        message: '数据备份完成',
-        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2)
-      },
-      {
-        id: 4,
-        level: 'error',
-        message: '数据库连接超时',
-        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 5)
-      },
-      {
-        id: 5,
-        level: 'debug',
-        message: 'API请求处理完成',
-        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 8)
-      }
-    ]
-
-    // 模拟系统统计数据
-    systemStats.value = {
-      totalDataSize: 1024 * 1024 * 15, // 15MB
-      lastBackup: dayjs(Date.now() - 1000 * 60 * 60 * 24).format('YYYY-MM-DD HH:mm')
-    }
+    const resp = await api.get('/messages?unreadOnly=false&page=0&size=5')
+    const list = resp?.data?.messages || []
+    recentMessages.value = list
   } catch (error) {
-    console.error('获取系统日志失败:', error)
-    ElMessage.error('获取系统日志失败')
+    console.error('获取最近消息失败:', error)
+    ElMessage.error('获取最近消息失败')
   } finally {
-    loading.value.logs = false
+    loading.value.messages = false
+  }
+}
+
+// 获取未读消息数量
+const fetchUnreadCount = async () => {
+  try {
+    const resp = await api.get('/messages/unread-count')
+    unreadCount.value = resp?.data?.count ?? 0
+  } catch {
+    unreadCount.value = 0
   }
 }
 
 // 初始化数据
 const initializeData = async () => {
+  // 先拿未读消息数量，确保概览卡片能显示
+  await fetchUnreadCount()
   await Promise.all([
     fetchOverviewData(),
     fetchCampusList(),
-    fetchSystemLogs()
+    fetchRecentMessages(),
   ])
 }
 

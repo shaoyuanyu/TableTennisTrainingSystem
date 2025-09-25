@@ -8,6 +8,7 @@ import io.github.shaoyuanyu.ttts.persistence.MessageService
 import io.github.shaoyuanyu.ttts.persistence.MutualSelectionService
 import io.github.shaoyuanyu.ttts.persistence.StudentService
 import io.github.shaoyuanyu.ttts.persistence.AdminService
+import io.github.shaoyuanyu.ttts.persistence.CompetitionService
 import io.github.shaoyuanyu.ttts.plugins.configureAuthentication
 import io.github.shaoyuanyu.ttts.plugins.configureCORS
 import io.github.shaoyuanyu.ttts.plugins.configureSerialization
@@ -41,6 +42,7 @@ fun Application.module() {
     val mutualSelectionService = MutualSelectionService(database)
     val courseService = CourseService(database, studentService)
     val adminService = AdminService(database)
+    val competitionService = CompetitionService(database, studentService)
 
     // monitoring
     configureMonitoring()
@@ -67,6 +69,7 @@ fun Application.module() {
         coachService = coachService,
         mutualSelectionService = mutualSelectionService,
         courseService = courseService,
-        adminService = adminService
+        adminService = adminService,
+        competitionService = competitionService
     )
 }

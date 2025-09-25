@@ -8,7 +8,7 @@
 
     <!-- 筛选器 -->
     <el-card class="filter-card">
-      <el-form :model="filters" :inline="true" @submit.prevent="fetchAppointments">
+      <el-form :model="filters" :inline="true" @submit.prevent="fetchAppointments" class="filter-form">
         <el-form-item label="状态">
           <el-select v-model="filters.status" placeholder="全部状态" clearable>
             <el-option label="待审核" value="PENDING" />
@@ -48,12 +48,12 @@
     <!-- 课程列表（GlassTable 包裹） -->
     <el-card>
       <GlassTable title="课程列表" :data="appointmentList" :loading="loading" density="md" :stripe="true"
-        @selection-change="handleSelectionChange">
+        @selection-change="handleSelectionChange" :table-layout="'auto'">
         <el-table-column type="selection" width="55" :selectable="isSelectable" />
 
-        <el-table-column prop="id" label="课程ID" width="100" />
+        <el-table-column prop="id" label="课程ID" min-width="100" />
 
-        <el-table-column prop="student" label="学员信息" width="200">
+        <el-table-column prop="student" label="学员信息" min-width="150">
           <template #default="{ row }">
             <div class="student-info">
               <el-avatar :size="32" :src="row.student.avatar">
@@ -67,23 +67,30 @@
           </template>
         </el-table-column>
 
-        <el-table-column prop="date" label="预约日期" width="120">
+        <el-table-column prop="date" label="预约日期" min-width="100">
           <template #default="{ row }">
             {{ formatDate(row.date) }}
           </template>
         </el-table-column>
 
-        <el-table-column label="时间段" width="120">
-          <template #default="{ row }"> {{ getStartTime(row.NO) }} - {{ getEndTime(row.NO) }} </template>
+        <el-table-column label="时间段" min-width="100">
+          <template #default="{ row }"> {{ row.startTime }} - {{ row.endTime }} </template>
         </el-table-column>
 
-        <el-table-column prop="title" label="课程标题" width="150" />
+        <el-table-column prop="title" label="课程标题" min-width="120" />
 
-        <el-table-column prop="price" label="费用" width="100">
+        <el-table-column prop="price" label="费用" min-width="80">
           <template #default="{ row }"> ¥{{ row.price }} </template>
         </el-table-column>
 
-        <el-table-column prop="status" label="状态" width="100">
+        <el-table-column label="球桌号" min-width="80">
+          <template #default="{ row }">
+            <span v-if="row.tableIndex">{{ row.tableIndex }}</span>
+            <span v-else>未分配</span>
+          </template>
+        </el-table-column>
+
+        <el-table-column prop="status" label="状态" min-width="100">
           <template #default="{ row }">
             <el-tag :type="getStatusType(row.status)">
               {{ getStatusText(row.status) }}
@@ -91,13 +98,13 @@
           </template>
         </el-table-column>
 
-        <el-table-column prop="createdAt" label="申请时间" width="160">
+        <el-table-column prop="createdAt" label="申请时间" min-width="150">
           <template #default="{ row }">
             {{ formatDateTime(row.createdAt) }}
           </template>
         </el-table-column>
 
-        <el-table-column label="操作" width="200" fixed="right">
+        <el-table-column label="操作" min-width="200" fixed="right">
           <template #default="{ row }">
             <el-button v-if="row.status === 'PENDING'" size="small" type="success" @click="approveAppointment(row)">
               通过
@@ -167,13 +174,17 @@
             {{ formatDate(selectedAppointment.date) }}
           </el-descriptions-item>
           <el-descriptions-item label="时间段">
-            {{ getStartTime(selectedAppointment.NO) }} - {{ getEndTime(selectedAppointment.NO) }}
+            {{ selectedAppointment.startTime }} - {{ selectedAppointment.endTime }}
           </el-descriptions-item>
           <el-descriptions-item label="课程标题">
             {{ selectedAppointment.title }}
           </el-descriptions-item>
           <el-descriptions-item label="课程费用">
             ¥{{ selectedAppointment.price }}
+          </el-descriptions-item>
+          <el-descriptions-item label="球桌号">
+            <span v-if="selectedAppointment.tableIndex">{{ selectedAppointment.tableIndex }}</span>
+            <span v-else>未分配</span>
           </el-descriptions-item>
           <el-descriptions-item label="申请时间">
             {{ formatDateTime(selectedAppointment.createdAt) }}
@@ -273,7 +284,26 @@ const fetchAppointments = async () => {
 
     // 获取教练的所有课程
     const response = await api.get('/courses/querypending', { params })
-    appointmentList.value = response.data.map(course => {
+    
+    // 检查响应数据结构
+    let courses = []
+    let total = 0
+    
+    if (Array.isArray(response.data)) {
+      // 如果是简单数组格式
+      courses = response.data
+      total = courses.length
+    } else if (response.data && typeof response.data === 'object' && Array.isArray(response.data.courses)) {
+      // 如果是分页格式
+      courses = response.data.courses
+      total = response.data.total || courses.length
+    } else {
+      // 其他情况，保持空数组
+      courses = []
+      total = 0
+    }
+    
+    appointmentList.value = courses.map(course => {
       // 确保每个课程都有学生信息
       return {
         ...course,
@@ -283,11 +313,14 @@ const fetchAppointments = async () => {
           avatar: ''
         }
       }
-    }) || []
-    pagination.total = appointmentList.value.length
+    })
+    pagination.total = total
   } catch (error) {
     console.error('获取课程列表失败:', error)
     ElMessage.error('获取课程列表失败: ' + (error.message || '未知错误'))
+    // 出错时也重置列表和总数
+    appointmentList.value = []
+    pagination.total = 0
   } finally {
     loading.value = false
   }
@@ -485,40 +518,6 @@ const getStatusText = (status) => {
   return texts[status] || status
 }
 
-// 根据课程节数获取开始时间
-const getStartTime = (NO) => {
-  const timeMap = {
-    1: '08:00',
-    2: '09:00',
-    3: '10:00',
-    4: '11:00',
-    5: '14:00',
-    6: '15:00',
-    7: '16:00',
-    8: '17:00',
-    9: '19:00',
-    10: '20:00'
-  }
-  return timeMap[NO] || '未知时间'
-}
-
-// 根据课程节数获取结束时间
-const getEndTime = (NO) => {
-  const timeMap = {
-    1: '09:00',
-    2: '10:00',
-    3: '11:00',
-    4: '12:00',
-    5: '15:00',
-    6: '16:00',
-    7: '17:00',
-    8: '18:00',
-    9: '20:00',
-    10: '21:00'
-  }
-  return timeMap[NO] || '未知时间'
-}
-
 // 组件挂载
 onMounted(() => {
   fetchAppointments()
@@ -528,6 +527,7 @@ onMounted(() => {
 <style scoped>
 .appointment-approval {
   padding: 20px;
+  width: 100%;
 }
 
 .page-header {
@@ -572,17 +572,24 @@ onMounted(() => {
 
 .student-details {
   flex: 1;
+  min-width: 0; /* 允许文本收缩 */
 }
 
 .student-name {
   font-weight: 500;
   color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .student-phone {
   font-size: 12px;
   color: #666;
   margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .pagination-wrapper {
@@ -600,5 +607,30 @@ onMounted(() => {
 
 :deep(.el-descriptions-item__label) {
   font-weight: 500;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .appointment-approval {
+    padding: 10px;
+  }
+  
+  .filter-card :deep(.el-form-item) {
+    margin-bottom: 10px;
+  }
+  
+  .batch-actions {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  :deep(.el-table) {
+    font-size: 12px;
+  }
+  
+  :deep(.el-table .el-button) {
+    padding: 6px 8px;
+    font-size: 12px;
+  }
 }
 </style>

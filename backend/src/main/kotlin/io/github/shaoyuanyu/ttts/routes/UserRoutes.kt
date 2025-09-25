@@ -37,8 +37,7 @@ fun Application.userRoutes(userService: UserService) {
             }
 
             // campus admin
-            authenticate("auth-session-campus-admin") {
-
+            authenticate("auth-session-campus-admin", "auth-session-super-admin") {
             }
 
             // super admin
