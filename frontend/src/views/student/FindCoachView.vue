@@ -8,7 +8,16 @@
 
     <!-- 教练列表 -->
     <div v-loading="loading" class="coaches-grid">
-      <el-card v-for="coach in coachList" :key="coach.id" class="coach-card" @click="viewCoachDetail(coach)">
+      <GlassCard 
+        v-for="coach in coachList" 
+        :key="coach.id" 
+        class="coach-card"
+        :title="coach.name"
+        :subtitle="getLevelText(coach.level)"
+        icon="👨‍🏫"
+        variant="display"
+        @click="viewCoachDetail(coach)"
+      >
         <div class="coach-avatar">
           <el-avatar :size="80" :src="coach.avatar">
             {{ coach.name.charAt(0) }}
@@ -22,9 +31,6 @@
         </div>
 
         <div class="coach-info">
-          <h3>{{ coach.name }}</h3>
-          <p class="coach-level">{{ getLevelText(coach.level) }}</p>
-
           <div class="coach-rating">
             <el-rate v-model="coach.rating" disabled show-score text-color="#ff9900" score-template="{value}分" />
             <span class="rating-count">({{ coach.reviewCount }}条评价)</span>
@@ -87,7 +93,7 @@
             <OutlineButton size="sm" @click.stop="viewCoachDetail(coach)">查看详情</OutlineButton>
           </div>
         </div>
-      </el-card>
+      </GlassCard>
     </div>
 
     <!-- 空状态 -->
@@ -105,112 +111,128 @@
     </div>
 
     <!-- 教练详情对话框 -->
-    <el-dialog v-model="detailDialogVisible" title="教练详情" width="800px" @close="selectedCoach = null">
-      <div v-if="selectedCoach" class="coach-detail">
-        <div class="detail-header">
-          <el-avatar :size="100" :src="selectedCoach.avatar">
-            {{ selectedCoach.name.charAt(0) }}
-          </el-avatar>
-          <div class="header-info">
-            <h2>{{ selectedCoach.name }}</h2>
-            <p>{{ getLevelText(selectedCoach.level) }}</p>
-            <div class="rating-section">
-              <el-rate v-model="selectedCoach.rating" disabled show-score text-color="#ff9900"
-                score-template="{value}分" />
-              <span>({{ selectedCoach.reviewCount }}条评价)</span>
-            </div>
-            <div class="status-tags">
-              <el-tag v-if="!selectedCoach.isSameCampus" type="warning" size="small">
-                非本校区教练
-              </el-tag>
-              <el-tag 
-                v-if="selectedCoach.applicationStatus === 'APPROVED' || selectedCoach.applicationStatus === 'ACTIVE'"
-                type="success" 
-                size="small"
-              >
-                已建立关系
-              </el-tag>
-              <el-tag 
-                v-else-if="selectedCoach.applicationStatus === 'PENDING'"
-                type="warning" 
-                size="small"
-              >
-                申请审核中
-              </el-tag>
-            </div>
-          </div>
-          <div class="header-stats">
-            <div class="stat-item">
-              <div class="stat-number">{{ selectedCoach.experience }}</div>
-              <div class="stat-label">年经验</div>
-            </div>
-            <div class="stat-item">
-              <div class="stat-number">{{ selectedCoach.studentCount }}</div>
-              <div class="stat-label">位学员</div>
-            </div>
-            <div class="stat-item">
-              <div class="stat-number">{{ selectedCoach.completedClasses }}</div>
-              <div class="stat-label">节课程</div>
-            </div>
-          </div>
+    <el-dialog 
+      v-model="detailDialogVisible" 
+      width="800px" 
+      @close="selectedCoach = null"
+      custom-class="glass-dialog"
+    >
+      <template #header>
+        <div class="dialog-header">
+          <h3>教练详情</h3>
         </div>
-
-        <el-tabs>
-          <el-tab-pane label="基本信息" name="basic">
-            <el-descriptions :column="2" border>
-              <el-descriptions-item label="教练等级">
-                {{ getLevelText(selectedCoach.level) }}
-              </el-descriptions-item>
-              <el-descriptions-item label="课时费用">
-                ¥{{ selectedCoach.hourlyRate }}/小时
-              </el-descriptions-item>
-              <el-descriptions-item label="专业特长" :span="2">
-                <el-tag v-for="specialty in selectedCoach.specialties" :key="specialty" size="small" type="info"
-                  style="margin-right: 8px">
-                  {{ getSpecialtyText(specialty) }}
+      </template>
+      
+      <div v-if="selectedCoach" class="coach-detail">
+        <GlassCardBase 
+          class="detail-card"
+          variant="enhanced"
+        >
+          <div class="detail-header">
+            <el-avatar :size="100" :src="selectedCoach.avatar">
+              {{ selectedCoach.name.charAt(0) }}
+            </el-avatar>
+            <div class="header-info">
+              <h2>{{ selectedCoach.name }}</h2>
+              <p>{{ getLevelText(selectedCoach.level) }}</p>
+              <div class="rating-section">
+                <el-rate v-model="selectedCoach.rating" disabled show-score text-color="#ff9900"
+                  score-template="{value}分" />
+                <span>({{ selectedCoach.reviewCount }}条评价)</span>
+              </div>
+              <div class="status-tags">
+                <el-tag v-if="!selectedCoach.isSameCampus" type="warning" size="small">
+                  非本校区教练
                 </el-tag>
-              </el-descriptions-item>
-              <el-descriptions-item label="自我介绍" :span="2">
-                {{ selectedCoach.introduction }}
-              </el-descriptions-item>
-            </el-descriptions>
-          </el-tab-pane>
-
-          <el-tab-pane label="学员评价" name="reviews">
-            <div class="reviews-section">
-              <div v-for="review in selectedCoach.reviews" :key="review.id" class="review-item">
-                <div class="review-header">
-                  <el-avatar :size="32" :src="review.student.avatar">
-                    {{ review.student.name.charAt(0) }}
-                  </el-avatar>
-                  <div class="review-info">
-                    <h5>{{ review.student.name }}</h5>
-                    <div class="review-rating">
-                      <el-rate v-model="review.rating" disabled size="small" />
-                      <span class="review-date">{{ formatDate(review.createdAt) }}</span>
-                    </div>
-                  </div>
-                </div>
-                <p class="review-content">{{ review.content }}</p>
+                <el-tag 
+                  v-if="selectedCoach.applicationStatus === 'APPROVED' || selectedCoach.applicationStatus === 'ACTIVE'"
+                  type="success" 
+                  size="small"
+                >
+                  已建立关系
+                </el-tag>
+                <el-tag 
+                  v-else-if="selectedCoach.applicationStatus === 'PENDING'"
+                  type="warning" 
+                  size="small"
+                >
+                  申请审核中
+                </el-tag>
               </div>
             </div>
-          </el-tab-pane>
+            <div class="header-stats">
+              <div class="stat-item">
+                <div class="stat-number">{{ selectedCoach.experience }}</div>
+                <div class="stat-label">年经验</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-number">{{ selectedCoach.studentCount }}</div>
+                <div class="stat-label">位学员</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-number">{{ selectedCoach.completedClasses }}</div>
+                <div class="stat-label">节课程</div>
+              </div>
+            </div>
+          </div>
 
-          <el-tab-pane label="可预约时间" name="schedule">
-            <div class="schedule-section">
-              <el-calendar v-model="scheduleDate" @panel-change="loadSchedule">
-                <template #date-cell="{ data }">
-                  <div class="schedule-cell">
-                    <span class="date-text">{{ data.day.split('-').slice(1).join('/') }}</span>
-                    <div v-if="getAvailableSlots(data.day).length > 0" class="available-slots">
-                      {{ getAvailableSlots(data.day).length }}个时段可约
+          <el-tabs class="detail-tabs">
+            <el-tab-pane label="基本信息" name="basic">
+              <el-descriptions :column="2" border>
+                <el-descriptions-item label="教练等级">
+                  {{ getLevelText(selectedCoach.level) }}
+                </el-descriptions-item>
+                <el-descriptions-item label="课时费用">
+                  ¥{{ selectedCoach.hourlyRate }}/小时
+                </el-descriptions-item>
+                <el-descriptions-item label="专业特长" :span="2">
+                  <el-tag v-for="specialty in selectedCoach.specialties" :key="specialty" size="small" type="info"
+                    style="margin-right: 8px">
+                    {{ getSpecialtyText(specialty) }}
+                  </el-tag>
+                </el-descriptions-item>
+                <el-descriptions-item label="自我介绍" :span="2">
+                  {{ selectedCoach.introduction }}
+                </el-descriptions-item>
+              </el-descriptions>
+            </el-tab-pane>
+
+            <el-tab-pane label="学员评价" name="reviews">
+              <div class="reviews-section">
+                <div v-for="review in selectedCoach.reviews" :key="review.id" class="review-item">
+                  <div class="review-header">
+                    <el-avatar :size="32" :src="review.student.avatar">
+                      {{ review.student.name.charAt(0) }}
+                    </el-avatar>
+                    <div class="review-info">
+                      <h5>{{ review.student.name }}</h5>
+                      <div class="review-rating">
+                        <el-rate v-model="review.rating" disabled size="small" />
+                        <span class="review-date">{{ formatDate(review.createdAt) }}</span>
+                      </div>
                     </div>
                   </div>
-                </template>
-              </el-calendar>
-            </div>
-          </el-tab-pane>
-        </el-tabs>
+                  <p class="review-content">{{ review.content }}</p>
+                </div>
+              </div>
+            </el-tab-pane>
+
+            <el-tab-pane label="可预约时间" name="schedule">
+              <div class="schedule-section">
+                <el-calendar v-model="scheduleDate" @panel-change="loadSchedule">
+                  <template #date-cell="{ data }">
+                    <div class="schedule-cell">
+                      <span class="date-text">{{ data.day.split('-').slice(1).join('/') }}</span>
+                      <div v-if="getAvailableSlots(data.day).length > 0" class="available-slots">
+                        {{ getAvailableSlots(data.day).length }}个时段可约
+                      </div>
+                    </div>
+                  </template>
+                </el-calendar>
+              </div>
+            </el-tab-pane>
+          </el-tabs>
+        </GlassCardBase>
 
         <div class="detail-actions">
           <OutlineButton size="lg" @click="detailDialogVisible = false">关闭</OutlineButton>
@@ -255,6 +277,7 @@ import {useUserStore} from '@/stores/user'
 import {ElMessage, ElMessageBox} from 'element-plus'
 import {Calendar, User} from '@element-plus/icons-vue'
 import {OutlineButton, PrimaryButton} from '@/components/buttons'
+import { GlassCard, GlassCardBase } from '@/components/cards'
 import dayjs from 'dayjs'
 import api from '@/utils/api'
 import { getStudentApplications } from '@/api/mutualSelection'
@@ -517,16 +540,25 @@ onMounted(async () => {
 
 .page-header {
   margin-bottom: 20px;
+  text-align: center;
+  padding: 20px;
+  background: linear-gradient(135deg, var(--white-alpha-15), var(--white-alpha-10));
+  border-radius: var(--radius-xl);
+  backdrop-filter: var(--blur-lg);
+  border: 1px solid var(--white-alpha-20);
+  margin-bottom: 30px;
 }
 
 .page-header h2 {
   margin: 0 0 8px 0;
-  color: #333;
+  color: white;
+  font-size: 2rem;
 }
 
 .page-header p {
   margin: 0;
-  color: #666;
+  color: var(--white-alpha-80);
+  font-size: 1.1rem;
 }
 
 .coaches-grid {
@@ -538,19 +570,17 @@ onMounted(async () => {
 
 .coach-card {
   cursor: pointer;
-  transition: all 0.3s;
   height: 100%;
 }
 
-.coach-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+:deep(.glass-card-base) {
+  height: 100%;
 }
 
 .coach-avatar {
   text-align: center;
   position: relative;
-  margin-bottom: 16px;
+  margin: 16px 0;
 }
 
 .online-status {
@@ -567,27 +597,19 @@ onMounted(async () => {
   transform: translateX(-50%);
 }
 
-.coach-info h3 {
-  margin: 0 0 4px 0;
-  text-align: center;
-  color: #333;
-}
-
-.coach-level {
-  text-align: center;
-  color: #666;
-  font-size: 14px;
-  margin: 0 0 12px 0;
+.coach-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .coach-rating {
   text-align: center;
-  margin-bottom: 12px;
 }
 
 .rating-count {
   font-size: 12px;
-  color: #999;
+  color: var(--white-alpha-80);
   margin-left: 8px;
 }
 
@@ -597,34 +619,37 @@ onMounted(async () => {
   justify-content: center;
   gap: 8px;
   font-size: 14px;
-  color: #666;
-  margin-bottom: 12px;
+  color: var(--white-alpha-80);
 }
 
 .coach-specialty {
   text-align: center;
-  margin-bottom: 12px;
 }
 
 .coach-price {
   text-align: center;
-  margin-bottom: 16px;
 }
 
 .price {
   font-size: 24px;
   font-weight: bold;
   color: #409eff;
+  background: linear-gradient(135deg, #409eff, #79bbff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .price-unit {
   font-size: 14px;
-  color: #666;
+  color: var(--white-alpha-80);
 }
 
 .coach-actions {
   display: flex;
   gap: 8px;
+  justify-content: center;
+  margin-top: 8px;
 }
 
 .empty-state {
@@ -647,7 +672,7 @@ onMounted(async () => {
   gap: 20px;
   margin-bottom: 30px;
   padding-bottom: 20px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--white-alpha-20);
 }
 
 .header-info {
@@ -656,12 +681,12 @@ onMounted(async () => {
 
 .header-info h2 {
   margin: 0 0 8px 0;
-  color: #333;
+  color: white;
 }
 
 .header-info p {
   margin: 0 0 12px 0;
-  color: #666;
+  color: var(--white-alpha-80);
 }
 
 .rating-section {
@@ -690,11 +715,15 @@ onMounted(async () => {
   font-weight: bold;
   color: #409eff;
   line-height: 1;
+  background: linear-gradient(135deg, #409eff, #79bbff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .stat-label {
   font-size: 12px;
-  color: #666;
+  color: var(--white-alpha-80);
   margin-top: 4px;
 }
 
@@ -705,7 +734,7 @@ onMounted(async () => {
 
 .review-item {
   padding: 16px 0;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--white-alpha-20);
 }
 
 .review-item:last-child {
@@ -721,7 +750,7 @@ onMounted(async () => {
 
 .review-info h5 {
   margin: 0;
-  color: #333;
+  color: white;
 }
 
 .review-rating {
@@ -732,12 +761,12 @@ onMounted(async () => {
 
 .review-date {
   font-size: 12px;
-  color: #999;
+  color: var(--white-alpha-80);
 }
 
 .review-content {
   margin: 0;
-  color: #666;
+  color: var(--white-alpha-85);
   line-height: 1.6;
 }
 
@@ -755,7 +784,7 @@ onMounted(async () => {
 
 .date-text {
   font-size: 14px;
-  color: #333;
+  color: white;
 }
 
 .available-slots {
@@ -768,6 +797,6 @@ onMounted(async () => {
   margin-top: 30px;
   text-align: center;
   padding-top: 20px;
-  border-top: 1px solid #eee;
+  border-top: 1px solid var(--white-alpha-20);
 }
 </style>

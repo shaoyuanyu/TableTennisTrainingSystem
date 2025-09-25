@@ -8,12 +8,14 @@
           color="primary"
           @click="setView('week')"
           text="周视图"
+          icon-left="📅"
         />
         <ModernButton
           :variant="currentView === 'month' ? 'solid' : 'outline'"
           color="primary"
           @click="setView('month')"
           text="月视图"
+          icon-left="🗓️"
         />
       </div>
 
@@ -40,6 +42,7 @@
           color="primary"
           @click="goToToday"
           text="今天"
+          icon-left="⭐"
           class="today-btn ultra-btn"
         />
       </div>
@@ -51,6 +54,7 @@
           color="primary"
           @click="refreshSchedule"
           text="刷新课表"
+          icon-left="🔄"
           class="action-btn ultra-btn"
         />
         <ModernButton
@@ -58,6 +62,7 @@
           color="primary"
           @click="exportSchedule"
           text="导出课表"
+          icon-left="📤"
           class="action-btn ultra-btn"
         />
         <ModernButton
@@ -65,6 +70,7 @@
           color="primary"
           @click="sendScheduleEmail"
           text="邮件发送"
+          icon-left="📧"
           class="action-btn ultra-btn"
         />
       </div>
@@ -312,9 +318,6 @@ import dayjs from 'dayjs'
 import api from '@/utils/api'
 import {useScheduleSync} from '@/utils/scheduleSyncExamples'
 import {useUserStore} from '@/stores/user'
-// 仅开发环境输出日志
-const __DEV__ = import.meta.env?.DEV === true
-const devLog = (...args) => { if (__DEV__) console.log(...args) }
 
 // 定义组件属性
 const props = defineProps({
@@ -350,6 +353,9 @@ const emailOptions = ref({
 
 // 初始化同步功能
 const scheduleSync = useScheduleSync()
+
+// 获取用户状态用于调试
+const userStore = useUserStore()
 
 // 时间段设置（8:00-22:00）
 const timeSlots = [
@@ -635,7 +641,7 @@ const fetchSchedules = async () => {
     // 首先验证当前用户session状态
     try {
       const userInfoResponse = await api.get('/user/info')
-  devLog('ScheduleCalendar - 当前用户session信息:', userInfoResponse.data)
+      console.log('ScheduleCalendar - 当前用户session信息:', userInfoResponse.data)
     } catch (userInfoError) {
       console.error('ScheduleCalendar - 获取用户信息失败:', userInfoError)
     }
@@ -652,7 +658,7 @@ const fetchSchedules = async () => {
 
     // 输出调试信息
     const userStore = useUserStore() // 获取用户store实例
-  devLog('ScheduleCalendar - fetchSchedules 调试信息:', {
+    console.log('ScheduleCalendar - fetchSchedules 调试信息:', {
       userType: props.userType,
       userId: props.userId,
       isStudentView: isStudentView.value,
@@ -673,7 +679,7 @@ const fetchSchedules = async () => {
     // 教练：/courses/coach-schedule (在教练权限组中)
     const endpoint = isStudentView.value ? '/courses/my-schedule' : '/courses/coach-schedule'
 
-  devLog('ScheduleCalendar - 使用端点:', endpoint)
+    console.log('ScheduleCalendar - 使用端点:', endpoint)
 
     const response = await api.get(endpoint, {
       params: {
@@ -683,7 +689,7 @@ const fetchSchedules = async () => {
     })
 
     schedules.value = response.data || []
-  devLog('ScheduleCalendar - 成功获取课表数据:', schedules.value.length, '条记录')
+    console.log('ScheduleCalendar - 成功获取课表数据:', schedules.value.length, '条记录')
   } catch (error) {
     console.error('ScheduleCalendar - 获取课表失败:', error)
 
@@ -824,19 +830,6 @@ defineExpose({
   gap: var(--spacing-sm);
 }
 
-/* 统一功能区按钮高度（不影响圆形导航按钮） */
-.schedule-controls .ultra-btn:not(.nav-btn) {
-  height: 40px;
-  line-height: 40px;
-  padding: 0 var(--spacing-md);
-  font-size: 0.95rem;
-}
-
-.view-switch-group .ultra-btn {
-  height: 40px;
-  line-height: 40px;
-}
-
 .week-view.ultra,
 .month-view.ultra {
   background: var(--white-alpha-10);
@@ -858,7 +851,6 @@ defineExpose({
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--white-alpha-30);
   flex-shrink: 0; /* 防止头部被压缩 */
-  align-items: center; /* 垂直居中 */
 }
 
 .time-column {
@@ -876,10 +868,6 @@ defineExpose({
   border-right: 1px solid var(--white-alpha-30);
   color: var(--text-white-80);
   transition: all var(--transition-normal);
-  display: flex;
-  flex-direction: column;
-  align-items: center; /* 水平居中 */
-  justify-content: center; /* 垂直居中 */
 }
 
 .day-header.is-today {
@@ -910,7 +898,6 @@ defineExpose({
   grid-template-columns: 100px repeat(7, 1fr);
   border-bottom: 1px solid var(--white-alpha-20);
   min-height: 64px;
-  align-items: center; /* 垂直居中单元格内容 */
 }
 
 .day-cell {
@@ -919,7 +906,6 @@ defineExpose({
   position: relative;
   cursor: pointer;
   transition: all var(--transition-normal);
-  text-align: center; /* 水平居中 */
 }
 
 .day-cell:hover {
@@ -941,9 +927,7 @@ defineExpose({
   display: flex;
   flex-direction: column;
   position: relative;
-  align-items: center; /* 水平居中 */
-  justify-content: center; /* 垂直居中 */
-  text-align: center;
+  align-items: flex-start;
 }
 
 .schedule-item.ultra .field-icon {
@@ -1000,7 +984,6 @@ defineExpose({
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--white-alpha-30);
   flex-shrink: 0; /* 防止头部被压缩 */
-  align-items: center; /* 垂直居中 */
 }
 
 .month-day-header {
@@ -1036,9 +1019,6 @@ defineExpose({
   position: relative;
   display: flex;
   flex-direction: column;
-  align-items: center; /* 水平居中 */
-  justify-content: center; /* 垂直居中 */
-  text-align: center;
 }
 
 .month-day:hover {
@@ -1067,7 +1047,6 @@ defineExpose({
   margin-bottom: var(--spacing-xs);
   font-weight: 600;
   color: var(--text-white-80);
-  text-align: center;
 }
 
 .day-schedules.ultra {
@@ -1095,8 +1074,6 @@ defineExpose({
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
-  justify-content: center; /* 居中 */
-  text-align: center;
 }
 
 .month-schedule-item.ultra .dot-icon {
