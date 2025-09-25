@@ -1,6 +1,6 @@
 <template>
   <div class="tournament-registration">
-    <PageHeader title="月赛报名" :centered="true" />
+    <PageHeader :title="tournamentInfo?.name ? tournamentInfo.name + '报名' : '比赛报名'" :centered="true" />
     
     <el-card class="registration-card">
       <div class="registration-info" v-if="tournamentInfo && tournamentInfo.id && !hasRegistered">
@@ -59,6 +59,10 @@
           >
             账户充值
           </el-button>
+          
+          <el-button @click="goBack">
+            返回
+          </el-button>
         </el-form-item>
       </el-form>
       
@@ -74,9 +78,11 @@
               <el-descriptions-item label="报名时间">{{ registrationInfo.registeredAt }}</el-descriptions-item>
             </el-descriptions>
             
-            <el-button type="primary" @click="viewSchedule">
-              查看比赛安排
-            </el-button>
+            <div style="margin-top: 20px;">
+              <el-button @click="goBack">
+                返回我的比赛
+              </el-button>
+            </div>
           </template>
         </el-result>
       </div>
@@ -84,9 +90,13 @@
       <div class="no-tournament" v-else>
         <el-result
           icon="info"
-          title="暂无比赛"
-          sub-title="当前没有可报名的比赛，请等待管理员创建比赛后再进行报名。"
-        />
+          title="比赛不存在"
+          sub-title="您尝试报名的比赛不存在或已下架，请返回我的比赛页面查看其他比赛。"
+        >
+          <template #extra>
+            <el-button @click="goBack">返回我的比赛</el-button>
+          </template>
+        </el-result>
       </div>
     </el-card>
   </div>
@@ -94,12 +104,13 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useUserStore } from '@/stores/user'
 import PageHeader from '@/components/PageHeader.vue'
 import api from '@/utils/api'
 
+const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
 
@@ -150,20 +161,28 @@ const getGroupText = (groupValue) => {
 // 方法
 const fetchTournamentInfo = async () => {
   try {
-    // 获取本校区所有比赛，然后选择最近的一个
-    const response = await api.get('/competition/self-campus')
-    const competitions = response.data
-    
-    // 如果有比赛，选择第一个作为最新比赛
-    if (Array.isArray(competitions) && competitions.length > 0) {
-      tournamentInfo.value = competitions[0]
+    // 如果路由中有比赛ID参数，则获取指定比赛的信息
+    const competitionId = route.params.id
+    if (competitionId) {
+      // 获取指定比赛的信息
+      const response = await api.get(`/competition/${competitionId}`)
+      tournamentInfo.value = response.data
     } else {
-      // 如果没有比赛，设置为null以显示"暂无比赛"
-      tournamentInfo.value = null
+      // 获取本校区所有比赛，然后选择最近的一个
+      const response = await api.get('/competition/self-campus')
+      const competitions = response.data
+      
+      // 如果有比赛，选择第一个作为最新比赛
+      if (Array.isArray(competitions) && competitions.length > 0) {
+        tournamentInfo.value = competitions[0]
+      } else {
+        // 如果没有比赛，设置为null以显示"暂无比赛"
+        tournamentInfo.value = null
+      }
     }
   } catch (error) {
     console.error('获取比赛信息失败:', error)
-    // 出错时也显示"暂无比赛"
+    // 出错时也显示"比赛不存在"
     tournamentInfo.value = null
   }
 }
@@ -177,14 +196,30 @@ const fetchUserBalance = async () => {
   }
 }
 
-// 检查用户是否已报名
+// 检查用户是否已报名当前比赛
 const checkRegistrationStatus = async () => {
   try {
-    const response = await api.get('/competition/querysignup')
-    hasRegistered.value = true
-    registrationInfo.value = {
-      group: response.data.group,
-      registeredAt: new Date().toLocaleString()
+    const response = await api.get('/competition/signup')
+    
+    // 检查用户是否已报名当前显示的比赛
+    if (response.data && Array.isArray(response.data) && response.data.length > 0) {
+      // 获取用户已报名的比赛ID列表
+      const signedUpCompetitionIds = response.data.map(item => item.competitionId)
+      
+      // 检查当前显示的比赛是否在已报名列表中
+      if (tournamentInfo.value && signedUpCompetitionIds.includes(tournamentInfo.value.id)) {
+        hasRegistered.value = true
+        // 查找该比赛的报名信息
+        const currentCompetitionSignup = response.data.find(item => item.competitionId === tournamentInfo.value.id)
+        registrationInfo.value = {
+          group: currentCompetitionSignup.group,
+          registeredAt: new Date().toLocaleString()
+        }
+      } else {
+        hasRegistered.value = false
+      }
+    } else {
+      hasRegistered.value = false
     }
   } catch (error) {
     hasRegistered.value = false
@@ -240,6 +275,10 @@ const goToRecharge = () => {
 }
 
 const viewSchedule = () => {
+  router.push('/student/match-schedule')
+}
+
+const goBack = () => {
   router.push('/student/matches')
 }
 
@@ -247,7 +286,10 @@ const viewSchedule = () => {
 onMounted(() => {
   fetchUserBalance()
   fetchTournamentInfo()
-  checkRegistrationStatus()
+    .then(() => {
+      // 确保在获取到比赛信息后再检查报名状态
+      checkRegistrationStatus()
+    })
 })
 </script>
 

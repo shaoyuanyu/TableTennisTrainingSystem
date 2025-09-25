@@ -235,7 +235,7 @@ const router = createRouter({
           },
         },
         {
-          path: 'student/tournament-registration',
+          path: 'student/tournament-registration/:id?',
           name: 'TournamentRegistration',
           component: () => import('@/views/student/TournamentRegistrationView.vue'),
           meta: {
