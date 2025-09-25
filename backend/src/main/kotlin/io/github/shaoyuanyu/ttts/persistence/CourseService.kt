@@ -297,8 +297,11 @@ class CourseService(
             val specifiedTable = TableEntity.findById(UUID.fromString(request.tableId))
             if (specifiedTable != null && specifiedTable.campusId == campusId) {
                 // 检查球桌在课程时间段是否可用
-                if (isTableAvailable(specifiedTable, LocalDate.parse(request.date),
-                        LocalTime.parse(request.startTime), LocalTime.parse(request.endTime))) {
+                if (isTableAvailable(
+                        specifiedTable, LocalDate.parse(request.date),
+                        LocalTime.parse(request.startTime), LocalTime.parse(request.endTime)
+                    )
+                ) {
                     return specifiedTable
                 } else {
                     throw BadRequestException("指定的球桌在该时间段不可用")
@@ -317,15 +320,16 @@ class CourseService(
         val startTime = LocalTime.parse(request.startTime)
         val endTime = LocalTime.parse(request.endTime)
 
-        // 找到在指定时间段可用的球桌
-        for (table in availableTables) {
-            if (isTableAvailable(table, date, startTime, endTime)) {
-                return table
-            }
+        // 先找到所有可用球桌，然后随机选择一个
+        val allAvailableTables = availableTables.filter { table ->
+            isTableAvailable(table, date, startTime, endTime)
         }
-
-        COURSE_SERVICE_LOGGER.warn("在校区 $campusId 未找到可用球桌，课程将在没有指定球桌的情况下创建")
-        throw BadRequestException("没有可用的球桌")
+        if (!allAvailableTables.isEmpty()) {
+            return allAvailableTables.random()
+        } else {
+            COURSE_SERVICE_LOGGER.warn("在校区 $campusId 未找到可用球桌，课程将在没有指定球桌的情况下创建")
+            throw BadRequestException("没有可用的球桌")
+        }
     }
 
     /**
