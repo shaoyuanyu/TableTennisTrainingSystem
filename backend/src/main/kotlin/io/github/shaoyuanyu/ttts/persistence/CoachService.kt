@@ -24,7 +24,7 @@ class CoachService(
     /**
      * 通过审批并更新教练等级
      */
-    fun updateCoachLevel(coachId: String, adminId: String,newLevel: String) {
+    fun updateCoachLevel(coachId: String, adminId: String, newLevel: String) {
         transaction(database) {
             val coachEntity = CoachEntity.findById(UUID.fromString(coachId))
                 ?: throw IllegalArgumentException("教练不存在")
@@ -158,12 +158,17 @@ class CoachService(
                 realName = userWithCoachInfo.realName,
                 gender = userWithCoachInfo.gender,
                 age = userWithCoachInfo.age,
+                isApproved = userWithCoachInfo.coachInfo.isApproved,
+                approvedBy = userWithCoachInfo.coachInfo.approvedBy,
+                phoneNumber = userWithCoachInfo.phoneNumber,
                 campusId = userWithCoachInfo.campusId,
                 photoUrl = userWithCoachInfo.coachInfo.photoUrl ?: "",
                 achievements = userWithCoachInfo.coachInfo.achievements ?:"",
                 level = userWithCoachInfo.coachInfo.level ?: "",
                 hourlyRate = userWithCoachInfo.coachInfo.hourlyRate,
-                currentStudents = userWithCoachInfo.coachInfo.currentStudents
+                currentStudents = userWithCoachInfo.coachInfo.currentStudents,
+                maxStudents = userWithCoachInfo.coachInfo.maxStudents,
+                createdAt = userWithCoachInfo.createdAt.toString(),
             )
         }
     /**
@@ -197,12 +202,17 @@ class CoachService(
                 realName = userWithCoachInfo.realName,
                 gender = userWithCoachInfo.gender,
                 age = userWithCoachInfo.age,
+                isApproved = userWithCoachInfo.coachInfo.isApproved,
+                approvedBy = userWithCoachInfo.coachInfo.approvedBy,
                 campusId = userWithCoachInfo.campusId,
+                phoneNumber = userWithCoachInfo.phoneNumber,
                 photoUrl = userWithCoachInfo.coachInfo.photoUrl ?: "",
                 achievements = userWithCoachInfo.coachInfo.achievements ?:"",
                 level = userWithCoachInfo.coachInfo.level ?: "",
                 hourlyRate = userWithCoachInfo.coachInfo.hourlyRate,
-                currentStudents = userWithCoachInfo.coachInfo.currentStudents
+                currentStudents = userWithCoachInfo.coachInfo.currentStudents,
+                maxStudents = userWithCoachInfo.coachInfo.maxStudents,
+                createdAt = userWithCoachInfo.createdAt.toString(),
             )
         }
 
@@ -238,12 +248,17 @@ class CoachService(
                         realName = user.realName,
                         gender = user.gender,
                         age = user.age,
+                        isApproved = user.coachInfo?.isApproved ?: false,
+                        approvedBy = user.coachInfo?.approvedBy,
                         campusId = user.campusId,
+                        phoneNumber = user.phoneNumber,
                         photoUrl = user.coachInfo?.photoUrl ?: "",
                         achievements = user.coachInfo?.achievements ?:"",
                         level = user.coachInfo?.level ?: "",
                         hourlyRate = user.coachInfo?.hourlyRate ?: 0.0f,
-                        currentStudents = user.coachInfo?.currentStudents ?: 0
+                        currentStudents = user.coachInfo?.currentStudents ?: 0,
+                        maxStudents = user.coachInfo?.maxStudents ?: 0,
+                        createdAt = user.createdAt.toString(),
                     )
                 }
         }

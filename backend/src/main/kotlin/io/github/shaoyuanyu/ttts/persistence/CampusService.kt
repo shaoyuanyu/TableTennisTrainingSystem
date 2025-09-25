@@ -3,12 +3,14 @@ package io.github.shaoyuanyu.ttts.persistence
 
 import io.github.shaoyuanyu.ttts.dto.campus.CampusCreateRequest
 import io.github.shaoyuanyu.ttts.dto.campus.CampusQueryRequest
+import io.github.shaoyuanyu.ttts.dto.table.Table
 import io.github.shaoyuanyu.ttts.dto.student.Group
 import io.github.shaoyuanyu.ttts.dto.student.Status
 import io.github.shaoyuanyu.ttts.dto.user.UserRole
 import io.github.shaoyuanyu.ttts.persistence.campus.CampusEntity
 import io.github.shaoyuanyu.ttts.persistence.table.TableEntity
 import io.github.shaoyuanyu.ttts.persistence.table.TableTable
+import io.github.shaoyuanyu.ttts.persistence.table.expose
 import io.github.shaoyuanyu.ttts.persistence.user.UserEntity
 import io.github.shaoyuanyu.ttts.persistence.user.UserTable
 import io.github.shaoyuanyu.ttts.utils.encryptPasswd
@@ -144,11 +146,11 @@ class CampusService(
     /**
      * 获取校区所有空闲球桌
      */
-    fun getFreeTables(userId: String): List<TableEntity> =
+    fun getFreeTables(userId: String): List<Table> =
         transaction(database) {
             val campusId= UserEntity.findById(UUID.fromString(userId))?.campusId ?: throw IllegalArgumentException("用户不存在")
             TableEntity.find {
                 TableTable.status.eq(Status.free) and (TableTable.campusId.eq(campusId))
-            }.toList()
+            }.toList().map { it.expose() }
         }
 }

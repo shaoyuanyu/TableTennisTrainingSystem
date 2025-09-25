@@ -114,10 +114,12 @@
 
           <el-form-item label="课程节数" prop="NO">
             <el-select v-model="courseForm.NO" placeholder="请选择课程节数">
-              <el-option label="第1节" :value="1" />
-              <el-option label="第2节" :value="2" />
-              <el-option label="第3节" :value="3" />
-              <el-option label="第4节" :value="4" />
+              <el-option
+                v-for="slot in getAvailableSlots(selectedDate)"
+                :key="slot.NO"
+                :label="`${slot.startTime} - ${slot.endTime}`"
+                :value="slot.NO"
+              />
             </el-select>
           </el-form-item>
 
@@ -235,12 +237,13 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from 'vue'
+import { onMounted, reactive, ref, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ArrowLeft, ArrowRight, Check } from '@element-plus/icons-vue'
 import dayjs from 'dayjs'
 import api from '@/utils/api'
+import { getCoachSchedule, getCoachScheduleForStudent } from '@/api/courses'
 import { useUserStore } from '@/stores/user'
 import PrimaryButton from '@/components/buttons/PrimaryButton.vue'
 import OutlineButton from '@/components/buttons/OutlineButton.vue'
@@ -309,9 +312,9 @@ const searchCoaches = async () => {
           const detail = detailResponse.data
           return {
             ...coach,
-            level: detail.level || '未评级',
-            avatar: detail.avatar || '',
-            hourlyRate: detail.hourlyRate || 100, // 使用教练信息中的价格，如果没有则使用默认价格
+            level: detail?.level || '未评级',
+            avatar: detail?.avatar || '',
+            hourlyRate: detail?.hourlyRate || 100, // 使用教练信息中的价格，如果没有则使用默认价格
           }
         } catch (error) {
           console.error(`获取教练 ${coach.id} 详细信息失败:`, error)
@@ -335,58 +338,119 @@ const selectCoach = (coach) => {
 
 // 选择日期
 const selectDate = async (date) => {
-  selectedDate.value = date
+  selectedDate.value = dayjs(date).format('YYYY-MM-DD')
   selectedTimeSlot.value = null
 
   // 自动加载该日期的教练排班信息
-  await loadCoachSchedule()
+  if (selectedCoach.value) {
+    await loadCoachSchedule()
+    // 等待DOM更新后再继续
+    await nextTick()
+  }
 }
 
 // 选择时间段
 const selectTimeSlot = (slot) => {
   selectedTimeSlot.value = slot
+  // 同时设置课程表单中的NO值
+  courseForm.NO = slot.NO
 }
 
 // 加载教练排班
 const loadCoachSchedule = async () => {
-  if (!selectedCoach.value || !selectedDate.value) return
+  // 确保教练ID和日期都存在且有效
+  if (!selectedCoach.value?.id || !selectedDate.value) return
 
+  // 简单验证教练ID是否为UUID格式
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  if (!uuidRegex.test(selectedCoach.value.id)) {
+    console.error('无效的教练ID格式:', selectedCoach.value.id)
+    ElMessage.error('教练信息无效')
+    return
+  }
+
+  // 初始化排班数据
+  const schedule = {}
+  
   try {
     // 调用API获取教练在指定日期的排班信息
-    const response = await api.get(`/courses/coach-schedule/${selectedCoach.value.id}`, {
-      params: {
-        dateFrom: selectedDate.value,
-        dateTo: selectedDate.value,
-      },
-    })
+    const params = {
+      dateFrom: selectedDate.value,
+      dateTo: selectedDate.value
+    }
+    
+    // 首先尝试使用 getCoachScheduleForStudent 方法
+    let courses;
+    try {
+      courses = await getCoachScheduleForStudent(selectedCoach.value.id, params)
+    } catch (error) {
+      // 如果失败，尝试使用 getCoachSchedule 方法
+      console.warn('使用 getCoachScheduleForStudent 失败，尝试使用 getCoachSchedule:', error)
+      params.coachId = selectedCoach.value.id
+      courses = await getCoachSchedule(params)
+    }
 
-    // 初始化排班数据
-    const schedule = {}
-
-    // 处理后端返回的排班数据
-    const courses = response.data || []
-    schedule[selectedDate.value] = courses.map((course) => ({
-      id: course.id,
-      startTime: course.startTime,
-      endTime: course.endTime,
-      duration: course.duration || 60, // 默认60分钟
-    }))
-
-    coachSchedule.value = schedule
-    console.log('获取到的教练排班:', schedule)
+    // 确保courses是数组
+    const validCourses = Array.isArray(courses) ? courses : []
+    
+    // 定义固定的课程时间段（根据NO值）
+    const fixedTimeSlots = [
+      { id: 1, NO: 1, startTime: '08:00', endTime: '09:00', duration: 60 },
+      { id: 2, NO: 2, startTime: '09:00', endTime: '10:00', duration: 60 },
+      { id: 3, NO: 3, startTime: '10:00', endTime: '11:00', duration: 60 },
+      { id: 4, NO: 4, startTime: '11:00', endTime: '12:00', duration: 60 },
+      { id: 5, NO: 5, startTime: '14:00', endTime: '15:00', duration: 60 },
+      { id: 6, NO: 6, startTime: '15:00', endTime: '16:00', duration: 60 },
+      { id: 7, NO: 7, startTime: '16:00', endTime: '17:00', duration: 60 },
+      { id: 8, NO: 8, startTime: '17:00', endTime: '18:00', duration: 60 },
+      { id: 9, NO: 9, startTime: '19:00', endTime: '20:00', duration: 60 },
+      { id: 10, NO: 10, startTime: '20:00', endTime: '21:00', duration: 60 }
+    ]
+    
+    // 根据教练已有的课程计算出已占用的时间段
+    const bookedSlots = validCourses.map(course => {
+      // 根据开始时间确定NO值，处理不同的时间格式
+      const startTime = course.startTime
+      if (typeof startTime === 'string') {
+        // 处理 "HH:MM:SS" 或 "HH:MM" 格式
+        if (startTime.startsWith('08:00')) return 1
+        if (startTime.startsWith('09:00')) return 2
+        if (startTime.startsWith('10:00')) return 3
+        if (startTime.startsWith('11:00')) return 4
+        if (startTime.startsWith('14:00')) return 5
+        if (startTime.startsWith('15:00')) return 6
+        if (startTime.startsWith('16:00')) return 7
+        if (startTime.startsWith('17:00')) return 8
+        if (startTime.startsWith('19:00')) return 9
+        if (startTime.startsWith('20:00')) return 10
+      }
+      return null
+    }).filter(no => no !== null)
+    
+    // 过滤出空闲的时间段
+    const availableSlots = fixedTimeSlots.filter(slot => !bookedSlots.includes(slot.NO))
+    
+    schedule[selectedDate.value] = availableSlots
   } catch (error) {
     console.error('获取排班信息失败:', error)
     ElMessage.error('获取排班信息失败: ' + (error.message || '未知错误'))
-
-    // 出错时使用模拟数据作为备选方案
-    const schedule = {}
-    schedule[selectedDate.value] = [
-      { id: 1, startTime: '09:00', endTime: '10:00', duration: 60 },
-      { id: 2, startTime: '14:00', endTime: '15:00', duration: 60 },
-      { id: 3, startTime: '19:00', endTime: '20:00', duration: 60 },
+    
+    // 使用模拟数据作为备选方案
+    const fixedTimeSlots = [
+      { id: 1, NO: 1, startTime: '08:00', endTime: '09:00', duration: 60 },
+      { id: 2, NO: 2, startTime: '09:00', endTime: '10:00', duration: 60 },
+      { id: 5, NO: 5, startTime: '14:00', endTime: '15:00', duration: 60 },
+      { id: 6, NO: 6, startTime: '15:00', endTime: '16:00', duration: 60 },
+      { id: 9, NO: 9, startTime: '19:00', endTime: '20:00', duration: 60 }
     ]
-    coachSchedule.value = schedule
+    schedule[selectedDate.value] = fixedTimeSlots
   }
+  
+  coachSchedule.value = schedule
+  console.log('获取到的教练排班:', schedule)
+  
+  // 强制更新视图
+  await nextTick()
 }
 
 // 获取用户余额
@@ -467,8 +531,18 @@ const canProceed = () => {
 
 // 下一步
 const nextStep = async () => {
-  if (currentStep.value === 1 && selectedCoach.value && selectedDate.value) {
-    await loadCoachSchedule()
+  if (currentStep.value === 0 && selectedCoach.value) {
+    // 当从第一步进入第二步时，如果已选择教练和日期，则加载排班信息
+    if (selectedDate.value) {
+      await loadCoachSchedule()
+    }
+  }
+
+  if (currentStep.value === 1) {
+    // 确保在第二步时有排班信息
+    if (selectedCoach.value && selectedDate.value) {
+      await loadCoachSchedule()
+    }
   }
 
   if (currentStep.value === 2) {
@@ -503,13 +577,12 @@ const confirmBooking = async () => {
 
     const bookingData = {
       title: courseForm.title,
-      description: courseForm.description,
-      coachId: selectedCoach.value.id,
-      studentId: userStore.user.id,
-      date: selectedDate.value,
-      NO: courseForm.NO,
-      campusId: userStore.user.campusId,
-      price: calculatePrice(),
+      description: courseForm.description || '',
+      coachId: selectedCoach.value?.id || '',
+      studentId: userStore.user?.id || '',
+      date: selectedDate.value || '',
+      NO: courseForm.NO || 1,
+      price: parseFloat(calculatePrice()) || 0,
       tableId: selectedTable.value || null, // 球桌ID，可以为空，后端会自动分配
     }
 

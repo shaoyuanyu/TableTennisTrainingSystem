@@ -7,6 +7,7 @@ import io.github.shaoyuanyu.ttts.persistence.UserService
 import io.github.shaoyuanyu.ttts.persistence.MessageService
 import io.github.shaoyuanyu.ttts.persistence.MutualSelectionService
 import io.github.shaoyuanyu.ttts.persistence.StudentService
+import io.github.shaoyuanyu.ttts.persistence.AdminService
 import io.github.shaoyuanyu.ttts.routes.campusRoutes
 import io.github.shaoyuanyu.ttts.routes.coachRoutes
 import io.github.shaoyuanyu.ttts.routes.competitionRoutes
@@ -15,6 +16,7 @@ import io.github.shaoyuanyu.ttts.routes.userRoutes
 import io.github.shaoyuanyu.ttts.routes.messageRoutes
 import io.github.shaoyuanyu.ttts.routes.mutualSelectionRoutes
 import io.github.shaoyuanyu.ttts.routes.walletRoutes
+import io.github.shaoyuanyu.ttts.routes.adminRoutes
 import io.ktor.server.application.*
 import io.ktor.server.plugins.openapi.*
 import io.ktor.server.plugins.swagger.*
@@ -27,7 +29,8 @@ fun Application.configureRouting(
     campusService: CampusService,
     coachService: CoachService,
     mutualSelectionService: MutualSelectionService,
-    courseService: CourseService
+    courseService: CourseService,
+    adminService: AdminService
 ) {
     routing {
         // open api
@@ -45,4 +48,5 @@ fun Application.configureRouting(
     mutualSelectionRoutes(mutualSelectionService)
     competitionRoutes(studentService)
     courseRoutes(courseService)
+    adminRoutes(adminService)
 }

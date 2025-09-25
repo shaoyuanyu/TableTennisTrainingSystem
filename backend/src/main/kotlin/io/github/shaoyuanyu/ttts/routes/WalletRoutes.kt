@@ -5,6 +5,7 @@ import io.github.shaoyuanyu.ttts.dto.user.UserRole
 import io.github.shaoyuanyu.ttts.dto.user.UserSession
 import io.github.shaoyuanyu.ttts.exceptions.BadRequestException
 import io.github.shaoyuanyu.ttts.persistence.StudentService
+import io.github.shaoyuanyu.ttts.plugins.LOGGER
 import io.github.shaoyuanyu.ttts.utils.getUserIdFromCall
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -125,8 +126,9 @@ fun Route.getRechargeHistory(walletService: StudentService) {
             throw BadRequestException("每页大小必须在1-100之间")
         }
 
-        val records= walletService.getRechargeHistory(userId, page, size)
+        val records = walletService.getRechargeHistory(userId, page, size)
 
+        LOGGER.info("用户ID: $userId, 充值记录: $records")
         call.respond(HttpStatusCode.OK, records)
     }
 }

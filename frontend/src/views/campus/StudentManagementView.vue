@@ -2,7 +2,7 @@
   <div class="student-management">
     <!-- 页面头部 -->
     <div class="page-header">
-      <h2>学员管理</h2>
+      <h2>{{ campusName }}学员管理</h2>
       <div class="header-actions">
         <OutlineButton @click="showBatchDialog">
           <template #icon-left>
@@ -35,23 +35,16 @@
           </el-select>
         </el-form-item>
 
-        <el-form-item label="会员等级">
-          <el-select v-model="filters.memberLevel" placeholder="全部等级" clearable>
-            <el-option label="普通会员" value="normal" />
-            <el-option label="银卡会员" value="silver" />
-            <el-option label="金卡会员" value="gold" />
-            <el-option label="钻石会员" value="diamond" />
-          </el-select>
-        </el-form-item>
+
 
         <el-form-item label="注册时间">
           <el-date-picker v-model="filters.dateRange" type="daterange" range-separator="至" start-placeholder="开始日期"
-            end-placeholder="结束日期" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
+                          end-placeholder="结束日期" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
         </el-form-item>
 
         <el-form-item label="搜索">
-          <el-input v-model="filters.keyword" placeholder="姓名/手机号/学号" style="width: 200px"
-            @keyup.enter="fetchStudents" />
+          <el-input v-model="filters.keyword" placeholder="姓名/手机号/用户名" style="width: 200px"
+                    @keyup.enter="fetchStudents" />
         </el-form-item>
 
         <el-form-item>
@@ -63,7 +56,7 @@
 
     <!-- 学员统计 -->
     <el-row :gutter="20" class="stats-row">
-      <el-col :span="6">
+      <el-col :span="8">
         <el-card class="stat-card">
           <div class="stat-content">
             <div class="stat-icon active">
@@ -79,7 +72,7 @@
         </el-card>
       </el-col>
 
-      <el-col :span="6">
+      <el-col :span="8">
         <el-card class="stat-card">
           <div class="stat-content">
             <div class="stat-icon new">
@@ -95,7 +88,7 @@
         </el-card>
       </el-col>
 
-      <el-col :span="6">
+      <el-col :span="8">
         <el-card class="stat-card">
           <div class="stat-content">
             <div class="stat-icon balance">
@@ -110,27 +103,11 @@
           </div>
         </el-card>
       </el-col>
-
-      <el-col :span="6">
-        <el-card class="stat-card">
-          <div class="stat-content">
-            <div class="stat-icon courses">
-              <el-icon>
-                <Reading />
-              </el-icon>
-            </div>
-            <div class="stat-text">
-              <div class="stat-number">{{ stats.totalCourses }}</div>
-              <div class="stat-label">总课时数</div>
-            </div>
-          </div>
-        </el-card>
-      </el-col>
     </el-row>
 
     <!-- 学员列表 -->
     <el-card>
-      <el-table :data="studentList" v-loading="loading" stripe @selection-change="handleSelectionChange">
+      <el-table :data="studentList" v-loading="loading" stripe @selection-change="handleSelectionChange" style="width: 100%">
         <el-table-column type="selection" width="55" />
 
         <el-table-column prop="avatar" label="头像" width="80">
@@ -141,35 +118,24 @@
           </template>
         </el-table-column>
 
-        <el-table-column prop="studentId" label="学号" width="120" />
+        <el-table-column prop="username" label="用户名" />
 
-        <el-table-column prop="name" label="姓名" width="120" />
+        <el-table-column prop="name" label="姓名" />
 
-        <el-table-column prop="phone" label="手机号" width="140" />
+        <el-table-column prop="phone" label="手机号" />
 
         <el-table-column prop="age" label="年龄" width="80">
-          <template #default="{ row }"> {{ calculateAge(row.birthDate) }}岁 </template>
+          <template #default="{ row }"> {{ row.age }}岁 </template>
         </el-table-column>
 
-        <el-table-column prop="memberLevel" label="会员等级" width="120">
+        <el-table-column prop="coaches" label="教练" width="200">
           <template #default="{ row }">
-            <el-tag :type="getMemberLevelType(row.memberLevel)">
-              {{ getMemberLevelText(row.memberLevel) }}
-            </el-tag>
-          </template>
-        </el-table-column>
-
-        <el-table-column prop="balance" label="账户余额" width="120">
-          <template #default="{ row }">
-            <span :class="{ 'low-balance': row.balance < 100 }"> ¥{{ row.balance }} </span>
-          </template>
-        </el-table-column>
-
-        <el-table-column prop="courseCount" label="剩余课时" width="100" />
-
-        <el-table-column prop="coach" label="主教练" width="120">
-          <template #default="{ row }">
-            {{ row.coach?.name || '-' }}
+            <div v-if="row.coaches && row.coaches.length > 0">
+              <el-tag v-for="coach in row.coaches" :key="coach.id" :type="getCoachTagType(coach.status)" style="margin: 2px;">
+                {{ coach.name }}
+              </el-tag>
+            </div>
+            <span v-else>-</span>
           </template>
         </el-table-column>
 
@@ -210,8 +176,8 @@
 
       <div class="pagination-wrapper">
         <el-pagination v-model:current-page="pagination.page" v-model:page-size="pagination.size"
-          :total="pagination.total" :page-sizes="[10, 20, 50, 100]" layout="total, sizes, prev, pager, next, jumper"
-          @size-change="fetchStudents" @current-change="fetchStudents" />
+                       :total="pagination.total" :page-sizes="[10, 20, 50, 100]" layout="total, sizes, prev, pager, next, jumper"
+                       @size-change="fetchStudents" @current-change="fetchStudents" />
       </div>
     </el-card>
 
@@ -259,14 +225,7 @@
           <el-input v-model="studentForm.emergencyPhone" placeholder="紧急联系电话" />
         </el-form-item>
 
-        <el-form-item label="会员等级" prop="memberLevel">
-          <el-select v-model="studentForm.memberLevel" placeholder="选择会员等级">
-            <el-option label="普通会员" value="normal" />
-            <el-option label="银卡会员" value="silver" />
-            <el-option label="金卡会员" value="gold" />
-            <el-option label="钻石会员" value="diamond" />
-          </el-select>
-        </el-form-item>
+
 
         <el-form-item label="备注">
           <el-input v-model="studentForm.notes" type="textarea" :rows="3" placeholder="备注信息" />
@@ -285,8 +244,8 @@
     <el-dialog v-model="detailDialogVisible" title="学员详情" width="800px">
       <div v-if="selectedStudent">
         <el-descriptions :column="2" border>
-          <el-descriptions-item label="学号">
-            {{ selectedStudent.studentId }}
+          <el-descriptions-item label="用户名">
+            {{ selectedStudent.username }}
           </el-descriptions-item>
           <el-descriptions-item label="姓名">
             {{ selectedStudent.name }}
@@ -303,19 +262,17 @@
           <el-descriptions-item label="邮箱">
             {{ selectedStudent.email }}
           </el-descriptions-item>
-          <el-descriptions-item label="会员等级">
-            <el-tag :type="getMemberLevelType(selectedStudent.memberLevel)">
-              {{ getMemberLevelText(selectedStudent.memberLevel) }}
-            </el-tag>
-          </el-descriptions-item>
+
           <el-descriptions-item label="账户余额">
             ¥{{ selectedStudent.balance }}
           </el-descriptions-item>
-          <el-descriptions-item label="剩余课时">
-            {{ selectedStudent.courseCount }}节
-          </el-descriptions-item>
-          <el-descriptions-item label="主教练">
-            {{ selectedStudent.coach?.name || '未分配' }}
+          <el-descriptions-item label="教练">
+            <div v-if="selectedStudent.coaches && selectedStudent.coaches.length > 0">
+              <el-tag v-for="coach in selectedStudent.coaches" :key="coach.id" :type="getCoachTagType(coach.status)" style="margin: 2px;">
+                {{ coach.name }}
+              </el-tag>
+            </div>
+            <span v-else>未分配</span>
           </el-descriptions-item>
           <el-descriptions-item label="注册时间">
             {{ formatDateTime(selectedStudent.registeredAt) }}
@@ -374,14 +331,13 @@
 </template>
 
 <script setup>
-import {computed, onMounted, reactive, ref} from 'vue'
+import {computed, onMounted, reactive, ref, watch} from 'vue'
 import {ElMessage, ElMessageBox} from 'element-plus'
 import {
   ArrowDown,
   Money,
   Operation,
   Plus,
-  Reading,
   Refresh,
   Search,
   User,
@@ -391,6 +347,7 @@ import dayjs from 'dayjs'
 import api from '@/utils/api'
 import PrimaryButton from '@/components/buttons/PrimaryButton.vue'
 import OutlineButton from '@/components/buttons/OutlineButton.vue'
+import { useUserStore } from '@/stores/user'
 
 // 数据列表
 const studentList = ref([])
@@ -405,18 +362,20 @@ const detailDialogVisible = ref(false)
 const batchDialogVisible = ref(false)
 const isEdit = ref(false)
 
+// 校区信息
+const userStore = useUserStore()
+const campusName = computed(() => userStore.userInfo.campusName || '当前校区')
+
 // 统计数据
 const stats = reactive({
   active: 0,
   newThisMonth: 0,
   totalBalance: 0,
-  totalCourses: 0,
 })
 
 // 筛选器
 const filters = reactive({
   status: '',
-  memberLevel: '',
   dateRange: [],
   keyword: '',
 })
@@ -474,18 +433,76 @@ const fetchStudents = async () => {
   try {
     const params = {
       page: pagination.page,
-      size: pagination.size,
-      ...filters,
+      size: pagination.size
     }
 
-    const response = await api.get('/campus/students', { params })
-    studentList.value = response.data.list || []
-    pagination.total = response.data.total || 0
+    // 使用正确的API端点获取校区学生数据
+    const response = await api.get('/admin/students', { params })
 
-    // 获取统计数据
-    const statsResponse = await api.get('/campus/students/stats')
-    Object.assign(stats, statsResponse.data || {})
-  } catch {
+    // 根据后端实际返回的数据结构进行适配
+    if (Array.isArray(response.data)) {
+      // 获取所有师生关系数据
+      const relationsResponse = await api.get('/mutual-selection/all')
+      console.log('relationsResponse:', relationsResponse)
+      const allRelations = relationsResponse.data || []
+
+      // 将后端返回的StudentRecord对象映射为前端使用的格式
+      studentList.value = response.data.map(student => {
+        // 获取学生的教练信息
+        const studentRelations = allRelations.filter(rel =>
+          rel.studentId === student.studentId && (rel.status === 'PENDING' || rel.status === 'APPROVED' || rel.status === 'ACTIVE')
+        )
+
+        console.log('studentRelations:', studentRelations)
+
+        const coaches = studentRelations.map(rel => ({
+          id: rel.coachId,
+          name: rel.coachName || '未知教练',
+          status: rel.status
+        }))
+
+        return {
+          id: student.studentId,
+          studentId: student.studentId,
+          name: student.realName,
+          username: student.username,
+          gender: student.gender.toLowerCase(), // 转换性别值
+          age: student.age,
+          campusId: student.campusId,
+          balance: student.balance,
+          maxCoach: student.maxCoach,
+          currentCoach: student.currentCoach,
+          // 添加一些默认值以避免前端报错
+          phone: student.phoneNumber,
+          status: 'active',
+          registeredAt: student.createdAt,
+          // 添加教练信息
+          coaches: coaches
+        }
+      })
+      pagination.total = response.data.length
+
+      // 更新统计数据
+      stats.active = studentList.value.length
+
+      // 计算本月新增学员数
+      const now = new Date()
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+      stats.newThisMonth = studentList.value.filter(student =>
+        new Date(student.registeredAt) >= startOfMonth
+      ).length
+
+      // 计算总余额
+      stats.totalBalance = studentList.value.reduce((sum, student) => sum + student.balance, 0)
+    } else {
+      studentList.value = []
+      pagination.total = 0
+      stats.active = 0
+      stats.newThisMonth = 0
+      stats.totalBalance = 0
+    }
+  } catch (error) {
+    console.error('获取学员列表失败:', error)
     ElMessage.error('获取学员列表失败')
   } finally {
     loading.value = false
@@ -496,7 +513,6 @@ const fetchStudents = async () => {
 const resetFilters = () => {
   Object.assign(filters, {
     status: '',
-    memberLevel: '',
     dateRange: [],
     keyword: '',
   })
@@ -545,7 +561,6 @@ const resetForm = () => {
     birthDate: '',
     emergencyContact: '',
     emergencyPhone: '',
-    memberLevel: 'normal',
     notes: '',
   })
 }
@@ -561,15 +576,17 @@ const saveStudent = async () => {
     saving.value = true
 
     if (isEdit.value) {
-      await api.put(`/campus/students/${studentForm.id}`, studentForm)
-      ElMessage.success('学员信息更新成功')
+      // await api.put(`/admin/students/${studentForm.id}`, studentForm)
+      // ElMessage.success('学员信息更新成功')
+      ElMessage.error('暂时不支持更新学员信息')
     } else {
-      await api.post('/campus/students', studentForm)
-      ElMessage.success('学员创建成功')
+      // await api.post('/admin/students', studentForm)
+      // ElMessage.success('学员创建成功')
+      ElMessage.error('暂时不支持创建学员')
     }
 
     dialogVisible.value = false
-    fetchStudents()
+    await fetchStudents()
   } catch {
     ElMessage.error(isEdit.value ? '更新失败' : '创建失败')
   } finally {
@@ -599,9 +616,9 @@ const handleAction = async (command, student) => {
 // 更新学员状态
 const updateStudentStatus = async (studentId, status) => {
   try {
-    await api.put(`/campus/students/${studentId}/status`, { status })
+    await api.put(`/admin/students/${studentId}/status`, { status })
     ElMessage.success('状态更新成功')
-    fetchStudents()
+    await fetchStudents()
   } catch {
     ElMessage.error('状态更新失败')
   }
@@ -616,9 +633,9 @@ const deleteStudent = async (student) => {
       type: 'warning',
     })
 
-    await api.delete(`/campus/students/${student.id}`)
+    await api.delete(`/admin/students/${student.id}`)
     ElMessage.success('学员删除成功')
-    fetchStudents()
+    await fetchStudents()
   } catch (error) {
     if (error !== 'cancel') {
       ElMessage.error('删除失败')
@@ -636,7 +653,7 @@ const executeBatchOperation = async () => {
   try {
     const studentIds = selectedStudents.value.map((s) => s.id)
 
-    await api.post('/campus/students/batch', {
+    await api.post('/admin/students/batch', {
       operation: batchOperation.type,
       studentIds,
       targetLevel: batchOperation.targetLevel,
@@ -644,7 +661,7 @@ const executeBatchOperation = async () => {
 
     ElMessage.success('批量操作执行成功')
     batchDialogVisible.value = false
-    fetchStudents()
+    await fetchStudents()
   } catch {
     ElMessage.error('批量操作失败')
   }
@@ -652,6 +669,7 @@ const executeBatchOperation = async () => {
 
 // 计算年龄
 const calculateAge = (birthDate) => {
+  if (!birthDate) return 0
   return dayjs().diff(dayjs(birthDate), 'year')
 }
 
@@ -665,27 +683,7 @@ const formatDateTime = (date) => {
   return dayjs(date).format('YYYY-MM-DD HH:mm')
 }
 
-// 获取会员等级类型
-const getMemberLevelType = (level) => {
-  const types = {
-    normal: '',
-    silver: 'info',
-    gold: 'warning',
-    diamond: 'success',
-  }
-  return types[level] || ''
-}
 
-// 获取会员等级文本
-const getMemberLevelText = (level) => {
-  const texts = {
-    normal: '普通会员',
-    silver: '银卡会员',
-    gold: '金卡会员',
-    diamond: '钻石会员',
-  }
-  return texts[level] || level
-}
 
 // 获取状态类型
 const getStatusType = (status) => {
@@ -696,6 +694,19 @@ const getStatusType = (status) => {
     refunded: 'danger',
   }
   return types[status] || ''
+}
+
+// 获取教练标签类型
+const getCoachTagType = (status) => {
+  // PENDING-待审批(黄色), APPROVED-已审批(蓝色), ACTIVE-已激活(绿色), 其他状态(灰色)
+  const types = {
+    PENDING: 'warning',
+    APPROVED: 'primary',
+    ACTIVE: 'success',
+    REJECTED: 'danger',
+    INACTIVE: 'info'
+  }
+  return types[status] || 'info'
 }
 
 // 获取状态文本
@@ -713,6 +724,22 @@ const getStatusText = (status) => {
 onMounted(() => {
   fetchStudents()
 })
+
+// 监听学生列表变化以更新统计
+watch(studentList, () => {
+  // 更新统计数据
+  stats.active = studentList.value.length
+
+  // 计算本月新增学员数
+  const now = new Date()
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+  stats.newThisMonth = studentList.value.filter(student =>
+    new Date(student.registeredAt) >= startOfMonth
+  ).length
+
+  // 计算总余额
+  stats.totalBalance = studentList.value.reduce((sum, student) => sum + student.balance, 0)
+}, { deep: true })
 </script>
 
 <style scoped>
@@ -784,10 +811,6 @@ onMounted(() => {
   background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
 }
 
-.stat-icon.courses {
-  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-}
-
 .stat-text {
   flex: 1;
 }
@@ -805,21 +828,9 @@ onMounted(() => {
   margin-top: 4px;
 }
 
-.low-balance {
-  color: #f56c6c;
-  font-weight: bold;
-}
-
 .pagination-wrapper {
   margin-top: 20px;
   text-align: center;
 }
 
-:deep(.el-table .el-button) {
-  margin-right: 8px;
-}
-
-:deep(.el-table .el-button:last-child) {
-  margin-right: 0;
-}
 </style>

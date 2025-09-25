@@ -122,6 +122,7 @@ class StudentService(
                 USER_LOGGER.info("查询校区成功，校区 ID：$campusId，校区名称：${it.campusName}")
             }
         }
+
     /**
      * 获取用户充值历史记录
      * @param userId 用户ID
@@ -273,6 +274,7 @@ class StudentService(
             USER_LOGGER.info("报名成功！小组：$group，分配球台：$tableId")
         }
     }
+
     /**
      * 查询报名信息
      */
@@ -366,6 +368,7 @@ class StudentService(
                 }
             }
         }
+
     /**
      * 获取管理员所在校区的比赛信息
      */
@@ -413,6 +416,7 @@ class StudentService(
                 }
             }
         }
+
     fun enterResults(winner:String,loser:String){
         transaction(database) {
             val winnerEntity=UserEntity.find{ UserTable.username eq winner}.limit(1).singleOrNull()
