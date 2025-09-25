@@ -27,15 +27,14 @@
     <el-card class="filter-card">
       <el-form :model="filters" :inline="true" @submit.prevent="fetchCoaches">
         <el-form-item label="教练状态">
-          <el-select v-model="filters.status" placeholder="全部状态" clearable>
-            <el-option label="已审核" value="approved" />
-            <el-option label="待审核" value="pending" />
-            <el-option label="已停用" value="disabled" />
+          <el-select v-model="filters.status" placeholder="全部状态" clearable style="width: 120px">
+            <el-option label="已审核" value="true" />
+            <el-option label="待审核" value="false" />
           </el-select>
         </el-form-item>
 
         <el-form-item label="教练等级">
-          <el-select v-model="filters.level" placeholder="全部等级" clearable>
+          <el-select v-model="filters.level" placeholder="全部等级" clearable style="width: 120px">
             <el-option label="初级教练" value="junior" />
             <el-option label="中级教练" value="intermediate" />
             <el-option label="高级教练" value="senior" />
@@ -182,10 +181,9 @@
               </el-button>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item command="approve" v-if="row.status === 'pending'">审核通过</el-dropdown-item>
-                  <el-dropdown-item command="disable">停用</el-dropdown-item>
-                  <el-dropdown-item command="enable" v-if="row.status === 'disabled'">启用</el-dropdown-item>
-                  <el-dropdown-item divided command="delete">删除</el-dropdown-item>
+                  <el-dropdown-item command="approve" v-if="!row.isApproved">审核通过</el-dropdown-item>
+                  <el-dropdown-item command="disable" v-if="row.isApproved">停用</el-dropdown-item>
+                  <el-dropdown-item command="delete">删除</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -321,8 +319,8 @@
             {{ formatDateTime(selectedCoach.registeredAt) }}
           </el-descriptions-item>
           <el-descriptions-item label="状态">
-            <el-tag :type="getStatusType(selectedCoach.status)">
-              {{ getStatusText(selectedCoach.status) }}
+            <el-tag :type="getStatusType(selectedCoach.isApproved)">
+              {{ getStatusText(selectedCoach.isApproved) }}
             </el-tag>
           </el-descriptions-item>
         </el-descriptions>
@@ -514,8 +512,7 @@ const fetchCoaches = async () => {
   try {
     const params = {
       page: pagination.page,
-      size: pagination.size,
-      ...filters,
+      size: pagination.size
     }
 
     // 修改API调用路径为正确的后端端点
@@ -529,7 +526,7 @@ const fetchCoaches = async () => {
 
     console.log('allRelations', allRelations)
 
-    coachList.value = (response.data || []).map(coach => {
+    let coaches = (response.data || []).map(coach => {
       // 获取教练的关系信息
       const coachRelations = allRelations.filter(rel =>
         rel.coachId === coach.coachId && (rel.status === 'PENDING' || rel.status === 'APPROVED' || rel.status === 'ACTIVE')
@@ -549,6 +546,25 @@ const fetchCoaches = async () => {
       }
     })
 
+    // 在前端进行筛选，因为后端接口不支持筛选参数
+    if (filters.status !== '') {
+      const statusFilter = filters.status === 'true'
+      coaches = coaches.filter(coach => coach.isApproved === statusFilter)
+    }
+
+    if (filters.level) {
+      coaches = coaches.filter(coach => coach.level === filters.level)
+    }
+
+    if (filters.keyword) {
+      const keyword = filters.keyword.toLowerCase()
+      coaches = coaches.filter(coach =>
+        coach.realName.toLowerCase().includes(keyword) ||
+        coach.phoneNumber.includes(keyword)
+      )
+    }
+
+    coachList.value = coaches
     pagination.total = response.data.total || 0
 
     // 更新统计数据
@@ -678,17 +694,30 @@ const saveCoach = async () => {
 const handleAction = async (command, coach) => {
   switch (command) {
     case 'approve':
-      await updateCoachStatus(coach.id, 'approved')
+      await approveCoach(coach.id, coach.level)
       break
     case 'disable':
-      await updateCoachStatus(coach.id, 'disabled')
-      break
-    case 'enable':
-      await updateCoachStatus(coach.id, 'approved')
+      // 教练停用功能需要后端API支持，暂时不实现
+      ElMessage.warning('教练停用功能暂未实现')
       break
     case 'delete':
       await deleteCoach(coach)
       break
+  }
+}
+
+// 审批教练
+const approveCoach = async (coachId, level) => {
+  try {
+    await api.post('/coach/approve', {
+      coachId: coachId,
+      level: level
+    })
+    ElMessage.success('教练审批成功')
+    await fetchCoaches()
+  } catch (error) {
+    console.error('审批失败:', error)
+    ElMessage.error('审批失败: ' + (error.message || '未知错误'))
   }
 }
 
@@ -835,21 +864,21 @@ const getLevelText = (level) => {
 }
 
 // 获取状态类型
-const getStatusType = (status) => {
+const getStatusType = (isApproved) => {
   const types = {
     true: 'success',
     false: 'warning',
   }
-  return types[status] || 'info'
+  return types[isApproved] || 'info'
 }
 
 // 获取状态文本
-const getStatusText = (status) => {
+const getStatusText = (isApproved) => {
   const texts = {
     true: '在职',
     false: '待审核',
   }
-  return texts[status] || status
+  return texts[isApproved] || '未知'
 }
 
 // 获取会员等级类型
