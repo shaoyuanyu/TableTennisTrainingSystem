@@ -353,19 +353,17 @@ class CourseService(
     fun bookCourse(CourseBooking: CourseBookingRequest) {
         transaction(database) {
 
-            val campus = CampusEntity.findById(CourseBooking.campusId)
-                ?: throw NotFoundException("校区不存在")
-            val hour = 8 + CourseBooking.NO
+            val student = StudentEntity.findById(UUID.fromString(CourseBooking.studentId))
+                ?: throw NotFoundException("学生不存在")
+            val campus = student.userId.campusId
+            val balance = student.balance
+            if (balance < CourseBooking.price) {
+                throw BadRequestException("余额不足")
+            }
+            val hour = 7 + CourseBooking.NO
             val startTime = LocalTime(hour, 0)  // 小时:分钟，如 10:00
             val endTime = LocalTime(hour + 1, 0)  // 小时:分钟，如 11:00
-            val location = campus.address
-            val student= StudentEntity.findById(UUID.fromString(CourseBooking.studentId))
-            val balance= student?.balance
-            balance?.let {
-                if (it < CourseBooking.price) {
-                    throw BadRequestException("余额不足")
-                }
-            }
+            val location = CampusEntity.findById(campus)?.address ?: ""
             val Course = CourseCreateRequest(
                 title = CourseBooking.title,
                 description = CourseBooking.description,
@@ -376,7 +374,7 @@ class CourseService(
                 price = CourseBooking.price,
                 coachId = CourseBooking.coachId,
                 studentId = CourseBooking.studentId,
-                campusId = CourseBooking.campusId,
+                campusId = campus,
                 tableId = CourseBooking.tableId
             )
             // 创建课程
