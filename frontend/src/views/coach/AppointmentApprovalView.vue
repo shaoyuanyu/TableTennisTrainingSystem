@@ -61,7 +61,6 @@
               </el-avatar>
               <div class="student-details">
                 <div class="student-name">{{ row.student.name }}</div>
-                <div class="student-phone">{{ row.student.phone }}</div>
               </div>
             </div>
           </template>
@@ -167,7 +166,7 @@
           <el-descriptions-item label="学员姓名">
             {{ selectedAppointment.student?.name }}
           </el-descriptions-item>
-          <el-descriptions-item label="学员手机">
+          <el-descriptions-item label="学员手机" v-if="selectedAppointment.student?.phone && selectedAppointment.student?.phone !== '无手机号'">
             {{ selectedAppointment.student?.phone }}
           </el-descriptions-item>
           <el-descriptions-item label="预约日期">
@@ -276,18 +275,18 @@ const fetchAppointments = async () => {
       page: pagination.page,
       size: pagination.size
     }
-    
+
     // 添加状态筛选
     if (filters.status) {
       params.status = filters.status
     }
-    
+
     // 添加日期范围筛选
     if (filters.dateRange && filters.dateRange.length === 2) {
       params.dateFrom = filters.dateRange[0]
       params.dateTo = filters.dateRange[1]
     }
-    
+
     // 添加关键词搜索
     if (filters.keyword) {
       params.keyword = filters.keyword
@@ -295,11 +294,11 @@ const fetchAppointments = async () => {
 
     // 获取教练的所有课程
     const response = await api.get('/courses/querypending', { params })
-    
+
     // 检查响应数据结构
     let courses = []
     let total = 0
-    
+
     if (Array.isArray(response.data)) {
       // 如果是简单数组格式
       courses = response.data
@@ -313,14 +312,14 @@ const fetchAppointments = async () => {
       courses = []
       total = 0
     }
-    
+
     appointmentList.value = courses.map(course => {
       // 确保每个课程都有学生信息
       return {
         ...course,
         student: course.student || {
           name: course.studentName || '未知学员',
-          phone: '无手机号',
+          phone: '',
           avatar: ''
         }
       }
@@ -389,7 +388,7 @@ const confirmApprove = async () => {
 const approveAppointment = async (appointment) => {
   try {
     await ElMessageBox.confirm(
-      `确定要通过学员 ${appointment.student?.name || '未知学员'} 的课程预约吗？`, 
+      `确定要通过学员 ${appointment.student?.name || '未知学员'} 的课程预约吗？`,
       '确认通过',
       {
         confirmButtonText: '确定',
@@ -662,20 +661,20 @@ onMounted(() => {
   .appointment-approval {
     padding: 10px;
   }
-  
+
   .filter-card :deep(.el-form-item) {
     margin-bottom: 10px;
   }
-  
+
   .batch-actions {
     flex-direction: column;
     align-items: flex-start;
   }
-  
+
   :deep(.el-table) {
     font-size: 12px;
   }
-  
+
   :deep(.el-table .el-button) {
     padding: 6px 8px;
     font-size: 12px;

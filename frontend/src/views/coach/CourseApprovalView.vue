@@ -42,11 +42,10 @@
           <template #default="{ row }">
             <div class="student-info">
               <el-avatar :size="32" :src="row.student?.avatar || ''">
-                {{ row.student?.realName ? row.student?.realName.charAt(0) : '?' }}
+                {{ row.studentName ? row.studentName.charAt(0) : '?' }}
               </el-avatar>
               <div class="student-details">
-                <div class="student-name">{{ row.student?.realName || '未知学员' }}</div>
-                <div class="student-phone">{{ row.student?.phoneNumber || '无手机号' }}</div>
+                <div class="student-name">{{ row.studentName || '未知学员' }}</div>
               </div>
             </div>
           </template>
@@ -106,12 +105,10 @@
           </el-descriptions-item>
           
           <el-descriptions-item label="学员姓名">
-            {{ selectedCourse.student?.realName || '未知学员' }}
+            {{ selectedCourse.studentName || '未知学员' }}
           </el-descriptions-item>
           
-          <el-descriptions-item label="学员手机">
-            {{ selectedCourse.student?.phoneNumber || '无手机号' }}
-          </el-descriptions-item>
+
           
           <el-descriptions-item label="预约日期">
             {{ selectedCourse.date }}
@@ -184,17 +181,7 @@ const fetchPendingCourses = async () => {
     }
 
     const response = await api.get('/courses/querypending', { params })
-    pendingCourses.value = response.data.map(course => {
-      // 确保每个课程都有学生信息
-      return {
-        ...course,
-        student: course.student || {
-          realName: '未知学员',
-          phoneNumber: '无手机号',
-          avatar: ''
-        }
-      }
-    }) || []
+    pendingCourses.value = response.data || []
     pagination.total = pendingCourses.value.length
   } catch (error) {
     console.error('获取待审批课程列表失败:', error)
@@ -220,7 +207,7 @@ const showDetailDialog = (course) => {
 const approveCourse = async (course) => {
   try {
     await ElMessageBox.confirm(
-      `确定要通过学员 ${course.student?.realName || '未知学员'} 的课程预约吗？`, 
+      `确定要通过学员 ${course.studentName || '未知学员'} 的课程预约吗？`, 
       '确认通过',
       {
         confirmButtonText: '确定',
@@ -249,7 +236,7 @@ const approveCourse = async (course) => {
 const rejectCourse = async (course) => {
   try {
     await ElMessageBox.confirm(
-      `确定要拒绝学员 ${course.student?.realName || '未知学员'} 的课程预约吗？`, 
+      `确定要拒绝学员 ${course.studentName || '未知学员'} 的课程预约吗？`, 
       '确认拒绝',
       {
         confirmButtonText: '确定',
@@ -332,11 +319,6 @@ onMounted(() => {
   color: #333;
 }
 
-.student-phone {
-  font-size: 12px;
-  color: #666;
-  margin-top: 2px;
-}
 
 .pagination-wrapper {
   margin-top: 20px;
