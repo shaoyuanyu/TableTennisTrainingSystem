@@ -396,10 +396,6 @@ class CourseService(
                         (CourseTable.status eq CourseStatus.PENDING)
             }.toList()
 
-            if (pendingCourses.isEmpty()) {
-                throw NotFoundException("没有待审核的课程")
-            }
-
             pendingCourses.map { it.expose() }
         }
     }

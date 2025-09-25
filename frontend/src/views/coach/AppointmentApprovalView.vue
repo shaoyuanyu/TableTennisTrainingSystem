@@ -273,7 +273,26 @@ const fetchAppointments = async () => {
 
     // 获取教练的所有课程
     const response = await api.get('/courses/querypending', { params })
-    appointmentList.value = response.data.map(course => {
+    
+    // 检查响应数据结构
+    let courses = []
+    let total = 0
+    
+    if (Array.isArray(response.data)) {
+      // 如果是简单数组格式
+      courses = response.data
+      total = courses.length
+    } else if (response.data && typeof response.data === 'object' && Array.isArray(response.data.courses)) {
+      // 如果是分页格式
+      courses = response.data.courses
+      total = response.data.total || courses.length
+    } else {
+      // 其他情况，保持空数组
+      courses = []
+      total = 0
+    }
+    
+    appointmentList.value = courses.map(course => {
       // 确保每个课程都有学生信息
       return {
         ...course,
@@ -283,11 +302,14 @@ const fetchAppointments = async () => {
           avatar: ''
         }
       }
-    }) || []
-    pagination.total = appointmentList.value.length
+    })
+    pagination.total = total
   } catch (error) {
     console.error('获取课程列表失败:', error)
     ElMessage.error('获取课程列表失败: ' + (error.message || '未知错误'))
+    // 出错时也重置列表和总数
+    appointmentList.value = []
+    pagination.total = 0
   } finally {
     loading.value = false
   }
