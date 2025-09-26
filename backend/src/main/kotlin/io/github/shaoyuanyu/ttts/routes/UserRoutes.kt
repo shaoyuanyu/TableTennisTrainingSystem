@@ -39,6 +39,7 @@ fun Application.userRoutes(userService: UserService) {
             // campus admin
             authenticate("auth-session-admin") {
                 getTotalNum(userService)
+                getAllUsers(userService)
             }
 
             // super admin
@@ -46,9 +47,9 @@ fun Application.userRoutes(userService: UserService) {
                 createUser(userService)
                 deleteUser(userService)
                 resetCampusAdminPassword(userService)
-                getAllUsers(userService)
+                SAgetAllUsers(userService)
                 getUserByUsername(userService)
-
+                getAllTotalNum(userService)
             }
         }
     }
@@ -168,9 +169,35 @@ fun Route.changeSelfPassword(userService: UserService) {
         call.respond(mapOf("message" to "密码修改成功"))
     }
 }
-
 /**
  * 获取所有用户（分页）
+ *
+ * 该函数用于查询所有用户列表，支持分页。仅限超级管理员
+ *
+ * @param userService UserService实例，用于查询用户列表
+ */
+fun Route.SAgetAllUsers(userService: UserService) {
+    get("/allUsers") {
+        // 获取查询参数
+        val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 1
+        val size = call.request.queryParameters["size"]?.toIntOrNull() ?: 10
+        
+        // 参数验证
+        if (page <= 0) {
+            throw BadRequestException("页码必须大于0")
+        }
+        
+        if (size !in 1..100) {
+            throw BadRequestException("每页大小必须在1-100之间")
+        }
+        
+        val users = userService.queryAllUsers(page,size)
+        call.respond(HttpStatusCode.OK, users)
+    }
+}
+
+/**
+ * 获取本校区所有用户（分页）
  *
  * 该函数用于查询用户列表，支持分页和过滤。仅限超级管理员
  *
@@ -186,15 +213,11 @@ fun Route.getAllUsers(userService: UserService) {
         
         val users = userService.queryUsers(page, size, role, campusId)
         
-        call.respond(mapOf(
-            "users" to users,
-            "page" to page,
-            "size" to size,
-        ))
+        call.respond(HttpStatusCode.OK,users)
     }
 }
 /**
- * 获取用户总数
+ * 获取本校区用户总数
  */
 fun Route.getTotalNum(userService: UserService){
     get("/totalUserNum") {
@@ -202,6 +225,15 @@ fun Route.getTotalNum(userService: UserService){
         val campusId=userService.queryUserByUUID(userId).campusId
         // 获取用户总数
         val totalCount = userService.countUsers(campusId)
+        call.respond(mapOf("totalCount" to totalCount))
+    }
+}
+/**
+ * 获取全部校区用户总数
+ */
+fun Route.getAllTotalNum(userService: UserService){
+    get("/allTotalUserNum") {
+        val totalCount = userService.countUsers()
         call.respond(mapOf("totalCount" to totalCount))
     }
 }

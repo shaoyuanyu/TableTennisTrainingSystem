@@ -28,6 +28,10 @@ fun Application.walletRoutes(walletService: StudentService) {
             authenticate("auth-session-student") {
                 rechargeWallet(walletService)
             }
+            // 校区管理员权限
+            authenticate("auth-session-admin") {
+                getRechargeRecordsByCampus(walletService)
+            }
 
             // 超级管理员权限
             authenticate("auth-session-super-admin") {
@@ -151,7 +155,21 @@ fun Route.getAllRechargeRecords(walletService: StudentService) {
         call.respond(HttpStatusCode.OK, records)
     }
 }
+/**
+ * 获取本校区所有充值记录
+ */
+fun Route.getRechargeRecordsByCampus(walletService: StudentService) {
+    get("/recharge/records/campus") {
+        val adminId= getUserIdFromCall(call)
 
+        val page = 1
+        val size = 100
+
+        val campusRecords=walletService.getRechargeRecordsByCampus(adminId,page,size)
+
+        call.respond(HttpStatusCode.OK, campusRecords)
+    }
+}
 /**
  * 按用户ID获取充值记录（超级管理员）
  *

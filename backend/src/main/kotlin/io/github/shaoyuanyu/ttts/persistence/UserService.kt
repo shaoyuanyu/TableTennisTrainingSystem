@@ -264,7 +264,26 @@ class UserService(
                 USER_LOGGER.info("查询用户成功，用户 ID：${it.uuid}, 用户名：${it.username}")
             }
         }
-
+    /**
+     * 查询所有用户
+     */
+    fun queryAllUsers(
+        page: Int,
+        size: Int
+    ): List<User> = transaction(database) {
+        val allUsers = UserEntity.all().toList()
+        
+        val users = allUsers
+            .drop((page - 1) * size)
+            .take(size)
+            .map { userEntity ->
+                userEntity.exposeWithoutPassword()
+            }
+            .also {
+                USER_LOGGER.info("查询所有用户成功")
+            }
+        users
+    }
     /**
      * 查询用户列表
      *

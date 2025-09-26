@@ -21,6 +21,10 @@
           <el-icon><OfficeBuilding /></el-icon>
           <template #title>校区管理</template>
         </el-menu-item>
+        <el-menu-item index="/admin/users" class="menu-item">
+          <el-icon><User /></el-icon>
+          <template #title>用户管理</template>
+        </el-menu-item>
         <el-menu-item index="/campus/students" class="menu-item">
           <el-icon><User /></el-icon>
           <template #title>学员管理</template>

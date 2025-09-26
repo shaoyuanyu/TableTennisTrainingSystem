@@ -110,6 +110,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import api from '@/utils/api'
+import { getAllCampusTotalUsers } from '@/api/admin'
 import {
   GlassHeaderCard,
   GlassDisplayCard,
@@ -137,6 +138,7 @@ const loading = ref({
 const overviewItems = ref([
   { key: 'campuses', title: '校区总数', icon: '🏢', variant: 'display', value: '0', description: '所有运营中的校区' },
   { key: 'users', title: '本校区用户数', icon: '👥', variant: 'content', value: '0', description: '本校区注册用户数' },
+  { key: 'allUsers', title: '全部校区用户数', icon: '👥', variant: 'content', value: '0', description: '所有校区注册用户数' },
   { key: 'revenue', title: '本月充值', icon: '💰', variant: 'enhanced', value: '¥0', description: '所有用户本月充值合计（近似）' },
   { key: 'unread', title: '未读消息', icon: '✉️', variant: 'minimal', value: '0', description: '消息中心未读数量' },
 ])
@@ -207,6 +209,15 @@ const fetchOverviewData = async () => {
       usersTotal = 0
     }
 
+    // 全部校区用户总数
+    let allUsersTotal = 0
+    try {
+      const allUsersResp = await getAllCampusTotalUsers()
+      allUsersTotal = allUsersResp?.totalCount ?? 0
+    } catch {
+      allUsersTotal = 0
+    }
+
     // 本月充值（近似：取前200条记录按 createdAt 过滤）
     let monthRevenue = 0
     try {
@@ -224,6 +235,7 @@ const fetchOverviewData = async () => {
     overviewItems.value = [
       { key: 'campuses', title: '校区总数', icon: '🏢', variant: 'display', value: String(campusTotal), description: '所有运营中的校区' },
       { key: 'users', title: '本校区用户数', icon: '👥', variant: 'content', value: String(usersTotal), description: '本校区注册用户数' },
+      { key: 'allUsers', title: '全部校区用户数', icon: '👥', variant: 'content', value: String(allUsersTotal), description: '所有校区注册用户数' },
       { key: 'revenue', title: '本月充值', icon: '💰', variant: 'enhanced', value: `¥${Number(monthRevenue).toLocaleString() }`, description: '所有用户本月充值合计（近似）' },
       { key: 'unread', title: '未读消息', icon: '✉️', variant: 'minimal', value: String(unreadCount.value || 0), description: '消息中心未读数量' },
     ]
