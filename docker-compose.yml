@@ -1,10 +1,28 @@
 name: "TableTennisTrainingSystem"
 
 volumes:
+  app:
+    driver: "local"
   mysql:
     driver: "local"
 
 services:
+  app:
+    build:
+      context: "./backend"
+    env_file:
+      - path: "./.env.default"
+        required: true
+      - path: "./.env"
+        required: false
+    volumes:
+      - "app:/app/data"
+    ports:
+      - "0.0.0.0:${APP_PORT:-8080}:8080"
+    depends_on:
+      mysql:
+        condition: "service_healthy"
+
   mysql:
     image: "bitnami/mysql:9.0"
     restart: "unless-stopped"
