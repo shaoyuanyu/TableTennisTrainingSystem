@@ -18,6 +18,7 @@ import io.github.shaoyuanyu.ttts.routes.messageRoutes
 import io.github.shaoyuanyu.ttts.routes.mutualSelectionRoutes
 import io.github.shaoyuanyu.ttts.routes.walletRoutes
 import io.github.shaoyuanyu.ttts.routes.adminRoutes
+import io.github.shaoyuanyu.ttts.routes.logRoutes
 import io.ktor.server.application.*
 import io.ktor.server.plugins.openapi.*
 import io.ktor.server.plugins.swagger.*
@@ -51,4 +52,5 @@ fun Application.configureRouting(
     competitionRoutes(competitionService)
     courseRoutes(courseService)
     adminRoutes(adminService)
+    logRoutes()
 }

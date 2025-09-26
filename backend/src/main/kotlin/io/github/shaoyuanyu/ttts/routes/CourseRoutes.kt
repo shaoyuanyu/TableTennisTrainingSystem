@@ -29,6 +29,7 @@ fun Application.courseRoutes(courseService: CourseService) {
                 submitStudentFeedback(courseService)
                 bookCourse(courseService)
                 getStudentOrderedCourses(courseService)
+                cancelleCourse(courseService)
             }
             
             // 教练权限路由
@@ -37,6 +38,8 @@ fun Application.courseRoutes(courseService: CourseService) {
                 updateCourseStatusByCoach(courseService)
                 getPendingCoursesForCoach(courseService)
                 coachJudgeCourse(courseService)
+                queryCancelCourse(courseService)
+                judgeCancelCourse(courseService)
             }
             
             // 管理员权限路由
@@ -182,6 +185,41 @@ fun Route.bookCourse(courseService: CourseService) {
         LOGGER.info(request.toString())
         courseService.bookCourse(request)
         call.respond(HttpStatusCode.Created)
+    }
+}
+/**
+ * 取消预约
+ */
+fun Route.cancelleCourse(courseService: CourseService) {
+    post("/cancel") {
+        val params = call.receiveParameters()
+        val courseId = params["courseId"] ?: throw BadRequestException("缺少课程ID参数")
+        courseService.cancelCourse(courseId)
+        call.respond(HttpStatusCode.OK)
+    }
+}
+/**
+ * 教练查看取消待审核的课程
+ */
+fun Route.queryCancelCourse(courseService: CourseService) {
+    get("/querycancel") {
+        val userId = getUserIdFromCall(call)
+        val courses = courseService.QueryCancelCourse(userId)
+        call.respond(HttpStatusCode.OK, courses)
+    }
+}
+/**
+ * 教练审核取消预约课程申请
+ */
+fun Route.judgeCancelCourse(courseService: CourseService) {
+    post("/judgecancel") {
+        val userId = getUserIdFromCall(call)
+        call.receiveParameters().let { params ->
+            val courseId = params["courseId"] ?: throw BadRequestException("缺少课程ID参数")
+            val judge = params["judge"]?.toBoolean() ?: throw BadRequestException("缺少审核结果参数")
+            courseService.judegeCancelCourse(userId, courseId, judge)
+            call.respond(HttpStatusCode.OK)
+        }
     }
 }
 

@@ -121,6 +121,10 @@
           <el-icon><Checked /></el-icon>
           <template #title>预约审批</template>
         </el-menu-item>
+        <el-menu-item index="/coach/cancel-approval" class="menu-item">
+          <el-icon><Close /></el-icon>
+          <template #title>取消预约审批</template>
+        </el-menu-item>
       </template>
 
       <!-- 开发工具菜单 -->
@@ -159,6 +163,7 @@ import {
   Calendar,
   Checked,
   Clock,
+  Close,
   CreditCard,
   Document,
   EditPen,

@@ -87,10 +87,17 @@
           </template>
         </el-table-column>
         
-        <el-table-column label="操作" width="150" fixed="right">
+        <el-table-column label="操作" width="200" fixed="right">
           <template #default="{ row }">
             <el-button size="small" @click="showDetailDialog(row)">
               详情
+            </el-button>
+            <el-button 
+              v-if="canCancelAppointment(row)" 
+              size="small" 
+              type="danger" 
+              @click="cancelAppointmentHandler(row)">
+              取消预约
             </el-button>
           </template>
         </el-table-column>
@@ -161,6 +168,12 @@
       
       <template #footer>
         <OutlineButton @click="detailDialogVisible = false">关闭</OutlineButton>
+        <el-button 
+          v-if="canCancelAppointment(selectedAppointment)" 
+          type="danger" 
+          @click="cancelAppointmentHandler(selectedAppointment)">
+          取消预约
+        </el-button>
       </template>
     </el-dialog>
   </div>
@@ -168,8 +181,8 @@
 
 <script setup>
 import { onMounted, reactive, ref } from 'vue'
-import { ElMessage } from 'element-plus'
-import { getMyAppointments } from '@/api/courses'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { getMyAppointments, cancelAppointment } from '@/api/courses'
 import OutlineButton from '@/components/buttons/OutlineButton.vue'
 import dayjs from 'dayjs'
 
@@ -238,12 +251,51 @@ const showDetailDialog = (appointment) => {
   detailDialogVisible.value = true
 }
 
+// 判断是否可以取消预约
+const canCancelAppointment = (appointment) => {
+  if (!appointment) return false
+  // 只有待审核和已通过的预约可以取消
+  return appointment.status === 'PENDING' || appointment.status === 'CONFIRMED'
+}
+
+// 取消预约
+const cancelAppointmentHandler = async (appointment) => {
+  try {
+    await ElMessageBox.confirm(
+      `确定要取消预约"${appointment.title}"吗？取消后将无法恢复。`,
+      '确认取消',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }
+    )
+
+    await cancelAppointment(appointment.id, appointment.price)
+    ElMessage.success('预约已取消')
+    
+    // 更新本地状态
+    appointment.status = 'CANCELLED'
+    
+    // 关闭详情对话框
+    detailDialogVisible.value = false
+    
+    // 重新获取预约列表
+    fetchAppointments()
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('取消预约失败: ' + (error.message || '未知错误'))
+    }
+  }
+}
+
 // 获取状态类型
 const getStatusType = (status) => {
   const types = {
     PENDING: 'warning',
     CONFIRMED: 'success',
-    CANCELLED: 'danger'
+    CANCELLED: 'danger',
+    CANCELLPENDING: 'warning'
   }
   return types[status] || ''
 }
@@ -253,7 +305,8 @@ const getStatusText = (status) => {
   const texts = {
     PENDING: '待审核',
     CONFIRMED: '审核通过',
-    CANCELLED: '已拒绝'
+    CANCELLED: '已拒绝',
+    CANCELLPENDING: '取消待审核'
   }
   return texts[status] || status
 }

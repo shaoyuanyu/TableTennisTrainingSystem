@@ -71,7 +71,7 @@
           </template>
         </el-table-column>
 
-        <el-table-column label="操作" width="150">
+        <el-table-column label="操作" width="200">
           <template #default="{ row }">
             <el-button size="small" @click="viewApplicationDetail(row)">详情</el-button>
             <el-button
@@ -81,6 +81,14 @@
               @click="withdrawApplicationHandler(row)"
             >
               撤回
+            </el-button>
+            <el-button
+              v-if="row.status === 'APPROVED' || row.status === 'ACTIVE'"
+              size="small"
+              type="danger"
+              @click="cancelApprovedRelationHandler(row)"
+            >
+              取消关系
             </el-button>
           </template>
         </el-table-column>
@@ -142,7 +150,7 @@ import { onMounted, reactive, ref, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Refresh } from '@element-plus/icons-vue'
 import dayjs from 'dayjs'
-import { getStudentApplications, withdrawApplication } from '@/api/mutualSelection'
+import { getStudentApplications, withdrawApplication, cancelApprovedRelation } from '@/api/mutualSelection'
 
 // 数据状态
 const applications = ref([])
@@ -265,6 +273,30 @@ const withdrawApplicationHandler = async (application) => {
   } catch (error) {
     if (error !== 'cancel') {
       ElMessage.error('撤回失败: ' + (error.response?.data?.message || error.message))
+    }
+  }
+}
+
+// 取消已批准的关系
+const cancelApprovedRelationHandler = async (application) => {
+  try {
+    await ElMessageBox.confirm(
+      `确定要取消与 ${application.coachName} 的双选关系吗？此操作不可恢复。`,
+      '确认取消关系',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+
+    await cancelApprovedRelation(application.selectionId)
+
+    ElMessage.success('双选关系已取消')
+    await fetchApplications()
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('取消关系失败: ' + (error.response?.data?.message || error.message))
     }
   }
 }
