@@ -6,14 +6,31 @@
       </template>
       <el-empty :description="`${title}页面正在开发中`" />
       <div class="placeholder-actions">
-        <el-button type="primary" @click="$router.go(-1)"> 返回上页 </el-button>
-        <el-button @click="$router.push('/dashboard')"> 回到首页 </el-button>
+        <OutlineButton @click="$router.go(-1)">
+          <template #icon-left>
+            <el-icon>
+              <ArrowLeft />
+            </el-icon>
+          </template>
+          返回上页
+        </OutlineButton>
+        <PrimaryButton to="/dashboard">
+          <template #icon-left>
+            <el-icon>
+              <House />
+            </el-icon>
+          </template>
+          回到首页
+        </PrimaryButton>
       </div>
     </el-card>
   </div>
 </template>
 
 <script setup>
+import {OutlineButton, PrimaryButton} from '@/components/buttons'
+import {ArrowLeft, House} from '@element-plus/icons-vue'
+
 defineProps({
   title: {
     type: String,
@@ -30,10 +47,14 @@ defineProps({
 
 .placeholder-actions {
   margin-top: 20px;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-lg);
 }
 
-.placeholder-actions .el-button {
-  margin: 0 8px;
+/* 让按钮在卡片中更紧凑、统一 */
+.placeholder-actions :deep(.btn-modern) {
+  min-width: 120px;
 }
 </style>

@@ -1,8 +1,8 @@
 // main.js - 优化版本
 import './assets/main.css'
 
-import { createApp } from 'vue'
-import { createPinia } from 'pinia'
+import {createApp} from 'vue'
+import {createPinia} from 'pinia'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
@@ -12,7 +12,7 @@ import App from './App.vue'
 import router from './router'
 
 // 导入权限指令
-import { permissionDirective } from '@/composables/usePermissions'
+import {permissionDirective} from '@/composables/usePermissions'
 
 const app = createApp(App)
 
@@ -20,7 +20,7 @@ const app = createApp(App)
 app.use(ElementPlus, {
   locale: zhCn,
   size: 'default', // 添加全局尺寸配置
-  zIndex: 3000,   // 设置初始 z-index
+  zIndex: 3000, // 设置初始 z-index
 })
 
 // 批量注册图标（更优雅的方式）

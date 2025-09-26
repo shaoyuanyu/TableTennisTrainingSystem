@@ -1,8 +1,8 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import {createRouter, createWebHistory} from 'vue-router'
 // 权限相关导入
-import { useUserStore } from '@/stores/user'
-import { hasPagePermission, getDefaultHomePage, normalizeRole } from '@/utils/permissions'
-import { ElMessage } from 'element-plus'
+import {useUserStore} from '@/stores/user'
+import {getDefaultHomePage, hasPagePermission, normalizeRole} from '@/utils/permissions'
+import {ElMessage} from 'element-plus'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -43,52 +43,62 @@ const router = createRouter({
           path: 'dashboard',
           name: 'Dashboard',
           component: () => import('@/views/HomeView.vue'),
-          meta: { 
+          meta: {
             requiresAuth: false, // 允许游客访问
-            title: '仪表盘'
-          }
+            title: '仪表盘',
+          },
         },
 
         // 超级管理员页面
         {
           path: 'admin/campus',
           name: 'CampusManagement',
-          component: () => import('@/views/admin/CampusManagementViewNew.vue'),
-          meta: { 
+          component: () => import('@/views/admin/CampusManagementView.vue'),
+          meta: {
             requiresAuth: true,
             title: '校区管理',
-            roles: ['super_admin']
-          }
+            roles: ['super_admin'],
+          },
         },
         {
           path: 'admin/service',
           name: 'ServiceStatus',
           component: () => import('@/views/admin/ServiceStatusView.vue'),
-          meta: { 
+          meta: {
             requiresAuth: true,
             title: '服务状态',
-            roles: ['super_admin']
-          }
+            roles: ['super_admin'],
+          },
         },
         {
           path: 'admin/data',
           name: 'DataExport',
           component: () => import('@/views/admin/DataExportView.vue'),
-          meta: { 
+          meta: {
             requiresAuth: true,
             title: '数据导出',
-            roles: ['super_admin']
-          }
+            roles: ['super_admin'],
+          },
         },
         {
           path: 'admin/logs',
           name: 'SystemLogs',
           component: () => import('@/views/admin/SystemLogsView.vue'),
-          meta: { 
+          meta: {
             requiresAuth: true,
             title: '系统日志',
-            roles: ['super_admin']
-          }
+            roles: ['super_admin'],
+          },
+        },
+        {
+          path: 'admin/users',
+          name: 'UserManagement',
+          component: () => import('@/views/admin/UserManagementView.vue'),
+          meta: {
+            requiresAuth: true,
+            title: '用户管理',
+            roles: ['super_admin'],
+          },
         },
 
         // 校区管理员页面
@@ -96,185 +106,227 @@ const router = createRouter({
           path: 'campus/students',
           name: 'StudentManagement',
           component: () => import('@/views/campus/StudentManagementView.vue'),
-          meta: { 
+          meta: {
             requiresAuth: true,
             title: '学员管理',
-            roles: ['campus_admin']
-          }
+            roles: ['campus_admin', 'super_admin'],
+          },
         },
         {
           path: 'campus/coaches',
           name: 'CoachManagement',
           component: () => import('@/views/campus/CoachManagementView.vue'),
-          meta: { 
+          meta: {
             requiresAuth: true,
             title: '教练管理',
-            roles: ['campus_admin']
-          }
+            roles: ['campus_admin', 'super_admin'],
+          },
+        },
+        {
+          path: 'campus/tables',
+          name: 'TableManagement',
+          component: () => import('@/views/campus/TableManagementView.vue'),
+          meta: {
+            requiresAuth: true,
+            title: '球台管理',
+            roles: ['campus_admin', 'super_admin'],
+          },
         },
         {
           path: 'campus/appointments',
           name: 'AppointmentManagement',
           component: () => import('@/views/campus/AppointmentManagementView.vue'),
-          meta: { 
+          meta: {
             requiresAuth: true,
             title: '预约管理',
-            roles: ['campus_admin']
-          }
+            roles: ['campus_admin'],
+          },
+        },
+        {
+          path: 'campus/tournaments',
+          name: 'TournamentManagement',
+          component: () => import('@/views/campus/TournamentManagementView.vue'),
+          meta: {
+            requiresAuth: true,
+            title: '比赛管理',
+            roles: ['campus_admin', 'super_admin'],
+          },
         },
         {
           path: 'campus/logs',
           name: 'SystemLogs',
           component: () => import('@/views/campus/SystemLogsView.vue'),
-          meta: { 
+          meta: {
             requiresAuth: true,
             title: '系统日志',
-            roles: ['campus_admin', 'super_admin']
-          }
+            roles: ['campus_admin', 'super_admin'],
+          },
         },
 
         // 学员页面
-        {
-          path: 'student/dashboard',
-          name: 'StudentDashboard',
-          component: () => import('@/views/student/StudentDashboardView.vue'),
-          meta: { 
-            requiresAuth: true,
-            title: '学员仪表盘',
-            roles: ['student']
-          }
-        },
+        
         {
           path: 'student/find-coach',
           name: 'FindCoach',
           component: () => import('@/views/student/FindCoachView.vue'),
-          meta: { 
+          meta: {
             requiresAuth: true,
             title: '找教练',
-            roles: ['student']
-          }
+            roles: ['student'],
+          },
         },
         {
           path: 'student/coach-profile/:id',
           name: 'CoachProfile',
           component: () => import('@/views/student/CoachProfileView.vue'),
-          meta: { 
+          meta: {
             requiresAuth: true,
             title: '教练详情',
-            roles: ['student']
-          }
+            roles: ['student'],
+          },
         },
         {
           path: 'student/my-coaches',
           name: 'MyCoaches',
           component: () => import('@/views/student/MyCoachesView.vue'),
-          meta: { 
+          meta: {
             requiresAuth: true,
             title: '我的教练',
-            roles: ['student']
-          }
+            roles: ['student'],
+          },
         },
         {
           path: 'student/book-training',
           name: 'BookTraining',
           component: () => import('@/views/student/BookTrainingView.vue'),
-          meta: { 
+          meta: {
             requiresAuth: true,
             title: '预约训练',
-            roles: ['student']
-          }
+            roles: ['student'],
+          },
         },
         {
           path: 'student/schedule',
           name: 'StudentSchedule',
           component: () => import('@/views/student/ScheduleView.vue'),
-          meta: { 
+          meta: {
             requiresAuth: true,
             title: '我的课表',
-            roles: ['student']
-          }
+            roles: ['student'],
+          },
         },
         {
           path: 'student/account-recharge',
           name: 'AccountRecharge',
           component: () => import('@/views/student/AccountRechargeView.vue'),
-          meta: { 
+          meta: {
             requiresAuth: true,
             title: '账户充值',
-            roles: ['student']
-          }
+            roles: ['student'],
+          },
         },
         {
-          path: 'student/tournament-registration',
+          path: 'student/tournament-registration/:id?',
           name: 'TournamentRegistration',
           component: () => import('@/views/student/TournamentRegistrationView.vue'),
-          meta: { 
+          meta: {
             requiresAuth: true,
             title: '比赛报名',
-            roles: ['student']
-          }
+            roles: ['student'],
+          },
+        },
+        {
+          path: 'student/mutual-selection',
+          name: 'StudentMutualSelection',
+          component: () => import('@/views/student/MutualSelectionView.vue'),
+          meta: {
+            requiresAuth: true,
+            title: '教练双选',
+            roles: ['student'],
+          },
         },
         {
           path: 'student/matches',
           name: 'MyMatches',
           component: () => import('@/views/student/MyMatchesView.vue'),
-          meta: { 
+          meta: {
             requiresAuth: true,
             title: '我的比赛',
-            roles: ['student']
-          }
+            roles: ['student'],
+          },
+        },
+        {
+          path: 'student/competition-schedule',
+          name: 'CompetitionSchedule',
+          component: () => import('@/views/student/CompetitionScheduleView.vue'),
+          meta: {
+            requiresAuth: true,
+            title: '赛程安排',
+            roles: ['student'],
+          },
         },
         {
           path: 'student/evaluation',
           name: 'TrainingEvaluation',
           component: () => import('@/views/student/TrainingEvaluationView.vue'),
-          meta: { 
+          meta: {
             requiresAuth: true,
             title: '训练评价',
-            roles: ['student']
-          }
+            roles: ['student'],
+          },
+        },
+        {
+          path: 'student/my-appointments',
+          name: 'MyAppointments',
+          component: () => import('@/views/student/MyAppointmentsView.vue'),
+          meta: {
+            requiresAuth: true,
+            title: '我的预约',
+            roles: ['student'],
+          },
         },
 
         // 教练页面
-        {
-          path: 'coach/dashboard',
-          name: 'CoachDashboard',
-          component: () => import('@/views/coach/CoachDashboardView.vue'),
-          meta: { 
-            requiresAuth: true,
-            title: '教练仪表盘',
-            roles: ['coach']
-          }
-        },
+       
         {
           path: 'coach/appointment-approval',
           name: 'AppointmentApproval',
           component: () => import('@/views/coach/AppointmentApprovalView.vue'),
-          meta: { 
+          meta: {
             requiresAuth: true,
             title: '预约审核',
-            roles: ['coach']
-          }
+            roles: ['coach'],
+          },
         },
         {
           path: 'coach/schedule',
           name: 'CoachSchedule',
           component: () => import('@/views/coach/ScheduleView.vue'),
-          meta: { 
+          meta: {
             requiresAuth: true,
             title: '我的课表',
-            roles: ['coach']
-          }
+            roles: ['coach'],
+          },
         },
         {
           path: 'coach/student-feedback',
           name: 'StudentFeedback',
           component: () => import('@/views/coach/StudentFeedbackView.vue'),
-          meta: { 
+          meta: {
             requiresAuth: true,
             title: '学员反馈',
-            roles: ['coach']
-          }
+            roles: ['coach'],
+          },
+        },
+        {
+          path: 'coach/mutual-selection',
+          name: 'CoachMutualSelection',
+          component: () => import('@/views/coach/MutualSelectionView.vue'),
+          meta: {
+            requiresAuth: true,
+            title: '学生双选',
+            roles: ['coach'],
+          },
         },
 
         // 通用页面
@@ -282,39 +334,39 @@ const router = createRouter({
           path: 'profile',
           name: 'Profile',
           component: () => import('@/views/ProfileView.vue'),
-          meta: { 
+          meta: {
             requiresAuth: true,
             title: '个人中心',
-            roles: ['super_admin', 'campus_admin', 'student', 'coach']
-          }
+            roles: ['super_admin', 'campus_admin', 'student', 'coach'],
+          },
         },
         {
           path: 'messages',
           name: 'Messages',
           component: () => import('@/views/MessagesView.vue'),
-          meta: { 
+          meta: {
             requiresAuth: true,
             title: '消息中心',
-            roles: ['super_admin', 'campus_admin', 'student', 'coach']
-          }
+            roles: ['super_admin', 'campus_admin', 'student', 'coach'],
+          },
         },
         {
           path: 'dev-tools',
           name: 'DevTools',
           component: () => import('@/views/DevToolsView.vue'),
-          meta: { 
+          meta: {
             requiresAuth: false, // 允许游客访问
-            title: '开发工具'
-          }
+            title: '开发工具',
+          },
         },
         {
           path: 'design-system-test',
           name: 'DesignSystemTest',
           component: () => import('@/views/DesignSystemTestView.vue'),
-          meta: { 
+          meta: {
             requiresAuth: false, // 允许游客访问
-            title: '设计语言样板间'
-          }
+            title: '设计语言样板间',
+          },
         },
       ],
     },
@@ -333,14 +385,14 @@ router.beforeEach(async (to, from, next) => {
   const userStore = useUserStore()
 
   console.log('🔍 路由守卫检查:', {
-    目标路径: to.path,
-    来源路径: from.path,
-    需要认证: to.meta.requiresAuth,
-    用户登录状态: userStore.isLoggedIn,
-    用户角色: userStore.userRole,
-    有用户信息: !!userStore.userInfo.id,
-    token: userStore.token ? '有' : '无',
-    要求角色: to.meta.roles
+    "目标路径": to.path,
+    "来源路径": from.path,
+    "需要认证": to.meta.requiresAuth,
+    "用户登录状态": userStore.isLoggedIn,
+    "用户角色": userStore.userRole,
+    "有用户信息": !!userStore.userInfo.id,
+    "token": userStore.token ? '有' : '无',
+    "要求角色": to.meta.roles,
   })
 
   // 如果是开发工具或测试页面，直接通过
@@ -373,16 +425,16 @@ router.beforeEach(async (to, from, next) => {
       const normalizedUserRole = normalizeRole(userStore.userRole)
       const hasRolePermission = to.meta.roles.includes(normalizedUserRole)
       console.log('角色权限检查:', {
-        原始角色: userStore.userRole,
-        标准化角色: normalizedUserRole,
-        要求角色: to.meta.roles,
-        有权限: hasRolePermission
+        "原始角色": userStore.userRole,
+        "标准化角色": normalizedUserRole,
+        "要求角色": to.meta.roles,
+        "有权限": hasRolePermission,
       })
-      
+
       if (!hasRolePermission) {
         console.log('❌ 角色权限不足:', {
-          用户角色: normalizedUserRole,
-          要求角色: to.meta.roles
+          "用户角色": normalizedUserRole,
+          "要求角色": to.meta.roles,
         })
         ElMessage.error('您没有权限访问该页面')
         const homePage = getDefaultHomePage(userStore.userRole)
@@ -393,8 +445,8 @@ router.beforeEach(async (to, from, next) => {
       // 回退到权限配置文件检查
       if (!hasPagePermission(to.path, userStore.userRole)) {
         console.log('❌ 页面权限检查失败:', {
-          页面: to.path,
-          用户角色: userStore.userRole
+          "页面": to.path,
+          "用户角色": userStore.userRole,
         })
         ElMessage.error('您没有权限访问该页面')
         const homePage = getDefaultHomePage(userStore.userRole)

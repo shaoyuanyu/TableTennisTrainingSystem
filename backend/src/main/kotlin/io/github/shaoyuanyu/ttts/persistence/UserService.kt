@@ -9,6 +9,7 @@ import io.github.shaoyuanyu.ttts.dto.user.injectStudentEntity
 import io.github.shaoyuanyu.ttts.exceptions.BadRequestException
 import io.github.shaoyuanyu.ttts.exceptions.UnauthorizedException
 import io.github.shaoyuanyu.ttts.exceptions.NotFoundException
+import io.github.shaoyuanyu.ttts.persistence.campus.CampusEntity
 import io.github.shaoyuanyu.ttts.persistence.coach.CoachEntity
 import io.github.shaoyuanyu.ttts.persistence.student.StudentEntity
 import io.github.shaoyuanyu.ttts.persistence.user.UserEntity
@@ -24,7 +25,7 @@ import java.util.*
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
-internal val LOGGER = LoggerFactory.getLogger("io.github.shaoyuanyu.ttts.persistence")
+internal val USER_LOGGER = LoggerFactory.getLogger("io.github.shaoyuanyu.ttts.persistence.user")
 
 // TODO: 是否使用协程，以否使用 suspend 函数
 class UserService(
@@ -43,7 +44,7 @@ class UserService(
                     age = 0
                     phoneNumber = ""
                     email = ""
-                    campusId = -1
+                    campus = CampusEntity.all().first()
                     role = UserRole.SUPER_ADMIN
                     status = ""
                     createdAt = Clock.System.now()
@@ -81,50 +82,54 @@ class UserService(
                 throw BadRequestException("用户名已存在")
             }
 
-            // 检查手机号是否已存在
-            if (newUser.phoneNumber.isNotBlank()) {
-                val existingPhoneUser = UserEntity.find { UserTable.phone_number eq newUser.phoneNumber }.firstOrNull()
-                if (existingPhoneUser != null) {
-                    throw BadRequestException("手机号已被注册")
-                }
-            }
+//            // 检查手机号是否已存在
+//            if (newUser.phoneNumber.isNotBlank()) {
+//                val existingPhoneUser = UserEntity.find { UserTable.phone_number eq newUser.phoneNumber }.firstOrNull()
+//                if (existingPhoneUser != null) {
+//                    throw BadRequestException("手机号已被注册")
+//                }
+//            }
 
-            // 检查邮箱是否已存在
-            if (newUser.email.isNotBlank()) {
-                val existingEmailUser = UserEntity.find { UserTable.email eq newUser.email}.firstOrNull()
-                if (existingEmailUser != null) {
-                    throw BadRequestException("邮箱已被注册")
-                }
-            }
+//            // 检查邮箱是否已存在
+//            if (newUser.email.isNotBlank()) {
+//                val existingEmailUser = UserEntity.find { UserTable.email eq newUser.email}.firstOrNull()
+//                if (existingEmailUser != null) {
+//                    throw BadRequestException("邮箱已被注册")
+//                }
+//            }
+
             if (newUser.username.isBlank()) {
                 throw BadRequestException("用户名不能为空")
             }
+
             if (newUser.plainPassword.isNullOrBlank()) {
                 throw BadRequestException("密码不能为空")
             }
+
             if (newUser.realName.isBlank()) {
                 throw BadRequestException("真实姓名不能为空")
             }
+
             // 验证字段格式
-            if (!newUser.username.matches(Regex("^[a-zA-Z0-9_]{4,20}$"))) {
-                throw BadRequestException("用户名必须是4-20位的字母、数字或下划线")
-            }
-
-            if (!newUser.plainPassword.matches(Regex("^(?=.*[A-Za-z])(?=.*\\d).{8,}$"))) {
-                throw BadRequestException("密码必须至少8位，包含字母和数字")
-            }
-
-            if ( !newUser.phoneNumber.matches(Regex("^1[3-9]\\d{9}$"))) {
-                throw BadRequestException("手机号格式不正确")
-            }
-
-            if (!newUser.email.matches(Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\$"))) {
-                throw BadRequestException("邮箱格式不正确")
-            }
-
-            if (newUser.age < 1 || newUser.age > 120) {
-                throw BadRequestException("年龄必须在1-120之间")
-            }
+//            if (!newUser.username.matches(Regex("^[a-zA-Z0-9_]{4,20}$"))) {
+//                throw BadRequestException("用户名必须是4-20位的字母、数字或下划线")
+//            }
+//
+//            if (!newUser.plainPassword.matches(Regex("^(?=.*[A-Za-z])(?=.*\\d).{8,}$"))) {
+//                throw BadRequestException("密码必须至少8位，包含字母和数字")
+//            }
+//
+//            if ( !newUser.phoneNumber.matches(Regex("^1[3-9]\\d{9}$"))) {
+//                throw BadRequestException("手机号格式不正确")
+//            }
+//
+//            if (!newUser.email.matches(Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\$"))) {
+//                throw BadRequestException("邮箱格式不正确")
+//            }
+//
+//            if (newUser.age < 1 || newUser.age > 120) {
+//                throw BadRequestException("年龄必须在1-120之间")
+//            }
 
 
             // 提前验证角色特定信息
@@ -140,13 +145,13 @@ class UserService(
                 }
 
                 UserRole.COACH -> {
-                    if (newUser.coachInfo == null) {
-                        throw BadRequestException("教练用户必须提供教练信息")
-                    }
-                    // 验证教练信息
-                    if (!newUser.coachInfo.photoUrl.isNullOrBlank() && !newUser.coachInfo.photoUrl.matches(Regex("^https?://.+"))) {
-                        throw BadRequestException("教练照片URL格式不正确")
-                    }
+//                    if (newUser.coachInfo == null) {
+//                        throw BadRequestException("教练用户必须提供教练信息")
+//                    }
+//                    // 验证教练信息
+//                    if (!newUser.coachInfo.photoUrl.isNullOrBlank() && !newUser.coachInfo.photoUrl.matches(Regex("^https?://.+"))) {
+//                        throw BadRequestException("教练照片URL格式不正确")
+//                    }
                 }
 
                 else -> {
@@ -163,7 +168,7 @@ class UserService(
                 age = newUser.age
                 phoneNumber = newUser.phoneNumber
                 email = newUser.email
-                campusId = newUser.campusId
+                campus = CampusEntity.findById(newUser.campusId) ?: throw BadRequestException("校区不存在")
                 role = newUser.role
                 status = "ACTIVE"
                 createdAt = Clock.System.now()
@@ -174,7 +179,8 @@ class UserService(
             // 根据用户角色创建相应的角色特定记录
             when (newUser.role) {
                 UserRole.STUDENT -> {
-                    val studentInfo = newUser.studentInfo!!
+                    //val studentInfo =
+                    newUser.studentInfo!!
                     StudentEntity.new(UUID.fromString(userId)) {
                         this.userId = userEntity
                         this.balance = 0.0f
@@ -195,7 +201,7 @@ class UserService(
                         this.maxStudents = 20
                         this.currentStudents = 0
                         this.isApproved = false
-                        this.approvedBy = -1
+                        this.approvedBy = ""
                     }
                 }
                 
@@ -206,7 +212,7 @@ class UserService(
             
             userId
         }.also { uuid ->
-            LOGGER.info("创建用户成功，用户 ID：$uuid，用户名：${newUser.username}")
+            USER_LOGGER.info("创建用户成功，用户 ID：$uuid，用户名：${newUser.username}")
         }
 
     /**
@@ -241,7 +247,7 @@ class UserService(
                     else -> user
                 }
             }.also {
-                LOGGER.info("查询用户成功，用户 ID：$uuid，用户名：${it.username}")
+                USER_LOGGER.info("查询用户成功，用户 ID：$uuid，用户名：${it.username}")
             }
         }
 
@@ -255,10 +261,29 @@ class UserService(
                     throw NotFoundException("用户不存在")
                 }
             }.first().exposeWithoutPassword().also {
-                LOGGER.info("查询用户成功，用户 ID：${it.uuid}, 用户名：${it.username}")
+                USER_LOGGER.info("查询用户成功，用户 ID：${it.uuid}, 用户名：${it.username}")
             }
         }
-
+    /**
+     * 查询所有用户
+     */
+    fun queryAllUsers(
+        page: Int,
+        size: Int
+    ): List<User> = transaction(database) {
+        val allUsers = UserEntity.all().toList()
+        
+        val users = allUsers
+            .drop((page - 1) * size)
+            .take(size)
+            .map { userEntity ->
+                userEntity.exposeWithoutPassword()
+            }
+            .also {
+                USER_LOGGER.info("查询所有用户成功")
+            }
+        users
+    }
     /**
      * 查询用户列表
      *
@@ -273,7 +298,7 @@ class UserService(
         size: Int = 10,
         role: UserRole? = null,
         campusId: Int? = null
-    ): Pair<List<User>, Long> = transaction(database) {
+    ): List<User> = transaction(database) {
         var query = UserEntity.all().toList()
         
         // 根据角色筛选
@@ -283,11 +308,8 @@ class UserService(
         
         // 根据校区ID筛选
         campusId?.let {
-            query = query.filter { user -> user.campusId == it }
+            query = query.filter { user -> user.campus.id.value == it }
         }
-        
-        // 获取总数
-        val totalCount = query.size.toLong()
         
         // 分页查询
         val users = query
@@ -317,9 +339,30 @@ class UserService(
                 }
             }
         
-        users to totalCount
+        users
     }.also {
-        LOGGER.info("查询用户列表成功，页码：$page，每页数量：$size，角色：$role，校区ID：$campusId")
+        USER_LOGGER.info("查询用户列表成功，页码：$page，每页数量：$size，角色：$role，校区ID：$campusId")
+    }
+
+    /**
+     * 统计用户总数
+     *
+     * @param campusId 校区ID过滤
+     * @return 用户总数
+     */
+    fun countUsers(
+        campusId: Int? = null
+    ): Long = transaction(database) {
+        var query = UserEntity.all().toList()
+        
+        // 根据校区ID筛选
+        campusId?.let {
+            query = query.filter { user -> user.campus.id.value == it }
+        }
+        
+        query.size.toLong()
+    }.also {
+        USER_LOGGER.info("统计用户总数成功，校区ID：$campusId，总数：$it")
     }
 
     /**
@@ -346,7 +389,7 @@ class UserService(
                 it.age = user.age
                 it.phoneNumber = user.phoneNumber
                 it.email = user.email
-                it.campusId = user.campusId
+                it.campus = CampusEntity.findById(user.campusId) ?: throw BadRequestException("校区不存在")
                 // 注意：不更新角色和状态字段，防止用户越权修改
             }
             
@@ -376,7 +419,7 @@ class UserService(
                 }
             }
         }.also {
-            LOGGER.info("更新用户信息成功，用户 ID：${user.uuid}, 用户名：${user.username}")
+            USER_LOGGER.info("更新用户信息成功，用户 ID：${user.uuid}, 用户名：${user.username}")
         }
     }
 
@@ -401,7 +444,7 @@ class UserService(
                 }
             }.first().expose().let { user ->
                 if (validatePasswd(plainPassword, user.encryptedPassword!!)) {
-                    LOGGER.info("验证用户成功，用户 ID：${user.uuid}, 用户名：${user.username}")
+                    USER_LOGGER.info("验证用户成功，用户 ID：${user.uuid}, 用户名：${user.username}")
 
                     user.uuid.toString()
                 } else {
@@ -435,7 +478,7 @@ class UserService(
                 // 更新为新密码
                 userEntity.encryptedPassword = encryptPasswd(newPassword)
             }.also {
-                LOGGER.info("修改用户密码成功，用户 ID：$uuid")
+                USER_LOGGER.info("修改用户密码成功，用户 ID：$uuid")
             }
         }
     }
@@ -452,7 +495,7 @@ class UserService(
 
                 it.delete()
             }.also {
-                LOGGER.info("删除用户成功，用户 ID：$uuid")
+                USER_LOGGER.info("删除用户成功，用户 ID：$uuid")
             }
         }
     }

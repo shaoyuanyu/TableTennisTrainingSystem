@@ -16,5 +16,5 @@ data class CoachInfo(
     val maxStudents: Int = 20,
     val currentStudents: Int = 0,
     val isApproved: Boolean = false,
-    val approvedBy: Int = -1
+    val approvedBy: String? =null
 )

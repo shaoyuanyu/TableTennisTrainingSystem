@@ -3,7 +3,14 @@
     <!-- 页面头部 -->
     <div class="page-header">
       <h2>数据导出</h2>
-      <el-button type="primary" @click="showScheduleDialog" :icon="Timer"> 计划导出 </el-button>
+      <PrimaryButton @click="showScheduleDialog">
+        <template #icon-left>
+          <el-icon>
+            <Timer />
+          </el-icon>
+        </template>
+        计划导出
+      </PrimaryButton>
     </div>
 
     <!-- 导出类型卡片 -->
@@ -11,7 +18,9 @@
       <el-col :span="8">
         <el-card class="export-card" @click="showExportDialog('users')">
           <div class="export-icon">
-            <el-icon><User /></el-icon>
+            <el-icon>
+              <User />
+            </el-icon>
           </div>
           <h3>用户数据</h3>
           <p>导出学员、教练、管理员等用户信息</p>
@@ -24,7 +33,9 @@
       <el-col :span="8">
         <el-card class="export-card" @click="showExportDialog('bookings')">
           <div class="export-icon">
-            <el-icon><Calendar /></el-icon>
+            <el-icon>
+              <Calendar />
+            </el-icon>
           </div>
           <h3>预约数据</h3>
           <p>导出课程预约、场地预约等记录</p>
@@ -37,7 +48,9 @@
       <el-col :span="8">
         <el-card class="export-card" @click="showExportDialog('payments')">
           <div class="export-icon">
-            <el-icon><Money /></el-icon>
+            <el-icon>
+              <Money />
+            </el-icon>
           </div>
           <h3>财务数据</h3>
           <p>导出支付记录、充值记录、财务报表</p>
@@ -52,7 +65,9 @@
       <el-col :span="8">
         <el-card class="export-card" @click="showExportDialog('tournaments')">
           <div class="export-icon">
-            <el-icon><Trophy /></el-icon>
+            <el-icon>
+              <Trophy />
+            </el-icon>
           </div>
           <h3>比赛数据</h3>
           <p>导出比赛记录、报名信息、成绩等</p>
@@ -65,7 +80,9 @@
       <el-col :span="8">
         <el-card class="export-card" @click="showExportDialog('courses')">
           <div class="export-icon">
-            <el-icon><Reading /></el-icon>
+            <el-icon>
+              <Reading />
+            </el-icon>
           </div>
           <h3>课程数据</h3>
           <p>导出课程信息、上课记录、评价等</p>
@@ -78,7 +95,9 @@
       <el-col :span="8">
         <el-card class="export-card" @click="showExportDialog('system')">
           <div class="export-icon">
-            <el-icon><Setting /></el-icon>
+            <el-icon>
+              <Setting />
+            </el-icon>
           </div>
           <h3>系统数据</h3>
           <p>导出日志记录、系统配置、统计数据</p>
@@ -95,7 +114,9 @@
         <div class="card-header">
           <span>导出历史</span>
           <el-button text @click="fetchExportHistory">
-            <el-icon><Refresh /></el-icon>
+            <el-icon>
+              <Refresh />
+            </el-icon>
             刷新
           </el-button>
         </div>
@@ -140,12 +161,7 @@
 
         <el-table-column label="操作" width="120" fixed="right">
           <template #default="{ row }">
-            <el-button
-              v-if="row.status === 'completed'"
-              size="small"
-              type="primary"
-              @click="downloadFile(row)"
-            >
+            <el-button v-if="row.status === 'completed'" size="small" type="primary" @click="downloadFile(row)">
               下载
             </el-button>
             <el-button size="small" type="danger" @click="deleteExport(row)"> 删除 </el-button>
@@ -155,11 +171,7 @@
     </el-card>
 
     <!-- 导出配置对话框 -->
-    <el-dialog
-      v-model="exportDialogVisible"
-      :title="`导出${getTypeText(selectedType)}数据`"
-      width="600px"
-    >
+    <el-dialog v-model="exportDialogVisible" :title="`导出${getTypeText(selectedType)}数据`" width="600px">
       <el-form :model="exportForm" :rules="exportRules" ref="exportFormRef" label-width="100px">
         <el-form-item label="导出格式" prop="format">
           <el-radio-group v-model="exportForm.format">
@@ -170,15 +182,9 @@
         </el-form-item>
 
         <el-form-item label="时间范围" prop="dateRange">
-          <el-date-picker
-            v-model="exportForm.dateRange"
-            type="datetimerange"
-            range-separator="至"
-            start-placeholder="开始时间"
-            end-placeholder="结束时间"
-            format="YYYY-MM-DD HH:mm:ss"
-            value-format="YYYY-MM-DD HH:mm:ss"
-          />
+          <el-date-picker v-model="exportForm.dateRange" type="datetimerange" range-separator="至"
+            start-placeholder="开始时间" end-placeholder="结束时间" format="YYYY-MM-DD HH:mm:ss"
+            value-format="YYYY-MM-DD HH:mm:ss" />
         </el-form-item>
 
         <el-form-item v-if="selectedType === 'users'" label="用户类型">
@@ -210,12 +216,7 @@
 
         <el-form-item label="校区筛选">
           <el-select v-model="exportForm.campusId" placeholder="全部校区" clearable>
-            <el-option
-              v-for="campus in campusList"
-              :key="campus.id"
-              :label="campus.name"
-              :value="campus.id"
-            />
+            <el-option v-for="campus in campusList" :key="campus.id" :label="campus.name" :value="campus.id" />
           </el-select>
         </el-form-item>
 
@@ -233,8 +234,8 @@
       </el-form>
 
       <template #footer>
-        <el-button @click="exportDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="startExport" :loading="exporting"> 开始导出 </el-button>
+        <OutlineButton @click="exportDialogVisible = false">取消</OutlineButton>
+        <PrimaryButton @click="startExport" :loading="exporting">开始导出</PrimaryButton>
       </template>
     </el-dialog>
 
@@ -261,12 +262,7 @@
         </el-form-item>
 
         <el-form-item label="执行时间">
-          <el-time-picker
-            v-model="scheduleForm.time"
-            format="HH:mm"
-            value-format="HH:mm"
-            placeholder="选择时间"
-          />
+          <el-time-picker v-model="scheduleForm.time" format="HH:mm" value-format="HH:mm" placeholder="选择时间" />
         </el-form-item>
 
         <el-form-item label="邮件发送">
@@ -279,28 +275,30 @@
       </el-form>
 
       <template #footer>
-        <el-button @click="scheduleDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="saveSchedule"> 保存计划 </el-button>
+        <OutlineButton @click="scheduleDialogVisible = false">取消</OutlineButton>
+        <PrimaryButton @click="saveSchedule">保存计划</PrimaryButton>
       </template>
     </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import {computed, onMounted, reactive, ref} from 'vue'
+import {ElMessage, ElMessageBox} from 'element-plus'
 import {
-  Timer,
-  User,
   Calendar,
   Money,
-  Trophy,
   Reading,
-  Setting,
   Refresh,
+  Setting,
+  Timer,
+  Trophy,
+  User,
 } from '@element-plus/icons-vue'
 import dayjs from 'dayjs'
 import api from '@/utils/api'
+import PrimaryButton from '@/components/buttons/PrimaryButton.vue'
+import OutlineButton from '@/components/buttons/OutlineButton.vue'
 
 // 数据
 const exportHistory = ref([])

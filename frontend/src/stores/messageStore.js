@@ -1,12 +1,11 @@
-
-import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import {defineStore} from 'pinia'
+import {computed, ref} from 'vue'
 import {
-  fetchMessages as apiFetchMessages,
-  markMessageAsRead,
-  markAllMessagesAsRead,
+  clearAllMessages,
   deleteMessage as apiDeleteMessage,
-  clearAllMessages
+  fetchMessages as apiFetchMessages,
+  markAllMessagesAsRead,
+  markMessageAsRead,
 } from '@/api/message'
 
 export const useMessageStore = defineStore('messages', () => {
@@ -20,20 +19,21 @@ export const useMessageStore = defineStore('messages', () => {
   const selectedMessage = ref(null)
 
   // 计算属性
-  const unreadCount = computed(() => messages.value.filter(msg => !msg.read).length)
+  const unreadCount = computed(() => messages.value.filter((msg) => !msg.read).length)
   const hasUnread = computed(() => unreadCount.value > 0)
   const filteredMessages = computed(() => {
     let result = [...messages.value]
     if (activeFilter.value !== 'all') {
-      result = activeFilter.value === 'unread' 
-        ? result.filter(msg => !msg.read)
-        : result.filter(msg => msg.type === activeFilter.value)
+      result =
+        activeFilter.value === 'unread'
+          ? result.filter((msg) => !msg.read)
+          : result.filter((msg) => msg.type === activeFilter.value)
     }
     if (searchQuery.value) {
       const query = searchQuery.value.toLowerCase()
-      result = result.filter(msg => 
-        msg.title.toLowerCase().includes(query) || 
-        msg.summary.toLowerCase().includes(query)
+      result = result.filter(
+        (msg) =>
+          msg.title.toLowerCase().includes(query) || msg.summary.toLowerCase().includes(query),
       )
     }
     return result.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
@@ -53,31 +53,29 @@ export const useMessageStore = defineStore('messages', () => {
     messages.value = res.data || []
   }
 
-
   // 标记单条消息为已读
   const markAsRead = async (id) => {
     await markMessageAsRead(id)
-    const message = messages.value.find(msg => msg.id === id)
+    const message = messages.value.find((msg) => msg.id === id)
     if (message) message.read = true
   }
-
 
   // 标记全部为已读
   const markAllRead = async () => {
     await markAllMessagesAsRead()
-    messages.value.forEach(msg => { msg.read = true })
+    messages.value.forEach((msg) => {
+      msg.read = true
+    })
   }
-
 
   // 删除单条消息
   const deleteMessage = async (id) => {
     await apiDeleteMessage(id)
-    messages.value = messages.value.filter(msg => msg.id !== id)
+    messages.value = messages.value.filter((msg) => msg.id !== id)
     if (selectedMessage.value?.id === id) {
       selectedMessage.value = null
     }
   }
-
 
   // 清空所有消息
   const clearAll = async () => {
@@ -85,7 +83,6 @@ export const useMessageStore = defineStore('messages', () => {
     messages.value = []
     selectedMessage.value = null
   }
-
 
   // 已移除 mockFetchMessages，全部走 API
 
@@ -106,6 +103,6 @@ export const useMessageStore = defineStore('messages', () => {
     markAsRead,
     markAllRead,
     deleteMessage,
-    clearAll
+    clearAll,
   }
 })

@@ -4,9 +4,9 @@ import io.github.shaoyuanyu.ttts.dto.user.User
 import io.github.shaoyuanyu.ttts.dto.user.UserRole
 import io.github.shaoyuanyu.ttts.dto.user.UserSession
 import io.github.shaoyuanyu.ttts.exceptions.BadRequestException
-import io.github.shaoyuanyu.ttts.exceptions.UnauthorizedException
 import io.github.shaoyuanyu.ttts.exceptions.NotFoundException
 import io.github.shaoyuanyu.ttts.persistence.UserService
+import io.github.shaoyuanyu.ttts.utils.getUserIdFromCall
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -37,8 +37,9 @@ fun Application.userRoutes(userService: UserService) {
             }
 
             // campus admin
-            authenticate("auth-session-campus-admin") {
-
+            authenticate("auth-session-admin") {
+                getTotalNum(userService)
+                getAllUsers(userService)
             }
 
             // super admin
@@ -46,8 +47,9 @@ fun Application.userRoutes(userService: UserService) {
                 createUser(userService)
                 deleteUser(userService)
                 resetCampusAdminPassword(userService)
-                getAllUsers(userService)
+                SAgetAllUsers(userService)
                 getUserByUsername(userService)
+                getAllTotalNum(userService)
             }
         }
     }
@@ -112,12 +114,7 @@ fun Route.logout() {
  */
 fun Route.getSelfInfo(userService: UserService) {
     get("/info") {
-        val userId = call.sessions.get<UserSession>().let {
-            if (it == null) {
-                throw UnauthorizedException("未登录")
-            }
-            it.userId
-        }
+        val userId = getUserIdFromCall(call)
 
         call.respond(
             userService.queryUserByUUID(userId)
@@ -134,16 +131,10 @@ fun Route.getSelfInfo(userService: UserService) {
  */
 fun Route.updateSelfInfo(userService: UserService) {
     put("/info") {
+        val userId = getUserIdFromCall(call)
+
         val updatedUser = call.receive<User>()
-        
-        // 从会话中获取用户ID，如果未登录则抛出异常
-        val userId = call.sessions.get<UserSession>().let {
-            if (it == null) {
-                throw UnauthorizedException("未登录")
-            }
-            it.userId
-        }
-        
+
         // 确保用户只能更新自己的信息
         if (updatedUser.uuid != userId) {
             throw BadRequestException("只能更新自己的信息")
@@ -165,40 +156,31 @@ fun Route.updateSelfInfo(userService: UserService) {
  */
 fun Route.changeSelfPassword(userService: UserService) {
     put("/change-password") {
+        val userId = getUserIdFromCall(call)
+
         // 从表单数据中获取密码信息
         val formData = call.receiveParameters()
         val oldPassword = formData["oldPassword"] ?: throw BadRequestException("缺少旧密码参数")
         val newPassword = formData["newPassword"] ?: throw BadRequestException("缺少新密码参数")
-        
-        // 从会话中获取用户ID，如果未登录则抛出异常
-        val userId = call.sessions.get<UserSession>().let {
-            if (it == null) {
-                throw UnauthorizedException("未登录")
-            }
-            it.userId
-        }
-        
+
         userService.changeUserPassword(userId, oldPassword, newPassword)
         
         call.response.status(HttpStatusCode.OK)
         call.respond(mapOf("message" to "密码修改成功"))
     }
 }
-
 /**
  * 获取所有用户（分页）
  *
- * 该函数用于查询用户列表，支持分页和过滤。仅限超级管理员
+ * 该函数用于查询所有用户列表，支持分页。仅限超级管理员
  *
  * @param userService UserService实例，用于查询用户列表
  */
-fun Route.getAllUsers(userService: UserService) {
-    get("/users") {
+fun Route.SAgetAllUsers(userService: UserService) {
+    get("/allUsers") {
         // 获取查询参数
         val page = call.request.queryParameters["page"]?.toIntOrNull() ?: 1
         val size = call.request.queryParameters["size"]?.toIntOrNull() ?: 10
-        val role = call.request.queryParameters["role"]?.let { UserRole.valueOf(it) }
-        val campusId = call.request.queryParameters["campusId"]?.toIntOrNull()
         
         // 参数验证
         if (page <= 0) {
@@ -209,29 +191,58 @@ fun Route.getAllUsers(userService: UserService) {
             throw BadRequestException("每页大小必须在1-100之间")
         }
         
-        val (users, totalCount) = userService.queryUsers(page, size, role, campusId)
-        
-        call.respond(mapOf(
-            "users" to users,
-            "totalCount" to totalCount,
-            "page" to page,
-            "size" to size,
-            "totalPages" to ((totalCount + size - 1) / size).toInt()
-        ))
+        val users = userService.queryAllUsers(page,size)
+        call.respond(HttpStatusCode.OK, users)
     }
 }
 
+/**
+ * 获取本校区所有用户（分页）
+ *
+ * 该函数用于查询用户列表，支持分页和过滤。仅限超级管理员
+ *
+ * @param userService UserService实例，用于查询用户列表
+ */
+fun Route.getAllUsers(userService: UserService) {
+    get("/users") {
+        // 获取查询参数
+        val page = 1
+        val size = 100
+        val role = call.request.queryParameters["role"]?.let { UserRole.valueOf(it) }
+        val campusId = call.request.queryParameters["campusId"]?.toIntOrNull()
+        
+        val users = userService.queryUsers(page, size, role, campusId)
+        
+        call.respond(HttpStatusCode.OK,users)
+    }
+}
+/**
+ * 获取本校区用户总数
+ */
+fun Route.getTotalNum(userService: UserService){
+    get("/totalUserNum") {
+        val userId=getUserIdFromCall(call)
+        val campusId=userService.queryUserByUUID(userId).campusId
+        // 获取用户总数
+        val totalCount = userService.countUsers(campusId)
+        call.respond(mapOf("totalCount" to totalCount))
+    }
+}
+/**
+ * 获取全部校区用户总数
+ */
+fun Route.getAllTotalNum(userService: UserService){
+    get("/allTotalUserNum") {
+        val totalCount = userService.countUsers()
+        call.respond(mapOf("totalCount" to totalCount))
+    }
+}
 /**
  * 管理员创建用户
  */
 fun Route.createUser(userService: UserService) {
     post("/create") {
         val newUser = call.receive<User>()
-        
-        // 当前版本只允许创建校区管理员
-        if (newUser.role != UserRole.CAMPUS_ADMIN) {
-            throw BadRequestException("当前版本只能创建校区管理员")
-        }
         
         val userId = userService.createUser(newUser)
         
@@ -247,12 +258,6 @@ fun Route.deleteUser(userService: UserService) {
     delete("/{userId}") {
         val userId = call.parameters["userId"] ?: throw BadRequestException("缺少用户ID参数")
         
-        // 检查要删除的用户是否是校区管理员
-        val user = userService.queryUserByUUID(userId)
-        if (user.role != UserRole.CAMPUS_ADMIN) {
-            throw BadRequestException("只能删除校区管理员")
-        }
-        
         userService.deleteUser(userId)
         
         call.response.status(HttpStatusCode.OK)
@@ -266,12 +271,6 @@ fun Route.deleteUser(userService: UserService) {
 fun Route.resetCampusAdminPassword(userService: UserService) {
     put("/{userId}/reset-password") {
         val userId = call.parameters["userId"] ?: throw BadRequestException("缺少用户ID参数")
-        
-        // 检查要重置密码的用户是否是校区管理员
-        val user = userService.queryUserByUUID(userId)
-        if (user.role != UserRole.CAMPUS_ADMIN) {
-            throw BadRequestException("只能重置校区管理员密码")
-        }
         
         // 重置密码为默认密码 "123456"
         // TODO: 默认密码改为通过配置文件读取

@@ -1,8 +1,8 @@
-import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import {defineStore} from 'pinia'
+import {computed, ref} from 'vue'
 import api from '@/utils/api'
-import { normalizeRole } from '@/utils/permissions'
-import { getErrorMessage } from '@/utils/errorHandler'
+import {normalizeRole} from '@/utils/permissions'
+import {getErrorMessage} from '@/utils/errorHandler'
 
 export const useUserStore = defineStore('user', () => {
   // 安全解析localStorage中的数据
@@ -54,26 +54,31 @@ export const useUserStore = defineStore('user', () => {
       const loginData = new URLSearchParams()
       loginData.append('username', credentials.username.trim())
       loginData.append('password', credentials.password)
-      
+
       const response = await api.post('/user/login', loginData, {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        withCredentials: true
+        withCredentials: true,
       })
 
       if (response.status === 200 && response.data && response.data.username) {
+        // 打印完整的响应数据，以便调试
+        console.log('登录响应原始数据:', response.data);
+        
         // 假设后端返回用户信息，如果没有则从其他接口获取
         const userData = response.data
-        
+
+        console.log(userData)
+
         // 设置用户信息（这里可能需要根据后端实际返回调整）
         userInfo.value = {
-          id: userData.id || userData.username,
+          id: userData.uuid,
           name: userData.name || userData.username,
           username: userData.username,
           role: userData.role || 'STUDENT', // 保持后端返回的原始格式
           campusId: userData.campusId,
           email: userData.email,
           phone: userData.phone,
-          avatar: userData.avatar
+          avatar: userData.avatar,
         }
 
         // session认证模式，用户登录状态通过cookie维持
@@ -86,7 +91,7 @@ export const useUserStore = defineStore('user', () => {
 
         console.log('登录成功，用户信息已保存:', {
           userInfo: userInfo.value,
-          normalizedRole: normalizeRole(userInfo.value.role)
+          normalizedRole: normalizeRole(userInfo.value.role),
         })
 
         return { success: true, user: userInfo.value }
@@ -95,10 +100,10 @@ export const useUserStore = defineStore('user', () => {
       }
     } catch (error) {
       console.error('登录失败:', error)
-      
+
       // 处理不同类型的错误
       let errorMessage = '登录失败，请稍后重试'
-      
+
       if (error.response) {
         const { status, data } = error.response
         switch (status) {
@@ -123,10 +128,10 @@ export const useUserStore = defineStore('user', () => {
       } else if (error.code === 'ECONNABORTED') {
         errorMessage = '请求超时，请稍后重试'
       }
-      
-      return { 
-        success: false, 
-        message: errorMessage
+
+      return {
+        success: false,
+        message: errorMessage,
       }
     }
   }
@@ -142,9 +147,9 @@ export const useUserStore = defineStore('user', () => {
       }
     } catch (error) {
       console.error('注册失败:', error)
-      
+
       let errorMessage = '注册失败，请稍后重试'
-      
+
       if (error.response) {
         const { status, data } = error.response
         switch (status) {
@@ -168,7 +173,7 @@ export const useUserStore = defineStore('user', () => {
       } else if (error.code === 'ECONNABORTED') {
         errorMessage = '请求超时，请稍后重试'
       }
-      
+
       return { success: false, message: errorMessage }
     }
   }
@@ -196,7 +201,7 @@ export const useUserStore = defineStore('user', () => {
 
       // 使用动态导入避免循环依赖
       const { default: router } = await import('@/router')
-      
+
       // 只有当前不在登录页时才跳转
       if (router.currentRoute.value.path !== '/login') {
         router.push('/login')
@@ -249,9 +254,9 @@ export const useUserStore = defineStore('user', () => {
       }
     } catch (error) {
       console.error('获取用户信息失败:', error)
-      return { 
-        success: false, 
-        message: error.response?.data?.message || '获取用户信息失败' 
+      return {
+        success: false,
+        message: error.response?.data?.message || '获取用户信息失败',
       }
     }
   }
@@ -265,9 +270,9 @@ export const useUserStore = defineStore('user', () => {
       return { success: false, message: '修改密码功能暂未实现，请联系管理员' }
     } catch (error) {
       console.error('修改密码失败:', error)
-      return { 
-        success: false, 
-        message: error.response?.data?.message || '修改密码失败' 
+      return {
+        success: false,
+        message: error.response?.data?.message || '修改密码失败',
       }
     }
   }

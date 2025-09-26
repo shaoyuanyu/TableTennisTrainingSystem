@@ -51,6 +51,11 @@ fun Application.configureAuthentication(userService: UserService) {
                     throw UnauthorizedException("需要学生权限")
                 }
             }
+
+            challenge {
+                LOGGER.info("登录状态异常", call.toString())
+                throw UnauthorizedException("未登录")
+            }
         }
 
         // session 验证（coach）
@@ -62,16 +67,24 @@ fun Application.configureAuthentication(userService: UserService) {
                     throw UnauthorizedException("需要教练权限")
                 }
             }
+
+            challenge {
+                throw UnauthorizedException("未登录")
+            }
         }
 
-        // session 验证（campus admin）
-        session<UserSession>("auth-session-campus-admin") {
+        // session 验证（campus admin & super admin）
+        session<UserSession>("auth-session-admin") {
             validate { session ->
-                if (session.userRole == UserRole.CAMPUS_ADMIN) {
+                if (session.userRole == UserRole.CAMPUS_ADMIN || session.userRole == UserRole.SUPER_ADMIN) {
                     session
                 } else {
                     throw UnauthorizedException("需要校区管理员权限")
                 }
+            }
+
+            challenge {
+                throw UnauthorizedException("未登录")
             }
         }
 
@@ -83,6 +96,10 @@ fun Application.configureAuthentication(userService: UserService) {
                 } else {
                     throw UnauthorizedException("需要超级管理员权限")
                 }
+            }
+
+            challenge {
+                throw UnauthorizedException("未登录")
             }
         }
     }

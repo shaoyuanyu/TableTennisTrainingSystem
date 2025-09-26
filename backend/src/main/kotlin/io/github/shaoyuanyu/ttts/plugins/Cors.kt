@@ -7,15 +7,18 @@ import io.ktor.server.plugins.cors.routing.CORS
 
 fun Application.configureCORS() {
     install(CORS) {
+        anyHost()
         anyMethod()
 
         allowHeader(HttpHeaders.Authorization)
         allowHeader(HttpHeaders.ContentType)
-        allowNonSimpleContentTypes = true
 
+        allowOrigins({
+            true
+        })
+
+        allowNonSimpleContentTypes = true
         allowCredentials = true
         allowSameOrigin = true
-
-        anyHost()
     }
 }

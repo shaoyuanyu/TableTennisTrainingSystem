@@ -151,11 +151,11 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { useUserStore } from '@/stores/user'
-import { ElMessage } from 'element-plus'
-import { getCampusList } from '@/api/auth'
+import {onMounted, reactive, ref} from 'vue'
+import {useRouter} from 'vue-router'
+import {useUserStore} from '@/stores/user'
+import {ElMessage} from 'element-plus'
+import {getCampusList} from '@/api/auth'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -242,7 +242,7 @@ const registerRules = {
   campusId: [{ required: true, message: '请选择校区', trigger: 'change' }],
   email: [
     { required: true, message: '请输入邮箱地址', trigger: 'blur' },
-    { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' }
+    { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' },
   ],
   agreement: [
     {
@@ -300,8 +300,8 @@ const handleRegister = async () => {
       studentInfo: {
         balance: 100.0,
         maxCoach: 3,
-        currentCoach: 0
-      }
+        currentCoach: 0,
+      },
     }
 
     console.log('发送到后端的注册数据:', JSON.stringify(registerData, null, 2))

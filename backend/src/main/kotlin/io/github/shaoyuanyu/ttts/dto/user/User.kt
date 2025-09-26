@@ -19,6 +19,7 @@ data class User(
     val phoneNumber: String,
     val email: String,
     val campusId: Int,
+    val campusName: String? = null,
     val role: UserRole,
     val status: String,
     val createdAt: LocalDateTime? = null,

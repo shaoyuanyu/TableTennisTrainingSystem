@@ -35,19 +35,13 @@
                 <User />
               </el-icon>
             </el-avatar>
-            <el-upload
-              :show-file-list="false"
-              :before-upload="beforeUpload"
-              :on-success="handleAvatarSuccess"
-              action="/api/upload/avatar"
-              class="avatar-upload"
-            >
-              <el-button size="small" type="text">
+            <el-upload :show-file-list="false" :before-upload="beforeUpload" :on-success="handleAvatarSuccess"
+              action="/api/upload/avatar" class="avatar-upload">
+              <IconButton size="sm" variant="glass" :circle="true">
                 <el-icon>
                   <Camera />
                 </el-icon>
-              
-              </el-button>
+              </IconButton>
             </el-upload>
           </div>
           <div class="user-info">
@@ -74,54 +68,76 @@
           </div>
         </el-card>
         <!-- 动态功能菜单卡片 -->
-        <el-card class="profile-card" style="margin-top: 16px;">
+        <el-card class="profile-card" style="margin-top: 16px">
           <template #header>
             <span>功能菜单</span>
           </template>
           <el-menu class="profile-menu" :default-active="''" router>
             <el-menu-item v-if="isStudent" index="/student/schedule">
-              <el-icon><Clock /></el-icon>
+              <el-icon>
+                <Clock />
+              </el-icon>
               我的课表
             </el-menu-item>
             <el-menu-item v-if="isStudent" index="/student/recharge">
-              <el-icon><Wallet /></el-icon>
+              <el-icon>
+                <Wallet />
+              </el-icon>
               账户管理
             </el-menu-item>
             <el-menu-item v-if="isStudent" index="/student/matches">
-              <el-icon><Medal /></el-icon>
+              <el-icon>
+                <Medal />
+              </el-icon>
               我的比赛
             </el-menu-item>
             <el-menu-item v-if="isStudent" index="/student/evaluation">
-              <el-icon><EditPen /></el-icon>
+              <el-icon>
+                <EditPen />
+              </el-icon>
               训练评价
             </el-menu-item>
             <el-menu-item v-if="isCoach" index="/coach/schedule">
-              <el-icon><Clock /></el-icon>
+              <el-icon>
+                <Clock />
+              </el-icon>
               我的课表
             </el-menu-item>
             <el-menu-item v-if="isCoach" index="/coach/evaluation">
-              <el-icon><EditPen /></el-icon>
+              <el-icon>
+                <EditPen />
+              </el-icon>
               学员评价
             </el-menu-item>
             <el-menu-item v-if="isCampusAdmin" index="/campus/students">
-              <el-icon><User /></el-icon>
+              <el-icon>
+                <User />
+              </el-icon>
               学员管理
             </el-menu-item>
             <el-menu-item v-if="isCampusAdmin" index="/campus/coaches">
-              <el-icon><Avatar /></el-icon>
+              <el-icon>
+                <Avatar />
+              </el-icon>
               教练管理
             </el-menu-item>
             <el-menu-item v-if="isSuperAdmin" index="/admin/campus">
-              <el-icon><OfficeBuilding /></el-icon>
+              <el-icon>
+                <OfficeBuilding />
+              </el-icon>
               校区管理
             </el-menu-item>
             <el-menu-item v-if="isSuperAdmin" index="/admin/service">
-              <el-icon><CreditCard /></el-icon>
+              <el-icon>
+                <CreditCard />
+              </el-icon>
               服务状态
             </el-menu-item>
             <!-- 通用功能 -->
             <el-menu-item index="/messages">
-              <el-icon><Document /></el-icon>
+              <el-icon>
+                <Document />
+              </el-icon>
               消息通知
             </el-menu-item>
           </el-menu>
@@ -133,13 +149,7 @@
           <template #header>
             <span>个人信息</span>
           </template>
-          <el-form
-            ref="profileFormRef"
-            :model="profileForm"
-            :rules="profileRules"
-            label-width="100px"
-            size="large"
-          >
+          <el-form ref="profileFormRef" :model="profileForm" :rules="profileRules" label-width="100px" size="large">
             <el-row :gutter="16">
               <el-col :span="12">
                 <el-form-item label="真实姓名" prop="name">
@@ -158,12 +168,7 @@
             <el-row :gutter="16">
               <el-col :span="12">
                 <el-form-item label="年龄" prop="age">
-                  <el-input-number
-                    v-model="profileForm.age"
-                    :min="1"
-                    :max="120"
-                    style="width: 100%"
-                  />
+                  <el-input-number v-model="profileForm.age" :min="1" :max="120" style="width: 100%" />
                 </el-form-item>
               </el-col>
               <el-col :span="12">
@@ -176,10 +181,8 @@
               <el-input v-model="profileForm.email" />
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" @click="updateProfile" :loading="updating">
-                保存修改
-              </el-button>
-              <el-button @click="resetForm">重置</el-button>
+              <PrimaryButton @click="updateProfile" :loading="updating">保存修改</PrimaryButton>
+              <OutlineButton @click="resetForm">重置</OutlineButton>
             </el-form-item>
           </el-form>
         </el-card>
@@ -188,13 +191,7 @@
           <template #header>
             <span>修改密码</span>
           </template>
-          <el-form
-            ref="passwordFormRef"
-            :model="passwordForm"
-            :rules="passwordRules"
-            label-width="100px"
-            size="large"
-          >
+          <el-form ref="passwordFormRef" :model="passwordForm" :rules="passwordRules" label-width="100px" size="large">
             <el-form-item label="当前密码" prop="oldPassword">
               <el-input v-model="passwordForm.oldPassword" type="password" show-password />
             </el-form-item>
@@ -205,14 +202,12 @@
               <el-input v-model="passwordForm.confirmPassword" type="password" show-password />
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" @click="changePassword" :loading="changingPassword">
-                修改密码
-              </el-button>
+              <PrimaryButton @click="changePassword" :loading="changingPassword">修改密码</PrimaryButton>
             </el-form-item>
           </el-form>
         </el-card>
         <!-- 操作日志卡片 -->
-        <el-card class="profile-card" style="margin-top: 16px;">
+        <el-card class="profile-card" style="margin-top: 16px">
           <template #header>
             <span>操作日志</span>
           </template>
@@ -228,11 +223,21 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
-import { useUserStore } from '@/stores/user'
-import { ElMessage } from 'element-plus'
+import {computed, onMounted, reactive, ref} from 'vue'
+import {useUserStore} from '@/stores/user'
+import {ElMessage} from 'element-plus'
+import {IconButton, OutlineButton, PrimaryButton} from '@/components/buttons'
 import {
-  User, Camera, Clock, Wallet, Medal, EditPen, Avatar, OfficeBuilding, CreditCard, Document
+  Avatar,
+  Camera,
+  Clock,
+  CreditCard,
+  Document,
+  EditPen,
+  Medal,
+  OfficeBuilding,
+  User,
+  Wallet,
 } from '@element-plus/icons-vue'
 
 // 角色判断
@@ -416,14 +421,12 @@ onMounted(() => {
 
 <style scoped>
 .profile-view {
-  background: linear-gradient(
-    135deg,
-    #667eea 0%,
-    #764ba2 25%,
-    #f093fb 50%,
-    #f5576c 75%,
-    #4facfe 100%
-  );
+  background: linear-gradient(135deg,
+      #667eea 0%,
+      #764ba2 25%,
+      #f093fb 50%,
+      #f5576c 75%,
+      #4facfe 100%);
   min-height: 100vh;
   padding: 24px;
   position: relative;
@@ -667,6 +670,7 @@ onMounted(() => {
 
 /* 动画定义 */
 @keyframes float {
+
   0%,
   100% {
     transform: translateY(0px) rotate(0deg);
@@ -688,6 +692,7 @@ onMounted(() => {
 }
 
 @keyframes morphFloat {
+
   0%,
   100% {
     transform: translateY(0px);
@@ -711,6 +716,7 @@ onMounted(() => {
 }
 
 @keyframes pulse {
+
   0%,
   100% {
     opacity: 0.08;

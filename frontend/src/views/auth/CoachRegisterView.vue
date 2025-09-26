@@ -112,30 +112,14 @@
         </el-form-item>
 
         <!-- 教练专属信息 -->
-        <el-row :gutter="16">
-          <el-col :span="12">
-            <el-form-item label="课时费 (元/小时)" prop="hourlyRate">
-              <el-input-number
-                v-model="registerForm.hourlyRate"
-                :min="50"
-                :max="1000"
-                placeholder="请输入课时费"
-                style="width: 100%"
-              />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="最大带学生数" prop="maxStudents">
-              <el-input-number
-                v-model="registerForm.maxStudents"
-                :min="1"
-                :max="100"
-                placeholder="请输入最大带学生数"
-                style="width: 100%"
-              />
-            </el-form-item>
-          </el-col>
-        </el-row>
+        <el-form-item label="获奖信息" prop="achievements">
+          <el-input
+            v-model="registerForm.achievements"
+            type="textarea"
+            :rows="3"
+            placeholder="请输入您的获奖信息，如：全国乒乓球教练员资格证书、省级优秀教练等"
+          />
+        </el-form-item>
 
         <el-form-item>
           <el-checkbox v-model="registerForm.agreement">
@@ -167,11 +151,11 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { useUserStore } from '@/stores/user'
-import { ElMessage } from 'element-plus'
-import { getCampusList } from '@/api/auth'
+import {onMounted, reactive, ref} from 'vue'
+import {useRouter} from 'vue-router'
+import {useUserStore} from '@/stores/user'
+import {ElMessage} from 'element-plus'
+import {getCampusList} from '@/api/auth'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -190,16 +174,14 @@ const registerForm = reactive({
   age: null,
   campusId: '',
   email: '',
-  hourlyRate: null,
-  maxStudents: null,
+  achievements: '', // 替换原来的hourlyRate和maxStudents
   agreement: false,
 })
 
 // 校验函数（沿用学生注册）
 const validatePassword = (rule, value, callback) => {
   if (!value) callback(new Error('请输入密码'))
-  else if (value.length < 8 || value.length > 16)
-    callback(new Error('密码长度在 8 到 16 个字符'))
+  else if (value.length < 8 || value.length > 16) callback(new Error('密码长度在 8 到 16 个字符'))
   else if (!/^(?=.*[a-zA-Z])(?=.*\d)(?=.*[\W_]).{8,16}$/.test(value))
     callback(new Error('密码必须包含字母、数字和特殊字符'))
   else callback()
@@ -212,9 +194,13 @@ const validateConfirmPassword = (rule, value, callback) => {
 }
 
 const validatePhone = (rule, value, callback) => {
-  if (!value) callback(new Error('请输入手机号码'))
-  else if (!/^1[3-9]\d{9}$/.test(value)) callback(new Error('请输入正确的手机号码'))
-  else callback()
+  if (!value) {
+    callback()
+  } else if (!/^1[3-9]\d{9}$/.test(value)) {
+    callback(new Error('请输入正确的手机号码'))
+  } else {
+    callback()
+  }
 }
 
 const registerRules = {
@@ -224,16 +210,14 @@ const registerRules = {
     { pattern: /^[a-zA-Z0-9_]+$/, message: '用户名只能包含字母、数字和下划线', trigger: 'blur' },
   ],
   realName: [{ required: true, message: '请输入真实姓名', trigger: 'blur' }],
-  phone: [{ required: true, validator: validatePhone, trigger: 'blur' }],
+  phone: [{ validator: validatePhone, trigger: 'blur' }],
   password: [{ required: true, validator: validatePassword, trigger: 'blur' }],
   confirmPassword: [{ required: true, validator: validateConfirmPassword, trigger: 'blur' }],
   campusId: [{ required: true, message: '请选择校区', trigger: 'change' }],
   email: [
-    { required: true, message: '请输入邮箱地址', trigger: 'blur' },
-    { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' }
+    { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' },
   ],
-  hourlyRate: [{ required: true, message: '请输入课时费', trigger: 'blur' }],
-  maxStudents: [{ required: true, message: '请输入最大带学生数', trigger: 'blur' }],
+  achievements: [{ required: true, message: '请输入获奖信息', trigger: 'blur' }],
   agreement: [
     {
       validator: (rule, value, callback) => {
@@ -276,23 +260,39 @@ const handleRegister = async () => {
       role: 'COACH',
       status: 'ACTIVE',
       coachInfo: {
-        hourlyRate: parseFloat(registerForm.hourlyRate),
+        achievements: registerForm.achievements.trim(), // 替换原来的字段
         balance: 0,
-        maxStudents: parseInt(registerForm.maxStudents),
+        hourlyRate: 0, // 设置默认值
+        maxStudents: 20, // 设置默认值
         currentStudents: 0,
         isApproved: false,
-        approvedBy: -1
-      }
+        approvedBy: '',
+      },
     }
 
     console.log('发送到后端的教练注册数据:', JSON.stringify(registerData, null, 2))
-    await userStore.register(registerData)
-
-    ElMessage.success('注册成功！注册即生效，请登录')
-    router.push('/login')
+    const result = await userStore.register(registerData)
+    
+    if ( result.success ) {
+      ElMessage.success('注册成功！请登录')
+      router.push('/login')
+    } else {
+      
+      ElMessage.error(result.message)
+    }
   } catch (error) {
     console.error('注册错误:', error)
-    ElMessage.error(error.message || '注册失败，请稍后重试')
+    // 检查是否是用户名重复错误
+    if (error.response && error.response.status === 400) {
+      const errorMessage = error.response.data?.message || error.message
+      if (errorMessage && errorMessage.includes('用户名已存在')) {
+        // 明确提示用户名重复
+        ElMessage.error('用户名已存在')
+        return
+      }
+    }
+    // 其他错误使用通用提示
+    ElMessage.error(error.message )
   } finally {
     loading.value = false
   }

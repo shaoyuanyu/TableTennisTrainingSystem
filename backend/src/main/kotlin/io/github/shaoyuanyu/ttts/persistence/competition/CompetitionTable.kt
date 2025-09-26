@@ -1,0 +1,35 @@
+package io.github.shaoyuanyu.ttts.persistence.competition
+
+import io.github.shaoyuanyu.ttts.persistence.campus.CampusTable
+import kotlinx.datetime.LocalDate
+import org.jetbrains.exposed.v1.core.Column
+import org.jetbrains.exposed.v1.core.ReferenceOption
+import org.jetbrains.exposed.v1.core.dao.id.UUIDTable
+import org.jetbrains.exposed.v1.datetime.date
+
+object CompetitionTable : UUIDTable("competition") {
+    // 比赛名称
+    val name: Column<String> = varchar("name", 255)
+    
+    // 比赛类型（自定义）
+    val type: Column<String> = varchar("type", 50)
+
+    // 比赛所属校区
+    val campus = reference("campus", CampusTable, ReferenceOption.CASCADE)
+    
+    // 比赛日期
+    val date: Column<LocalDate> = date("date")
+    
+    // 报名截止日期
+    val registrationDeadline: Column<LocalDate> = date("registration_deadline")
+
+    // 状态
+    // "未开始"、"进行中"、"已结束"
+    val status: Column<String> = varchar("status", 32)
+    
+    // 报名费用
+    val fee: Column<Float> = float("fee")
+    
+    // 比赛描述
+    val description: Column<String> = text("description")
+}

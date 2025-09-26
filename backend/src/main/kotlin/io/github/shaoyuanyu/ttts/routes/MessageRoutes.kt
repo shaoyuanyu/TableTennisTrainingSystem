@@ -3,17 +3,15 @@ package io.github.shaoyuanyu.ttts.routes
 import io.github.shaoyuanyu.ttts.dto.message.CreateMessageRequest
 import io.github.shaoyuanyu.ttts.dto.message.MessageListResponse
 import io.github.shaoyuanyu.ttts.dto.message.UnreadCountResponse
-import io.github.shaoyuanyu.ttts.dto.user.UserSession
 import io.github.shaoyuanyu.ttts.exceptions.BadRequestException
-import io.github.shaoyuanyu.ttts.exceptions.UnauthorizedException
 import io.github.shaoyuanyu.ttts.persistence.MessageService
+import io.github.shaoyuanyu.ttts.utils.getUserIdFromCall
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import io.ktor.server.sessions.*
 import org.slf4j.LoggerFactory
 
 private val logger = LoggerFactory.getLogger("io.github.shaoyuanyu.ttts.routes.MessageRoutes")
@@ -35,7 +33,7 @@ fun Application.messageRoutes(messageService: MessageService) {
             }
 
             // 发送消息（当前版本仅限管理员）
-            authenticate("auth-session-super-admin") {
+            authenticate("auth-session-admin") {
                 sendMessage(messageService)
             }
         }
@@ -49,13 +47,7 @@ fun Application.messageRoutes(messageService: MessageService) {
  */
 fun Route.getMessages(messageService: MessageService) {
     get {
-        // 从会话中获取用户ID，如果未登录则抛出异常
-        val userId = call.sessions.get<UserSession>().let {
-            if (it == null) {
-                throw UnauthorizedException("未登录")
-            }
-            it.userId
-        }
+        val userId = getUserIdFromCall(call)
 
         val type = call.request.queryParameters["type"]
         val unreadOnly = call.request.queryParameters["unreadOnly"]?.toBoolean() ?: false
@@ -93,13 +85,7 @@ fun Route.getMessages(messageService: MessageService) {
  */
 fun Route.getUnreadCount(messageService: MessageService) {
     get("/unread-count") {
-        // 从会话中获取用户ID，如果未登录则抛出异常
-        val userId = call.sessions.get<UserSession>().let {
-            if (it == null) {
-                throw UnauthorizedException("未登录")
-            }
-            it.userId
-        }
+        val userId = getUserIdFromCall(call)
 
         val count = messageService.getUnreadCount(userId)
         call.respond(HttpStatusCode.OK, UnreadCountResponse(count))
@@ -113,13 +99,7 @@ fun Route.getUnreadCount(messageService: MessageService) {
  */
 fun Route.sendMessage(messageService: MessageService) {
     post {
-        // 从会话中获取用户ID，如果未登录则抛出异常
-        val userId = call.sessions.get<UserSession>().let {
-            if (it == null) {
-                throw UnauthorizedException("未登录")
-            }
-            it.userId
-        }
+        val userId = getUserIdFromCall(call)
 
         val request = call.receive<CreateMessageRequest>()
 
@@ -143,13 +123,7 @@ fun Route.sendMessage(messageService: MessageService) {
  */
 fun Route.markMessageAsRead(messageService: MessageService) {
     put("/{id}/read") {
-        // 从会话中获取用户ID，如果未登录则抛出异常
-        val userId = call.sessions.get<UserSession>().let {
-            if (it == null) {
-                throw UnauthorizedException("未登录")
-            }
-            it.userId
-        }
+        val userId = getUserIdFromCall(call)
 
         val messageId = call.parameters["id"]
             ?: throw BadRequestException("Message ID is required")
@@ -167,13 +141,7 @@ fun Route.markMessageAsRead(messageService: MessageService) {
  */
 fun Route.markAllMessagesAsRead(messageService: MessageService) {
     put("/read-all") {
-        // 从会话中获取用户ID，如果未登录则抛出异常
-        val userId = call.sessions.get<UserSession>().let {
-            if (it == null) {
-                throw UnauthorizedException("未登录")
-            }
-            it.userId
-        }
+        val userId = getUserIdFromCall(call)
 
         // 获取用户所有未读消息并标记为已读
         val (messages, _) = messageService.getUserMessages(
@@ -210,13 +178,7 @@ fun Route.markAllMessagesAsRead(messageService: MessageService) {
  */
 fun Route.deleteMessage(messageService: MessageService) {
     delete("/{id}") {
-        // 从会话中获取用户ID，如果未登录则抛出异常
-        val userId = call.sessions.get<UserSession>().let {
-            if (it == null) {
-                throw UnauthorizedException("未登录")
-            }
-            it.userId
-        }
+        val userId = getUserIdFromCall(call)
 
         val messageId = call.parameters["id"]
             ?: throw BadRequestException("Message ID is required")

@@ -1,7 +1,7 @@
 <template>
   <div class="coach-dashboard">
     <!-- 欢迎横幅 -->
-    <div class="welcome-banner">
+    <div class="welcome-banner glass-card-base glass-card-base--enhanced">
       <div class="banner-left">
         <div class="welcome-content">
           <h1 class="welcome-title">{{ getWelcomeMessage() }}，{{ userStore.userName }}教练！</h1>
@@ -36,45 +36,19 @@
       </div>
     </div>
 
-    <!-- 收入统计卡片 -->
-    <el-row :gutter="24" class="stats-row">
-      <el-col :xs="12" :sm="6" v-for="stat in coachStats" :key="stat.key">
-        <el-card class="stat-card" shadow="hover">
-          <div class="stat-content">
-            <div class="stat-icon" :style="{ background: stat.gradient }">
-              <component :is="stat.icon" />
-            </div>
-            <div class="stat-info">
-              <div class="stat-value">{{ stat.value }}</div>
-              <div class="stat-label">{{ stat.label }}</div>
-              <div class="stat-trend" :class="stat.trend">
-                <el-icon v-if="stat.trend === 'up'">
-                  <TrendCharts />
-                </el-icon>
-                <span>{{ stat.trendText }}</span>
-              </div>
-            </div>
-          </div>
-        </el-card>
-      </el-col>
-    </el-row>
-
     <!-- 主要功能区域 -->
     <el-row :gutter="24" class="main-content">
       <!-- 左侧内容 -->
       <el-col :xs="24" :lg="16">
         <!-- 今日课程安排 -->
-        <el-card class="content-card schedule-card" shadow="hover">
-          <template #header>
-            <div class="card-header">
-              <div class="header-left">
-                <el-icon class="header-icon">
-                  <Calendar />
-                </el-icon>
-                <span>今日课程安排</span>
-              </div>
-              <el-button type="primary" size="small" @click="goToSchedule">完整课表</el-button>
-            </div>
+        <GlassCard
+          title="今日课程安排"
+          icon="🗓️"
+          variant="content"
+          class="content-card schedule-card"
+        >
+          <template #actions>
+            <PrimaryButton size="sm" to="/coach/schedule">完整课表</PrimaryButton>
           </template>
 
           <div v-if="todaySchedule.length > 0" class="schedule-timeline">
@@ -90,9 +64,7 @@
                 </div>
               </div>
               <div class="timeline-status">
-                <el-button v-if="item.status === 'upcoming'" size="small" type="primary">
-                  开始授课
-                </el-button>
+                <PrimaryButton v-if="item.status === 'upcoming'" size="sm">开始授课</PrimaryButton>
                 <el-tag v-else :type="getStatusType(item.status)" size="small">
                   {{ getStatusText(item.status) }}
                 </el-tag>
@@ -105,27 +77,24 @@
               <template #image>
                 <div class="empty-icon">📚</div>
               </template>
-              <el-button type="primary" @click="goToScheduleManagement">安排课程</el-button>
+              <PrimaryButton to="/coach/schedule-management">安排课程</PrimaryButton>
             </el-empty>
           </div>
-        </el-card>
+        </GlassCard>
 
         <!-- 我的学员 -->
-        <el-card class="content-card students-card" shadow="hover">
-          <template #header>
-            <div class="card-header">
-              <div class="header-left">
-                <el-icon class="header-icon">
-                  <UserFilled />
-                </el-icon>
-                <span>我的学员</span>
-              </div>
-              <el-link type="primary" @click="goToStudents">管理学员</el-link>
-            </div>
+        <GlassCard
+          title="我的学员"
+          icon="👨‍🎓"
+          variant="content"
+          class="content-card students-card"
+        >
+          <template #actions>
+            <el-link type="primary" @click="goToStudents">管理学员</el-link>
           </template>
 
           <div class="students-grid">
-            <div v-for="student in myStudents" :key="student.id" class="student-card">
+            <div v-for="student in myStudents" :key="student.id" class="student-card glass-card-base glass-card-base--minimal">
               <div class="student-header">
                 <el-avatar :size="40" :src="student.avatar">
                   <el-icon>
@@ -157,70 +126,63 @@
                 </div>
               </div>
               <div class="student-action">
-                <el-button size="small" @click="viewStudentDetail(student)">查看详情</el-button>
+                <OutlineButton size="sm" @click="viewStudentDetail(student)">查看详情</OutlineButton>
               </div>
             </div>
           </div>
-        </el-card>
+        </GlassCard>
 
         <!-- 收入分析 -->
-        <el-card class="content-card income-chart-card" shadow="hover">
-          <template #header>
-            <div class="card-header">
-              <div class="header-left">
-                <el-icon class="header-icon">
-                  <TrendCharts />
-                </el-icon>
-                <span>收入趋势</span>
-              </div>
-              <div class="header-actions">
-                <el-radio-group v-model="incomeTimeRange" size="small">
-                  <el-radio-button label="week">7天</el-radio-button>
-                  <el-radio-button label="month">30天</el-radio-button>
-                  <el-radio-button label="quarter">3个月</el-radio-button>
-                </el-radio-group>
-              </div>
-            </div>
+        <GlassCard
+          title="收入趋势"
+          icon="💰"
+          variant="content"
+          class="content-card income-chart-card"
+        >
+          <template #actions>
+            <el-radio-group v-model="incomeTimeRange" size="small">
+              <el-radio-button label="week">7天</el-radio-button>
+              <el-radio-button label="month">30天</el-radio-button>
+              <el-radio-button label="quarter">3个月</el-radio-button>
+            </el-radio-group>
           </template>
+
           <div class="income-overview">
             <div class="income-summary">
-              <div class="summary-item">
+              <div class="summary-item glass-card-base glass-card-base--minimal">
                 <span class="summary-label">本月收入</span>
                 <span class="summary-value">¥{{ monthlyIncome.toLocaleString() }}</span>
                 <span class="summary-trend up">+12.5%</span>
               </div>
-              <div class="summary-item">
+              <div class="summary-item glass-card-base glass-card-base--minimal">
                 <span class="summary-label">课程单价</span>
                 <span class="summary-value">¥{{ averageFee }}</span>
                 <span class="summary-trend stable">持平</span>
               </div>
-              <div class="summary-item">
+              <div class="summary-item glass-card-base glass-card-base--minimal">
                 <span class="summary-label">学员满意度</span>
                 <span class="summary-value">{{ satisfaction }}%</span>
                 <span class="summary-trend up">+2.3%</span>
               </div>
             </div>
             <div class="income-chart">
-              <div class="chart-placeholder">📈 收入趋势图表区域</div>
+              <div class="chart-placeholder glass-card-base glass-card-base--minimal">📈 收入趋势图表区域</div>
             </div>
           </div>
-        </el-card>
+        </GlassCard>
       </el-col>
 
       <!-- 右侧边栏 -->
       <el-col :xs="24" :lg="8">
         <!-- 教学评价 -->
-        <el-card class="sidebar-card evaluation-card" shadow="hover">
-          <template #header>
-            <div class="card-header">
-              <el-icon class="header-icon">
-                <Star />
-              </el-icon>
-              <span>学员评价</span>
-            </div>
-          </template>
+        <GlassCard
+          title="学员评价"
+          icon="⭐"
+          variant="display"
+          class="sidebar-card evaluation-card"
+        >
           <div class="evaluation-overview">
-            <div class="rating-summary">
+            <div class="rating-summary glass-card-base glass-card-base--minimal">
               <div class="overall-rating">
                 <span class="rating-value">{{ overallRating }}</span>
                 <div class="rating-stars">
@@ -231,11 +193,7 @@
             </div>
             <div class="recent-evaluations">
               <div class="evaluation-title">最新评价</div>
-              <div
-                v-for="evaluation in recentEvaluations"
-                :key="evaluation.id"
-                class="evaluation-item"
-              >
+              <div v-for="evaluation in recentEvaluations" :key="evaluation.id" class="evaluation-item glass-card-base glass-card-base--minimal">
                 <div class="evaluation-header">
                   <span class="student-name">{{ evaluation.studentName }}</span>
                   <el-rate :model-value="evaluation.rating" disabled size="small" />
@@ -245,25 +203,21 @@
               </div>
             </div>
           </div>
-        </el-card>
+        </GlassCard>
 
         <!-- 课程申请 -->
-        <el-card class="sidebar-card applications-card" shadow="hover">
-          <template #header>
-            <div class="card-header">
-              <el-icon class="header-icon">
-                <Bell />
-              </el-icon>
-              <span>课程申请</span>
-              <el-badge :value="pendingApplications.length" class="badge" />
-            </div>
+        <GlassCard
+          title="课程申请"
+          icon="📋"
+          variant="display"
+          class="sidebar-card applications-card"
+        >
+          <template #actions>
+            <el-badge :value="pendingApplications.length" class="badge" />
           </template>
+
           <div class="applications-list">
-            <div
-              v-for="application in pendingApplications"
-              :key="application.id"
-              class="application-item"
-            >
+            <div v-for="application in pendingApplications" :key="application.id" class="application-item glass-card-base glass-card-base--minimal">
               <div class="application-info">
                 <div class="student-name">{{ application.studentName }}</div>
                 <div class="application-details">
@@ -272,12 +226,8 @@
                 </div>
               </div>
               <div class="application-actions">
-                <el-button size="small" type="success" @click="approveApplication(application)">
-                  同意
-                </el-button>
-                <el-button size="small" type="danger" @click="rejectApplication(application)">
-                  拒绝
-                </el-button>
+                <OutlineButton size="sm" color="success" @click="approveApplication(application)">同意</OutlineButton>
+                <OutlineButton size="sm" color="danger" @click="rejectApplication(application)">拒绝</OutlineButton>
               </div>
             </div>
           </div>
@@ -288,45 +238,33 @@
               </template>
             </el-empty>
           </div>
-        </el-card>
+        </GlassCard>
 
         <!-- 快捷操作 -->
-        <el-card class="sidebar-card actions-card" shadow="hover">
-          <template #header>
-            <div class="card-header">
-              <el-icon class="header-icon">
-                <Operation />
-              </el-icon>
-              <span>快捷操作</span>
-            </div>
-          </template>
+        <GlassCard
+          title="快捷操作"
+          icon="⚡"
+          variant="display"
+          class="sidebar-card actions-card"
+        >
           <div class="quick-actions">
-            <el-button
-              v-for="action in quickActions"
-              :key="action.key"
-              :type="action.type"
-              @click="action.handler"
-              class="action-button"
-              size="large"
-            >
-              <template #icon>
+            <OutlineButton v-for="action in quickActions" :key="action.key" :color="action.color"
+              @click="action.handler" class="action-button" size="lg">
+              <el-icon style="margin-right:8px">
                 <component :is="action.icon" />
-              </template>
+              </el-icon>
               {{ action.label }}
-            </el-button>
+            </OutlineButton>
           </div>
-        </el-card>
+        </GlassCard>
 
         <!-- 本月统计 -->
-        <el-card class="sidebar-card monthly-stats-card" shadow="hover">
-          <template #header>
-            <div class="card-header">
-              <el-icon class="header-icon">
-                <DataAnalysis />
-              </el-icon>
-              <span>本月统计</span>
-            </div>
-          </template>
+        <GlassCard
+          title="本月统计"
+          icon="📊"
+          variant="display"
+          class="sidebar-card monthly-stats-card"
+        >
           <div class="monthly-stats">
             <div v-for="stat in monthlyStats" :key="stat.key" class="monthly-stat-item">
               <div class="stat-info">
@@ -338,27 +276,39 @@
               </div>
             </div>
           </div>
-        </el-card>
+        </GlassCard>
       </el-col>
     </el-row>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { useUserStore } from '@/stores/user'
+import {onMounted, ref} from 'vue'
+import {useRouter} from 'vue-router'
+import {useUserStore} from '@/stores/user'
 import dayjs from 'dayjs'
+import {OutlineButton, PrimaryButton} from '@/components/buttons'
 import {
-  User,
+  Bell,
   Calendar,
+  DataAnalysis,
+  Operation,
   Star,
   TrendCharts,
+  User,
   UserFilled,
-  Bell,
-  Operation,
-  DataAnalysis,
 } from '@element-plus/icons-vue'
+// 导入API函数
+import {
+  getCoachStats,
+  getTodayClasses,
+  getCoachStudents,
+  getPendingApplications
+} from '@/api/coach'
+import { getCoachCurrentStudents } from '@/api/mutualSelection'
+import { getCoachSchedule } from '@/api/courses'
+// 导入玻璃卡片组件
+import GlassCard from '@/components/cards/base/GlassCard.vue'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -370,6 +320,7 @@ const averageFee = ref(150)
 const satisfaction = ref(94)
 const overallRating = ref(4.8)
 const evaluationCount = ref(156)
+const loading = ref(false)
 
 const todayStats = ref({
   courses: 5,
@@ -418,82 +369,10 @@ const coachStats = ref([
 ])
 
 // 今日课程安排
-const todaySchedule = ref([
-  {
-    id: 1,
-    time: '09:00',
-    title: '基础训练课',
-    student: '小明',
-    type: '基础训练',
-    location: '训练室A',
-    fee: 150,
-    status: 'upcoming',
-  },
-  {
-    id: 2,
-    time: '11:00',
-    title: '技术提升课',
-    student: '小红',
-    type: '技术提升',
-    location: '训练室B',
-    fee: 200,
-    status: 'upcoming',
-  },
-  {
-    id: 3,
-    time: '14:00',
-    title: '比赛训练',
-    student: '小华',
-    type: '比赛训练',
-    location: '比赛厅',
-    fee: 250,
-    status: 'completed',
-  },
-])
+const todaySchedule = ref([])
 
 // 我的学员
-const myStudents = ref([
-  {
-    id: 1,
-    name: '小明',
-    level: 'B+',
-    status: '活跃',
-    courses: 24,
-    progress: 78,
-    rating: 4.9,
-    avatar: '',
-  },
-  {
-    id: 2,
-    name: '小红',
-    level: 'A-',
-    status: '活跃',
-    courses: 18,
-    progress: 85,
-    rating: 4.8,
-    avatar: '',
-  },
-  {
-    id: 3,
-    name: '小华',
-    level: 'C+',
-    status: '请假',
-    courses: 12,
-    progress: 65,
-    rating: 4.7,
-    avatar: '',
-  },
-  {
-    id: 4,
-    name: '小李',
-    level: 'B',
-    status: '活跃',
-    courses: 20,
-    progress: 72,
-    rating: 4.6,
-    avatar: '',
-  },
-])
+const myStudents = ref([])
 
 // 最新评价
 const recentEvaluations = ref([
@@ -521,48 +400,35 @@ const recentEvaluations = ref([
 ])
 
 // 待处理申请
-const pendingApplications = ref([
-  {
-    id: 1,
-    studentName: '张同学',
-    courseType: '基础训练',
-    preferredTime: '周三 14:00',
-  },
-  {
-    id: 2,
-    studentName: '李同学',
-    courseType: '技术提升',
-    preferredTime: '周五 16:00',
-  },
-])
+const pendingApplications = ref([])
 
 // 快捷操作
 const quickActions = ref([
   {
     key: 'schedule',
     label: '查看课表',
-    type: 'primary',
+    color: 'primary',
     icon: Calendar,
     handler: () => router.push('/coach/schedule'),
   },
   {
     key: 'students',
     label: '学员管理',
-    type: 'success',
+    color: 'success',
     icon: UserFilled,
     handler: () => router.push('/coach/students'),
   },
   {
     key: 'applications',
     label: '申请审批',
-    type: 'warning',
+    color: 'warning',
     icon: Bell,
     handler: () => router.push('/coach/applications'),
   },
   {
     key: 'feedback',
     label: '学员反馈',
-    type: 'info',
+    color: 'info',
     icon: Star,
     handler: () => router.push('/coach/feedback'),
   },
@@ -627,14 +493,6 @@ const formatTime = (date) => {
 }
 
 // 导航方法
-const goToSchedule = () => {
-  router.push('/coach/schedule')
-}
-
-const goToScheduleManagement = () => {
-  router.push('/coach/schedule-management')
-}
-
 const goToStudents = () => {
   router.push('/coach/students')
 }
@@ -653,8 +511,77 @@ const rejectApplication = (application) => {
   // 实际应用中这里会调用API
 }
 
+// 获取今日课程安排
+const fetchTodaySchedule = async () => {
+  try {
+    const schedule = await getTodayClasses()
+    todaySchedule.value = schedule.map(item => ({
+      id: item.id,
+      time: dayjs(item.startTime).format('HH:mm'),
+      title: item.courseName || '训练课程',
+      student: item.studentName,
+      type: item.courseType || '基础训练',
+      location: item.location || '训练室',
+      fee: item.fee || 0,
+      status: item.status || 'upcoming',
+    }))
+  } catch (error) {
+    console.error('获取今日课程安排失败:', error)
+  }
+}
+
+// 获取我的学员
+const fetchMyStudents = async () => {
+  try {
+    const students = await getCoachCurrentStudents()
+    myStudents.value = students.map(student => ({
+      id: student.id,
+      name: student.name,
+      level: student.level || '暂无',
+      status: student.status || '活跃',
+      courses: student.completedCourses || 0,
+      progress: student.progress || 0,
+      rating: student.rating || 0,
+      avatar: student.avatar || '',
+    }))
+  } catch (error) {
+    console.error('获取我的学员失败:', error)
+  }
+}
+
+// 获取待处理申请
+const fetchPendingApplications = async () => {
+  try {
+    const applications = await getPendingApplications()
+    pendingApplications.value = applications.map(app => ({
+      id: app.id,
+      studentName: app.studentName,
+      courseType: app.courseType || '基础训练',
+      preferredTime: app.preferredTime || '待定',
+    }))
+  } catch (error) {
+    console.error('获取待处理申请失败:', error)
+  }
+}
+
+// 加载所有数据
+const loadData = async () => {
+  loading.value = true
+  try {
+    await Promise.all([
+      fetchTodaySchedule(),
+      fetchMyStudents(),
+      fetchPendingApplications()
+    ])
+  } catch (error) {
+    console.error('加载数据失败:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
 onMounted(() => {
-  // 可以在这里加载教练数据
+  loadData()
 })
 </script>
 
@@ -667,7 +594,6 @@ onMounted(() => {
 
 /* 欢迎横幅 */
 .welcome-banner {
-  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
   border-radius: 20px;
   padding: 40px;
   color: white;
@@ -676,6 +602,7 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   box-shadow: 0 10px 30px rgba(255, 152, 0, 0.3);
+  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
 }
 
 .banner-left {
@@ -795,9 +722,6 @@ onMounted(() => {
 /* 内容卡片 */
 .content-card,
 .sidebar-card {
-  border: none;
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   margin-bottom: 24px;
 }
 

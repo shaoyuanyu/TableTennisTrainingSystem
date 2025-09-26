@@ -79,12 +79,12 @@
         </el-form-item>
 
         <el-form-item>
-          <el-checkbox v-model="loginForm.remember">记住密码</el-checkbox>
-          <el-link type="primary" class="forgot-password">忘记密码？</el-link>
-        </el-form-item>
-
-        <el-form-item>
-          <el-button type="primary" class="login-button btn-modern btn-primary btn-large" :loading="loading" @click="handleLogin">
+          <el-button
+            type="primary"
+            class="login-button btn-modern btn-primary btn-large"
+            :loading="loading"
+            @click="handleLogin"
+          >
             登录
           </el-button>
         </el-form-item>
@@ -103,11 +103,11 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
-import { useRouter } from 'vue-router'
-import { useUserStore } from '@/stores/user'
-import { ElMessage } from 'element-plus'
-import { User, Lock } from '@element-plus/icons-vue'
+import {reactive, ref} from 'vue'
+import {useRouter} from 'vue-router'
+import {useUserStore} from '@/stores/user'
+import {ElMessage} from 'element-plus'
+import {Lock, User} from '@element-plus/icons-vue'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -122,7 +122,6 @@ const loading = ref(false)
 const loginForm = reactive({
   username: '',
   password: '',
-  remember: false,
 })
 
 // 表单验证规则
@@ -150,15 +149,15 @@ const handleLogin = async () => {
     // 使用用户store的login方法
     const result = await userStore.login({
       username: loginForm.username,
-      password: loginForm.password
+      password: loginForm.password,
     })
 
     if (result.success) {
       ElMessage.success('登录成功')
-      
+
       // 等待更长时间确保session完全建立和用户状态更新完成
-      await new Promise(resolve => setTimeout(resolve, 500))
-      
+      await new Promise((resolve) => setTimeout(resolve, 500))
+
       // 开发环境下输出调试信息
       if (import.meta.env.DEV) {
         console.log('登录成功后用户状态:', {
@@ -166,22 +165,21 @@ const handleLogin = async () => {
           userRole: userStore.userRole,
           hasUserInfo: !!userStore.userInfo.id,
           originalRole: result.user.role,
-          normalizedRole: userStore.userRole
+          normalizedRole: userStore.userRole,
         })
       }
-      
+
       // 根据用户角色跳转到对应页面
       const { getDefaultHomePage } = await import('@/utils/permissions')
       const homePage = getDefaultHomePage(userStore.userRole) // 使用标准化后的角色
-      
+
       console.log('即将跳转到首页:', homePage)
       await router.push(homePage)
     } else {
-      ElMessage.error(result.message )
+      ElMessage.error(result.message)
     }
   } catch (error) {
     console.error('登录错误:', error)
-    
   } finally {
     loading.value = false
   }
@@ -524,6 +522,16 @@ const goToRegister = (type) => {
   }
 }
 
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%) translateY(-100%) rotate(45deg);
+  }
+
+  100% {
+    transform: translateX(100%) translateY(100%) rotate(45deg);
+  }
+}
+
 .login-box {
   background: var(--white-alpha-95);
   backdrop-filter: var(--blur-xl);
@@ -579,16 +587,6 @@ const goToRegister = (type) => {
   z-index: 1;
 }
 
-@keyframes shimmer {
-  0% {
-    transform: translateX(-100%) translateY(-100%) rotate(45deg);
-  }
-
-  100% {
-    transform: translateX(100%) translateY(100%) rotate(45deg);
-  }
-}
-
 .login-title {
   font-size: var(--font-size-4xl);
   font-weight: var(--font-weight-bold);
@@ -641,12 +639,6 @@ const goToRegister = (type) => {
   box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
 }
 
-.forgot-password {
-  margin-left: auto;
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-}
-
 .login-button {
   width: 100%;
   height: 50px;
@@ -656,6 +648,9 @@ const goToRegister = (type) => {
   position: relative;
   overflow: hidden;
   transition: var(--transition-normal);
+  background: linear-gradient(135deg, #667eea, #764ba2) !important;
+  border: none !important;
+  box-shadow: 0 8px 24px rgba(118, 75, 162, 0.35) !important;
 }
 
 .login-button:active {

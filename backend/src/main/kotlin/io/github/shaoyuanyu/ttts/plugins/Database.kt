@@ -4,10 +4,15 @@ import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import io.github.shaoyuanyu.ttts.persistence.campus.CampusTable
 import io.github.shaoyuanyu.ttts.persistence.coach.CoachTable
+import io.github.shaoyuanyu.ttts.persistence.competition.CompetitionArrangementTable
+import io.github.shaoyuanyu.ttts.persistence.competition.CompetitionSignupTable
+import io.github.shaoyuanyu.ttts.persistence.competition.CompetitionTable
 import io.github.shaoyuanyu.ttts.persistence.message.MessageTable
+import io.github.shaoyuanyu.ttts.persistence.mutual_selection.MutualSelectionTable
 import io.github.shaoyuanyu.ttts.persistence.recharge.RechargeTable
 import io.github.shaoyuanyu.ttts.persistence.student.StudentTable
-import io.github.shaoyuanyu.ttts.persistence.student_coach.StudentCoachRelationTable
+import io.github.shaoyuanyu.ttts.persistence.table.TableTable
+import io.github.shaoyuanyu.ttts.persistence.course.CourseTable
 import io.github.shaoyuanyu.ttts.persistence.user.UserTable
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
@@ -38,13 +43,18 @@ fun configureDatabase(
     // 第一次transaction与数据库建立连接
     // 检查table并创建缺失的，DSL "CREATE TABLE IF NOT EXISTS"
     transaction(database) {
+        SchemaUtils.create(CampusTable)
         SchemaUtils.create(UserTable)
         SchemaUtils.create(CoachTable)
         SchemaUtils.create(StudentTable)
-        SchemaUtils.create(StudentCoachRelationTable)
-        SchemaUtils.create(CampusTable)
+        SchemaUtils.create(MutualSelectionTable)
         SchemaUtils.create(MessageTable)
         SchemaUtils.create(RechargeTable)
+        SchemaUtils.create(TableTable)
+        SchemaUtils.create(CourseTable)
+        SchemaUtils.create(CompetitionTable)
+        SchemaUtils.create(CompetitionSignupTable)
+        SchemaUtils.create(CompetitionArrangementTable)
     }
 
     return database

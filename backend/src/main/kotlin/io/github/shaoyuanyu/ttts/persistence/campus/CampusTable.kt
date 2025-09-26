@@ -9,7 +9,7 @@ import kotlin.time.Instant
 
 object CampusTable : IntIdTable("campus") {
 
-    val campus_name: Column<String> = varchar("campus_name", 64)
+    val campus_name: Column<String> = varchar("campus_name", 64).uniqueIndex()
 
     val address: Column<String> = varchar("address", 64)
 
@@ -23,6 +23,8 @@ object CampusTable : IntIdTable("campus") {
     val balance: Column<Float> = float("balance").default(0.0f)
 
     val is_central: Column<Boolean> = bool("is_central").default(false)
+
+    val tableNumber: Column<Int> = integer("table_number")
 
     val created_at: Column<Instant> = timestamp("created_at")
 

@@ -3,7 +3,9 @@
 package io.github.shaoyuanyu.ttts.persistence.user
 
 import io.github.shaoyuanyu.ttts.dto.user.UserRole
+import io.github.shaoyuanyu.ttts.persistence.campus.CampusTable
 import org.jetbrains.exposed.v1.core.Column
+import org.jetbrains.exposed.v1.core.ReferenceOption
 import org.jetbrains.exposed.v1.core.dao.id.UUIDTable
 import org.jetbrains.exposed.v1.datetime.timestamp
 import kotlin.time.ExperimentalTime
@@ -27,8 +29,7 @@ object UserTable : UUIDTable("user") {
 
     val email: Column<String> = varchar("email", 128)
 
-    // TODO: 使用 foreign key
-    val campus_id: Column<Int> = integer("campus_id")
+    val campus = reference("campus", CampusTable, ReferenceOption.CASCADE)
 
     val role: Column<UserRole> = customEnumeration(
         name = "role",

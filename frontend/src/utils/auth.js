@@ -1,4 +1,4 @@
-import { useUserStore } from '@/stores/user'
+import {useUserStore} from '@/stores/user'
 import router from '@/router'
 
 /**
@@ -7,7 +7,7 @@ import router from '@/router'
  */
 export async function initializeAuth() {
   const userStore = useUserStore()
-  
+
   try {
     // 如果本地有用户信息，尝试验证
     if (userStore.isLoggedIn) {
@@ -31,12 +31,12 @@ export async function initializeAuth() {
  */
 export function requireAuth() {
   const userStore = useUserStore()
-  
+
   if (!userStore.isLoggedIn) {
     router.push('/login')
     return false
   }
-  
+
   return true
 }
 
@@ -45,21 +45,21 @@ export function requireAuth() {
  */
 export function requireRole(roles) {
   const userStore = useUserStore()
-  
+
   if (!userStore.isLoggedIn) {
     router.push('/login')
     return false
   }
-  
-  const hasRole = Array.isArray(roles) 
+
+  const hasRole = Array.isArray(roles)
     ? roles.includes(userStore.userRole)
     : userStore.userRole === roles
-    
+
   if (!hasRole) {
     router.push('/dashboard')
     return false
   }
-  
+
   return true
 }
 
@@ -93,5 +93,5 @@ export default {
   requireRole,
   getAuthToken,
   isAdmin,
-  logout
+  logout,
 }

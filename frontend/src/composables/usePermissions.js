@@ -1,6 +1,6 @@
-import { computed, ref, watchEffect } from 'vue'
-import { useUserStore } from '@/stores/user'
-import { hasPagePermission, hasActionPermission, getAccessibleMenus } from '@/utils/permissions'
+import {computed, ref, watchEffect} from 'vue'
+import {useUserStore} from '@/stores/user'
+import {getAccessibleMenus, hasActionPermission, hasPagePermission} from '@/utils/permissions'
 
 /**
  * 权限管理 Composable
@@ -17,14 +17,14 @@ export function usePermissions() {
     isCampusAdmin: false,
     isStudent: false,
     isCoach: false,
-    hasManagementAccess: false
+    hasManagementAccess: false,
   })
 
   // 监听用户状态变化，更新缓存
   watchEffect(() => {
     const userRole = userStore.userRole
     const isLoggedIn = userStore.isLoggedIn
-    
+
     cachedPermissions.value = {
       isLoggedIn,
       userRole,
@@ -32,7 +32,7 @@ export function usePermissions() {
       isCampusAdmin: userStore.isCampusAdmin,
       isStudent: userStore.isStudent,
       isCoach: userStore.isCoach,
-      hasManagementAccess: userStore.isSuperAdmin || userStore.isCampusAdmin
+      hasManagementAccess: userStore.isSuperAdmin || userStore.isCampusAdmin,
     }
   })
 
@@ -77,13 +77,17 @@ export function usePermissions() {
    */
   const hasAnyPermission = (permissions) => {
     if (!cachedPermissions.value.isLoggedIn) return false
-    return permissions.some(permission => {
+    return permissions.some((permission) => {
       if (typeof permission === 'string') {
         // 页面权限
         return hasPagePermission(permission, cachedPermissions.value.userRole)
       } else if (typeof permission === 'object') {
         // 操作权限
-        return hasActionPermission(permission.action, cachedPermissions.value.userRole, permission.context)
+        return hasActionPermission(
+          permission.action,
+          cachedPermissions.value.userRole,
+          permission.context,
+        )
       }
       return false
     })
@@ -94,13 +98,17 @@ export function usePermissions() {
    */
   const hasAllPermissions = (permissions) => {
     if (!cachedPermissions.value.isLoggedIn) return false
-    return permissions.every(permission => {
+    return permissions.every((permission) => {
       if (typeof permission === 'string') {
         // 页面权限
         return hasPagePermission(permission, cachedPermissions.value.userRole)
       } else if (typeof permission === 'object') {
         // 操作权限
-        return hasActionPermission(permission.action, cachedPermissions.value.userRole, permission.context)
+        return hasActionPermission(
+          permission.action,
+          cachedPermissions.value.userRole,
+          permission.context,
+        )
       }
       return false
     })
@@ -155,7 +163,7 @@ export const permissionDirective = {
   mounted(el, binding) {
     const { value } = binding
     const userStore = useUserStore()
-    
+
     if (!userStore.isLoggedIn) {
       el.style.display = 'none'
       return
@@ -165,7 +173,7 @@ export const permissionDirective = {
 
     if (Array.isArray(value)) {
       // 数组：检查是否有任意一个权限
-      hasPermission = value.some(permission => {
+      hasPermission = value.some((permission) => {
         if (typeof permission === 'string' && permission.startsWith('/')) {
           return hasPagePermission(permission, userStore.userRole)
         } else {
@@ -186,9 +194,9 @@ export const permissionDirective = {
       el.style.display = 'none'
     }
   },
-  
+
   updated(el, binding) {
     // 当绑定值更新时重新检查权限
     permissionDirective.mounted(el, binding)
-  }
+  },
 }

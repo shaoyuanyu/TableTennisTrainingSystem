@@ -1,7 +1,7 @@
 // 用户角色常量
 export const USER_ROLES = {
   SUPER_ADMIN: 'super_admin',
-  CAMPUS_ADMIN: 'campus_admin', 
+  CAMPUS_ADMIN: 'campus_admin',
   STUDENT: 'student',
   COACH: 'coach',
 }
@@ -10,14 +10,14 @@ export const USER_ROLES = {
 export function normalizeRole(role) {
   if (!role) return ''
   const roleMap = {
-    'SUPER_ADMIN': 'super_admin',
-    'CAMPUS_ADMIN': 'campus_admin',
-    'STUDENT': 'student',
-    'COACH': 'coach',
-    'super_admin': 'super_admin',
-    'campus_admin': 'campus_admin', 
-    'student': 'student',
-    'coach': 'coach'
+    SUPER_ADMIN: 'super_admin',
+    CAMPUS_ADMIN: 'campus_admin',
+    STUDENT: 'student',
+    COACH: 'coach',
+    super_admin: 'super_admin',
+    campus_admin: 'campus_admin',
+    student: 'student',
+    coach: 'coach',
   }
   return roleMap[role] || role.toLowerCase()
 }
@@ -35,10 +35,13 @@ export const PAGE_PERMISSIONS = {
   // 超级管理员页面
   '/admin/campus': [USER_ROLES.SUPER_ADMIN],
   '/admin/service': [USER_ROLES.SUPER_ADMIN],
+  '/admin/tables': [USER_ROLES.SUPER_ADMIN],
+  '/admin/tournaments': [USER_ROLES.SUPER_ADMIN],
 
   // 校区管理员页面
   '/campus/students': [USER_ROLES.CAMPUS_ADMIN],
   '/campus/coaches': [USER_ROLES.CAMPUS_ADMIN],
+  '/campus/tables': [USER_ROLES.CAMPUS_ADMIN, USER_ROLES.SUPER_ADMIN],
   '/campus/appointments': [USER_ROLES.CAMPUS_ADMIN],
   '/campus/logs': [USER_ROLES.CAMPUS_ADMIN, USER_ROLES.SUPER_ADMIN],
 
@@ -95,7 +98,7 @@ export function hasPagePermission(path, userRole) {
   // 标准化用户角色后进行检查
   const normalizedRole = normalizeRole(userRole)
   console.log('权限检查:', { path, userRole, normalizedRole, permissions })
-  
+
   // 检查是否包含标准化后的用户角色
   return permissions.includes(normalizedRole)
 }
@@ -110,32 +113,32 @@ export function hasPagePermission(path, userRole) {
 export function hasActionPermission(action, userRole, context = {}) {
   // eslint-disable-next-line no-unused-vars
   const { campusId, resourceId } = context // 为将来的扩展预留
-  
+
   // 标准化用户角色
   const normalizedRole = normalizeRole(userRole)
-  
+
   switch (action) {
     case 'manage_students':
       return normalizedRole === USER_ROLES.CAMPUS_ADMIN || normalizedRole === USER_ROLES.SUPER_ADMIN
-    
+
     case 'manage_coaches':
       return normalizedRole === USER_ROLES.CAMPUS_ADMIN || normalizedRole === USER_ROLES.SUPER_ADMIN
-    
+
     case 'manage_campus':
       return normalizedRole === USER_ROLES.SUPER_ADMIN
-    
+
     case 'approve_appointments':
       return normalizedRole === USER_ROLES.COACH
-    
+
     case 'book_training':
       return normalizedRole === USER_ROLES.STUDENT
-    
+
     case 'view_system_logs':
       return normalizedRole === USER_ROLES.SUPER_ADMIN || normalizedRole === USER_ROLES.CAMPUS_ADMIN
-    
+
     case 'export_data':
       return normalizedRole === USER_ROLES.SUPER_ADMIN
-    
+
     default:
       return false
   }
@@ -148,84 +151,87 @@ export function hasActionPermission(action, userRole, context = {}) {
  */
 export function getAccessibleMenus(userRole) {
   const menus = []
-  
+
   // 通用菜单
-  menus.push({ 
-    path: '/dashboard', 
-    title: '仪表盘', 
-    icon: 'Odometer' 
+  menus.push({
+    path: '/dashboard',
+    title: '仪表盘',
+    icon: 'Odometer',
   })
-  
+
   // 角色特定菜单
   switch (userRole) {
     case USER_ROLES.SUPER_ADMIN:
-      menus.push(
-        {
-          title: '系统管理',
-          icon: 'Setting',
-          children: [
-            { path: '/admin/campus', title: '校区管理', icon: 'OfficeBuilding' },
-            { path: '/admin/service', title: '服务状态', icon: 'CreditCard' },
-          ]
-        }
-      )
+      menus.push({
+        title: '校区管理',
+        icon: 'OfficeBuilding',
+        children: [
+          { path: '/admin/campus', title: '校区管理', icon: 'Management' },
+          { path: '/admin/students', title: '学员管理', icon: 'User' },
+          { path: '/admin/coaches', title: '教练管理', icon: 'Avatar' },
+          { path: '/admin/tables', title: '球台管理', icon: 'Management' },
+        ],
+      })
+      menus.push({
+        title: '系统管理',
+        icon: 'Setting',
+        children: [
+          { path: '/admin/service', title: '服务状态', icon: 'CreditCard' },
+          { path: '/admin/tournaments', title: '比赛管理', icon: 'Trophy' },
+        ],
+      })
       break
-      
+
     case USER_ROLES.CAMPUS_ADMIN:
-      menus.push(
-        {
-          title: '校区管理',
-          icon: 'Management',
-          children: [
-            { path: '/campus/students', title: '学员管理', icon: 'User' },
-            { path: '/campus/coaches', title: '教练管理', icon: 'Avatar' },
-            { path: '/campus/appointments', title: '预约管理', icon: 'Calendar' },
-            { path: '/campus/logs', title: '日志查询', icon: 'Document' },
-          ]
-        }
-      )
+      menus.push({
+        title: '校区管理',
+        icon: 'Management',
+        children: [
+          { path: '/campus/students', title: '学员管理', icon: 'User' },
+          { path: '/campus/coaches', title: '教练管理', icon: 'Avatar' },
+          { path: '/campus/tables', title: '球台管理', icon: 'Management' },
+          { path: '/campus/appointments', title: '预约管理', icon: 'Calendar' },
+          { path: '/campus/logs', title: '日志查询', icon: 'Document' },
+        ],
+      })
       break
-      
+
     case USER_ROLES.STUDENT:
-      menus.push(
-        {
-          title: '学员中心',
-          icon: 'User',
-          children: [
-            { path: '/student/find-coach', title: '教练查询', icon: 'Search' },
-            { path: '/student/my-coaches', title: '我的教练', icon: 'UserFilled' },
-            { path: '/student/book-training', title: '课程预约', icon: 'Calendar' },
-            { path: '/student/schedule', title: '我的课表', icon: 'Clock' },
-            { path: '/student/account-recharge', title: '账户充值', icon: 'Wallet' },
-            { path: '/student/tournament-registration', title: '比赛报名', icon: 'Trophy' },
-            { path: '/student/matches', title: '我的比赛', icon: 'Medal' },
-            { path: '/student/evaluation', title: '训练评价', icon: 'EditPen' },
-          ]
-        }
-      )
+      menus.push({
+        title: '学员中心',
+        icon: 'User',
+        children: [
+          { path: '/student/find-coach', title: '教练查询', icon: 'Search' },
+          { path: '/student/my-coaches', title: '我的教练', icon: 'UserFilled' },
+          { path: '/student/book-training', title: '课程预约', icon: 'Calendar' },
+          { path: '/student/schedule', title: '我的课表', icon: 'Clock' },
+          { path: '/student/account-recharge', title: '账户充值', icon: 'Wallet' },
+          { path: '/student/tournament-registration', title: '比赛报名', icon: 'Trophy' },
+          { path: '/student/matches', title: '我的比赛', icon: 'Medal' },
+          { path: '/student/evaluation', title: '训练评价', icon: 'EditPen' },
+        ],
+      })
       break
-      
+
     case USER_ROLES.COACH:
-      menus.push(
-        {
-          title: '教练中心',
-          icon: 'Avatar',
-          children: [
-            { path: '/coach/appointment-approval', title: '预约审核', icon: 'Checked' },
-            { path: '/coach/schedule', title: '我的课表', icon: 'Clock' },
-            { path: '/coach/student-feedback', title: '学员评价', icon: 'EditPen' },
-          ]
-        }
-      )
+      menus.push({
+        title: '教练中心',
+        icon: 'Avatar',
+        children: [
+          { path: '/coach/appointment-approval', title: '预约审核', icon: 'Checked' },
+          { path: '/coach/schedule', title: '我的课表', icon: 'Clock' },
+          { path: '/coach/student-feedback', title: '学员评价', icon: 'EditPen' },
+        ],
+      })
       break
   }
-  
+
   // 通用菜单项
   menus.push(
     { path: '/profile', title: '个人中心', icon: 'User' },
-    { path: '/messages', title: '消息中心', icon: 'Bell' }
+    { path: '/messages', title: '消息中心', icon: 'Bell' },
   )
-  
+
   return menus
 }
 
@@ -237,10 +243,10 @@ export function getAccessibleMenus(userRole) {
 export function getDefaultHomePage(userRole) {
   // eslint-disable-next-line no-unused-vars
   const _ = userRole // 避免参数未使用的警告
-  
+
   // 所有用户登录后都跳转到统一的仪表盘首页
   return '/dashboard'
-  
+
   // 如果需要按角色跳转到不同页面，可以使用以下配置：
   // const normalizedRole = normalizeRole(userRole)
   // switch (normalizedRole) {

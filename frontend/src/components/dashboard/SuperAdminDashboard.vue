@@ -1,7 +1,7 @@
 <template>
   <div class="super-admin-dashboard">
     <!-- 极简背景 - 完全移除装饰元素以提升性能 -->
-    
+
     <!-- 系统概览 -->
     <el-card class="dashboard-card overview-card" shadow="never">
       <template #header>
@@ -152,19 +152,19 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import {onMounted, ref} from 'vue'
 import {
+  Calendar,
+  CircleCloseFilled,
+  Document,
+  InfoFilled,
   Monitor,
   OfficeBuilding,
+  Setting,
+  SuccessFilled,
   UserFilled,
   Wallet,
-  Calendar,
-  Setting,
-  Document,
-  SuccessFilled,
   WarningFilled,
-  CircleCloseFilled,
-  InfoFilled,
 } from '@element-plus/icons-vue'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'

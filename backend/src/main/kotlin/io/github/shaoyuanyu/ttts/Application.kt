@@ -1,9 +1,14 @@
 package io.github.shaoyuanyu.ttts
 
 import io.github.shaoyuanyu.ttts.persistence.CampusService
+import io.github.shaoyuanyu.ttts.persistence.CoachService
+import io.github.shaoyuanyu.ttts.persistence.CourseService
 import io.github.shaoyuanyu.ttts.persistence.UserService
 import io.github.shaoyuanyu.ttts.persistence.MessageService
+import io.github.shaoyuanyu.ttts.persistence.MutualSelectionService
 import io.github.shaoyuanyu.ttts.persistence.StudentService
+import io.github.shaoyuanyu.ttts.persistence.AdminService
+import io.github.shaoyuanyu.ttts.persistence.CompetitionService
 import io.github.shaoyuanyu.ttts.plugins.configureAuthentication
 import io.github.shaoyuanyu.ttts.plugins.configureCORS
 import io.github.shaoyuanyu.ttts.plugins.configureSerialization
@@ -29,10 +34,15 @@ fun Application.module() {
     )
 
     // 创建各类服务
+    val campusService = CampusService(database)
     val userService = UserService(database)
     val messageService = MessageService(database)
-    val walletService = StudentService(database,userService)
-    val campusService = CampusService(database)
+    val studentService = StudentService(database, userService)
+    val coachService = CoachService(database, userService)
+    val mutualSelectionService = MutualSelectionService(database)
+    val courseService = CourseService(database, studentService)
+    val adminService = AdminService(database)
+    val competitionService = CompetitionService(database, studentService)
 
     // monitoring
     configureMonitoring()
@@ -51,5 +61,15 @@ fun Application.module() {
     configureStatusPages()
 
     // routing
-    configureRouting(userService, messageService, walletService, campusService)
+    configureRouting(
+        userService = userService,
+        messageService = messageService,
+        studentService = studentService,
+        campusService = campusService,
+        coachService = coachService,
+        mutualSelectionService = mutualSelectionService,
+        courseService = courseService,
+        adminService = adminService,
+        competitionService = competitionService
+    )
 }

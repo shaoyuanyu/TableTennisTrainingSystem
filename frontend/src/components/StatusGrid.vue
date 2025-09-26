@@ -1,32 +1,32 @@
 <template>
   <div class="status-grid">
-    <div 
-      v-for="(item, index) in items" 
+    <div
+      v-for="(item, index) in items"
       :key="index"
       class="status-item"
       :class="{ 'status-item--clickable': item.clickable }"
       @click="handleItemClick(item, index)"
     >
       <label>{{ item.label }}:</label>
-      
+
       <!-- 标签类型值 -->
-      <el-tag 
+      <el-tag
         v-if="item.type === 'tag'"
-        :type="item.tagType || 'primary'" 
+        :type="item.tagType || 'primary'"
         :size="item.size || 'small'"
       >
         {{ item.value }}
       </el-tag>
-      
+
       <!-- 状态类型值 -->
-      <el-tag 
+      <el-tag
         v-else-if="item.type === 'status'"
-        :type="item.status ? 'success' : 'danger'" 
+        :type="item.status ? 'success' : 'danger'"
         :size="item.size || 'small'"
       >
-        {{ item.status ? (item.trueText || '是') : (item.falseText || '否') }}
+        {{ item.status ? item.trueText || '是' : item.falseText || '否' }}
       </el-tag>
-      
+
       <!-- 普通文本值 -->
       <span v-else>{{ item.value || '无' }}</span>
     </div>
@@ -41,17 +41,17 @@ export default {
     // 格式: [{ label: '标签', value: '值', type: 'text|tag|status', tagType?: 'primary|success|warning|danger|info', status?: boolean }]
     items: {
       type: Array,
-      default: () => []
-    }
+      default: () => [],
+    },
   },
   emits: ['itemClick'],
   methods: {
     handleItemClick(item, index) {
       if (item.clickable) {
-        this.$emit('itemClick', { item, index });
+        this.$emit('itemClick', { item, index })
       }
-    }
-  }
+    },
+  },
 }
 </script>
 
@@ -122,12 +122,10 @@ export default {
 
 /* Element Plus 标签增强样式 - 与DevToolsView保持一致 */
 :deep(.el-tag) {
-  background: linear-gradient(135deg, 
-    rgba(64, 158, 255, 0.9) 0%, 
-    rgba(102, 126, 234, 0.9) 100%);
+  background: linear-gradient(135deg, rgba(64, 158, 255, 0.9) 0%, rgba(102, 126, 234, 0.9) 100%);
   color: #ffffff;
   border: 1px solid rgba(64, 158, 255, 0.8);
-  box-shadow: 
+  box-shadow:
     0 2px 8px rgba(64, 158, 255, 0.25),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
   font-weight: 600;
@@ -142,49 +140,40 @@ export default {
 }
 
 :deep(.el-tag--success) {
-  background: linear-gradient(135deg, 
-    rgba(16, 185, 129, 0.9) 0%, 
-    rgba(5, 150, 105, 0.9) 100%);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.9) 0%, rgba(5, 150, 105, 0.9) 100%);
   border-color: rgba(16, 185, 129, 0.8);
-  box-shadow: 
+  box-shadow:
     0 2px 8px rgba(16, 185, 129, 0.25),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 :deep(.el-tag--warning) {
-  background: linear-gradient(135deg, 
-    rgba(245, 158, 11, 0.9) 0%, 
-    rgba(217, 119, 6, 0.9) 100%);
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.9) 0%, rgba(217, 119, 6, 0.9) 100%);
   border-color: rgba(245, 158, 11, 0.8);
-  box-shadow: 
+  box-shadow:
     0 2px 8px rgba(245, 158, 11, 0.25),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 :deep(.el-tag--danger) {
-  background: linear-gradient(135deg, 
-    rgba(239, 68, 68, 0.9) 0%, 
-    rgba(220, 38, 127, 0.9) 100%);
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.9) 0%, rgba(220, 38, 127, 0.9) 100%);
   border-color: rgba(239, 68, 68, 0.8);
-  box-shadow: 
+  box-shadow:
     0 2px 8px rgba(239, 68, 68, 0.25),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 :deep(.el-tag--info) {
-  background: linear-gradient(135deg, 
-    rgba(99, 102, 241, 0.9) 0%, 
-    rgba(79, 70, 229, 0.9) 100%);
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.9) 0%, rgba(79, 70, 229, 0.9) 100%);
   border-color: rgba(99, 102, 241, 0.8);
-  box-shadow: 
+  box-shadow:
     0 2px 8px rgba(99, 102, 241, 0.25),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 :deep(.el-tag:hover) {
   transform: translateY(-1px) scale(1.02);
-  box-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 :deep(.el-tag::before) {
@@ -220,11 +209,11 @@ export default {
     padding: 10px 14px;
     min-height: 40px;
   }
-  
+
   .status-item label {
     font-size: 13px;
   }
-  
+
   :deep(.el-tag) {
     font-size: 12px;
     padding: 3px 8px;
@@ -239,7 +228,7 @@ export default {
     gap: 8px;
     padding: 12px;
   }
-  
+
   .status-item > *:last-child {
     align-self: flex-end;
   }
