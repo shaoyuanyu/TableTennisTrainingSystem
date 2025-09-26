@@ -233,10 +233,22 @@ class MutualSelectionService(
             if (relation.status != MutualSelectionStatus.APPROVED && relation.status != MutualSelectionStatus.ACTIVE) {
                 throw IllegalArgumentException("该关系状态不为已批准或活跃状态，无法取消")
             }
+            // 检查是否已存在相同组合的INACTIVE记录
+            val existingInactiveRelation = MutualSelectionEntity.find {
+                (MutualSelectionTable.student_id eq student.id) and
+                        (MutualSelectionTable.coach_id eq relation.coachID.id) and
+                        (MutualSelectionTable.status eq MutualSelectionStatus.INACTIVE)
+            }.firstOrNull()
 
-            // 更新关系状态为非活跃
-            relation.status = MutualSelectionStatus.INACTIVE
-            relation.endTime = Clock.System.now() // 保留但不再使用
+            if (existingInactiveRelation != null) {
+                // 如果已存在INACTIVE记录，直接删除当前关系记录
+                relation.delete()
+                // 返回已存在的INACTIVE记录
+                existingInactiveRelation.expose()
+            } else {
+                // 更新关系状态为非活跃
+                relation.status = MutualSelectionStatus.INACTIVE
+                relation.endTime = Clock.System.now() // 保留但不再使用
 
             // 更新学生和教练的计数
             relation.studentID.currentCoach -= 1
@@ -245,6 +257,7 @@ class MutualSelectionService(
             MUTUAL_SELECTION_LOGGER.info("学生取消已批准的关系完成")
 
             relation.expose()
+        }
         }
 
     /**
