@@ -182,11 +182,11 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
-  /user/users:
+  /user/allUsers:
     get:
       tags: [user]
       summary: 获取所有用户（分页）
-      description: 获取用户列表，支持分页和过滤。仅限超级管理员
+      description: 获取所有用户列表，支持分页。仅限超级管理员
       security:
         - SessionAuth: [SUPER_ADMIN]
       parameters:
@@ -203,34 +203,53 @@ paths:
             minimum: 1
             maximum: 100
             default: 10
-        - name: role
-          in: query
-          schema:
-            $ref: '#/components/schemas/UserRole'
-        - name: campusId
-          in: query
-          schema:
-            type: integer
       responses:
         '200':
           description: 用户列表
           content:
             application/json:
               schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+
+  /user/totalUserNum:
+    get:
+      tags: [user]
+      summary: 获取本校区用户总数
+      description: 获取当前登录管理员所在校区的用户总数
+      security:
+        - SessionAuth: [CAMPUS_ADMIN, SUPER_ADMIN]
+      responses:
+        '200':
+          description: 用户总数
+          content:
+            application/json:
+              schema:
                 type: object
                 properties:
-                  users:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/User'
                   totalCount:
                     type: integer
-                  page:
+                    example: 100
+
+  /user/allTotalUserNum:
+    get:
+      tags: [user]
+      summary: 获取全部校区用户总数
+      description: 获取所有校区的用户总数。仅限超级管理员
+      security:
+        - SessionAuth: [SUPER_ADMIN]
+      responses:
+        '200':
+          description: 用户总数
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalCount:
                     type: integer
-                  size:
-                    type: integer
-                  totalPages:
-                    type: integer
+                    example: 1000
 
   /user/create:
     post:
@@ -858,6 +877,27 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
+  /coach/queryCoachByUuid:
+    post:
+      tags: [coach]
+      summary: 根据UUID查询教练
+      description: 根据教练UUID查询教练信息
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueryCoachRequest'
+      responses:
+        '200':
+          description: 教练信息
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CoachRecord'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
   /coach/coaches/campusNotApproved:
     get:
       tags: [coach]
@@ -992,6 +1032,48 @@ paths:
                   message:
                     type: string
                     example: "创建校区成功"
+
+  /campus/queryFreeTables:
+    get:
+      tags: [campus]
+      summary: 查询所有本校区空闲的球桌
+      description: 获取当前用户所在校区的所有空闲球桌
+      security:
+        - SessionAuth: [STUDENT, COACH, CAMPUS_ADMIN, SUPER_ADMIN]
+      responses:
+        '200':
+          description: 空闲球桌列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Table'
+
+  /campus/addTable:
+    post:
+      tags: [campus]
+      summary: 增加球桌
+      description: 校区管理员为校区增加球桌
+      security:
+        - SessionAuth: [CAMPUS_ADMIN]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddTableRequest'
+      responses:
+        '201':
+          description: 增加球桌成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "增加球桌成功"
 
   # 钱包系统接口
   /wallet/balance:
@@ -1132,29 +1214,6 @@ paths:
                 items:
                   $ref: '#/components/schemas/RechargeRecord'
 
-  # 竞赛系统接口
-  /competition/signup:
-    post:
-      tags: [competition]
-      summary: 竞赛报名
-      description: 学生报名参加竞赛
-      security:
-        - SessionAuth: [STUDENT]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ComsignupRequest'
-      responses:
-        '200':
-          description: 报名成功
-          content:
-            application/json:
-              schema:
-                type: string
-                example: "报名成功"
-
   /competition/querysignup:
     get:
       tags: [competition]
@@ -1170,6 +1229,150 @@ paths:
               schema:
                 type: object
                 description: 比赛报名详情
+
+  /competition/self-campus:
+    get:
+      tags: [competition]
+      summary: 获取本校区所有比赛
+      description: 获取当前用户所在校区的所有比赛
+      security:
+        - SessionAuth: [STUDENT, COACH, CAMPUS_ADMIN, SUPER_ADMIN]
+      responses:
+        '200':
+          description: 校区竞赛列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Competition'
+
+  /competition/all:
+    get:
+      tags: [competition]
+      summary: 获取所有校区所有比赛
+      description: 获取所有校区的所有比赛。仅限超级管理员
+      security:
+        - SessionAuth: [SUPER_ADMIN]
+      responses:
+        '200':
+          description: 所有竞赛列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Competition'
+
+  /competition/{competitionId}:
+    get:
+      tags: [competition]
+      summary: 获取比赛详情
+      description: 根据比赛ID获取比赛详细信息
+      security:
+        - SessionAuth: [STUDENT, COACH, CAMPUS_ADMIN, SUPER_ADMIN]
+      parameters:
+        - name: competitionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 比赛详情
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Competition'
+
+  /competition/create:
+    post:
+      tags: [competition]
+      summary: 创建比赛
+      description: 管理员创建新的比赛
+      security:
+        - SessionAuth: [CAMPUS_ADMIN, SUPER_ADMIN]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Competition'
+      responses:
+        '200':
+          description: 比赛创建成功
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "比赛创建成功"
+
+  /competition/arrange/{competitionId}:
+    post:
+      tags: [competition]
+      summary: 安排比赛
+      description: 管理员为比赛安排对阵表
+      security:
+        - SessionAuth: [CAMPUS_ADMIN, SUPER_ADMIN]
+      parameters:
+        - name: competitionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 比赛安排成功
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "比赛安排成功"
+
+  /competition/my-schedule/{competitionId}:
+    get:
+      tags: [competition]
+      summary: 获取用户个人比赛安排
+      description: 学生或教练获取自己的比赛安排
+      security:
+        - SessionAuth: [STUDENT, COACH]
+      parameters:
+        - name: competitionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 个人比赛安排
+          content:
+            application/json:
+              schema:
+                type: object
+                description: 个人比赛安排详情
+
+  /competition/signup:
+    post:
+      tags: [competition]
+      summary: 竞赛报名
+      description: 学生报名参加竞赛
+      security:
+        - SessionAuth: [STUDENT]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompetitionSignupRequest'
+      responses:
+        '200':
+          description: 报名成功
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "报名成功"
+
 
   /competition/campuscompetitions:
     get:
@@ -1374,6 +1577,194 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
+
+  /courses/book:
+    post:
+      tags: [course]
+      summary: 课程预约
+      description: 学生预约课程
+      security:
+        - SessionAuth: [STUDENT]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CourseBookingRequest'
+      responses:
+        '201':
+          description: 预约成功
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /courses/cancel:
+    post:
+      tags: [course]
+      summary: 取消预约
+      description: 学生取消已预约的课程
+      security:
+        - SessionAuth: [STUDENT]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                courseId:
+                  type: string
+                  description: 课程ID
+              required:
+                - courseId
+      responses:
+        '200':
+          description: 取消成功
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /courses/querycancel:
+    get:
+      tags: [course]
+      summary: 教练查看取消待审核的课程
+      description: 教练查看学生申请取消的课程
+      security:
+        - SessionAuth: [COACH]
+      responses:
+        '200':
+          description: 课程列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Course'
+
+  /courses/judgecancel:
+    post:
+      tags: [course]
+      summary: 教练审核取消预约课程申请
+      description: 教练审核学生取消课程的申请
+      security:
+        - SessionAuth: [COACH]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                courseId:
+                  type: string
+                  description: 课程ID
+                judge:
+                  type: boolean
+                  description: 审核结果（true为同意取消，false为拒绝）
+              required:
+                - courseId
+                - judge
+      responses:
+        '200':
+          description: 审核完成
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /courses/querypending:
+    get:
+      tags: [course]
+      summary: 教练查询待确认的课程
+      description: 教练查看需要确认的课程
+      security:
+        - SessionAuth: [COACH]
+      responses:
+        '200':
+          description: 课程列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Course'
+
+  /courses/coach-judge:
+    post:
+      tags: [course]
+      summary: 教练审核课程
+      description: 教练确认或拒绝学生的课程预约
+      security:
+        - SessionAuth: [COACH]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CourseConfirmRequest'
+      responses:
+        '200':
+          description: 审核完成
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /courses/available-tables:
+    get:
+      tags: [course]
+      summary: 获取可用球桌列表
+      description: 获取指定时间段内的可用球桌列表
+      security:
+        - SessionAuth: [STUDENT]
+      parameters:
+        - name: date
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          description: 日期 (YYYY-MM-DD)
+        - name: startTime
+          in: query
+          required: true
+          schema:
+            type: string
+          description: 开始时间 (HH:MM)
+        - name: endTime
+          in: query
+          required: true
+          schema:
+            type: string
+          description: 结束时间 (HH:MM)
+      responses:
+        '200':
+          description: 可用球桌列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Table'
+
+  /courses/my-ordered-courses:
+    get:
+      tags: [course]
+      summary: 学生查看已提交的预约申请
+      description: 学生查看自己提交的课程预约申请
+      security:
+        - SessionAuth: [STUDENT]
+      responses:
+        '200':
+          description: 课程列表
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Course'
 
   /courses/coach/my-schedule:
     get:
@@ -1781,6 +2172,30 @@ components:
         level:
           type: string
 
+    Table:
+      type: object
+      properties:
+        id:
+          type: string
+        campusId:
+          type: integer
+        tableIndex:
+          type: integer
+        isOccupied:
+          type: boolean
+        occupiedUntil:
+          type: string
+          format: date-time
+          nullable: true
+
+    AddTableRequest:
+      type: object
+      properties:
+        number:
+          type: integer
+      required:
+        - number
+
     MutualSelectionStatus:
       type: string
       enum:
@@ -1957,13 +2372,49 @@ components:
         - coachId
         - level
 
-    ComsignupRequest:
+    CompetitionSignupRequest:
       type: object
       properties:
         group:
           type: string
+        competitionId:
+          type: string
       required:
         - group
+        - competitionId
+
+    Competition:
+      type: object
+      properties:
+        id:
+          type: string
+          nullable: true
+        name:
+          type: string
+        type:
+          type: string
+        campusId:
+          type: integer
+        campusName:
+          type: string
+          nullable: true
+        date:
+          type: string
+          format: date
+        registrationDeadline:
+          type: string
+          format: date
+        status:
+          type: string
+          nullable: true
+        fee:
+          type: number
+          format: float
+        description:
+          type: string
+        currentSignupStudentNumber:
+          type: integer
+          nullable: true
 
     ComQueryRequest:
       type: object
@@ -2128,6 +2579,32 @@ components:
           type: string
           format: uuid
           description: 关联的球桌ID（可选)
+
+    CourseBookingRequest:
+      type: object
+      required:
+        - coachId
+        - date
+        - startTime
+        - endTime
+        - campusId
+        - tableId
+      properties:
+        coachId:
+          type: string
+          format: uuid
+        date:
+          type: string
+          format: date
+        startTime:
+          type: string
+        endTime:
+          type: string
+        campusId:
+          type: integer
+        tableId:
+          type: string
+          format: uuid
 
     CourseConfirmRequest:
       type: object
