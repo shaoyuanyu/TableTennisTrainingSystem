@@ -294,7 +294,8 @@ const getStatusType = (status) => {
   const types = {
     PENDING: 'warning',
     CONFIRMED: 'success',
-    CANCELLED: 'danger'
+    CANCELLED: 'danger',
+    CANCELLPENDING: 'warning'
   }
   return types[status] || ''
 }
@@ -304,7 +305,8 @@ const getStatusText = (status) => {
   const texts = {
     PENDING: '待审核',
     CONFIRMED: '审核通过',
-    CANCELLED: '已拒绝'
+    CANCELLED: '已拒绝',
+    CANCELLPENDING: '取消待审核'
   }
   return texts[status] || status
 }

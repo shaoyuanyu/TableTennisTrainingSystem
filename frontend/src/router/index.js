@@ -299,6 +299,16 @@ const router = createRouter({
           },
         },
         {
+          path: 'coach/cancel-approval',
+          name: 'CancelApproval',
+          component: () => import('@/views/coach/CancelApprovalView.vue'),
+          meta: {
+            requiresAuth: true,
+            title: '取消预约审批',
+            roles: ['coach'],
+          },
+        },
+        {
           path: 'coach/schedule',
           name: 'CoachSchedule',
           component: () => import('@/views/coach/ScheduleView.vue'),

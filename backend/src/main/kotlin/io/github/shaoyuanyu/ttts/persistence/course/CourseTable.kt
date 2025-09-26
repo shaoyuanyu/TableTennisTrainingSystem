@@ -35,7 +35,7 @@ object CourseTable : UUIDTable("courses") {
 
     val status: Column<CourseStatus> = customEnumeration(
         name = "status",
-        sql = "ENUM('PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELLED')",
+        sql = "ENUM('PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELLED','CANCELLPENDING')",
         fromDb = { value -> CourseStatus.valueOf(value as String) },
         toDb = { it.name }
     )

@@ -406,6 +406,19 @@ class CourseService(
             pendingCourses.map { it.expose() }
         }
     }
+    /**
+     * 教练查询待审核取消课程
+     */
+    fun QueryCancelCourse(coachId: String): List<Course> {
+        return transaction(database) {
+            val pendingCourses = CourseEntity.find {
+                (CourseTable.coach eq UUID.fromString(coachId)) and
+                        (CourseTable.status eq CourseStatus.CANCELLPENDING)
+            }.toList()
+
+            pendingCourses.map { it.expose() }
+        }
+    }
 
     /**
      * 教练审核课程
@@ -484,18 +497,44 @@ class CourseService(
         }
     }
     /**
-     * 取消课程预约
+     * 取消课程预约申请
      */
-    fun cancelCourse(courseId: String,price: Float){
+    fun cancelCourse(courseId: String){
         transaction(database) {
             val course = CourseEntity.findById(UUID.fromString(courseId))
                 ?: throw NotFoundException("课程不存在")
             if (course.status != CourseStatus.PENDING && course.status != CourseStatus.CONFIRMED) {
                 throw BadRequestException("只有正在预约或已确认的课程才能取消")
             }
-            course.status = CourseStatus.CANCELLED
-            walletService.recharge(course.student.id.toString(),price)
-            COURSE_SERVICE_LOGGER.info("课程已取消: ${course.id}")
+            course.status = CourseStatus.CANCELLPENDING
+            COURSE_SERVICE_LOGGER.info("课程取消已申请: ${course.id}")
+        }
+    }
+    /**
+     * 教练审核课程取消申请
+     */
+    fun judegeCancelCourse(coachId: String, courseId: String,judge:Boolean) {
+        transaction(database) {
+            val course = CourseEntity.findById(UUID.fromString(courseId))
+                ?: throw NotFoundException("课程不存在")
+
+            if (course.coach.id.toString() != coachId) {
+                throw BadRequestException("无权确认此课程")
+            }
+            if (judge) {
+                if (course.status != CourseStatus.CANCELLPENDING) {
+                    throw BadRequestException("只有正在取消预约的课程才能确认")
+                }else{
+                    course.status = CourseStatus.CANCELLED
+                    walletService.recharge(course.student.id.value.toString(), course.price)
+                }
+            }else{
+                if (course.status != CourseStatus.CANCELLPENDING) {
+                    throw BadRequestException("只有正在取消预约的课程才能取消")
+                }else{
+                    course.status = CourseStatus.CONFIRMED
+                }
+            }
         }
     }
 }
