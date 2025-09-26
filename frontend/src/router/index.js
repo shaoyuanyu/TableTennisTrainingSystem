@@ -90,6 +90,16 @@ const router = createRouter({
             roles: ['super_admin'],
           },
         },
+        {
+          path: 'admin/users',
+          name: 'UserManagement',
+          component: () => import('@/views/admin/UserManagementView.vue'),
+          meta: {
+            requiresAuth: true,
+            title: '用户管理',
+            roles: ['super_admin'],
+          },
+        },
 
         // 校区管理员页面
         {

@@ -361,6 +361,8 @@ import {
   UserFilled,
   Warning,
 } from '@element-plus/icons-vue'
+// 导入API函数
+import { getCampusStudents, getCampusCoaches, getCampusRechargeRecords } from '@/api/admin'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -625,8 +627,98 @@ const handleNotification = (notification) => {
   console.log('处理通知:', notification)
 }
 
+// 获取营收数据
+const fetchRevenueData = async () => {
+  try {
+    // 获取充值记录用于计算营收
+    const rechargeData = await getCampusRechargeRecords({ page: 1, size: 100 })
+    
+    // 计算本月营收
+    const now = new Date()
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+    
+    const monthlyRevenueValue = rechargeData
+      .filter(record => new Date(record.createdAt) >= startOfMonth)
+      .reduce((sum, record) => sum + record.amount, 0)
+    
+    monthlyRevenue.value = monthlyRevenueValue
+    
+    // 更新校区统计数据中的营收值
+    const revenueStat = campusStats.value.find(stat => stat.key === 'revenue')
+    if (revenueStat) {
+      revenueStat.value = `¥${(monthlyRevenueValue / 1000).toFixed(1)}K`
+    }
+    
+    console.log('营收数据加载完成')
+  } catch (error) {
+    console.error('获取营收数据失败:', error)
+  }
+}
+
+// 获取学员数据
+const fetchStudentData = async () => {
+  try {
+    // 获取校区学员列表
+    const students = await getCampusStudents({ page: 1, size: 100 })
+    
+    // 更新学员统计数据
+    studentStats.value.active = students.length
+    
+    // 计算本月新增学员数
+    const now = new Date()
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+    studentStats.value.new = students.filter(
+      student => new Date(student.createdAt) >= startOfMonth
+    ).length
+    
+    // 更新校区统计数据中的学员数
+    const studentStat = campusStats.value.find(stat => stat.key === 'students')
+    if (studentStat) {
+      studentStat.value = students.length.toString()
+    }
+    
+    console.log('学员数据加载完成')
+  } catch (error) {
+    console.error('获取学员数据失败:', error)
+  }
+}
+
+// 获取教练数据
+const fetchCoachData = async () => {
+  try {
+    // 获取校区教练列表
+    const coachData = await getCampusCoaches({ page: 1, size: 100 })
+    
+    // 更新教练团队数据
+    coaches.value = coachData.map(coach => ({
+      id: coach.coachId,
+      name: coach.realName,
+      level: coach.level || '未评级',
+      rating: 5, // 默认评分
+      status: '在线', // 默认状态
+      students: coach.currentStudents || 0,
+      courses: 0, // 需要从其他接口获取
+      income: coach.balance || 0,
+      avatar: coach.photoUrl || ''
+    }))
+    
+    // 更新校区统计数据中的教练数
+    const coachStat = campusStats.value.find(stat => stat.key === 'coaches')
+    if (coachStat) {
+      coachStat.value = coachData.length.toString()
+    }
+    
+    console.log('教练数据加载完成')
+  } catch (error) {
+    console.error('获取教练数据失败:', error)
+  }
+}
+
+// 组件挂载时加载数据
 onMounted(() => {
-  // 可以在这里加载数据
+  fetchRevenueData()
+  fetchStudentData()
+  fetchCoachData()
 })
 </script>
 

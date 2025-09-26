@@ -1,13 +1,21 @@
 <template>
   <div class="course-approval">
     <!-- 页面头部 -->
-    <div class="page-header">
-      <h2>课程审批</h2>
-      <p>审核学员的课程预约申请</p>
-    </div>
+    <GlassCardBase 
+      title="课程审批" 
+      subtitle="审核学员的课程预约申请" 
+      icon="📋"
+      variant="enhanced"
+      class="header-card"
+    />
 
     <!-- 筛选器 -->
-    <el-card class="filter-card">
+    <GlassCard 
+      title="筛选条件" 
+      icon="🔍"
+      variant="content"
+      class="filter-card"
+    >
       <el-form :model="filters" :inline="true" @submit.prevent="fetchPendingCourses">
         <el-form-item label="预约日期">
           <el-date-picker 
@@ -17,23 +25,40 @@
             start-placeholder="开始日期"
             end-placeholder="结束日期" 
             format="YYYY-MM-DD" 
-            value-format="YYYY-MM-DD" />
+            value-format="YYYY-MM-DD"
+            class="date-picker" />
+        </el-form-item>
+        
+        <el-form-item label="状态">
+          <el-select v-model="filters.status" clearable placeholder="请选择状态" class="status-select">
+            <el-option label="全部状态" value="" />
+            <el-option label="待审批" value="pending" />
+            <el-option label="已通过" value="approved" />
+            <el-option label="已拒绝" value="rejected" />
+          </el-select>
         </el-form-item>
 
         <el-form-item>
-          <el-button type="primary" @click="fetchPendingCourses"> 搜索 </el-button>
-          <el-button @click="resetFilters"> 重置 </el-button>
+          <PrimaryButton @click="fetchPendingCourses">搜索</PrimaryButton>
+          <OutlineButton @click="resetFilters" type="secondary">重置</OutlineButton>
         </el-form-item>
       </el-form>
-    </el-card>
+    </GlassCard>
 
     <!-- 待审批课程列表 -->
-    <el-card>
+    <GlassCard 
+      title="待审批列表" 
+      icon="📝"
+      variant="content"
+      class="list-card"
+    >
       <el-table 
         :data="pendingCourses" 
         v-loading="loading"
         stripe
-        style="width: 100%">
+        style="width: 100%"
+        class="approval-table"
+      >
         <el-table-column prop="id" label="课程ID" width="80" />
         
         <el-table-column prop="title" label="课程标题" width="150" />
@@ -63,15 +88,23 @@
           </template>
         </el-table-column>
         
+        <el-table-column label="状态" width="100">
+          <template #default="{ row }">
+            <el-tag :type="getStatusTagType(row.status)">
+              {{ getStatusText(row.status) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        
         <el-table-column label="操作" width="200" fixed="right">
           <template #default="{ row }">
             <el-button size="small" type="primary" @click="showDetailDialog(row)">
               详情
             </el-button>
-            <el-button size="small" type="success" @click="approveCourse(row)">
+            <el-button size="small" type="success" @click="approveCourse(row)" :disabled="row.status !== 'pending'">
               通过
             </el-button>
-            <el-button size="small" type="danger" @click="rejectCourse(row)">
+            <el-button size="small" type="danger" @click="rejectCourse(row)" :disabled="row.status !== 'pending'">
               拒绝
             </el-button>
           </template>
@@ -90,7 +123,7 @@
       </div>
       
       <el-empty v-else description="暂无待审批的课程" />
-    </el-card>
+    </GlassCard>
 
     <!-- 课程详情对话框 -->
     <el-dialog v-model="detailDialogVisible" title="课程详情" width="600px">
@@ -108,8 +141,6 @@
             {{ selectedCourse.studentName || '未知学员' }}
           </el-descriptions-item>
           
-
-          
           <el-descriptions-item label="预约日期">
             {{ selectedCourse.date }}
           </el-descriptions-item>
@@ -120,6 +151,12 @@
           
           <el-descriptions-item label="课程费用">
             ¥{{ selectedCourse.price }}
+          </el-descriptions-item>
+          
+          <el-descriptions-item label="课程状态">
+            <el-tag :type="getStatusTagType(selectedCourse.status)">
+              {{ getStatusText(selectedCourse.status) }}
+            </el-tag>
           </el-descriptions-item>
           
           <el-descriptions-item label="校区">
@@ -144,6 +181,9 @@ import { onMounted, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import api from '@/utils/api'
 import OutlineButton from '@/components/buttons/OutlineButton.vue'
+import PrimaryButton from '@/components/buttons/PrimaryButton.vue'
+import GlassCard from '@/components/cards/base/GlassCard.vue'
+import GlassCardBase from '@/components/cards/base/GlassCardBase.vue'
 
 // 数据列表
 const pendingCourses = ref([])
@@ -155,7 +195,8 @@ const loading = ref(false)
 
 // 筛选器
 const filters = reactive({
-  dateRange: []
+  dateRange: [],
+  status: ''
 })
 
 // 分页
@@ -179,6 +220,11 @@ const fetchPendingCourses = async () => {
       params.dateFrom = filters.dateRange[0]
       params.dateTo = filters.dateRange[1]
     }
+    
+    // 添加状态筛选条件
+    if (filters.status) {
+      params.status = filters.status
+    }
 
     const response = await api.get('/courses/querypending', { params })
     pendingCourses.value = response.data || []
@@ -194,6 +240,7 @@ const fetchPendingCourses = async () => {
 // 重置筛选器
 const resetFilters = () => {
   filters.dateRange = []
+  filters.status = ''
   fetchPendingCourses()
 }
 
@@ -273,6 +320,26 @@ const getEndTime = (NO) => {
   return `${endHour.toString().padStart(2, '0')}:00`
 }
 
+// 获取状态文本
+const getStatusText = (status) => {
+  const statusMap = {
+    pending: '待审批',
+    approved: '已通过',
+    rejected: '已拒绝'
+  }
+  return statusMap[status] || '未知状态'
+}
+
+// 获取状态标签类型
+const getStatusTagType = (status) => {
+  const typeMap = {
+    pending: 'warning',
+    approved: 'success',
+    rejected: 'danger'
+  }
+  return typeMap[status] || 'info'
+}
+
 // 组件挂载时获取数据
 onMounted(() => {
   fetchPendingCourses()
@@ -286,22 +353,16 @@ onMounted(() => {
   margin: 0 auto;
 }
 
-.page-header {
-  margin-bottom: 20px;
-}
-
-.page-header h2 {
-  margin: 0 0 8px 0;
-  color: #333;
-}
-
-.page-header p {
-  margin: 0;
-  color: #666;
+.header-card {
+  margin-bottom: 24px;
 }
 
 .filter-card {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
+}
+
+.list-card {
+  margin-bottom: 24px;
 }
 
 .student-info {
@@ -319,7 +380,6 @@ onMounted(() => {
   color: #333;
 }
 
-
 .pagination-wrapper {
   margin-top: 20px;
   text-align: center;
@@ -335,5 +395,19 @@ onMounted(() => {
 
 :deep(.el-descriptions-item__label) {
   font-weight: 500;
+}
+
+:deep(.approval-table) {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+}
+
+.date-picker {
+  width: 300px;
+}
+
+.status-select {
+  width: 150px;
 }
 </style>

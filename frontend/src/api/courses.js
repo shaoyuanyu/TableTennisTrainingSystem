@@ -32,8 +32,10 @@ export const getMySchedule = async (params = {}) => {
     endpoint = '/courses/coach-schedule'
   }
 
-  console.log(`[courses.js] getMySchedule - 用户角色: ${userRole}, 使用端点: ${endpoint}`)
-  console.log(`[courses.js] getMySchedule - 请求参数:`, params)
+  if (import.meta.env?.DEV) {
+    console.log(`[courses.js] getMySchedule - 用户角色: ${userRole}, 使用端点: ${endpoint}`)
+    console.log(`[courses.js] getMySchedule - 请求参数:`, params)
+  }
 
   const response = await api.get(endpoint, { params })
   return response.data

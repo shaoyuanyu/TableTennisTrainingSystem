@@ -178,4 +178,37 @@ class StudentService(
 
             records
         }
+    private fun isSameCampus(userId: String,campusId: Int): Boolean =
+        transaction(database) {
+            val user = userService.queryUserByUUID(userId)
+            user.campusId == campusId
+        }
+    /**
+     * 获取本校区所有充值记录（校区管理员）
+     * @return 充值记录列表
+     */
+    fun getRechargeRecordsByCampus(adminId: String,page: Int, size: Int): List<RechargeRecord> =
+        transaction(database) {
+            val campusId = userService.queryUserByUUID(adminId).campusId
+
+            val query = RechargeEntity.all()
+                .filter{isSameCampus(it.userId,campusId)}
+                .toList()
+
+            // 计算偏移量
+            val offset = (page - 1) * size
+
+            // 查询总记录数
+            val totalCount = query.size.toLong()
+
+            // 查询分页数据
+            val records = query
+                .sortedByDescending { it.createdAt }
+                .drop(offset)
+                .take(size)
+                .map { it.expose() }
+            USER_LOGGER.info("查询充值记录成功")
+
+            records
+        }
 }

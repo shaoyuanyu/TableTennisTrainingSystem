@@ -264,7 +264,26 @@ class UserService(
                 USER_LOGGER.info("查询用户成功，用户 ID：${it.uuid}, 用户名：${it.username}")
             }
         }
-
+    /**
+     * 查询所有用户
+     */
+    fun queryAllUsers(
+        page: Int,
+        size: Int
+    ): List<User> = transaction(database) {
+        val allUsers = UserEntity.all().toList()
+        
+        val users = allUsers
+            .drop((page - 1) * size)
+            .take(size)
+            .map { userEntity ->
+                userEntity.exposeWithoutPassword()
+            }
+            .also {
+                USER_LOGGER.info("查询所有用户成功")
+            }
+        users
+    }
     /**
      * 查询用户列表
      *
@@ -291,9 +310,6 @@ class UserService(
         campusId?.let {
             query = query.filter { user -> user.campus.id.value == it }
         }
-        
-        // 获取总数
-        val totalCount = query.size.toLong()
         
         // 分页查询
         val users = query
@@ -326,6 +342,27 @@ class UserService(
         users
     }.also {
         USER_LOGGER.info("查询用户列表成功，页码：$page，每页数量：$size，角色：$role，校区ID：$campusId")
+    }
+
+    /**
+     * 统计用户总数
+     *
+     * @param campusId 校区ID过滤
+     * @return 用户总数
+     */
+    fun countUsers(
+        campusId: Int? = null
+    ): Long = transaction(database) {
+        var query = UserEntity.all().toList()
+        
+        // 根据校区ID筛选
+        campusId?.let {
+            query = query.filter { user -> user.campus.id.value == it }
+        }
+        
+        query.size.toLong()
+    }.also {
+        USER_LOGGER.info("统计用户总数成功，校区ID：$campusId，总数：$it")
     }
 
     /**

@@ -335,10 +335,10 @@
         </div>
 
         <!-- 个人成就 -->
-        <div style="margin-top: 20px" v-if="selectedCoach.achievements">
+        <div style="margin-top: 20px">
           <h4>个人成就</h4>
           <div class="achievements-content">
-            {{ selectedCoach.achievements }}
+            {{ selectedCoach.achievements || '暂无成就信息' }}
           </div>
         </div>
 
@@ -560,6 +560,7 @@ const fetchCoaches = async () => {
         phone: coach.phoneNumber,
         avatar: coach.photoUrl,
         registeredAt: coach.createdAt,
+        achievements: coach.achievements, // 确保成就信息被正确传递
         // 关系信息
         relations: coachRelations
       }
@@ -1059,6 +1060,8 @@ watch(coachList, () => {
   padding: 12px;
   background-color: #f5f7fa;
   border-radius: 4px;
+  white-space: pre-wrap;
+  word-break: break-word;
   line-height: 1.6;
 }
 
@@ -1066,5 +1069,4 @@ watch(coachList, () => {
   margin-top: 20px;
   text-align: center;
 }
-
 </style>

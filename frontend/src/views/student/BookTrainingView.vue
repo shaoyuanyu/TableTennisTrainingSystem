@@ -21,7 +21,7 @@
         <h3>选择教练</h3>
 
         <!-- 教练筛选 -->
-        <el-form :model="coachFilters" :inline="true" class="coach-filters">
+        <el-form :model="coachFilters" :inline="true" class="coach-filters filter-card">
           <el-form-item label="教练等级">
             <el-select v-model="coachFilters.level" placeholder="全部等级" clearable>
               <el-option label="初级教练" value="初级" />
@@ -31,14 +31,14 @@
           </el-form-item>
 
           <el-form-item>
-            <el-button type="primary" @click="searchCoaches">筛选</el-button>
+            <PrimaryButton @click="searchCoaches">筛选</PrimaryButton>
           </el-form-item>
         </el-form>
 
         <!-- 教练列表 -->
         <div class="coaches-grid">
           <div
-            v-for="coach in availableCoaches"
+            v-for="coach in filteredCoaches"
             :key="coach.id"
             class="coach-item"
             :class="{ selected: selectedCoach?.id === coach.id }"
@@ -48,7 +48,7 @@
               {{ coach.realName ? coach.realName.charAt(0) : '?' }}
             </el-avatar>
             <h4>{{ coach.realName || '未知教练' }}</h4>
-            <p>{{ coach.level || '未评级' }}</p>
+            <p>{{ displayLevel(coach.level) }}</p>
             <div class="coach-price">
               ¥{{ coach.hourlyRate || getCoachPrice(coach.level) }}/小时
             </div>
@@ -242,16 +242,17 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref, nextTick } from 'vue'
+import { onMounted, reactive, ref, nextTick, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ArrowLeft, ArrowRight, Check } from '@element-plus/icons-vue'
 import dayjs from 'dayjs'
 import api from '@/utils/api'
-import { getCoachSchedule, getCoachScheduleForStudent } from '@/api/courses'
+import { getCoachScheduleForStudent } from '@/api/courses'
 import { useUserStore } from '@/stores/user'
 import PrimaryButton from '@/components/buttons/PrimaryButton.vue'
 import OutlineButton from '@/components/buttons/OutlineButton.vue'
+import { normalizeLevel, displayLevel } from './bookTrainingUtils'
 
 // 从session中获取当前用户的UUID
 const getCurrentUserUUID = async () => {
@@ -330,6 +331,21 @@ const coachFilters = reactive({
   level: '',
 })
 
+// 显示与筛选函数从工具模块导入
+
+// 基于筛选条件的本地过滤（避免重复请求）
+const filteredCoaches = computed(() => {
+  if (!coachFilters.level) return availableCoaches.value
+  return (availableCoaches.value || []).filter((c) => normalizeLevel(c.level) === coachFilters.level)
+})
+
+// 当筛选后已选教练不在结果中时，自动清空选择
+watch(filteredCoaches, (list) => {
+  if (selectedCoach.value && !list.some((c) => c.id === selectedCoach.value.id)) {
+    selectedCoach.value = null
+  }
+})
+
 // 课程表单
 const courseForm = reactive({
   title: '',
@@ -381,7 +397,11 @@ const searchCoaches = async () => {
       }),
     )
 
-    availableCoaches.value = detailedCoaches
+    // 写回前，对等级做一次轻量规范化，提升显示与筛选一致性
+  availableCoaches.value = detailedCoaches.map((c) => ({
+      ...c,
+      level: displayLevel(c.level),
+    }))
     console.log('获取到的教练列表:', availableCoaches.value)
   } catch (error) {
     console.error('获取已建立双选关系的教练列表失败:', error)
@@ -528,26 +548,7 @@ const fetchUserBalance = async () => {
   }
 }
 
-// 获取可用球桌列表
-const fetchAvailableTables = async () => {
-  try {
-    // 调用后端API获取本校区的空闲球桌列表
-    const response = await api.get('/campus/queryFreeTables')
-
-    // 处理后端返回的球桌数据
-    const tables = response.data || []
-    availableTables.value = tables.map(table => ({
-      id: table.id,
-      name: `${table.indexInCampus}号球桌`,
-      location: table.group || '未知区域'
-    }))
-
-    console.log('获取到的球桌列表:', availableTables.value)
-  } catch (error) {
-    console.error('获取球桌列表失败:', error)
-    ElMessage.error('获取球桌列表失败: ' + (error.message || '未知错误'))
-  }
-}
+// （已移除未使用的 fetchAvailableTables，使用基于时间段的查询）
 
 // 根据选择的时间段获取可用球桌列表
 const fetchAvailableTablesForTimeSlot = async () => {
@@ -621,7 +622,8 @@ const getCoachPrice = (level) => {
     中级: 150,
     高级: 200,
   }
-  return prices[level] || 100
+  const normalized = normalizeLevel(level)
+  return prices[normalized] || 100
 }
 
 // 计算价格
