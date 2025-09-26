@@ -29,6 +29,7 @@ fun Application.courseRoutes(courseService: CourseService) {
                 submitStudentFeedback(courseService)
                 bookCourse(courseService)
                 getStudentOrderedCourses(courseService)
+                cancelleCourse(courseService)
             }
             
             // 教练权限路由
@@ -182,6 +183,18 @@ fun Route.bookCourse(courseService: CourseService) {
         LOGGER.info(request.toString())
         courseService.bookCourse(request)
         call.respond(HttpStatusCode.Created)
+    }
+}
+/**
+ * 取消预约
+ */
+fun Route.cancelleCourse(courseService: CourseService) {
+    post("/cancel") {
+        val params = call.receiveParameters()
+        val courseId = params["courseId"] ?: throw BadRequestException("缺少课程ID参数")
+        val price = params["price"]?.toFloatOrNull() ?: throw BadRequestException("缺少价格参数")
+        courseService.cancelCourse(courseId, price)
+        call.respond(HttpStatusCode.OK)
     }
 }
 

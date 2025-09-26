@@ -483,4 +483,19 @@ class CourseService(
             courses.map { it.expose() }
         }
     }
+    /**
+     * 取消课程预约
+     */
+    fun cancelCourse(courseId: String,price: Float){
+        transaction(database) {
+            val course = CourseEntity.findById(UUID.fromString(courseId))
+                ?: throw NotFoundException("课程不存在")
+            if (course.status != CourseStatus.PENDING && course.status != CourseStatus.CONFIRMED) {
+                throw BadRequestException("只有正在预约或已确认的课程才能取消")
+            }
+            course.status = CourseStatus.CANCELLED
+            walletService.recharge(course.student.id.toString(),price)
+            COURSE_SERVICE_LOGGER.info("课程已取消: ${course.id}")
+        }
+    }
 }

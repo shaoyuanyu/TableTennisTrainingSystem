@@ -122,4 +122,13 @@ export const getMyAppointments = async (params = {}) => {
   return response.data
 }
 
-
+// 取消预约
+export const cancelAppointment = async (courseId, price) => {
+  const formData = new FormData()
+  formData.append('courseId', courseId)
+  formData.append('price', price)
+  const response = await api.post('/courses/cancel', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  })
+  return response.data
+}
