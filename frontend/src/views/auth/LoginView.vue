@@ -79,11 +79,6 @@
         </el-form-item>
 
         <el-form-item>
-          <el-checkbox v-model="loginForm.remember">记住密码</el-checkbox>
-          <el-link type="primary" class="forgot-password">忘记密码？</el-link>
-        </el-form-item>
-
-        <el-form-item>
           <el-button
             type="primary"
             class="login-button btn-modern btn-primary btn-large"
@@ -127,7 +122,6 @@ const loading = ref(false)
 const loginForm = reactive({
   username: '',
   password: '',
-  remember: false,
 })
 
 // 表单验证规则
@@ -528,6 +522,16 @@ const goToRegister = (type) => {
   }
 }
 
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%) translateY(-100%) rotate(45deg);
+  }
+
+  100% {
+    transform: translateX(100%) translateY(100%) rotate(45deg);
+  }
+}
+
 .login-box {
   background: var(--white-alpha-95);
   backdrop-filter: var(--blur-xl);
@@ -583,16 +587,6 @@ const goToRegister = (type) => {
   z-index: 1;
 }
 
-@keyframes shimmer {
-  0% {
-    transform: translateX(-100%) translateY(-100%) rotate(45deg);
-  }
-
-  100% {
-    transform: translateX(100%) translateY(100%) rotate(45deg);
-  }
-}
-
 .login-title {
   font-size: var(--font-size-4xl);
   font-weight: var(--font-weight-bold);
@@ -643,12 +637,6 @@ const goToRegister = (type) => {
 .login-form :deep(.el-input__wrapper.is-focus) {
   border-color: #667eea;
   box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
-}
-
-.forgot-password {
-  margin-left: auto;
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
 }
 
 .login-button {
