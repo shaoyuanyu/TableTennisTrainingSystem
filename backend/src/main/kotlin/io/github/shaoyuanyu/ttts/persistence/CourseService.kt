@@ -367,7 +367,14 @@ class CourseService(
             if (balance < CourseBooking.price) {
                 throw BadRequestException("余额不足")
             }
-            val hour = 7 + CourseBooking.NO
+            var hour = CourseBooking.NO
+            hour = if (hour >= 9) {
+                hour + 3 + 7
+            } else if (hour >= 5) {
+                hour + 2 + 7
+            } else {
+                hour + 7
+            }
             val startTime = LocalTime(hour, 0)  // 小时:分钟，如 10:00
             val endTime = LocalTime(hour + 1, 0)  // 小时:分钟，如 11:00
             val location = campus.address
