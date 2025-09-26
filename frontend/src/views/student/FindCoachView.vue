@@ -395,25 +395,14 @@ const loadCoaches = async () => {
 const viewCoachDetail = async (coach) => {
   try {
     console.log('获取教练详情:', coach.id)
-    const response = await api.get(`/coach/coaches/${coach.id}`)
-    selectedCoach.value = {
-      ...response.data,
-      id: response.data.coachId,
-      name: response.data.realName,
-      isSameCampus: response.data.campusId === userStore.campusId
-    }
-    
-    // 添加申请状态
-    const application = studentApplications.value.find(app => app.coachId === selectedCoach.value.id)
-    if (application) {
-      selectedCoach.value.applicationStatus = application.status
-    }
-    
-    detailDialogVisible.value = true
-    await loadSchedule()
+    // 直接跳转到教练详情页面，让详情页面自己获取数据
+    router.push({
+      name: 'CoachProfile',
+      params: { id: coach.id }
+    })
   } catch (error) {
-    console.error('获取教练详情失败:', error)
-    ElMessage.error('获取教练详情失败: ' + (error.response?.data?.message || error.message))
+    console.error('跳转到教练详情页失败:', error)
+    ElMessage.error('跳转到教练详情页失败')
   }
 }
 
