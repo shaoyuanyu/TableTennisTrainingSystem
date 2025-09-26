@@ -61,29 +61,9 @@ const router = createRouter({
           },
         },
         {
-          path: 'admin/service',
-          name: 'ServiceStatus',
-          component: () => import('@/views/admin/ServiceStatusView.vue'),
-          meta: {
-            requiresAuth: true,
-            title: '服务状态',
-            roles: ['super_admin'],
-          },
-        },
-        {
-          path: 'admin/data',
-          name: 'DataExport',
-          component: () => import('@/views/admin/DataExportView.vue'),
-          meta: {
-            requiresAuth: true,
-            title: '数据导出',
-            roles: ['super_admin'],
-          },
-        },
-        {
-          path: 'admin/logs',
+          path: 'admin/system-logs',
           name: 'SystemLogs',
-          component: () => import('@/views/admin/SystemLogsView.vue'),
+          component: () => import('@/views/admin/SystemLogs.vue'),
           meta: {
             requiresAuth: true,
             title: '系统日志',
@@ -152,19 +132,8 @@ const router = createRouter({
             roles: ['campus_admin', 'super_admin'],
           },
         },
-        {
-          path: 'campus/logs',
-          name: 'SystemLogs',
-          component: () => import('@/views/campus/SystemLogsView.vue'),
-          meta: {
-            requiresAuth: true,
-            title: '系统日志',
-            roles: ['campus_admin', 'super_admin'],
-          },
-        },
 
         // 学员页面
-        
         {
           path: 'student/find-coach',
           name: 'FindCoach',
@@ -287,7 +256,6 @@ const router = createRouter({
         },
 
         // 教练页面
-       
         {
           path: 'coach/appointment-approval',
           name: 'AppointmentApproval',

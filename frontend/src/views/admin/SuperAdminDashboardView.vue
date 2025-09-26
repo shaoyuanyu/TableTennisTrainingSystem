@@ -103,6 +103,16 @@
           </GlassTable>
         </div>
       </GlassCardWithHeader>
+      
+      <!-- 系统日志 -->
+      <GlassCardWithHeader title="系统日志" icon="📝" class="system-logs-card">
+        <template #headerActions>
+          <PrimaryButton @click="$router.push('/admin/system-logs')" size="sm">查看日志</PrimaryButton>
+        </template>
+        <div style="padding: 16px; text-align: center; color: #909399;">
+          查看系统运行日志，用于排查问题和监控系统状态
+        </div>
+      </GlassCardWithHeader>
     </GlassCardsGrid>
   </div>
 </template>
